@@ -9,8 +9,8 @@ For many students who study at the Technion, getting and providing lifts is not 
 2. Searching lifts by starting point, destination, time, distance, price, preferences and sorting them by date or distance.
 3. Setting drives by starting point, destination, time, distance, price, preferences and receiving requests from hitchhiker on them.
 4. manage and view my scheduled drives and lifts.
-## Complementary features
 
+## Complementary features
 1. User profiles with their details and preferences which users can see on providing,requesting or searhcing a lift.
 2. Chat between drivers and hitchhikers.
 3. Getting notifications on available lifts which meets my desired lift preference.

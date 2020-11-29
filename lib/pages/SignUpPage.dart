@@ -38,7 +38,11 @@ class _SignUpPageState extends State<SignUpPage> {
 
     return Consumer<UserRepository>(builder: (context, userRep, child) {
 
+      /// this function is being called inside a while to wait until the user
+      /// has verified email.
+      /// returns true if email verified to stop the loop, false otherwise.
       Future<bool> checkEmailVerified() async{
+        return Future.delayed(Duration(seconds: 2)).then((_) async {
         userRep.user = userRep.auth.currentUser;
         if(userRep.user != null) {
           await userRep.user.reload();
@@ -47,7 +51,9 @@ class _SignUpPageState extends State<SignUpPage> {
           }
         }
         return false;
+        });
       }
+
 
 
 
@@ -144,16 +150,20 @@ class _SignUpPageState extends State<SignUpPage> {
                                   await user.user.updateProfile(displayName: _firstName.text+" "+_lastName.text);
                                   await user.user.sendEmailVerification();
                                   userRep.user = user.user;
-                                  while(!await Future.delayed(Duration(seconds: 2)).then((_) async => await checkEmailVerified())) {
+                                  while(!await checkEmailVerified()) {
 
                                   }
                                   Navigator.of(context).pop();
                                   }));
-                                }catch(e){
-                                  setState(() {
-                                    _pressed = false;
-                                  });
-                                  _key.currentState.showSnackBar(SnackBar(content: Text(e.message, style: TextStyle(fontSize: 20),)));
+                                }catch(e) {
+                                  if (_formKey?.currentState != null) {
+                                    setState(() {
+                                      _pressed = false;
+                                    });
+                                    _key.currentState.showSnackBar(SnackBar(
+                                        content: Text(e.message,
+                                          style: TextStyle(fontSize: 20),)));
+                                  }
                                 }
                               }
                             },

@@ -127,12 +127,11 @@ class _SignInPageState extends State<SignInPage> {
                                     }
                                   }));
                                 }catch(e){
+                                  _key.currentState.showSnackBar(SnackBar(content: Text(e.message, style: TextStyle(fontSize: 20),)));
                                   setState(() {
                                     _pressed = false;
                                   });
-                                  print(e);
-                                  print("BAD INFO");
-                              }
+                                }
                               }
                             },
                           ))  : Center(child: CircularProgressIndicator())

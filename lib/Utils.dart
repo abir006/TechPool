@@ -1,11 +1,15 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-
+/// Apps default settings
 MaterialColor mainColor =  Colors.cyan;
 Color secondColor = Color(0xff308ea1);
 BorderRadius containerBorderRadius = BorderRadius.all(Radius.circular(8));
 
+///user repository for the app, should be supplied at the very top of the widget tree
+///will manage the User state, info and Authentication.
+///[auth] is the entry point for firebase Authentication.
+///[user] is the current user using the app.
 class UserRepository extends ChangeNotifier {
   final auth = FirebaseAuth.instance;
   User _user;
@@ -18,22 +22,33 @@ class UserRepository extends ChangeNotifier {
   User get user => _user;
 }
 
+/// A container class for Drive event.
 class Drive{
   String info;
   Drive(this.info);
 
 }
 
+/// A container class for Lift event.
 class Lift{
   String info;
   Lift(this.info);
 }
 
+/// A container class for DesiredLift event.
 class DesiredLift{
   String info;
   DesiredLift(this.info);
 }
 
+/// A container class for DesiredDrive event.
+class DesiredDrive{
+  String info;
+  DesiredDrive(this.info);
+}
+
+/// A util function for the calendar, returns the desired event container to
+/// display under the calendar, according to the type of event received.
 Container transformEvent(dynamic event){
   if (event is Drive) {
     return Container(

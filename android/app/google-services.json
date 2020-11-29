@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "280446726402",
+    "firebase_url": "https://techpool-f0406.firebaseio.com",
+    "project_id": "techpool-f0406",
+    "storage_bucket": "techpool-f0406.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:280446726402:android:0fc7676b0561f3fb9e921b",
+        "android_client_info": {
+          "package_name": "com.technion.android.tech_pool"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "280446726402-7j8khecenqju78s945bhgdnqs6ioq185.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZfPGCzB1P5yy5SlGI8KSuVKscRW-stB8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "280446726402-7j8khecenqju78s945bhgdnqs6ioq185.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

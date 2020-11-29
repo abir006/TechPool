@@ -1,0 +1,6 @@
+package com.technion.android.tech_pool
+
+import io.flutter.embedding.android.FlutterActivity
+
+class MainActivity: FlutterActivity() {
+}

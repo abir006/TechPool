@@ -6,6 +6,8 @@ MaterialColor mainColor =  Colors.cyan;
 Color secondColor = Color(0xff308ea1);
 BorderRadius containerBorderRadius = BorderRadius.all(Radius.circular(8));
 
+double fontTextsSize = 17;
+double lablesTextsSize = 19;
 ///user repository for the app, should be supplied at the very top of the widget tree
 ///will manage the User state, info and Authentication.
 ///[auth] is the entry point for firebase Authentication.
@@ -94,3 +96,14 @@ Container transformEvent(dynamic event){
     return null;
   }
 }
+
+class MyLift{
+  String destAddress;
+  String stopAddress;
+  String note;
+  int numberOfSeats;
+  DateTime time;
+  String driver;
+  MyLift(this.driver,this.destAddress,this.stopAddress,this.numberOfSeats);
+}
+

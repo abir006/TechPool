@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'dart:ui';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:flutter/material.dart';
 import 'package:dropdownfield/dropdownfield.dart';
@@ -19,16 +20,40 @@ class LiftSearchReasultsPage extends StatefulWidget {
 }
 
 class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
   final _pageKey = GlobalKey<_LiftSearchReasultsPageState>();
   List<String> _searchParams = ["Time", "Distance"];
   String _currsSearchDrop = "Time";
+  List<MyLift> liftList =  <MyLift>[];
+
+  Future<String> initList() async {
+    try {
+      liftList.clear();
+      QuerySnapshot q  = await firestore.collection("Drives").where('TimeStamp', isLessThan: Timestamp.fromDate(DateTime.now())).get();
+      q.docs.forEach(
+              (element) {
+        MyLift docLift = new MyLift("driver", "destAddress", "stopAddress", 5);
+        element.data().forEach((key, value) {
+          if(value!=null) {
+            docLift.setPropertiy(key,value);
+          }
+        });
+        liftList.add(docLift);
+      });
+      QuerySnapshot q1  = await firestore.collection("Drives").where('TimeStamp', isLessThan: Timestamp.fromDate(DateTime.now())).get();
+        int i =6;
+    } catch (e) {
+      print("fail "+e.toString());
+    }
+    return "finish";
+  }
 
   @override
   Widget build(BuildContext context) {
     var sizeFrameWidth = MediaQuery.of(context).size.width;
     double defaultSpaceHeight = MediaQuery.of(context).size.height * 0.013;
     double defaultSpacewidth = MediaQuery.of(context).size.height * 0.016;
-
+    Future<String> _calculation = initList();
     final searchLift = Container(
         child: FlatButton.icon(
             color: Colors.black,
@@ -82,24 +107,43 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
 
     final _fbuildTiles = ListView.separated(
       shrinkWrap: true,
-      itemCount: 30,
+      itemCount: liftList.length,
       separatorBuilder: (BuildContext context, int index) => Divider(thickness: 4,),
       itemBuilder: (BuildContext context, int index) {
-        return _buildTile(null);
+        return _buildTile(liftList[index]);
       },
     );
+
+    final _futureBuildLists = FutureBuilder<void>(
+      future:_calculation, // a previously-obtained Future<String> or null
+      builder: (BuildContext context, AsyncSnapshot<void> snapshot){
+        if(snapshot.hasData) {
+          return  ListView.separated(
+            shrinkWrap: true,
+            itemCount: liftList.length,
+            separatorBuilder: (BuildContext context, int index) => Divider(thickness: 4,),
+            itemBuilder: (BuildContext context, int index) {
+              return _buildTile(liftList[index]);
+            },
+          );
+        }else{
+          return Center(child: CircularProgressIndicator(),);
+        }
+      }
+    );
+
 
     return Scaffold(
       appBar: AppBar(
         title: Text("Search Results"),
       ),
-      body: Container(
+      body:Container(
           margin: EdgeInsets.only(
               left: defaultSpacewidth, right: defaultSpacewidth, bottom: 10),
           //padding: EdgeInsets.only(left: defaultSpacewidth, right: defaultSpacewidth),
           color: Colors.white,
           child: Column(
-            children: [sortAndSearch, Expanded(child:_fbuildTiles)],
+            children: [sortAndSearch, Expanded(child:_futureBuildLists)],
           )),
       backgroundColor: mainColor,
     );
@@ -137,7 +181,7 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
                       left: MediaQuery.of(context).size.height * 0.016, top: MediaQuery.of(context).size.height * 0.016),
                   child:Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                children: [infoText("Ori"),placesText("Technion","Ramat Gan"),allInfoText(DateTime.now(), 24, 23, 3, 1),],
+                children: [infoText(lift.driver),placesText(lift.startAddress,lift.destAddress),allInfoText(lift.time, 24, lift.price, lift.numberOfSeats, 1),],
               )),
         Spacer(),
        InkWell(child:Icon(Icons.arrow_forward_ios_outlined),onTap:() {},),

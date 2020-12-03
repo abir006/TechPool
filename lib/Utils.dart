@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -99,11 +100,43 @@ Container transformEvent(dynamic event){
 
 class MyLift{
   String destAddress;
-  String stopAddress;
+  String startAddress;
   String note;
   int numberOfSeats;
+  int price;
   DateTime time;
   String driver;
-  MyLift(this.driver,this.destAddress,this.stopAddress,this.numberOfSeats);
+  MyLift(this.driver,this.destAddress,this.startAddress,this.numberOfSeats);
+
+  void setPropertiy(String key,var propery){
+    switch(key) {
+
+      case "Driver": {  this.driver=propery; }
+      break;
+
+      case "DestAddress": {  this.destAddress=propery; }
+      break;
+
+      case "StartAddress": {  this.startAddress=propery; }
+      break;
+
+      case "Note": {  this.note=propery; }
+      break;
+
+      case "TimeStamp": {  this.time= (propery as Timestamp).toDate(); }
+      break;
+
+      case "TimeStamp": {  this.time= (propery as Timestamp).toDate(); }
+      break;
+
+      case "NumberSeats": {  this.numberOfSeats = propery; }
+      break;
+
+      case "Price": {  this.price = propery; }
+      break;
+
+      default: { }
+      break;
+    }}
 }
 

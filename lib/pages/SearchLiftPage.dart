@@ -8,10 +8,16 @@ import 'package:dropdown_customizable/dropdown_customizable.dart';
 import 'package:f_datetimerangepicker/f_datetimerangepicker.dart';
 import 'package:intl/intl.dart';
 import 'package:tech_pool/widgets/TextBoxField.dart';
+import 'package:tech_pool/pages/LiftSearchReasultsPage.dart';
 import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
 
 
 class SearchLiftPage extends StatefulWidget {
+  DateTime cuurentdate;
+  DateTime fromtime;
+  DateTime totime;
+  int indexDis;
+  SearchLiftPage({Key key,@required this.cuurentdate,this.fromtime,this.totime,this.indexDis}): super(key: key);
   @override
   _SearchLiftPageState createState() => _SearchLiftPageState();
 }
@@ -46,6 +52,20 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
     var sizeFrameWidth = MediaQuery.of(context).size.width;
     double defaultSpace = MediaQuery.of(context).size.height*0.013;
     double defaultSpacewidth = MediaQuery.of(context).size.height*0.016;
+    if(widget.fromtime!=null) {
+      _fromTime = widget.fromtime;
+      _fromControler.text = DateFormat('dd-MM – kk:mm').format(widget.fromtime);
+       widget.fromtime=null;
+    }
+    if( widget.totime!=null) {
+      _toTime = widget.totime;
+      _toControler.text = DateFormat('dd-MM – kk:mm').format(widget.totime);
+      widget.totime=null;
+    }
+    if(widget.indexDis!=null){
+      _maxDist =_distances[widget.indexDis];
+       widget.indexDis = null;
+    }
 
     final locationText = Center(
         child: Container(
@@ -103,9 +123,15 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
                 side: BorderSide(color: Colors.black)),
             icon: Icon(Icons.search,color: Colors.white) ,
             label: Text("Search Lift  ",style: TextStyle(color: Colors.white,fontSize: 17)),
-            onPressed: () {if (_formKey.currentState.validate()) {
-              setState(() {
-              });}}
+            onPressed: () {
+              if (_formKey.currentState.validate()) {
+                Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                    builder: (context) => LiftSearchReasultsPage(fromTime: _fromTime,toTime: _toTime, indexDist: _distances.indexOf(_maxDist)),
+                    ));
+              }
+            }
         ));
 
     final clearButton =Column(mainAxisAlignment: MainAxisAlignment.start,crossAxisAlignment: CrossAxisAlignment.start, children: [ SizedBox(
@@ -140,7 +166,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
                   initialStartTime: (_fromTime!=null)?_fromTime:DateTime.now().add(Duration(days: 0,hours: 0,minutes: 0,microseconds: 0)),
                   initialEndTime: (_fromTime!=null)?_toTime:DateTime.now().add(Duration(days: 0,hours: 0,minutes: 0,microseconds: 0)),
                   mode: DateTimeRangePickerMode.time,
-                  minimumTime: DateTime.now().subtract(Duration(days: 0,hours: 1,minutes: 0,microseconds: 1)),
+                  minimumTime: DateTime.now().subtract(Duration(days: 1,hours: 1,minutes: 0,microseconds: 0)),
                   maximumTime: DateTime.now().add(Duration(days: 7)),
                   use24hFormat: true,
                   onConfirm: (start, end) {
@@ -238,7 +264,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
                 fontSize: _fontTextsSize, color: Colors.black.withOpacity(0.6)),
           ),
       Container(
-        color: Colors.white,
+        color: Colors.transparent,
       child:Theme(
           data: Theme.of(context).copyWith(
               canvasColor: mainColor, // background color for the dropdown items
@@ -247,6 +273,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
               )
           ),
           child:DropdownButton<String>(
+            dropdownColor: mainColor,
         elevation: 0,
         value: _maxDist,
         onChanged: (String newValue) {

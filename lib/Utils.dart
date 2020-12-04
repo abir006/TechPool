@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 /// Apps default settings
@@ -102,6 +103,8 @@ class MyLift{
   String destAddress;
   String startAddress;
   String note;
+  int dist;
+  List<String> passengers;
   int numberOfSeats;
   int price;
   DateTime time;
@@ -133,6 +136,9 @@ class MyLift{
       break;
 
       case "Price": {  this.price = propery; }
+      break;
+
+      case "Passengers": {  passengers=List.from(propery); }
       break;
 
       default: { }

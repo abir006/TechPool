@@ -11,10 +11,17 @@ import 'package:dropdown_formfield/dropdown_formfield.dart';
 import 'package:dropdown_customizable/dropdown_customizable.dart';
 import 'package:f_datetimerangepicker/f_datetimerangepicker.dart';
 import 'package:intl/intl.dart';
+import 'package:tech_pool/pages/SearchLiftPage.dart';
 import 'package:tech_pool/widgets/TextBoxField.dart';
 import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
 
 class LiftSearchReasultsPage extends StatefulWidget {
+  DateTime fromTime = DateTime.now();
+  DateTime toTime = DateTime.now().add(Duration(days: 1,hours: 0,minutes: 0,microseconds: 0));
+  int indexDist = 20000;
+  List<int> distances = [1000,5000,20000,40000];
+  LiftSearchReasultsPage({Key key,@required this.fromTime,@required this.toTime,@required this.indexDist}): super(key: key);
+  
   @override
   _LiftSearchReasultsPageState createState() => _LiftSearchReasultsPageState();
 }
@@ -26,10 +33,11 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
   String _currsSearchDrop = "Time";
   List<MyLift> liftList =  <MyLift>[];
 
+
   Future<String> initList() async {
     try {
       liftList.clear();
-      QuerySnapshot q  = await firestore.collection("Drives").where('TimeStamp', isLessThan: Timestamp.fromDate(DateTime.now())).get();
+      QuerySnapshot q  = await firestore.collection("Drives").where('TimeStamp', isLessThan: Timestamp.fromDate(widget.toTime),isGreaterThan: Timestamp.fromDate(widget.fromTime)).get();
       q.docs.forEach(
               (element) {
         MyLift docLift = new MyLift("driver", "destAddress", "stopAddress", 5);
@@ -40,10 +48,27 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
         });
         liftList.add(docLift);
       });
-      QuerySnapshot q1  = await firestore.collection("Drives").where('TimeStamp', isLessThan: Timestamp.fromDate(DateTime.now())).get();
-        int i =6;
     } catch (e) {
-      print("fail "+e.toString());
+    }
+
+    Comparator<MyLift> timeComparator = (a, b) {
+      if(a.time == b.time){
+        return a.dist.compareTo(b.dist);
+      }
+      return a.time.compareTo(b.time);
+    };
+
+    Comparator<MyLift> distComparator = (a, b) {
+      if(a.dist == b.dist){
+        return a.time.compareTo(b.time);
+      }
+      return a.dist.compareTo(b.dist);
+    };
+
+    if(_currsSearchDrop == "Time"){
+      liftList.sort(timeComparator);
+    }else{
+      liftList.sort(timeComparator);
     }
     return "finish";
   }
@@ -63,10 +88,17 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
             icon: Icon(Icons.edit_outlined, color: Colors.white),
             label: Text("Edit Search",
                 style: TextStyle(color: Colors.white, fontSize: 17)),
-            onPressed: () {}));
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SearchLiftPage(cuurentdate: widget.fromTime, fromtime: widget.fromTime,totime: widget.toTime,indexDis: widget.indexDist ,),
+                  ));
+
+            }));
 
     final sortAndSearch = Container(
-        color: Colors.lightBlue,
+        color: Colors.black.withOpacity(0.4),
       child:Container(
           margin: EdgeInsets.only(
               left: defaultSpacewidth),
@@ -78,7 +110,7 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
           Container(
             child: Theme(
                 data: Theme.of(context).copyWith(
-                    canvasColor: Colors.lightBlue,
+                    canvasColor: Colors.grey,
                     // background color for the dropdown items
                     buttonTheme: ButtonTheme.of(context).copyWith(
                       alignedDropdown:
@@ -135,7 +167,7 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Search Results"),
+        title: Text("Search Results",style: TextStyle(color: Colors.white),),
       ),
       body:Container(
           margin: EdgeInsets.only(
@@ -181,7 +213,7 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
                       left: MediaQuery.of(context).size.height * 0.016, top: MediaQuery.of(context).size.height * 0.016),
                   child:Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                children: [infoText(lift.driver),placesText(lift.startAddress,lift.destAddress),allInfoText(lift.time, 24, lift.price, lift.numberOfSeats, 1),],
+                children: [infoText(lift.driver),placesText(lift.startAddress,lift.destAddress),allInfoText(lift.time, 24, lift.price, lift.numberOfSeats, lift.passengers.length),],
               )),
         Spacer(),
        InkWell(child:Icon(Icons.arrow_forward_ios_outlined),onTap:() {},),
@@ -197,13 +229,13 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
        Icon(Icons.timer),
        Text(DateFormat('kk:mm').format(time)),
        SizedBox(width: MediaQuery.of(context).size.height * 0.01),
-       Icon(Icons.directions_walk),
+       Container(child:Image.asset("assets/images/tl-.png",scale: 0.9)),
        Text(dist.toString()+"km"),
        SizedBox(width: MediaQuery.of(context).size.height * 0.01),
        Icon(Icons.person),
        Text(taken.toString()+"/"+avaliable.toString()),
        SizedBox(width: MediaQuery.of(context).size.height * 0.01),
-       Container(child:Image.asset("assets/images/shekel.png",scale: 1.3)),
+       Container(child:Image.asset("assets/images/shekel.png",scale: 0.9)),
        Text(price.toString()),
 
      ],

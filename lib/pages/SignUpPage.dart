@@ -134,7 +134,7 @@ class _SignUpPageState extends State<SignUpPage> {
                               borderRadius:
                                   BorderRadius.all(Radius.circular(8))),
                           width: size.width * 0.7,
-                          child: TextButton(
+                        child: Row(mainAxisAlignment: MainAxisAlignment.center,children: [TextButton(
                             child: Text(
                               "Sign Up",
                               style: TextStyle(color: Colors.white),
@@ -162,12 +162,12 @@ class _SignUpPageState extends State<SignUpPage> {
                                     });
                                     _key.currentState.showSnackBar(SnackBar(
                                         content: Text(e.message,
-                                          style: TextStyle(fontSize: 20),)));
+                                          style: TextStyle(fontSize: 20,color: Colors.red),)));
                                   }
                                 }
                               }
                             },
-                          )) : Container(width: size.width*0.7,child: Wrap(direction: Axis.horizontal,children: [Text("A verification email sent to: \n${_email.text}, \nplease verify.", style: TextStyle(color: Colors.white, fontSize: 20),), Center(child: CircularProgressIndicator(),)]))
+                          ),Icon(Icons.account_circle,color: Colors.white)])) : Container(width: size.width*0.7,child: Wrap(direction: Axis.horizontal,children: [Text("A verification email sent to: \n${_email.text}, \nplease verify.", style: TextStyle(color: Colors.white, fontSize: 20),), Center(child: CircularProgressIndicator(),)]))
                     ]))));});
   }
 

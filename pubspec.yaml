@@ -39,7 +39,10 @@ dependencies:
   intl: ^0.16.1
   flutter_time_picker_spinner: ^1.0.6+1
   cloud_firestore: ^0.14.2
-
+  dio: ^3.0.10
+  geocoding: ^1.0.4
+  geocoder: ^0.2.1
+  google_maps_flutter: ^1.0.6
 dev_dependencies:
   flutter_test:
     sdk: flutter

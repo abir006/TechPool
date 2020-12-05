@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:tech_pool/Utils.dart';
 import 'package:tech_pool/widgets/TextBoxField.dart';
 
+import 'ForgotPasswordPage.dart';
+
 class SignInPage extends StatefulWidget {
   @override
   _SignInPageState createState() => _SignInPageState();
@@ -16,6 +18,7 @@ class _SignInPageState extends State<SignInPage> {
   TextEditingController _email;
   TextEditingController _password;
   bool _pressed;
+  
 
   @override
   void initState() {
@@ -28,7 +31,8 @@ class _SignInPageState extends State<SignInPage> {
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
-    return Consumer<UserRepository>(builder: (context, userRep, child) {return Scaffold(
+    return Consumer<UserRepository>(builder: (context, userRep, child) {
+      return Scaffold(
       key: _key,
         appBar: AppBar(
             title: Text(
@@ -89,7 +93,15 @@ class _SignInPageState extends State<SignInPage> {
                                   style: TextStyle(color: Colors.white)),
                               Spacer(),
                               TextButton(
-                                  onPressed: () => print("pressed"),
+                                  onPressed: () {
+                                    //showDialog(context: context, child:resetDialog);
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute<void>(
+                                        builder: (BuildContext context) {
+                                          return ForgotPasswordPage();
+                                        },
+                                      ),
+                                    );},
                                   child: Text("Forgot password",
                                       style: TextStyle(
                                         color: Colors.white,
@@ -102,7 +114,7 @@ class _SignInPageState extends State<SignInPage> {
                               borderRadius:
                                   BorderRadius.all(Radius.circular(8))),
                           width: size.width * 0.7,
-                          child: TextButton(
+                          child: Row(mainAxisAlignment: MainAxisAlignment.center,children: [TextButton(
                             child: Text(
                               "Sign In",
                               style: TextStyle(color: Colors.white),
@@ -119,7 +131,7 @@ class _SignInPageState extends State<SignInPage> {
                                       userRep.user = user.user;
                                       Navigator.of(context).pop();
                                     } else {
-                                      _key.currentState.showSnackBar(SnackBar(content: Text("Please verify email", style: TextStyle(fontSize: 20),)));
+                                      _key.currentState.showSnackBar(SnackBar(content: Text("Please verify email", style: TextStyle(fontSize: 20, color: Colors.red),)));
                                       await userRep.auth.signOut().then((value) => userRep.user = null);
                                       setState(() {
                                         _pressed = false;
@@ -127,14 +139,14 @@ class _SignInPageState extends State<SignInPage> {
                                     }
                                   }));
                                 }catch(e){
-                                  _key.currentState.showSnackBar(SnackBar(content: Text(e.message, style: TextStyle(fontSize: 20),)));
+                                  _key.currentState.showSnackBar(SnackBar(content: Text(e.message, style: TextStyle(fontSize: 20,color: Colors.red),)));
                                   setState(() {
                                     _pressed = false;
                                   });
                                 }
                               }
                             },
-                          ))  : Center(child: CircularProgressIndicator())
+                          ), Icon(Icons.login,color: Colors.white,)]))  : Center(child: CircularProgressIndicator())
                     ]))));});
   }
 

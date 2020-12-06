@@ -33,13 +33,16 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Consumer<UserRepository>(builder: (context, userRep, child) {
-      return Scaffold(floatingActionButton: Wrap(spacing: 5,direction: Axis.vertical,children: [FloatingActionButton(heroTag: "drive",backgroundColor: Colors.black,child: Icon(Icons.directions_car,size: 35,), onPressed: () {Navigator.of(context).push(
-        MaterialPageRoute<void>(
+      return Scaffold(floatingActionButton: Wrap(spacing: 5,direction: Axis.vertical,children: [FloatingActionButton(heroTag: "drive",backgroundColor: Colors.black,child: Icon(Icons.directions_car,size: 35,), onPressed: () async {
+        LocationsResult x = await Navigator.push(context,
+        MaterialPageRoute<LocationsResult>(
           builder: (BuildContext context) {
-            return null;
+            //TODO: replace to set drive page.
+            return SearchLiftPage(cuurentdate: selectedDay);
           },
         ),
-      );},)
+      );
+        print(x);},)
         ,Transform.rotate(angle: 0.8,child: FloatingActionButton(heroTag: "lift",backgroundColor: Colors.black, child: Icon(Icons.thumb_up_rounded,size: 30,),onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute<void>(

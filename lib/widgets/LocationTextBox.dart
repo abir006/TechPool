@@ -8,11 +8,12 @@ class LocationTextBoxes2 extends StatefulWidget {
   final GlobalKey<ScaffoldState> _key;
   final Size size;
   final Function performOnPress;
+  final Function updateAddress;
   final double locationNumber;
   final String leadingText;
   final Color leadingTextColor;
 
-  LocationTextBoxes2(this.size, this.performOnPress, this._key,
+  LocationTextBoxes2(this.updateAddress,this.size, this.performOnPress, this._key,
       this.locationNumber, this.leadingText, this.leadingTextColor);
 
   @override
@@ -20,7 +21,6 @@ class LocationTextBoxes2 extends StatefulWidget {
 }
 
 class _LocationTextBoxes2State extends State<LocationTextBoxes2> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController city;
   TextEditingController street;
   var address;
@@ -116,6 +116,7 @@ class _LocationTextBoxes2State extends State<LocationTextBoxes2> {
                           var _cityError =
                               await validateLegalStreet(city.text, street.text);
                           if (!_streetError && !_cityError) {
+                            widget.updateAddress(address.first);
                             await widget.performOnPress(
                                 address: address.first,
                                 locationNumber: widget.locationNumber,

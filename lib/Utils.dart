@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:geocoder/geocoder.dart';
 
 /// Apps default settings
 MaterialColor mainColor =  Colors.cyan;
@@ -49,6 +50,15 @@ class DesiredLift{
 class DesiredDrive{
   String info;
   DesiredDrive(this.info);
+}
+
+class LocationsResult{
+  Address fromAddress;
+  Address toAddress;
+  Address stop1Address;
+  Address stop2Address;
+  Address stop3Address;
+  LocationsResult(this.fromAddress, this.toAddress,this.stop1Address,this.stop2Address,this.stop3Address);
 }
 
 /// A util function for the calendar, returns the desired event container to

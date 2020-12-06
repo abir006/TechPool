@@ -3,10 +3,11 @@ import 'package:flutter/widgets.dart';
 import 'package:geocoder/geocoder.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:tech_pool/widgets/LocationTextBox.dart';
+import 'package:tech_pool/Utils.dart';
 import 'dart:async';
 
 class LocationSearch extends StatefulWidget {
-  bool showAddStops;
+  final bool showAddStops;
 
   LocationSearch({@required this.showAddStops});
   @override
@@ -14,8 +15,37 @@ class LocationSearch extends StatefulWidget {
 }
 
 class _LocationSearchState extends State<LocationSearch> {
+  Address fromAddress;
+  Address toAddress;
+  var stopFunctions;
+  var stopAddresses;
+
+  @override
+  void initState() {
+    stopFunctions = [updateStop1Address,updateStop2Address,updateStop3Address];
+    stopAddresses = [Address(),Address(),Address()];
+    super.initState();
+  }
+
+  void updateFromAddress(Address address){
+    fromAddress = address;
+  }
+  void updateToAddress(Address address){
+    toAddress = address;
+  }
+  void updateStop1Address(Address address){
+    stopAddresses[0] = address;
+  }
+  void updateStop2Address(Address address){
+    stopAddresses[1] = address;
+  }
+  void updateStop3Address(Address address){
+    stopAddresses[2] = address;
+  }
+
   var stopTextBoxes = [];
-  var stopNumber = 1;
+  var stopNumber = 0;
+
   final stopColor = [30.0, 240.0, 300.0];
   final stopTextColor = [
     Colors.orange,
@@ -43,10 +73,8 @@ class _LocationSearchState extends State<LocationSearch> {
       position: latlng,
       infoWindow: InfoWindow(
           title: address,
-          snippet: 'Click to set as $stopText location',
-          onTap: () {
-            print("$stopText location selected: $address");
-          }),
+          snippet: 'Searched as $stopText',
+        ),
     );
 
     setState(() {
@@ -58,10 +86,10 @@ class _LocationSearchState extends State<LocationSearch> {
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
-    var textBoxes = LocationTextBoxes2(
+    var textBoxes = LocationTextBoxes2(updateFromAddress,
         size, _goToAddress, _key, 120.0, "From", Colors.green);
     var textBoxes2 =
-        LocationTextBoxes2(size, _goToAddress, _key, 0.0, "To", Colors.red);
+        LocationTextBoxes2(updateToAddress,size, _goToAddress, _key, 0.0, "To", Colors.red);
     return Scaffold(
       key: _key,
       appBar: AppBar(
@@ -72,7 +100,7 @@ class _LocationSearchState extends State<LocationSearch> {
       body: Column(children: [
         textBoxes,
         ...stopTextBoxes,
-        (stopNumber <= 3 && widget.showAddStops)
+        (stopNumber < 3 && widget.showAddStops)
             ? Container(
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.black),
@@ -84,7 +112,7 @@ class _LocationSearchState extends State<LocationSearch> {
                     onPressed: () {
                       setState(() {
                         stopTextBoxes.insert(
-                            stopNumber - 1,
+                            stopNumber,
                             Row(children: [
                               SizedBox(
                                   width: 28,
@@ -95,19 +123,20 @@ class _LocationSearchState extends State<LocationSearch> {
                                           color: Colors.black),
                                       onPressed: () {
                                         setState(() {
+                                          stopAddresses[stopNumber-1] = null;
                                           stopTextBoxes
-                                              .removeAt(stopNumber - 2);
+                                              .removeAt(stopNumber - 1);
                                           stopNumber = stopNumber - 1;
                                         });
                                       })),
                               Flexible(
-                                  child: LocationTextBoxes2(
+                                  child: LocationTextBoxes2(stopFunctions[stopNumber],
                                       size,
                                       _goToAddress,
                                       _key,
-                                      stopColor[stopNumber - 1],
-                                      "Stop$stopNumber",
-                                      stopTextColor[stopNumber - 1]))
+                                      stopColor[stopNumber],
+                                      "Stop${stopNumber+1}",
+                                      stopTextColor[stopNumber]))
                             ]));
                         stopNumber = stopNumber + 1;
                       });
@@ -120,6 +149,37 @@ class _LocationSearchState extends State<LocationSearch> {
                     )))
             : Container(),
         textBoxes2,
+        Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.white),
+            ),
+            width: 160,
+            height: 26,
+            child: RaisedButton(color: Colors.black,onPressed: () {
+              if(fromAddress != null && toAddress != null) {
+                if (stopNumber == 0 ||
+                    (stopNumber == 1 && stopAddresses[0] != null) ||
+                    (stopNumber == 2 && stopAddresses[0] != null &&
+                        stopAddresses[1] != null) ||
+                    (stopNumber == 3 && stopAddresses[0] != null &&
+                        stopAddresses[1] != null && stopAddresses[2] != null)) {
+                  Navigator.pop<LocationsResult>(
+                      context, LocationsResult(
+                      fromAddress, toAddress, stopAddresses[0], stopAddresses[1],
+                      stopAddresses[2]));
+                } else {
+                  _key.currentState.showSnackBar(SnackBar(content: Text(
+                    "Please select addresses before submitting",
+                    style: TextStyle(fontSize: 16),),));
+                }
+              }
+              else {
+                _key.currentState.showSnackBar(SnackBar(content: Text(
+                  "Please select addresses before submitting",
+                  style: TextStyle(fontSize: 16),),));
+              }
+            },child: Text("Submit locations",style: TextStyle(color: Colors.white),),)),
+        
         Flexible(
             child: GoogleMap(
           mapType: MapType.normal,
@@ -132,8 +192,9 @@ class _LocationSearchState extends State<LocationSearch> {
           onMapCreated: (GoogleMapController controller) {
             _controller.complete(controller);
           },
-        ))
-      ]),
+        )),
+      ],
+      ),
     );
   }
 
@@ -154,4 +215,10 @@ class _LocationSearchState extends State<LocationSearch> {
         locationNumber,
         stopText);
   }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
 }

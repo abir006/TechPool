@@ -187,5 +187,17 @@ class MyLift{
       default: { }
       break;
     }}
-
 }
+
+class liftRes{
+  DateTime fromTime;
+  DateTime toTime;
+  int indexDist;
+  Address startAddress;
+  Address destAddress;
+  bool backSeat;
+  bool bigTrunk;
+
+  liftRes({@required this.fromTime,@required this.toTime,@required this.indexDist,@required this.startAddress,@required this.destAddress, @required this.backSeat, @required this.bigTrunk});
+}
+

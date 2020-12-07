@@ -11,6 +11,7 @@ import 'package:tech_pool/Utils.dart';
 import 'package:intl/intl.dart';
 import 'package:tech_pool/pages/SearchLiftPage.dart';
 import 'package:tech_pool/widgets/TextBoxField.dart';
+import 'package:configurable_expansion_tile/configurable_expansion_tile.dart';
 
 
 class LiftInfoPage extends StatefulWidget {
@@ -42,6 +43,14 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
       return stops;
     }
 
+    List<Widget> _buildPassengersList() {
+      List<Widget> passengers = [];
+      for(int i=0; i< widget.lift.passengers.length;i++) {
+        passengers.add(_buildPassengerTile(widget.lift.passengers[i]));
+      }
+      return passengers;
+    }
+
     Widget _buildRow(BuildContext context) {
       return Container(
         child: Column( // As you expect multiple lines you need a column not a row
@@ -49,7 +58,23 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
         ),
       );
     }
-
+final passengers = Container(
+  alignment: Alignment.bottomLeft,
+  color:Colors.white,
+    child:ConfigurableExpansionTile(
+      header: Container(alignment:Alignment.bottomLeft,child: Text("Passengers info",style:TextStyle(fontWeight: FontWeight.bold, fontSize: 17))),
+        animatedWidgetFollowingHeader: const Icon(
+          Icons.expand_more,
+          color: const Color(0xFF707070),
+        ),
+      //tilePadding: EdgeInsets.symmetric(horizontal: 0),
+     // backgroundColor: Colors.white,
+     // trailing: Icon(Icons.arrow_drop_down,color: Colors.black,),
+      //title: Text("Passenger info"),
+  children: [
+    ..._buildPassengersList(),
+  ],
+));
     final searchLift =
     Container(
         padding: EdgeInsets.only(left: sizeFrameWidth*0.2, right:sizeFrameWidth*0.2,bottom:defaultSpace*2 ) ,
@@ -63,6 +88,7 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
             label: Text("Request Lift  ",style: TextStyle(color: Colors.white,fontSize: 17)),
             onPressed: () {}
         ));
+
 
     final allInfo = Container(
       child:  ListView(
@@ -93,6 +119,12 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
             Text("Driver:",style:TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
             _buildTile(widget.lift),
             SizedBox(height: defaultSpace),
+            Divider(thickness: 3,),
+            passengers,
+            Divider(thickness: 3,),
+            SizedBox(height: defaultSpace),
+            //Row(children:[labelText(text: "Price: "),Expanded(child:infoText(widget.lift.price.toString()))]),
+
 
             
     ]));
@@ -133,7 +165,33 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
         fullscreenDialog: true
     ));
   }
-
+  Widget _buildPassengerTile(String name) {
+    return Container(
+      child:
+      Row(
+        children:[
+          Container(
+              margin: EdgeInsets.only(
+                  left: MediaQuery.of(context).size.height * 0.016, top: MediaQuery.of(context).size.height * 0.016),
+              width: MediaQuery.of(context).size.height * 0.016*4,
+              height: MediaQuery.of(context).size.height * 0.016*4,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.teal,
+              )),
+          Container(
+              margin: EdgeInsets.only(
+                  left: MediaQuery.of(context).size.height * 0.016, top: MediaQuery.of(context).size.height * 0.016),
+              child:Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [infoText(name),],
+              )),
+          Spacer(),
+          SizedBox(width:MediaQuery.of(context).size.height * 0.016 ,)
+        ],
+      ),
+    );
+  }
 
   Widget _buildTile(MyLift lift) {
     return Container(
@@ -154,7 +212,7 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
                   left: MediaQuery.of(context).size.height * 0.016, top: MediaQuery.of(context).size.height * 0.016),
               child:Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-               children: [infoText(lift.driver),placesText(lift.startAddress),allInfoText(lift.time),],
+               children: [infoText(lift.driver),placesText(lift.startAddress),allInfoText(lift.dist~/1000),],
               )),
           Spacer(),
           SizedBox(width:MediaQuery.of(context).size.height * 0.016 ,)
@@ -162,12 +220,13 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
       ),
     );
   }
-  Widget allInfoText(DateTime time){
+
+  Widget allInfoText(int dist){
     return Container(
         child:Row(
           children: [
-            Icon(Icons.timer),
-            Text(DateFormat('kk:mm').format(time)),
+            Text(dist.toString()+"km"),
+            SizedBox(width: MediaQuery.of(context).size.height * 0.01),
           ],
         ));
   }

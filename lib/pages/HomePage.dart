@@ -47,7 +47,7 @@ class _HomePageState extends State<HomePage> {
           Navigator.of(context).push(
             MaterialPageRoute<void>(
               builder: (BuildContext context) {
-                return SearchLiftPage(currentdate: selectedDay);
+                return SearchLiftPage(currentdate: selectedDay,popOrNot: false,);
               },
             ),
           );

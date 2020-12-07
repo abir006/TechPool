@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:configurable_expansion_tile/configurable_expansion_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:dropdownfield/dropdownfield.dart';
 import 'package:geocoder/model.dart';
@@ -23,7 +24,8 @@ class SearchLiftPage extends StatefulWidget {
   int indexDis;
   bool bigTrunk;
   bool backSeat;
-  SearchLiftPage({Key key,@required this.currentdate,this.fromtime,this.totime,this.indexDis, this.startAd, this.destAd, this.bigTrunk, this.backSeat}): super(key: key);
+  bool popOrNot;
+  SearchLiftPage({Key key,@required this.currentdate,this.fromtime,this.totime,this.indexDis, this.startAd, this.destAd, this.bigTrunk, this.backSeat, this.popOrNot}): super(key: key);
   @override
   _SearchLiftPageState createState() => _SearchLiftPageState();
 }
@@ -173,11 +175,30 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
             label: Text("Search Lift  ",style: TextStyle(color: Colors.white,fontSize: 17)),
             onPressed: () {
               if (_formKey.currentState.validate()) {
-                Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                    builder: (context) => LiftSearchReasultsPage(fromTime: _fromTime,toTime: _toTime, indexDist: _distances.indexOf(_maxDist) , startAddress: fromAddress, destAddress: destAddress, bigTrunk: checkedBigTrunck, backSeat: backSeatNotfull,),
-                    ));
+                if(widget.popOrNot==false) {
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            LiftSearchReasultsPage(fromTime: _fromTime,
+                              toTime: _toTime,
+                              indexDist: _distances.indexOf(_maxDist),
+                              startAddress: fromAddress,
+                              destAddress: destAddress,
+                              bigTrunk: checkedBigTrunck,
+                              backSeat: backSeatNotfull,),
+                      ));
+                }else{
+                  Navigator.pop<liftRes>(
+                      context, liftRes(
+                    fromTime: _fromTime,
+                    toTime: _toTime,
+                    indexDist: _distances.indexOf(_maxDist),
+                    startAddress: fromAddress,
+                    destAddress: destAddress,
+                    bigTrunk: checkedBigTrunck,
+                    backSeat: backSeatNotfull,));
+                }
               }
             }
         ));
@@ -279,7 +300,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
               textFieldController: _fromControler,
               validator: (value) {
                 if(_fromTime==null ){return 'No from time selected';}
-                else  if ((_fromTime.hour >_toTime.hour) || (_toTime.hour == _fromTime.hour && _toTime.minute < _fromTime.minute )) {return 'The from time is after than the to Time';}
+                else  if ((_fromTime.hour >_toTime.hour) || (_toTime.hour == _fromTime.hour && _toTime.minute < _fromTime.minute )) {return 'The from time is after the to Time';}
                 else if(_fromTime.hour ==_toTime.hour && _toTime.minute == _fromTime.minute ){return 'From time equal to time';}
                 else return null;}),
         ],
@@ -371,7 +392,28 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
       )],
       ),
     );
-
+    final prefer = Container(
+        alignment: Alignment.bottomLeft,
+        color:Colors.transparent,
+        child:ConfigurableExpansionTile(
+          header: Container(color: Colors.transparent,child: Text("Preferences",style:TextStyle(fontWeight: FontWeight.bold, fontSize: 17))),
+          animatedWidgetFollowingHeader: const Icon(
+            Icons.expand_more,
+            color: const Color(0xFF707070),
+          ),
+          headerBackgroundColorStart: Colors.transparent,
+          expandedBackgroundColor: Colors.transparent,
+          headerBackgroundColorEnd: Colors.transparent,
+          //tilePadding: EdgeInsets.symmetric(horizontal: 0),
+          // backgroundColor: Colors.white,
+          // trailing: Icon(Icons.arrow_drop_down,color: Colors.black,),
+          //title: Text("Passenger info"),
+          children: [
+            bigTruncText,
+            backSeatText,
+            maxDistance,
+          ],
+        ));
     return Scaffold(
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
@@ -384,7 +426,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
           builder: (context) => Container(
               color: Colors.white,
               margin: EdgeInsets.only(left: defaultSpacewidth, right: defaultSpacewidth, bottom: 10),
-              child: Stack(children:[Container( child:Center(child:Transform.rotate(angle: 0.8,child:Icon(Icons.thumb_up_rounded,size:300,color:  Colors.cyan.withOpacity(0.1),)))),
+              child: Column( children: [ Expanded(child: Stack(children:[Container( child:Center(child:Transform.rotate(angle: 0.8,child:Icon(Icons.thumb_up_rounded,size:300,color:  Colors.cyan.withOpacity(0.1),)))),
                 ListView(
                   padding: EdgeInsets.only(left: defaultSpacewidth, right: defaultSpacewidth, bottom: 10),
                   children: [
@@ -406,14 +448,16 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
                     //SizedBox(height: defaultSpace),
                     //preferenceTexts,
                     SizedBox(height: defaultSpace),
-                    bigTruncText,
-                    backSeatText,
-                    maxDistance,
-                    SizedBox(height:4*defaultSpace),
-                    searchLift,
+                    Divider(thickness: 3,),
+                    prefer,
+                    Divider(thickness: 3,),
+                    //SizedBox(height:2*defaultSpace),
                   ])])),
-        ),
-      ),
+                searchLift,
+                SizedBox(height: 2*defaultSpace),
+              ]),
+           // searchLift,
+    )) ),
       backgroundColor: mainColor,
     );
   }

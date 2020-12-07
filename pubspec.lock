@@ -64,6 +64,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.15.0-nullsafety.3"
+  configurable_expansion_tile:
+    dependency: "direct main"
+    description:
+      name: configurable_expansion_tile
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.0"
   cupertino_icons:
     dependency: "direct main"
     description:

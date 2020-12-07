@@ -55,8 +55,19 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
     }
     Coordinates startPointing = widget.startAddress.coordinates;
     Coordinates destPointing = widget.destAddress.coordinates;
-
+    List<MyLift> liftListDelete =  <MyLift>[];
     liftList.forEach((element) {
+      bool toRemove = false;
+      if(widget.backSeat){
+        if(!element.backSeat){
+          toRemove =true;
+        }
+      }
+      if(widget.bigTrunk){
+        if(!element.bigTrunk){
+          toRemove =true;
+        }
+      }
       double distToStart = clacDis(element.startPoint,startPointing);
       double distToEnd =  clacDis(element.destPoint,destPointing);
       element.stops.forEach((key, value) {
@@ -65,6 +76,13 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
         distToEnd = min(distToEnd,clacDis(pointStop,destPointing));
       });
       element.dist = (distToStart+distToEnd).toInt();
+      if(toRemove){
+        liftListDelete.add(element);
+      }
+    });
+
+    liftListDelete.forEach((element) {
+      liftList.remove(element);
     });
     Comparator<MyLift> timeComparator = (a, b) {
       if(a.time == b.time){
@@ -103,13 +121,25 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
             icon: Icon(Icons.edit_outlined, color: Colors.white),
             label: Text("Edit Search",
                 style: TextStyle(color: Colors.white, fontSize: 17)),
-            onPressed: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => SearchLiftPage(currentdate: widget.fromTime, fromtime: widget.fromTime,totime: widget.toTime,indexDis: widget.indexDist , startAd: widget.startAddress, destAd:widget.destAddress, bigTrunk: widget.bigTrunk, backSeat: widget.backSeat,),
-                  ));
-
+            onPressed: () async {
+            liftRes    returnResult = await Navigator.of(context).push(
+                    MaterialPageRoute<liftRes>(
+                        builder: (BuildContext context) {
+                          return SearchLiftPage(currentdate: widget.fromTime, fromtime: widget.fromTime,totime: widget.toTime,indexDis: widget.indexDist , startAd: widget.startAddress, destAd:widget.destAddress, bigTrunk: widget.bigTrunk, backSeat: widget.backSeat,popOrNot: true,);
+                        },
+                        fullscreenDialog: true
+                    ));
+                setState(() {
+                  if (returnResult != null) {
+                    widget.startAddress = returnResult.startAddress;
+                    widget.startAddress = returnResult.destAddress;
+                    widget.fromTime = returnResult.fromTime;
+                    widget.toTime = returnResult.toTime;
+                    widget.indexDist = returnResult.indexDist;
+                    widget.bigTrunk = returnResult.bigTrunk;
+                    widget.indexDist = returnResult.indexDist;
+                  }
+                });
             }));
 
     final sortAndSearch = Container(

@@ -14,7 +14,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   DateTime selectedDay = DateTime.now();
   CalendarController _calendarController;
-  Map<DateTime, List> _events = {DateTime.now() : [Drive('A Drive'),Lift('A Lift')],DateTime.now().add(Duration(days: 1)) : [DesiredLift('A Desired Lift')]};
+  Map<DateTime, List> _events = {DateTime.now() : [Drive('A Drive'),Lift('A Lift')],DateTime.now().add(Duration(days: 1)) : [Lift('A Lift')]};
   List  _dailyEvents = [];
 
   @override
@@ -33,16 +33,16 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Consumer<UserRepository>(builder: (context, userRep, child) {
-      return Scaffold(floatingActionButton: Wrap(spacing: 5,direction: Axis.vertical,children: [FloatingActionButton(heroTag: "drive",backgroundColor: Colors.black,child: Icon(Icons.directions_car,size: 35,), onPressed: () async {
-        LocationsResult x = await Navigator.push(context,
-        MaterialPageRoute<LocationsResult>(
-          builder: (BuildContext context) {
-            //TODO: replace to set drive page.
-            return SearchLiftPage(currentdate: selectedDay);
-          },
-        ),
-      );
-        print(x);},)
+      return Scaffold(floatingActionButton: Wrap(spacing: 5,direction: Axis.vertical,children: [FloatingActionButton(heroTag: "drive",backgroundColor: Colors.white,child: Icon(Icons.directions_car,size: 35,color: Colors.black,), onPressed: () async {
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (BuildContext context) {
+              //TODO: replace with Set Drive Page.
+              return SearchLiftPage(currentdate: selectedDay);
+            },
+          ),
+        );
+       },)
         ,Transform.rotate(angle: 0.8,child: FloatingActionButton(heroTag: "lift",backgroundColor: Colors.black, child: Icon(Icons.thumb_up_rounded,size: 30,),onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute<void>(

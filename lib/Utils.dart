@@ -56,10 +56,8 @@ class DesiredDrive{
 class LocationsResult{
   Address fromAddress;
   Address toAddress;
-  Address stop1Address;
-  Address stop2Address;
-  Address stop3Address;
-  LocationsResult(this.fromAddress, this.toAddress,this.stop1Address,this.stop2Address,this.stop3Address);
+  List<Address> stopAddresses;
+  LocationsResult(this.fromAddress, this.toAddress,this.stopAddresses);
 }
 
 /// A util function for the calendar, returns the desired event container to

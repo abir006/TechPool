@@ -38,7 +38,7 @@ class _HomePageState extends State<HomePage> {
         MaterialPageRoute<LocationsResult>(
           builder: (BuildContext context) {
             //TODO: replace to set drive page.
-            return SearchLiftPage(cuurentdate: selectedDay);
+            return SearchLiftPage(currentdate: selectedDay);
           },
         ),
       );
@@ -47,7 +47,7 @@ class _HomePageState extends State<HomePage> {
           Navigator.of(context).push(
             MaterialPageRoute<void>(
               builder: (BuildContext context) {
-                return SearchLiftPage(cuurentdate: selectedDay);
+                return SearchLiftPage(currentdate: selectedDay);
               },
             ),
           );

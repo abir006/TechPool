@@ -2,22 +2,28 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:dropdownfield/dropdownfield.dart';
+import 'package:geocoder/model.dart';
 import 'package:tech_pool/Utils.dart';
 import 'package:dropdown_formfield/dropdown_formfield.dart';
 import 'package:dropdown_customizable/dropdown_customizable.dart';
 import 'package:f_datetimerangepicker/f_datetimerangepicker.dart';
 import 'package:intl/intl.dart';
+import 'package:tech_pool/pages/LocationSearch.dart';
 import 'package:tech_pool/widgets/TextBoxField.dart';
 import 'package:tech_pool/pages/LiftSearchReasultsPage.dart';
 import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
 
 
 class SearchLiftPage extends StatefulWidget {
-  DateTime cuurentdate;
+  DateTime currentdate;
   DateTime fromtime;
   DateTime totime;
+  Address startAd;
+  Address destAd;
   int indexDis;
-  SearchLiftPage({Key key,@required this.cuurentdate,this.fromtime,this.totime,this.indexDis}): super(key: key);
+  bool bigTrunk;
+  bool backSeat;
+  SearchLiftPage({Key key,@required this.currentdate,this.fromtime,this.totime,this.indexDis, this.startAd, this.destAd, this.bigTrunk, this.backSeat}): super(key: key);
   @override
   _SearchLiftPageState createState() => _SearchLiftPageState();
 }
@@ -37,6 +43,13 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
   String _maxDist ="20km";
   TextEditingController _fromControler;
   TextEditingController _toControler;
+  TextEditingController _startPointControler;
+  TextEditingController _destPointControler;
+  LocationsResult returnResult = null;
+  Address fromAddress;
+  Address destAddress;
+
+
   double _spaces = 0;
 
 
@@ -45,6 +58,8 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
     super.initState();
     _fromControler = TextEditingController(text: "");
     _toControler = TextEditingController(text: "");
+    _startPointControler = TextEditingController(text: "");
+    _destPointControler = TextEditingController(text: "");
   }
 
   @override
@@ -65,6 +80,27 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
     if(widget.indexDis!=null){
       _maxDist =_distances[widget.indexDis];
        widget.indexDis = null;
+    }
+    if(widget.startAd!=null){
+      fromAddress=widget.startAd;
+      _startPointControler.text = fromAddress.addressLine;
+      widget.startAd = null;
+    }
+
+    if(widget.destAd!=null){
+      destAddress=widget.destAd;
+      _destPointControler.text = destAddress.addressLine;
+      widget.destAd = null;
+    }
+
+    if(widget.backSeat!=null){
+      backSeatNotfull = widget.backSeat;
+      widget.backSeat = null;
+    }
+
+    if(widget.bigTrunk!=null){
+      checkedBigTrunck = widget.bigTrunk;
+      widget.bigTrunk = null;
     }
 
     final locationText = Center(
@@ -95,20 +131,32 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
         ));
 
     final startPointText = Container(
-      child: TextFormField(
-        decoration: InputDecoration(
-          labelText: 'Starting point',
-          labelStyle: TextStyle(fontSize: _fontTextsSize),
-        ),
+      child: Row(
+        children: [
+          textBoxFieldDisable(
+              nameLable: "Start point : ",
+              size: MediaQuery.of(context).size,
+              hintText: "",
+              textFieldController: _startPointControler,
+              validator: (value) {
+                if(_startPointControler==null || _startPointControler.text==""){return "No start point chosen";}
+                else return null;}),
+        ],
       ),
     );
 
     final destinationText = Container(
-      child: TextFormField(
-        decoration: InputDecoration(
-          labelText: 'Destination point',
-          labelStyle: TextStyle(fontSize: _fontTextsSize),
-        ),
+      child: Row(
+        children: [
+          textBoxFieldDisable(
+              nameLable: "Destination point: ",
+              size: MediaQuery.of(context).size,
+              hintText: "",
+              textFieldController: _destPointControler,
+              validator: (value) {
+                if(_destPointControler==null || _destPointControler.text==""){return "No destination chosen";}
+                else return null;}),
+        ],
       ),
     );
 
@@ -128,7 +176,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
                 Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                    builder: (context) => LiftSearchReasultsPage(fromTime: _fromTime,toTime: _toTime, indexDist: _distances.indexOf(_maxDist)),
+                    builder: (context) => LiftSearchReasultsPage(fromTime: _fromTime,toTime: _toTime, indexDist: _distances.indexOf(_maxDist) , startAddress: fromAddress, destAddress: destAddress, bigTrunk: checkedBigTrunck, backSeat: backSeatNotfull,),
                     ));
               }
             }
@@ -145,6 +193,39 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
         label: Text("Delete"),
         onPressed: () {}
     ))]);
+
+    final chooseStartAndDestination =
+    Column(mainAxisAlignment: MainAxisAlignment.start,crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Container(
+        child: RaisedButton.icon(
+          color: Colors.white,
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
+              side: BorderSide(color: Colors.black)),
+          label: Text("Choose Start and Destination"),
+          icon: Icon(Icons.map),
+          onPressed: () async {
+            returnResult = await Navigator.of(context).push(
+                MaterialPageRoute<LocationsResult>(
+                builder: (BuildContext context) {
+                  return LocationSearch(showAddStops: false);
+                },
+                fullscreenDialog: true
+            ));
+              setState(() {
+                if (returnResult != null) {
+                  fromAddress = returnResult.fromAddress;
+                  destAddress = returnResult.toAddress;
+                  _startPointControler.text =
+                      returnResult.fromAddress.addressLine;
+                  _destPointControler.text = returnResult.toAddress.addressLine;
+                }
+              });
+
+          },
+        ),
+      ),
+    ]);
 
     final chooseTime =
     Column(mainAxisAlignment: MainAxisAlignment.start,crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -163,10 +244,10 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
                   doneText: "Yes",
                   cancelText: "Cancel",
                   interval: 5,
-                  initialStartTime: (_fromTime!=null)?_fromTime:DateTime.now().add(Duration(days: 0,hours: 0,minutes: 0,microseconds: 0)),
-                  initialEndTime: (_fromTime!=null)?_toTime:DateTime.now().add(Duration(days: 0,hours: 0,minutes: 0,microseconds: 0)),
+                  initialStartTime: (_fromTime!=null)?_fromTime:widget.currentdate,
+                  initialEndTime: (_fromTime!=null)?_toTime:widget.currentdate.add(Duration(days: 0,hours: 0,minutes: 0,microseconds: 0)),
                   mode: DateTimeRangePickerMode.time,
-                  minimumTime: DateTime.now().subtract(Duration(days: 1,hours: 1,minutes: 0,microseconds: 0)),
+                  minimumTime: DateTime.now().subtract(Duration(days: 2,hours: 1,minutes: 0,microseconds: 0)),
                   maximumTime: DateTime.now().add(Duration(days: 7)),
                   use24hFormat: true,
                   onConfirm: (start, end) {
@@ -197,9 +278,9 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
               hintText: "",
               textFieldController: _fromControler,
               validator: (value) {
-                if(_fromTime==null ){return '';}
-                else  if ((_fromTime.hour >_toTime.hour) || (_toTime.hour == _fromTime.hour && _toTime.minute < _fromTime.minute )) {return '';}
-                else if(_fromTime.hour ==_toTime.hour && _toTime.minute == _fromTime.minute ){return '';}
+                if(_fromTime==null ){return 'No from time selected';}
+                else  if ((_fromTime.hour >_toTime.hour) || (_toTime.hour == _fromTime.hour && _toTime.minute < _fromTime.minute )) {return 'The from time is after than the to Time';}
+                else if(_fromTime.hour ==_toTime.hour && _toTime.minute == _fromTime.minute ){return 'From time equal to time';}
                 else return null;}),
         ],
       ),
@@ -212,9 +293,9 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
               hintText: "",
               textFieldController: _toControler,
               validator: (value) {
-                if(_fromTime==null ){return 'Time not chosen';}
-              else  if ((_fromTime.hour >_toTime.hour) || (_toTime.hour == _fromTime.hour && _toTime.minute < _fromTime.minute )) {return 'The from time is older than the to';}
-              else if(_fromTime.hour ==_toTime.hour && _toTime.minute == _fromTime.minute ){return 'The from time is equal to the to';}
+                if(_fromTime==null ){return 'No to time selected';}
+              else  if ((_fromTime.hour >_toTime.hour) || (_toTime.hour == _fromTime.hour && _toTime.minute < _fromTime.minute )) {return 'The to time is before the from time ';}
+              else if(_fromTime.hour ==_toTime.hour && _toTime.minute == _fromTime.minute ){return 'To time equal from time ';}
               else return null;}),
             //  : SizedBox(width: sizeFrameWidth*0.1),
           //SizedBox(width:  sizeFrameWidth*0.1),
@@ -295,7 +376,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
-        title: Text("Search Lift"),
+        title: Text("Search Lift",style: TextStyle(color:Colors.white),),
       ),
       body:  Form(
         key: _formKey,
@@ -315,6 +396,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
                     destinationText,
                     //SizedBox(height: 2*defaultSpace),
                     //timeText,
+                    chooseStartAndDestination,
                     SizedBox(height: 2*defaultSpace),
                     fromText,
                     //SizedBox(height: defaultSpace),
@@ -340,6 +422,8 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
   void dispose() {
     _fromControler.dispose();
     _toControler.dispose();
+    _startPointControler.dispose();
+    _destPointControler.dispose();
     super.dispose();
   }
 }

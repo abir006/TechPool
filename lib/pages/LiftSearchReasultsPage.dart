@@ -1,26 +1,29 @@
+import 'dart:math';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-import 'package:flutter/material.dart';
-import 'package:dropdownfield/dropdownfield.dart';
+import 'package:geocoder/geocoder.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:tech_pool/Utils.dart';
-import 'package:dropdown_formfield/dropdown_formfield.dart';
-import 'package:dropdown_customizable/dropdown_customizable.dart';
-import 'package:f_datetimerangepicker/f_datetimerangepicker.dart';
 import 'package:intl/intl.dart';
+import 'package:tech_pool/pages/LiftInfoPage.dart';
 import 'package:tech_pool/pages/SearchLiftPage.dart';
-import 'package:tech_pool/widgets/TextBoxField.dart';
-import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
+
 
 class LiftSearchReasultsPage extends StatefulWidget {
   DateTime fromTime = DateTime.now();
   DateTime toTime = DateTime.now().add(Duration(days: 1,hours: 0,minutes: 0,microseconds: 0));
   int indexDist = 20000;
   List<int> distances = [1000,5000,20000,40000];
-  LiftSearchReasultsPage({Key key,@required this.fromTime,@required this.toTime,@required this.indexDist}): super(key: key);
+  Address startAddress;
+  Address destAddress;
+  bool backSeat;
+  bool bigTrunk;
+
+  LiftSearchReasultsPage({Key key,@required this.fromTime,@required this.toTime,@required this.indexDist,@required this.startAddress,@required this.destAddress, @required this.backSeat, @required this.bigTrunk}): super(key: key);
   
   @override
   _LiftSearchReasultsPageState createState() => _LiftSearchReasultsPageState();
@@ -37,20 +40,32 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
   Future<String> initList() async {
     try {
       liftList.clear();
-      QuerySnapshot q  = await firestore.collection("Drives").where('TimeStamp', isLessThan: Timestamp.fromDate(widget.toTime),isGreaterThan: Timestamp.fromDate(widget.fromTime)).get();
+      QuerySnapshot q  = await firestore.collection("Drives").where('TimeStamp', isLessThanOrEqualTo: Timestamp.fromDate(widget.toTime),isGreaterThanOrEqualTo: Timestamp.fromDate(widget.fromTime)).get();
       q.docs.forEach(
               (element) {
         MyLift docLift = new MyLift("driver", "destAddress", "stopAddress", 5);
         element.data().forEach((key, value) {
           if(value!=null) {
-            docLift.setPropertiy(key,value);
+            docLift.setProperty(key,value);
           }
         });
         liftList.add(docLift);
       });
     } catch (e) {
     }
+    Coordinates startPointing = widget.startAddress.coordinates;
+    Coordinates destPointing = widget.destAddress.coordinates;
 
+    liftList.forEach((element) {
+      double distToStart = clacDis(element.startPoint,startPointing);
+      double distToEnd =  clacDis(element.destPoint,destPointing);
+      element.stops.forEach((key, value) {
+        GeoPoint pointStop = value as GeoPoint;
+        distToStart = min(distToStart,clacDis(pointStop,startPointing));
+        distToEnd = min(distToEnd,clacDis(pointStop,destPointing));
+      });
+      element.dist = (distToStart+distToEnd).toInt();
+    });
     Comparator<MyLift> timeComparator = (a, b) {
       if(a.time == b.time){
         return a.dist.compareTo(b.dist);
@@ -68,7 +83,7 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
     if(_currsSearchDrop == "Time"){
       liftList.sort(timeComparator);
     }else{
-      liftList.sort(timeComparator);
+      liftList.sort(distComparator);
     }
     return "finish";
   }
@@ -92,7 +107,7 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => SearchLiftPage(cuurentdate: widget.fromTime, fromtime: widget.fromTime,totime: widget.toTime,indexDis: widget.indexDist ,),
+                    builder: (context) => SearchLiftPage(currentdate: widget.fromTime, fromtime: widget.fromTime,totime: widget.toTime,indexDis: widget.indexDist , startAd: widget.startAddress, destAd:widget.destAddress, bigTrunk: widget.bigTrunk, backSeat: widget.backSeat,),
                   ));
 
             }));
@@ -194,6 +209,16 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
         });
   }
 
+  void _openInfoDialog() {
+    Navigator.of(context).push(new MaterialPageRoute<Null>(
+        builder: (BuildContext context) {
+          return null;
+        },
+        fullscreenDialog: true
+    ));
+  }
+
+
   Widget _buildTile(MyLift lift) {
     return Container(
       child:
@@ -213,10 +238,20 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
                       left: MediaQuery.of(context).size.height * 0.016, top: MediaQuery.of(context).size.height * 0.016),
                   child:Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                children: [infoText(lift.driver),placesText(lift.startAddress,lift.destAddress),allInfoText(lift.time, 24, lift.price, lift.numberOfSeats, lift.passengers.length),],
+                children: [infoText(lift.driver),placesText(lift.startCity,lift.destCity),allInfoText(lift.time, lift.dist~/1000, lift.price, lift.numberOfSeats, lift.passengers.length),],
               )),
         Spacer(),
-       InkWell(child:Icon(Icons.arrow_forward_ios_outlined),onTap:() {},),
+       InkWell(
+         child:Icon(Icons.arrow_forward_ios_outlined),
+         onTap:() {
+           Navigator.of(context).push(new MaterialPageRoute<Null>(
+             builder: (BuildContext context) {
+               return LiftInfoPage(lift: lift);
+             },
+             fullscreenDialog: true
+         ));
+         },
+       ),
               SizedBox(width:MediaQuery.of(context).size.height * 0.016 ,)
             ],
       ),

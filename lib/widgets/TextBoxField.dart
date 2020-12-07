@@ -36,3 +36,26 @@ Widget textBoxFieldDisable({@required Size size,@required String hintText,@requi
               border: InputBorder.none, hintText: hintText)));
 }
 
+Widget labelText({@required String text}){
+ return Container(
+    child: Text(
+      text,
+      style:
+      TextStyle( fontSize: 17, color: Colors.black.withOpacity(0.6)),
+      overflow: TextOverflow.ellipsis,
+      maxLines: 2,
+    ),
+  );
+}
+Widget infoText({@required String text}){
+  return Container(
+    child: Text(
+      text,
+      style:
+      TextStyle( fontSize: 17,),
+      overflow: TextOverflow.ellipsis,
+      maxLines: 2,
+    ),
+  );
+}
+

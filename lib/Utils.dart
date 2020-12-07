@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoder/geocoder.dart';
+import 'package:geolocator/geolocator.dart';
 
 /// Apps default settings
 MaterialColor mainColor =  Colors.cyan;
@@ -109,7 +110,13 @@ Container transformEvent(dynamic event){
   }
 }
 
+double clacDis(GeoPoint from,Coordinates to){
+  return (Geolocator.distanceBetween(from.latitude,from.longitude,to.latitude,to.longitude).abs());
+}
+
 class MyLift{
+  String destCity;
+  String startCity;
   String destAddress;
   String startAddress;
   String note;
@@ -119,40 +126,68 @@ class MyLift{
   int price;
   DateTime time;
   String driver;
-  MyLift(this.driver,this.destAddress,this.startAddress,this.numberOfSeats);
+  MyLift(this.driver,this.destCity,this.startCity,this.numberOfSeats);
+  GeoPoint  destPoint;
+  GeoPoint startPoint;
+  bool bigTrunk;
+  bool backSeat;
+  var stops = new Map();
 
-  void setPropertiy(String key,var propery){
+  void setProperty(String key,var property){
     switch(key) {
 
-      case "Driver": {  this.driver=propery; }
+      case "Driver": {  this.driver=property; }
       break;
 
-      case "DestAddress": {  this.destAddress=propery; }
+      case "DestCity": {  this.destCity=property; }
       break;
 
-      case "StartAddress": {  this.startAddress=propery; }
+      case "StartCity": {  this.startCity=property; }
       break;
 
-      case "Note": {  this.note=propery; }
+      case "DestAddress": {  this.destAddress=property; }
       break;
 
-      case "TimeStamp": {  this.time= (propery as Timestamp).toDate(); }
+      case "StartAddress": {
+        this.startAddress=property;
+      }
       break;
 
-      case "TimeStamp": {  this.time= (propery as Timestamp).toDate(); }
+      case "Note": {
+        this.note=property;
+      }
       break;
 
-      case "NumberSeats": {  this.numberOfSeats = propery; }
+      case "TimeStamp": {  this.time= (property as Timestamp).toDate().add(Duration(days: 0,hours: 2,minutes: 0,microseconds: 0)); }
       break;
 
-      case "Price": {  this.price = propery; }
+      case "NumberSeats": {  this.numberOfSeats = property; }
       break;
 
-      case "Passengers": {  passengers=List.from(propery); }
+      case "Price": {  this.price = property; }
       break;
+
+      case "Passengers": {  passengers=List.from(property); }
+      break;
+
+      case "DestPoint": { destPoint = property;}
+      break;
+
+      case "StartPoint": { startPoint = property;}
+      break;
+
+      case "Stops": {stops = property;}
+      break;
+
+      case "BigTrunk": { bigTrunk = property;}
+      break;
+
+      case "BackSeatNotFull":{ backSeat = property;}
+      break;
+
 
       default: { }
       break;
     }}
-}
 
+}

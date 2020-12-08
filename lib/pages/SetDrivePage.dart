@@ -210,6 +210,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
                     numberOfStops = 0;
                     for(int i = 0; i < returnFromMapResult.stopAddresses.length; i++) {
                       bool exists = returnFromMapResult.stopAddresses[i] as bool;
+                      //bool exists = (returnFromMapResult.stopAddresses[i] != null);
                       int addition = exists ? 1 : 0;
                       numberOfStops += addition;
                     }

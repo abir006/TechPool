@@ -165,7 +165,7 @@ class _LocationSearchState extends State<LocationSearch> {
                         stopAddresses[1] != null && stopAddresses[2] != null)) {
                   Navigator.pop<LocationsResult>(
                       context, LocationsResult(
-                      fromAddress, toAddress, stopAddresses));
+                      fromAddress, toAddress, stopAddresses,stopNumber));
                 } else {
                   _key.currentState.showSnackBar(SnackBar(content: Text(
                     "Please select addresses before submitting",

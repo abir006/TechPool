@@ -57,7 +57,8 @@ class LocationsResult{
   Address fromAddress;
   Address toAddress;
   List<Address> stopAddresses;
-  LocationsResult(this.fromAddress, this.toAddress,this.stopAddresses);
+  int numberOfStops;
+  LocationsResult(this.fromAddress, this.toAddress,this.stopAddresses,this.numberOfStops);
 }
 
 /// A util function for the calendar, returns the desired event container to

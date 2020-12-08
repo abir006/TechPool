@@ -20,7 +20,7 @@ Function validateNotEmpty(String missingString){
 
 
 
-Widget textBoxFieldDisable({@required Size size,@required String hintText,@required TextEditingController textFieldController,bool obscureText = false,Function validator,String nameLable}) {
+Widget textBoxFieldDisable({@required Size size,@required String hintText,@required TextEditingController textFieldController,bool obscureText = false,Function validator,String nameLabel}) {
   return Container(decoration: BoxDecoration(
       color: Colors.transparent, borderRadius: containerBorderRadius),
       padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
@@ -31,10 +31,30 @@ Widget textBoxFieldDisable({@required Size size,@required String hintText,@requi
               fontSize: 17, color: Colors.black.withOpacity(0.6)),
           readOnly: true,
           decoration: InputDecoration(
-                labelText: nameLable,
+                labelText: nameLabel,
                 labelStyle: TextStyle(fontSize: 17),
               border: InputBorder.none, hintText: hintText)));
 }
+
+Widget textBoxFieldDisableCentered({@required Size size,@required String hintText,@required TextEditingController textFieldController,bool obscureText = false,Function validator,String nameLabel}) {
+  return Container(decoration: BoxDecoration(
+      color: Colors.transparent
+      //, borderRadius: containerBorderRadius)
+      ),
+      padding: const EdgeInsets.fromLTRB(0, 15, 0, 0),
+      width: size.width * 0.7,
+      height: size.height * 0.05,
+      child: TextFormField(autovalidateMode: AutovalidateMode.onUserInteraction,validator: validator,obscureText: obscureText,controller: textFieldController,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+              fontSize: 17, color: Colors.black.withOpacity(0.6)),
+          readOnly: true,
+          decoration: InputDecoration(
+              labelText: nameLabel,
+              labelStyle: TextStyle(fontSize: 17),
+              border: InputBorder.none, hintText: hintText)));
+}
+
 
 Widget labelText({@required String text}){
  return Container(

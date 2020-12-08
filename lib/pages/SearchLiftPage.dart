@@ -136,7 +136,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
       child: Row(
         children: [
           textBoxFieldDisable(
-              nameLable: "Start point : ",
+              nameLabel: "Start point : ",
               size: MediaQuery.of(context).size,
               hintText: "",
               textFieldController: _startPointControler,
@@ -151,7 +151,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
       child: Row(
         children: [
           textBoxFieldDisable(
-              nameLable: "Destination point: ",
+              nameLabel: "Destination point: ",
               size: MediaQuery.of(context).size,
               hintText: "",
               textFieldController: _destPointControler,
@@ -294,7 +294,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
       child: Row(
         children: [
           textBoxFieldDisable(
-              nameLable: "From: ",
+              nameLabel: "From: ",
               size: MediaQuery.of(context).size,
               hintText: "",
               textFieldController: _fromControler,
@@ -309,7 +309,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
 
     final toText = Container(
           child:textBoxFieldDisable(
-              nameLable: "To: ",
+              nameLabel: "To: ",
               size: MediaQuery.of(context).size,
               hintText: "",
               textFieldController: _toControler,

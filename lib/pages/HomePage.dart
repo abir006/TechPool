@@ -5,6 +5,8 @@ import 'package:tech_pool/Utils.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:tech_pool/pages/SearchLiftPage.dart';
 
+import 'SetDrivePage.dart';
+
 
 class HomePage extends StatefulWidget {
   @override
@@ -39,8 +41,7 @@ class _HomePageState extends State<HomePage> {
         Navigator.of(context).push(
           MaterialPageRoute<void>(
             builder: (BuildContext context) {
-              //TODO: replace with Set Drive Page.
-              return SearchLiftPage(currentdate: selectedDay);
+              return SetDrivePage(currentDate: selectedDay);
             },
           ),
         );

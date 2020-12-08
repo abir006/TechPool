@@ -18,7 +18,7 @@ class SetDrivePage extends StatefulWidget {
 }
 
 class _SetDrivePageState extends State<SetDrivePage> {
-  final _formKey = GlobalKey<FormState>();
+  final _formKey2 = GlobalKey<FormState>();
 
   DateTime time;
   double _fontTextsSize = 17;
@@ -30,10 +30,14 @@ class _SetDrivePageState extends State<SetDrivePage> {
   String _numberOfPassengers = "3";
   TextEditingController _hourController;
   String noteToPassengers = "";
-
+  int numberOfStops = 0;
   TextEditingController _startPointController;
   TextEditingController _destPointController;
-  LocationsResult returnResult;
+  TextEditingController _stopPoint1Controller;
+  TextEditingController _stopPoint2Controller;
+  TextEditingController _stopPoint3Controller;
+
+  LocationsResult returnFromMapResult;
   Address fromAddress;
   Address destAddress;
   //double _labelsTextsSize = 19;
@@ -44,6 +48,9 @@ class _SetDrivePageState extends State<SetDrivePage> {
     _hourController = TextEditingController(text: "");
     _startPointController = TextEditingController(text: "");
     _destPointController = TextEditingController(text: "");
+    _stopPoint1Controller = TextEditingController(text: "");
+    _stopPoint2Controller = TextEditingController(text: "");
+    _stopPoint3Controller = TextEditingController(text: "");
   }
 
   @override
@@ -62,46 +69,74 @@ class _SetDrivePageState extends State<SetDrivePage> {
       widget.numberOfSeatsIndex = null;
     }*/
 
+    final stopPoint1text = numberOfStops > 0
+        ? Container(
+            child: Row(
+              children: [
+                textBoxFieldDisable(
+                  nameLabel: "Stop 1:",
+                  size: MediaQuery.of(context).size,
+                  hintText: "",
+                  textFieldController: _stopPoint1Controller,
+                  // validator: (value) {
+                  //   if(_startPointController==null || _startPointController.text==""){return "No start point chosen";}
+                  //   else return null;}
+                ),
+              ],
+            ),
+          )
+        : Container();
 
+    final stopPoint2text = numberOfStops > 1
+        ? Container(
+            child: Row(
+              children: [
+                textBoxFieldDisable(
+                  nameLabel: "Stop 2:",
+                  size: MediaQuery.of(context).size,
+                  hintText: "",
+                  textFieldController: _stopPoint2Controller,
+                ),
+              ],
+            ),
+          )
+        : Container();
 
-    final stopPoint1text = Container(
-      child: TextFormField(
-        decoration: InputDecoration(
-          labelText: 'Stop 1',
-          labelStyle: TextStyle(fontSize: _fontTextsSize),
-        ),
-      ),
-    );
-    final stopPoint2text = Container(
-      child: TextFormField(
-        decoration: InputDecoration(
-          labelText: 'Stop 2',
-          labelStyle: TextStyle(fontSize: _fontTextsSize),
-        ),
-      ),
-    );
-    final stopPoint3text = Container(
-      child: TextFormField(
-        decoration: InputDecoration(
-          labelText: 'Stop 3',
-          labelStyle: TextStyle(fontSize: _fontTextsSize),
-        ),
-      ),
-    );
+    final stopPoint3text = numberOfStops > 2
+        ? Container(
+            child: Row(
+              children: [
+                textBoxFieldDisable(
+                  nameLabel: "Stop 3:",
+                  size: MediaQuery.of(context).size,
+                  hintText: "",
+                  textFieldController: _stopPoint3Controller,
+                ),
+              ],
+            ),
+          )
+        : Container();
 
-    // final startPointText = Container(
+    // final stopPoint1text_2 = Container(
     //   child: TextFormField(
     //     decoration: InputDecoration(
-    //       labelText: 'Start Point',
+    //       labelText: 'Stop 1',
     //       labelStyle: TextStyle(fontSize: _fontTextsSize),
     //     ),
     //   ),
     // );
-
-    // final destinationText = Container(
+    // final stopPoint2text = Container(
     //   child: TextFormField(
     //     decoration: InputDecoration(
-    //       labelText: 'Destination',
+    //       labelText: 'Stop 2',
+    //       labelStyle: TextStyle(fontSize: _fontTextsSize),
+    //     ),
+    //   ),
+    // );
+    // final stopPoint3text = Container(
+    //   child: TextFormField(
+    //     decoration: InputDecoration(
+    //       labelText: 'Stop 3',
     //       labelStyle: TextStyle(fontSize: _fontTextsSize),
     //     ),
     //   ),
@@ -111,13 +146,17 @@ class _SetDrivePageState extends State<SetDrivePage> {
       child: Row(
         children: [
           textBoxFieldDisable(
-              nameLabel: "Start point:",
+              nameLabel: "Start:",
               size: MediaQuery.of(context).size,
               hintText: "",
               textFieldController: _startPointController,
               validator: (value) {
-                if(_startPointController==null || _startPointController.text==""){return "No start point chosen";}
-                else return null;}),
+                if (_startPointController == null ||
+                    _startPointController.text == "") {
+                  return "No start point chosen";
+                } else
+                  return null;
+              }),
         ],
       ),
     );
@@ -126,50 +165,59 @@ class _SetDrivePageState extends State<SetDrivePage> {
       child: Row(
         children: [
           textBoxFieldDisable(
-              nameLabel: "Destination point: ",
+              nameLabel: "Destination:",
               size: MediaQuery.of(context).size,
               hintText: "",
               textFieldController: _destPointController,
               validator: (value) {
-                if(_destPointController==null || _destPointController.text==""){return "No destination chosen";}
-                else return null;}),
+                if (_destPointController == null ||
+                    _destPointController.text == "") {
+                  return "No destination chosen";
+                } else
+                  return null;
+              }),
         ],
       ),
     );
 
-
-    final chooseStartAndDestination =
-    Column(mainAxisAlignment: MainAxisAlignment.center,crossAxisAlignment: CrossAxisAlignment.center, children: [
-      Container(
-        child: RaisedButton.icon(
-          color: Colors.white,
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(18),
-              side: BorderSide(color: Colors.black)),
-          label: Text("Choose Start and Destination"),
-          icon: Icon(Icons.map),
-          onPressed: () async {
-            returnResult = await Navigator.of(context).push(
-                MaterialPageRoute<LocationsResult>(
-                    builder: (BuildContext context) {
-                      return LocationSearch(showAddStops: false);
-                    },
-                    fullscreenDialog: true
-                ));
-            setState(() {
-              if (returnResult != null) {
-                fromAddress = returnResult.fromAddress;
-                destAddress = returnResult.toAddress;
-                _startPointController.text =
-                    returnResult.fromAddress.addressLine;
-                _destPointController.text = returnResult.toAddress.addressLine;
-              }
-            });
-
-          },
-        ),
-      ),
-    ]);
+    final chooseStartAndDestination = Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            child: RaisedButton.icon(
+              color: Colors.white,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18),
+                  side: BorderSide(color: Colors.black)),
+              label: Text("Choose Start and Destination"),
+              icon: Icon(Icons.map),
+              onPressed: () async {
+                returnFromMapResult = await Navigator.of(context)
+                    .push(MaterialPageRoute<LocationsResult>(
+                        builder: (BuildContext context) {
+                          return LocationSearch(showAddStops: true);
+                        },
+                        fullscreenDialog: true));
+                setState(() {
+                  if (returnFromMapResult != null) {
+                    fromAddress = returnFromMapResult.fromAddress;
+                    destAddress = returnFromMapResult.toAddress;
+                    _startPointController.text =
+                        returnFromMapResult.fromAddress.addressLine;
+                    _destPointController.text =
+                        returnFromMapResult.toAddress.addressLine;
+                    numberOfStops = 0;
+                    for(int i = 0; i < returnFromMapResult.stopAddresses.length; i++) {
+                      bool exists = (returnFromMapResult.stopAddresses[i] != null);
+                      numberOfStops += (exists ? 0 : 1);
+                    }
+                  }
+                });
+              },
+            ),
+          ),
+        ]);
 
     final setDrive = Container(
         padding: EdgeInsets.only(
@@ -184,17 +232,12 @@ class _SetDrivePageState extends State<SetDrivePage> {
             label: Text("  Set Drive  ",
                 style: TextStyle(color: Colors.white, fontSize: 17)),
             onPressed: () {
-              if (_formKey.currentState.validate()) {
-                // Navigator.pushReplacement(
-                //     context,
-                //     MaterialPageRoute(
-                //       builder: (context) => LiftSearchReasultsPage(fromTime: _fromTime,toTime: _toTime, indexDist: _distances.indexOf(_maxDist)),
-                //     ));
+              if (_formKey2.currentState.validate()) {
                 Navigator.pop(context);
               }
             }));
 
-    final deparatureTimeButton = Column(
+    final departureTimeButton = Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -212,58 +255,67 @@ class _SetDrivePageState extends State<SetDrivePage> {
 
                 showDialog(
                     context: context,
-                    builder: (_) =>
-                    new SimpleDialog(
-                      title: Center(child: Text("Choose departure time", style: TextStyle(fontSize:21))),
-                      //content: Text("Hey! I'm Coflutter!"),
-                      children:[
-                        TimePickerSpinner(
-                          is24HourMode: true,
-                          normalTextStyle: TextStyle(fontSize: 28, color: Colors.grey),
-                          highlightedTextStyle:  TextStyle(fontSize: 34, color: Colors.teal),
-                          //spacing: 50,
-                          //itemHeight: 80,
-                          alignment: Alignment.center,
-                          isForce2Digits: true,
-                          minutesInterval: 5,
-                          //time: _hourTime != null ? _hourTime : fixedTime,
-                          time: _hourTime != null ? _hourTime : DateTime.now().add(new Duration(hours: 2)),
-                          isShowSeconds: false,
-                          onTimeChange: (time) {
-                            setState(() {
-                              _hourTimeCandidate = time;
-                            });
-                          },
-                        ),
-                        Row(
-                            mainAxisAlignment: MainAxisAlignment.center, //Center Row contents horizontally,
-                            children: [
-                            //RaisedButton(
-                            FlatButton(
-                              child: Text('CANCEL', style: TextStyle(fontSize: 16, color: mainColor)),
-                              onPressed: () {
+                    builder: (_) => new SimpleDialog(
+                          title: Center(
+                              child: Text("Choose departure time",
+                                  style: TextStyle(fontSize: 21))),
+                          //content: Text("Hey! I'm Coflutter!"),
+                          children: [
+                            TimePickerSpinner(
+                              is24HourMode: true,
+                              normalTextStyle:
+                                  TextStyle(fontSize: 28, color: Colors.grey),
+                              highlightedTextStyle:
+                                  TextStyle(fontSize: 34, color: Colors.teal),
+                              //spacing: 50,
+                              //itemHeight: 80,
+                              alignment: Alignment.center,
+                              isForce2Digits: true,
+                              minutesInterval: 5,
+                              //time: _hourTime != null ? _hourTime : fixedTime,
+                              time: _hourTime != null
+                                  ? _hourTime
+                                  : DateTime.now().add(new Duration(hours: 2)),
+                              isShowSeconds: false,
+                              onTimeChange: (time) {
                                 setState(() {
-                                  Navigator.of(context).pop();
+                                  _hourTimeCandidate = time;
                                 });
                               },
                             ),
-                            //SizedBox(width: 2*defaultSpaceWidth),
-                            //RaisedButton(
-                            FlatButton(
-                              child: Text('CONFIRM', style: TextStyle(fontSize: 16, color: mainColor)),
-                              onPressed: () {
-                                _hourTime = _hourTimeCandidate;
-                                _hourController.text = DateFormat('dd-MM – kk:mm').format(_hourTimeCandidate);
-                                Navigator.of(context).pop();
-                              },
-                            )
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment
+                                  .center, //Center Row contents horizontally,
+                              children: [
+                                //RaisedButton(
+                                FlatButton(
+                                  child: Text('CANCEL',
+                                      style: TextStyle(
+                                          fontSize: 16, color: mainColor)),
+                                  onPressed: () {
+                                    setState(() {
+                                      Navigator.of(context).pop();
+                                    });
+                                  },
+                                ),
+                                //SizedBox(width: 2*defaultSpaceWidth),
+                                //RaisedButton(
+                                FlatButton(
+                                  child: Text('CONFIRM',
+                                      style: TextStyle(
+                                          fontSize: 16, color: mainColor)),
+                                  onPressed: () {
+                                    _hourTime = _hourTimeCandidate;
+                                    _hourController.text =
+                                        DateFormat('dd-MM – kk:mm')
+                                            .format(_hourTimeCandidate);
+                                    Navigator.of(context).pop();
+                                  },
+                                )
+                              ],
+                            ),
                           ],
-                        ),
-
-                      ],
-                    )
-                );
-
+                        ));
               },
             ),
           ),
@@ -387,23 +439,22 @@ class _SetDrivePageState extends State<SetDrivePage> {
     final priceText = Container(
       margin: const EdgeInsets.only(right: 280),
       child: TextFormField(
-        //maxLengthEnforced: true,
-        maxLength: 3,
-        decoration: InputDecoration(
-          counterText: '',
-          labelText: 'Price: ₪',
-          labelStyle: TextStyle(fontSize: _fontTextsSize),
-        ),
-        keyboardType: TextInputType.number,
-        inputFormatters: <TextInputFormatter>[
-          FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
-          LengthLimitingTextInputFormatter(4),
-        ],
+          //maxLengthEnforced: true,
+          maxLength: 3,
+          decoration: InputDecoration(
+            counterText: '',
+            labelText: 'Price: ₪',
+            labelStyle: TextStyle(fontSize: _fontTextsSize),
+          ),
+          keyboardType: TextInputType.number,
+          inputFormatters: <TextInputFormatter>[
+            FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+            LengthLimitingTextInputFormatter(4),
+          ],
           validator: (value) {
             if (value.isEmpty) return 'Enter price';
             return null;
-          }
-      ),
+          }),
     );
 
     return Scaffold(
@@ -411,7 +462,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
         title: Text("Set Drive", style: TextStyle(color: Colors.white)),
       ),
       body: Form(
-        key: _formKey,
+        key: _formKey2,
         child: Builder(
           builder: (context) => Container(
               color: Colors.white,
@@ -435,32 +486,32 @@ class _SetDrivePageState extends State<SetDrivePage> {
                     children: [
                       //SizedBox(height: defaultSpace),
                       //locationText,
-                      SizedBox(height: 1.5*defaultSpace),
+                      SizedBox(height: 1.5 * defaultSpace),
                       chooseStartAndDestination,
                       startPointText,
-                      SizedBox(height: defaultSpace),
-                      //stopPoint1text,
+                      stopPoint1text,
+                      stopPoint2text,
+                      stopPoint3text,
+                      //if(numberOfStops > 0) Column(children: [SizedBox(height: defaultSpace), stopPoint1text]),
+                      // numberOfStops > 1 ? Column(children: [SizedBox(height: defaultSpace), stopPoint2text]) : null,
+                      // numberOfStops > 2 ? Column(children: [SizedBox(height: defaultSpace), stopPoint3text]) : null,
                       // SizedBox(height: defaultSpace/3),
                       // stopPoint2text,
                       // SizedBox(height: defaultSpace/3),
                       // stopPoint3text,
+
                       destinationText,
-                      SizedBox(height: 2*defaultSpace),
+                      SizedBox(height: 2 * defaultSpace),
                       Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          deparatureTimeButton,
+                          departureTimeButton,
                           timeText1,
                           priceText,
                         ],
                       ),
-                      // chooseTime,
-                      // timeText2,
-                      //Row(children: [chooseTime,timeText]),
-                      //SizedBox(height: defaultSpace/2),
-
-                      SizedBox(height: defaultSpace * 2),
+                      SizedBox(height: 2 * defaultSpace),
                       //propertiesText,
                       //SizedBox(height: defaultSpace/2),
                       bigTrunkText,
@@ -482,6 +533,9 @@ class _SetDrivePageState extends State<SetDrivePage> {
     _hourController.dispose();
     _startPointController.dispose();
     _destPointController.dispose();
+    _stopPoint1Controller.dispose();
+    _stopPoint2Controller.dispose();
+    _stopPoint3Controller.dispose();
     super.dispose();
   }
 }

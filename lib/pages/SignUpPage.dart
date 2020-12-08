@@ -10,7 +10,9 @@ class SignUpPage extends StatefulWidget {
   _SignUpPageState createState() => _SignUpPageState();
 }
 
-class _SignUpPageState extends State<SignUpPage> {
+class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateMixin {
+  Animation<double> animation;
+  AnimationController controller;
   final _formKey = GlobalKey<FormState>();
   final _key = GlobalKey<ScaffoldState>();
   bool _checkedValue = false;
@@ -24,6 +26,13 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   void initState() {
     super.initState();
+    controller = AnimationController(
+        duration: Duration(milliseconds: 150),
+        vsync: this //
+    );
+    animation = new Tween(begin: 0.0, end: 2.0).animate(controller);
+    controller.repeat(reverse: true);
+
     _firstName = TextEditingController(text: "");
     _lastName = TextEditingController(text: "");
     _email = TextEditingController(text: "");
@@ -35,6 +44,10 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
+
+    return AnimatedBuilder(
+        animation: animation,
+        builder: (BuildContext ctx, Widget child) {
 
     return Consumer<UserRepository>(builder: (context, userRep, child) {
 
@@ -58,6 +71,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
 
       return Scaffold(
+        backgroundColor: mainColor,
         key: _key,
         appBar: AppBar(
           leading: IconButton(icon: Icon(Icons.arrow_back, color: Colors.white,), onPressed: () async {  await userRep.auth.signOut(); Navigator.of(context).pop();},),
@@ -67,11 +81,15 @@ class _SignUpPageState extends State<SignUpPage> {
         )),
         body: Form(
             key: _formKey,
-            child: Container(
-                color: mainColor,
-                height: size.height,
-                width: size.width,
-                child: Wrap(
+            child: Stack(alignment: Alignment.topCenter,children :[Container(decoration: BoxDecoration(image: DecorationImage(image: Image.asset("assets/images/AuthPageBackground.png",height: size.height,width: size.width,).image)),
+      //color: mainColor,
+      height: size.height,
+      width: size.width),Positioned(top:animation.value,left: size.width*0.38,child: Image(alignment: Alignment.center,height: 100,width: 100,image: Image.asset("assets/images/TechPoolCar.png").image)),Container(
+      //decoration: BoxDecoration(image: DecorationImage(image: Image.asset("assets/images/background.png",height: size.height,width: size.width,).image)),
+      //color: mainColor,
+      height: size.height,
+      width: size.width,
+      child: Wrap(
                     runSpacing: 10,
                     alignment: WrapAlignment.center,
                     runAlignment: WrapAlignment.center,
@@ -153,6 +171,13 @@ class _SignUpPageState extends State<SignUpPage> {
                                   while(!await checkEmailVerified()) {
 
                                   }
+                                  setState(() {
+                                    controller.stop();
+                                    animation = new Tween(begin: 0.0, end: size.height).animate(controller);
+                                    controller.duration = Duration(seconds: 1, milliseconds: 1000);
+                                    controller.forward(from: 0.0);
+                                  });
+                                  await Future.delayed(Duration(seconds: 1, milliseconds: 1000));
                                   Navigator.of(context).pop();
                                   }));
                                 }catch(e) {
@@ -167,13 +192,14 @@ class _SignUpPageState extends State<SignUpPage> {
                                 }
                               }
                             },
-                          ),Icon(Icons.account_circle,color: Colors.white)])) : Container(width: size.width*0.7,child: Wrap(direction: Axis.horizontal,children: [Text("A verification email sent to: \n${_email.text}, \nplease verify.", style: TextStyle(color: Colors.white, fontSize: 20),), Center(child: CircularProgressIndicator(),)]))
-                    ]))));});
-  }
+                          ),Icon(Icons.account_circle,color: Colors.white)])) : Container(width: size.width*0.7,child: Wrap(direction: Axis.horizontal,children: [Text("A verification email sent to: \n${_email.text}, \nplease verify.", style: TextStyle(backgroundColor: secondColor, color: Colors.white, fontSize: 20),), Center(child: CircularProgressIndicator(),)]))
+                    ]))])));});
+  });}
 
 
   @override
   void dispose() {
+    controller.dispose();
     _firstName.dispose();
     _lastName.dispose();
     _email.dispose();

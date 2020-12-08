@@ -14,13 +14,15 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   DateTime selectedDay = DateTime.now();
   CalendarController _calendarController;
-  Map<DateTime, List> _events = {DateTime.now() : [Drive('A Drive'),Lift('A Lift')],DateTime.now().add(Duration(days: 1)) : [Lift('A Lift')]};
-  List  _dailyEvents = [];
+  Map<DateTime, List> _events;
+  List  _dailyEvents;
 
   @override
   void initState() {
     super.initState();
     _calendarController = CalendarController();
+    _events = {selectedDay : [Drive('A Drive'),Lift('A Lift')],selectedDay.add(Duration(days: 1)) : [Lift('A Lift')]};
+    _dailyEvents = _events[selectedDay] ?? [];
   }
 
   void _onDaySelected(DateTime day, List events, List holidays) {
@@ -54,8 +56,7 @@ class _HomePageState extends State<HomePage> {
         },))],),backgroundColor: mainColor,appBar: AppBar(title: Text("Home",  style: TextStyle(color: Colors.white),), actions: [IconButton(icon :Icon(Icons.exit_to_app),
           onPressed: () async => await (userRep.auth.signOut().then((_) => userRep.user = null)))],),drawer: Drawer(child: Container(color: mainColor, child: Column(mainAxisAlignment: MainAxisAlignment.center,children: [Text("Drawer")],),)),
           body: Container(color: Colors.white,margin: EdgeInsets.fromLTRB(10, 0, 10, 10),
-          child: ListView(children: [
-            TableCalendar(availableCalendarFormats: {CalendarFormat.month : 'Week', CalendarFormat.week : 'Month'},calendarController: _calendarController, events: _events,onDaySelected: _onDaySelected),
+          child: ListView(children: [TableCalendar(availableCalendarFormats: {CalendarFormat.month : 'Week', CalendarFormat.week : 'Month'},calendarController: _calendarController, events: _events,onDaySelected: _onDaySelected),
            Divider(indent: 5,endIndent: 5,thickness: 2), ..._dailyEvents
                   .map((event) => transformEvent(event))
                   .toList(),

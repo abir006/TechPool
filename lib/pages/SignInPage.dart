@@ -11,7 +11,9 @@ class SignInPage extends StatefulWidget {
   _SignInPageState createState() => _SignInPageState();
 }
 
-class _SignInPageState extends State<SignInPage> {
+class _SignInPageState extends State<SignInPage> with SingleTickerProviderStateMixin {
+  Animation<double> animation;
+  AnimationController controller;
   final _formKey = GlobalKey<FormState>();
   final _key = GlobalKey<ScaffoldState>();
   bool _checkedValue = false;
@@ -23,6 +25,14 @@ class _SignInPageState extends State<SignInPage> {
   @override
   void initState() {
     super.initState();
+    controller = AnimationController(
+        duration: Duration(milliseconds: 150),
+        vsync: this //
+    );
+    animation = new Tween(begin: 0.0, end: 2.0).animate(controller);
+    controller.repeat(reverse: true);
+
+
     _email = TextEditingController(text: "");
     _password = TextEditingController(text: "");
     _pressed = false;
@@ -31,8 +41,12 @@ class _SignInPageState extends State<SignInPage> {
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
+    return AnimatedBuilder(
+        animation: animation,
+        builder: (BuildContext ctx, Widget child) {
     return Consumer<UserRepository>(builder: (context, userRep, child) {
       return Scaffold(
+        backgroundColor: mainColor,
       key: _key,
         appBar: AppBar(
             title: Text(
@@ -41,8 +55,12 @@ class _SignInPageState extends State<SignInPage> {
         )),
         body: Form(
           key: _formKey,
-            child: Container(
-                color: mainColor,
+            child: Stack(alignment: Alignment.topCenter,children :[Container(decoration: BoxDecoration(image: DecorationImage(image: Image.asset("assets/images/AuthPageBackground.png",height: size.height,width: size.width,).image)),
+              //color: mainColor,
+              height: size.height,
+              width: size.width),Positioned(top:animation.value,left: size.width*0.38,child: Image(alignment: Alignment.center,height: 100,width: 100,image: Image.asset("assets/images/TechPoolCar.png").image)),Container(
+                //decoration: BoxDecoration(image: DecorationImage(image: Image.asset("assets/images/background.png",height: size.height,width: size.width,).image)),
+                //color: mainColor,
                 height: size.height,
                 width: size.width,
                 child: Wrap(
@@ -129,6 +147,13 @@ class _SignInPageState extends State<SignInPage> {
                                   await (userRep.auth.signInWithEmailAndPassword(email: _email.text, password: _password.text).then((user) async {
                                     if(user.user.emailVerified) {
                                       userRep.user = user.user;
+                                      setState(() {
+                                        controller.stop();
+                                        animation = new Tween(begin: 0.0, end: size.height).animate(controller);
+                                        controller.duration = Duration(seconds: 1, milliseconds: 1000);
+                                        controller.forward(from: 0.0);
+                                      });
+                                      await Future.delayed(Duration(seconds: 1, milliseconds: 1000));
                                       Navigator.of(context).pop();
                                     } else {
                                       _key.currentState.showSnackBar(SnackBar(content: Text("Please verify email", style: TextStyle(fontSize: 20, color: Colors.red),)));
@@ -147,11 +172,12 @@ class _SignInPageState extends State<SignInPage> {
                               }
                             },
                           ), Icon(Icons.login,color: Colors.white,)]))  : Center(child: CircularProgressIndicator())
-                    ]))));});
-  }
+                    ]))])));});
+          });}
 
   @override
   void dispose() {
+    controller.dispose();
     _email.dispose();
     _password.dispose();
     super.dispose();

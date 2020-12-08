@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:tech_pool/pages/LandingPage.dart';
 import 'Utils.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:tech_pool/pages/SetDrivePage.dart';
 
 
 
@@ -48,9 +47,7 @@ class MyApp extends StatelessWidget {
             primaryIconTheme: IconThemeData(color: Colors.white),
             unselectedWidgetColor: Colors.white,
           ),
-          home: SetDrivePage(),
-          //home: LandingPage(),
-          // TODO: put back- LandingPage(), or don't push main
+          home: LandingPage(),
     )
         );
   }

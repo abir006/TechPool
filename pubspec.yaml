@@ -45,6 +45,8 @@ dependencies:
   google_maps_flutter: ^1.0.6
   geolocator: ^6.1.10
   configurable_expansion_tile: ^1.0.0
+  flutter_datetime_picker: ^1.4.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

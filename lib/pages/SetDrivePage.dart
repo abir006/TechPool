@@ -504,8 +504,8 @@ class _SetDrivePageState extends State<SetDrivePage> {
                     'DestPoint': GeoPoint(destAddress.coordinates.latitude,destAddress.coordinates.longitude),
                     //'TimeStamp': DateTime.now(),//Should add+2?
                     'TimeStamp': time,//Should add+2?
-                    'Driver': userRep.user.email,
-                    //'Driver': "testing@technion.co.il",
+                    //'Driver': userRep.user.email,
+                    'Driver': "testing@technion.co.il",
                   })
                       .then((value) => Navigator.pop(context))
                       .catchError((error) => print("Failed to add user: $error"));

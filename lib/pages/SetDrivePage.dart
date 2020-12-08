@@ -9,6 +9,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+//import 'dart:convert';
+
 
 class SetDrivePage extends StatefulWidget {
   DateTime currentDate;
@@ -260,7 +262,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
               label: Text("Departure time"),
               icon: Icon(Icons.timer),
               onPressed: () {
-                //DateTime fixedTime = DateTime.now();
+                DateTime fixedTime = widget.currentDate.subtract(new Duration(hours: widget.currentDate.hour)).add(new Duration(hours: DateTime.now().hour));
                 //fixedTime.add(new Duration(minutes: 25));
 
                 showDialog(
@@ -285,7 +287,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
                               //time: _hourTime != null ? _hourTime : fixedTime,
                               time: _hourTime != null
                                   ? _hourTime
-                                  : DateTime.now().add(new Duration(hours: 2)),
+                                  : fixedTime,
                               isShowSeconds: false,
                               onTimeChange: (time) {
                                 setState(() {
@@ -494,21 +496,23 @@ class _SetDrivePageState extends State<SetDrivePage> {
                     'BackSeatNotFull': !(fullBackSeat),
                     'BigTrunk': bigTrunk,
                     'Note': _noteController.text,
-                    'NumberSeats': numberOfPassengers,
-                    'Price': _priceController.text,
+                    'NumberSeats': int.parse(numberOfPassengers),
+                    'Price': int.parse(_priceController.text),
                     'StartAddress': startAddress.addressLine,
                     'StartCity': startAddress.locality,
                     'StartPoint': GeoPoint(startAddress.coordinates.latitude,startAddress.coordinates.longitude),
                     'DestAddress': destAddress.addressLine,
                     'DestCity': destAddress.locality,
+                    'Passengers': [],
+                    'Stops': {},
                     'DestPoint': GeoPoint(destAddress.coordinates.latitude,destAddress.coordinates.longitude),
-                    //'TimeStamp': DateTime.now(),//Should add+2?
-                    'TimeStamp': time,//Should add+2?
-                    //'Driver': userRep.user.email,
-                    'Driver': "testing@technion.co.il",
+                    'TimeStamp': DateTime.now().add(new Duration(days: 1)),//Should add+2?
+                    //'TimeStamp': _hourController.text,//Should add+2?
+                    'Driver': userRep.user.email,
+                    //'Driver': "testing@technion.co.il",
                   })
                       .then((value) => Navigator.pop(context))
-                      .catchError((error) => print("Failed to add user: $error"));
+                      .catchError((error) => print("Something went wrong. Please try again"));
 
 
                 }

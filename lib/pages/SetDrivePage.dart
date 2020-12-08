@@ -209,8 +209,9 @@ class _SetDrivePageState extends State<SetDrivePage> {
                         returnFromMapResult.toAddress.addressLine;
                     numberOfStops = 0;
                     for(int i = 0; i < returnFromMapResult.stopAddresses.length; i++) {
-                      bool exists = (returnFromMapResult.stopAddresses[i] != null);
-                      numberOfStops += (exists ? 0 : 1);
+                      bool exists = returnFromMapResult.stopAddresses[i] as bool;
+                      int addition = exists ? 1 : 0;
+                      numberOfStops += addition;
                     }
                   }
                 });

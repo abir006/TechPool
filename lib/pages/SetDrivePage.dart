@@ -513,8 +513,6 @@ class _SetDrivePageState extends State<SetDrivePage> {
                   })
                       .then((value) => Navigator.pop(context))
                       .catchError((error) => print("Something went wrong. Please try again"));
-
-
                 }
               }));
 

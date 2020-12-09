@@ -162,6 +162,7 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
                             ),
                             onPressed: () async {
                               if (_formKey.currentState.validate()) {
+                                FocusScope.of(context).unfocus();
                                 setState(() {
                                   _pressed = true;
                                 });

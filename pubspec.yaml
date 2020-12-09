@@ -46,6 +46,7 @@ dependencies:
   geolocator: ^6.1.10
   configurable_expansion_tile: ^1.0.0
   flutter_datetime_picker: ^1.4.0
+  jiffy: ^3.0.1
 
 dev_dependencies:
   flutter_test:

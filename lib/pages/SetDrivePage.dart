@@ -34,8 +34,6 @@ class _SetDrivePageState extends State<SetDrivePage> {
   String _numberOfPassengers = "3";
   TextEditingController _hourController;
   int _numberOfStops = 0;
-  //String price;
-  //String noteToPassengers = "";
   TextEditingController _priceController;
   TextEditingController _noteController;
   TextEditingController _startPointController;
@@ -260,8 +258,6 @@ class _SetDrivePageState extends State<SetDrivePage> {
               label: Text("Departure time"),
               icon: Icon(Icons.timer),
               onPressed: () {
-                //DateTime fixedTime = widget.currentDate.subtract(new Duration(hours: widget.currentDate.hour)).add(new Duration(hours: DateTime.now().hour));
-                //fixedTime.add(new Duration(minutes: 25));
                 DateTime fixedTime = widget.currentDate.subtract(new Duration(hours: widget.currentDate.hour)).add(new Duration(hours: DateTime.now().hour));
 
                 showDialog(
@@ -283,10 +279,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
                               alignment: Alignment.center,
                               isForce2Digits: true,
                               minutesInterval: 5,
-                              //time: _hourTime != null ? _hourTime : fixedTime,
-                              time: _chosenTime != null
-                                  ? _chosenTime
-                                  : fixedTime,
+                              time: _chosenTime != null ? _chosenTime : fixedTime,
                               isShowSeconds: false,
                               onTimeChange: (time) {
                                 setState(() {
@@ -298,7 +291,6 @@ class _SetDrivePageState extends State<SetDrivePage> {
                               mainAxisAlignment: MainAxisAlignment
                                   .center, //Center Row contents horizontally,
                               children: [
-                                //RaisedButton(
                                 FlatButton(
                                   child: Text('CANCEL',
                                       style: TextStyle(
@@ -310,13 +302,11 @@ class _SetDrivePageState extends State<SetDrivePage> {
                                   },
                                 ),
                                 //SizedBox(width: 2*defaultSpaceWidth),
-                                //RaisedButton(
                                 FlatButton(
                                   child: Text('CONFIRM',
                                       style: TextStyle(
                                           fontSize: 16, color: mainColor)),
                                   onPressed: () {
-                                    //_hourTime = _hourTimeCandidate;
                                     _hourController.text =
                                         DateFormat('dd-MM – kk:mm')
                                             .format(_chosenTimeCandidate);

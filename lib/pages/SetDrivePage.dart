@@ -25,16 +25,15 @@ class SetDrivePage extends StatefulWidget {
 class _SetDrivePageState extends State<SetDrivePage> {
   final _formKey2 = GlobalKey<FormState>();
 
-  DateTime time;
   double _fontTextsSize = 17;
-  DateTime _hourTime;
-  DateTime _hourTimeCandidate;
-  bool bigTrunk = false;
-  bool fullBackSeat = false;
-  List<String> passengers = ["1", "2", "3", "4", "5", "6"];
-  String numberOfPassengers = "3";
+  DateTime _chosenTime;
+  DateTime _chosenTimeCandidate;
+  bool _bigTrunk = false;
+  bool _fullBackSeat = false;
+  List<String> _passengers = ["1", "2", "3", "4", "5", "6"];
+  String _numberOfPassengers = "3";
   TextEditingController _hourController;
-  int numberOfStops = 0;
+  int _numberOfStops = 0;
   //String price;
   //String noteToPassengers = "";
   TextEditingController _priceController;
@@ -48,7 +47,6 @@ class _SetDrivePageState extends State<SetDrivePage> {
   LocationsResult returnFromMapResult;
   Address startAddress;
   Address destAddress;
-  //double _labelsTextsSize = 19;
 
   @override
   void initState() {
@@ -230,10 +228,10 @@ class _SetDrivePageState extends State<SetDrivePage> {
                         returnFromMapResult.fromAddress.addressLine;
                     _destPointController.text =
                         returnFromMapResult.toAddress.addressLine;
-                    numberOfStops = returnFromMapResult.numberOfStops;
-                    if(numberOfStops > 0) _stopPoint1Controller.text = returnFromMapResult.stopAddresses[0].addressLine;
-                    if(numberOfStops > 1) _stopPoint2Controller.text = returnFromMapResult.stopAddresses[1].addressLine;
-                    if(numberOfStops > 2) _stopPoint3Controller.text = returnFromMapResult.stopAddresses[2].addressLine;
+                    _numberOfStops = returnFromMapResult.numberOfStops;
+                    if(_numberOfStops > 0) _stopPoint1Controller.text = returnFromMapResult.stopAddresses[0].addressLine;
+                    if(_numberOfStops > 1) _stopPoint2Controller.text = returnFromMapResult.stopAddresses[1].addressLine;
+                    if(_numberOfStops > 2) _stopPoint3Controller.text = returnFromMapResult.stopAddresses[2].addressLine;
                     /*numberOfStops = 0;
                     for(int i = 0; i < returnFromMapResult.stopAddresses.length; i++) {
                       //bool exists = returnFromMapResult.stopAddresses[i] as bool;
@@ -262,8 +260,9 @@ class _SetDrivePageState extends State<SetDrivePage> {
               label: Text("Departure time"),
               icon: Icon(Icons.timer),
               onPressed: () {
-                DateTime fixedTime = widget.currentDate.subtract(new Duration(hours: widget.currentDate.hour)).add(new Duration(hours: DateTime.now().hour));
+                //DateTime fixedTime = widget.currentDate.subtract(new Duration(hours: widget.currentDate.hour)).add(new Duration(hours: DateTime.now().hour));
                 //fixedTime.add(new Duration(minutes: 25));
+                DateTime fixedTime = widget.currentDate.subtract(new Duration(hours: widget.currentDate.hour)).add(new Duration(hours: DateTime.now().hour));
 
                 showDialog(
                     context: context,
@@ -285,13 +284,13 @@ class _SetDrivePageState extends State<SetDrivePage> {
                               isForce2Digits: true,
                               minutesInterval: 5,
                               //time: _hourTime != null ? _hourTime : fixedTime,
-                              time: _hourTime != null
-                                  ? _hourTime
+                              time: _chosenTime != null
+                                  ? _chosenTime
                                   : fixedTime,
                               isShowSeconds: false,
                               onTimeChange: (time) {
                                 setState(() {
-                                  _hourTimeCandidate = time;
+                                  _chosenTimeCandidate = time;
                                 });
                               },
                             ),
@@ -317,10 +316,11 @@ class _SetDrivePageState extends State<SetDrivePage> {
                                       style: TextStyle(
                                           fontSize: 16, color: mainColor)),
                                   onPressed: () {
-                                    _hourTime = _hourTimeCandidate;
+                                    //_hourTime = _hourTimeCandidate;
                                     _hourController.text =
                                         DateFormat('dd-MM – kk:mm')
-                                            .format(_hourTimeCandidate);
+                                            .format(_chosenTimeCandidate);
+                                    _chosenTime = _chosenTimeCandidate;
                                     Navigator.of(context).pop();
                                   },
                                 )
@@ -341,7 +341,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
           hintText: "",
           textFieldController: _hourController,
           validator: (value) {
-            if (_hourTime == null)
+            if (_chosenTime == null)
               return '                               Time not chosen';
             else
               return null;
@@ -360,10 +360,10 @@ class _SetDrivePageState extends State<SetDrivePage> {
           Theme(
               data: ThemeData(unselectedWidgetColor: secondColor),
               child: Checkbox(
-                  value: bigTrunk,
+                  value: _bigTrunk,
                   onChanged: (bool value) {
                     setState(() {
-                      bigTrunk = value;
+                      _bigTrunk = value;
                     });
                   })),
         ],
@@ -382,10 +382,10 @@ class _SetDrivePageState extends State<SetDrivePage> {
           Theme(
               data: ThemeData(unselectedWidgetColor: secondColor),
               child: Checkbox(
-                  value: fullBackSeat,
+                  value: _fullBackSeat,
                   onChanged: (bool value) {
                     setState(() {
-                      fullBackSeat = value;
+                      _fullBackSeat = value;
                     });
                   })),
         ],
@@ -414,13 +414,13 @@ class _SetDrivePageState extends State<SetDrivePage> {
                 child: DropdownButton<String>(
                     dropdownColor: mainColor,
                     elevation: 0,
-                    value: numberOfPassengers,
+                    value: _numberOfPassengers,
                     onChanged: (String newValue) {
                       setState(() {
-                        numberOfPassengers = newValue;
+                        _numberOfPassengers = newValue;
                       });
                     },
-                    items: passengers
+                    items: _passengers
                         .map<DropdownMenuItem<String>>((String value) {
                       return DropdownMenuItem<String>(
                         value: value,
@@ -473,9 +473,9 @@ class _SetDrivePageState extends State<SetDrivePage> {
 
     return Consumer<UserRepository>(builder: (context, userRep, child) {
       final setDrive = Container(
+          height: defaultSpace*4,
           padding: EdgeInsets.only(
               left: sizeFrameWidth * 0.23, right: sizeFrameWidth * 0.23),
-          height: 40,
           child: RaisedButton.icon(
               color: Colors.black,
               shape: RoundedRectangleBorder(
@@ -493,10 +493,10 @@ class _SetDrivePageState extends State<SetDrivePage> {
                   //driveName = "drive5"
                   CollectionReference drives = widget.db.collection('Drives');
                   drives.add({
-                    'BackSeatNotFull': !(fullBackSeat),
-                    'BigTrunk': bigTrunk,
+                    'BackSeatNotFull': !(_fullBackSeat),
+                    'BigTrunk': _bigTrunk,
                     'Note': _noteController.text,
-                    'NumberSeats': int.parse(numberOfPassengers),
+                    'NumberSeats': int.parse(_numberOfPassengers),
                     'Price': int.parse(_priceController.text),
                     'StartAddress': startAddress.addressLine,
                     'StartCity': startAddress.locality,
@@ -530,7 +530,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
                     margin: EdgeInsets.only(
                         left: defaultSpaceWidth,
                         right: defaultSpaceWidth,
-                        bottom: 10),
+                        bottom: defaultSpace*3),
                     child: Stack(children: [
                       Container(
                           child: Center(
@@ -543,7 +543,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
                           padding: EdgeInsets.only(
                               left: defaultSpaceWidth,
                               right: defaultSpaceWidth,
-                              bottom: 10),
+                              bottom: defaultSpace),
                           children: [
                             //SizedBox(height: defaultSpace),
                             //locationText,
@@ -575,9 +575,9 @@ class _SetDrivePageState extends State<SetDrivePage> {
                           }
                       ).values.toList(),*/
 
-                            numberOfStops > 0 ? stopPoint1text_2 : Container(),
-                            numberOfStops > 1 ? stopPoint2text_2 : Container(),
-                            numberOfStops > 2 ? stopPoint3text_2 : Container(),
+                            _numberOfStops > 0 ? stopPoint1text_2 : Container(),
+                            _numberOfStops > 1 ? stopPoint2text_2 : Container(),
+                            _numberOfStops > 2 ? stopPoint3text_2 : Container(),
                             /*stopPoint1text,
                       stopPoint2text,
                       stopPoint3text,*/

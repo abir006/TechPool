@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
@@ -11,6 +12,7 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateMixin {
+  FirebaseFirestore db = FirebaseFirestore.instance;
   Animation<double> animation;
   AnimationController controller;
   final _formKey = GlobalKey<FormState>();
@@ -160,11 +162,14 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
                             ),
                             onPressed: () async {
                               if (_formKey.currentState.validate()) {
+                                FocusScope.of(context).unfocus();
                                 setState(() {
                                   _pressed = true;
                                 });
                                 try{
                                   await (userRep.auth.createUserWithEmailAndPassword(email: _email.text, password: _password.text).then((user) async {
+                                    await db.collection("Profiles").doc(_email.text).set(
+                                        {"firstName" : _firstName.text, "lastName" : _lastName.text});
                                   await user.user.updateProfile(displayName: _firstName.text+" "+_lastName.text);
                                   await user.user.sendEmailVerification();
                                   userRep.user = user.user;

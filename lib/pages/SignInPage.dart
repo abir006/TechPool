@@ -139,8 +139,8 @@ class _SignInPageState extends State<SignInPage> with SingleTickerProviderStateM
                               textAlign: TextAlign.center,
                             ),
                             onPressed: () async {
-                              FocusScope.of(context).unfocus();
                               if (_formKey.currentState.validate()) {
+                                FocusScope.of(context).unfocus();
                                 setState(() {
                                   _pressed = true;
                                 });

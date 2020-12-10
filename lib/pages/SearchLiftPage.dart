@@ -34,11 +34,11 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
   final _formKey = GlobalKey<FormState>();
   double _fontTextsSize = 17;
   double _lablesTextsSize = 19;
-  String _fromTimec = "00:00";
   String resultString;
   DateTime _fromTime = null;
-  String _fromMinutes="";
   DateTime _toTime = null;
+  DateTime _fromTimeTemp = null;
+  DateTime _toTimeTemp = null;
   bool checkedBigTrunck = false;
   bool backSeatNotfull = false;
   List<String> _distances = ["1km","5km","20km","40km"];
@@ -50,6 +50,9 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
   LocationsResult returnResult = null;
   Address fromAddress;
   Address destAddress;
+  bool checkpoints = true;
+  bool checkPointError = false;
+  int hasSpace = 0;
 
 
   double _spaces = 0;
@@ -69,15 +72,17 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
     var sizeFrameWidth = MediaQuery.of(context).size.width;
     double defaultSpace = MediaQuery.of(context).size.height*0.013;
     double defaultSpacewidth = MediaQuery.of(context).size.height*0.016;
-    if(widget.fromtime!=null) {
-      _fromTime = widget.fromtime;
-      _fromControler.text = DateFormat('dd-MM – kk:mm').format(widget.fromtime);
-       widget.fromtime=null;
-    }
+    if(widget.currentdate == null) widget.currentdate = DateTime.now();
+    DateTime currentDate = DateTime(widget.currentdate.year,widget.currentdate.month,widget.currentdate.day,DateTime.now().hour+2,DateTime.now().minute,DateTime.now().second,DateTime.now().millisecond,DateTime.now().microsecond);
     if( widget.totime!=null) {
       _toTime = widget.totime;
-      _toControler.text = DateFormat('dd-MM – kk:mm').format(widget.totime);
+      _toControler.text = DateFormat('kk:mm').format(widget.totime);
       widget.totime=null;
+    }
+    if(widget.fromtime!=null) {
+      _fromTime = widget.fromtime;
+      _fromControler.text = DateFormat('dd/MM  kk:mm').format(widget.fromtime)+"-"+_toControler.text;
+      widget.fromtime=null;
     }
     if(widget.indexDis!=null){
       _maxDist =_distances[widget.indexDis];
@@ -132,7 +137,9 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
           ),
         ));
 
-    final startPointText = Container(
+
+    final startPointText = Stack(children:[
+        Container(
       child: Row(
         children: [
           textBoxFieldDisable(
@@ -141,13 +148,17 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
               hintText: "",
               textFieldController: _startPointControler,
               validator: (value) {
-                if(_startPointControler==null || _startPointControler.text==""){return "No start point chosen";}
-                else return null;}),
+                if(checkpoints && (_startPointControler==null || _startPointControler.text=="")){checkPointError=true;return "No start point chosen";}
+                else {checkPointError=false;return null;}}),
         ],
       ),
-    );
+    ),
+      InkWell(
+          onTap: (){},
+          child:Container(color:Colors.transparent,child:SizedBox(width: defaultSpace*8,height:defaultSpace*8,))),
+    ]);
 
-    final destinationText = Container(
+    final destinationText =  Stack(children:[Container(
       child: Row(
         children: [
           textBoxFieldDisable(
@@ -156,11 +167,14 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
               hintText: "",
               textFieldController: _destPointControler,
               validator: (value) {
-                if(_destPointControler==null || _destPointControler.text==""){return "No destination chosen";}
+                if(checkpoints &&(_destPointControler==null || _destPointControler.text=="")){return "No destination chosen";}
                 else return null;}),
         ],
-      ),
-    );
+      )),
+      InkWell(
+          onTap: (){},
+          child:Container(color:Colors.transparent,child:SizedBox(width: defaultSpace*8,height:defaultSpace*8,))),
+    ]);
 
     final searchLift =
       Container(
@@ -216,7 +230,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
     ))]);
 
     final chooseStartAndDestination =
-    Column(mainAxisAlignment: MainAxisAlignment.start,crossAxisAlignment: CrossAxisAlignment.start, children: [
+    Column(mainAxisAlignment: MainAxisAlignment.start,crossAxisAlignment: CrossAxisAlignment.center, children: [
       Container(
         child: RaisedButton.icon(
           color: Colors.white,
@@ -248,68 +262,227 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
       ),
     ]);
 
-    final chooseTime =
-    Column(mainAxisAlignment: MainAxisAlignment.start,crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Container(
-          child: RaisedButton.icon(
-            color: Colors.white,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(18),
-                side: BorderSide(color: Colors.black)),
-            label: Text("Choose time"),
-            icon: Icon(Icons.timer),
-            onPressed: () {
-              DateTimeRangePicker(
-                  startText: "From",
-                  endText: "To",
-                  doneText: "Yes",
-                  cancelText: "Cancel",
-                  interval: 5,
-                  initialStartTime: (_fromTime!=null)?_fromTime:widget.currentdate,
-                  initialEndTime: (_fromTime!=null)?_toTime:widget.currentdate.add(Duration(days: 0,hours: 0,minutes: 0,microseconds: 0)),
-                  mode: DateTimeRangePickerMode.time,
-                  minimumTime: DateTime.now().subtract(Duration(days: 2,hours: 1,minutes: 0,microseconds: 0)),
-                  maximumTime: DateTime.now().add(Duration(days: 7)),
-                  use24hFormat: true,
-                  onConfirm: (start, end) {
+
+    final toTimePicker = TimePickerSpinner(
+      is24HourMode: true,
+      normalTextStyle:
+      TextStyle(fontSize: 28, color: Colors.grey),
+      highlightedTextStyle:
+      TextStyle(fontSize: 34, color: Colors.teal),
+      //spacing: 50,
+      //itemHeight: 80,
+      alignment: Alignment.center,
+      isForce2Digits: true,
+      minutesInterval: 5,
+      //time: _hourTime != null ? _hourTime : fixedTime,
+      time: _toTime != null
+          ? _toTime
+          : currentDate,
+      isShowSeconds: false,
+      onTimeChange: (time) {
+        setState(() {
+          _toTimeTemp = time;
+        });
+      },
+    );
+
+    final fromTimePicker = TimePickerSpinner(
+      is24HourMode: true,
+      normalTextStyle:
+      TextStyle(fontSize: 28, color: Colors.grey),
+      highlightedTextStyle:
+      TextStyle(fontSize: 34, color: Colors.teal),
+      //spacing: 50,
+      //itemHeight: 80,
+      alignment: Alignment.center,
+      isForce2Digits: true,
+      minutesInterval: 5,
+      //time: _hourTime != null ? _hourTime : fixedTime,
+      time: _fromTime != null
+          ? _fromTime
+          : currentDate,
+      isShowSeconds: false,
+      onTimeChange: (time) {
+        setState(() {
+          _fromTimeTemp = time;
+        });
+      },
+    );
+
+    final newChooseTime = DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          toolbarHeight: 23,
+          leading: Container(),
+          titleSpacing: 0,
+          bottom: ColoredTabBar(Colors.white,TabBar(
+            tabs: [
+              Text("From",style:TextStyle(fontSize: 18, color: mainColor)),
+              Text("To",style:TextStyle(fontSize: 18, color: mainColor)),
+            ],
+          )),
+        ),
+        body: TabBarView(
+          children: [
+            fromTimePicker,
+            toTimePicker,
+          ],
+        ),
+      ),
+    );
+/*
+    final chooseTime2 = showDialog(
+        context: context,
+        builder: (_) => new SimpleDialog(
+          title: Center(
+              child: Text("Choose from and to time",
+                  style: TextStyle(fontSize: 21))),
+         /* children: [//newChooseTime,
+            Row(
+              mainAxisAlignment: MainAxisAlignment
+                  .center, //Center Row contents horizontally,
+              children: [
+                //RaisedButton(
+                FlatButton(
+                  child: Text('CANCEL',
+                      style: TextStyle(
+                          fontSize: 16, color: mainColor)),
+                  onPressed: () {
                     setState(() {
-                    _fromTime=start;
-                    _fromMinutes =start.minute.toString();
-                    if(_fromTime.minute<10){
-                      _fromMinutes ="0"+start.minute.toString();
-                    }
-                    _toTime=end;
-                    _fromControler.text = DateFormat('dd-MM – kk:mm').format(start);
-                    _toControler.text = DateFormat('dd-MM – kk:mm').format(end);
-                    _formKey.currentState.validate();
+                      Navigator.of(context).pop();
                     });
-                  }).showPicker(context);
-            },
+                  },
+                ),
+                //SizedBox(width: 2*defaultSpaceWidth),
+                //RaisedButton(
+                FlatButton(
+                  child: Text('CONFIRM',
+                      style: TextStyle(
+                          fontSize: 16, color: mainColor)),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                )
+              ],
+            ),
+          ],*/
+        ));
+*/
+    final chooseTime =
+    Column(mainAxisAlignment: MainAxisAlignment.center,crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Center(
+          child: Container(
+            child: RaisedButton.icon(
+              color: Colors.white,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18),
+                  side: BorderSide(color: Colors.black)),
+              label: Text("Choose time"),
+              icon: Icon(Icons.timer),
+              onPressed: () {
+                showDialog(
+                    context: context,
+                    builder: (_) => new SimpleDialog(
+                        backgroundColor:Colors.white,
+                       children: [Container(height: defaultSpace*25,width:defaultSpace*30,child:newChooseTime),
+              Row(
+                mainAxisAlignment: MainAxisAlignment
+                    .center, //Center Row contents horizontally,
+                children: [
+                  //RaisedButton(
+                  FlatButton(
+                    child: Text('CANCEL',
+                        style: TextStyle(
+                            fontSize: 16, color: mainColor)),
+                    onPressed: () {
+                      setState(() {
+                        Navigator.of(context).pop();
+                      });
+                    },
+                  ),
+                  //SizedBox(width: 2*defaultSpaceWidth),
+                  //RaisedButton(
+                  FlatButton(
+                    child: Text('CONFIRM',
+                        style: TextStyle(
+                            fontSize: 16, color: mainColor)),
+                    onPressed: () {
+                      setState(() {
+                       if(_fromTimeTemp==null) _fromTimeTemp=currentDate;
+                       if(_toTimeTemp==null) _toTimeTemp =_toTime!=null?_toTime:_fromTimeTemp;
+                       _fromTime=_fromTimeTemp;
+                       _toTime = _toTimeTemp;
+                        _toControler.text = DateFormat('kk:mm').format(_toTime);
+                       _fromControler.text = DateFormat('dd/MM  kk:mm').format(_fromTime)+" - "+ _toControler.text;
+                        if(_fromTime==null || ((_fromTime.hour >_toTime.hour) || (_toTime.hour == _fromTime.hour && _toTime.minute < _fromTime.minute )) ||
+                         (_fromTime.hour ==_toTime.hour && _toTime.minute == _fromTime.minute)){
+                        hasSpace=2;
+                        }else{
+                          hasSpace=0;
+                        }
+                        if(!checkPointError) checkpoints = false;
+                        _formKey.currentState.validate();
+                        checkpoints = true;
+                      });
+                      Navigator.of(context).pop();
+                    },
+                  )
+                ],
+              ),
+            ],
+                    ));
+                /*
+                DateTimeRangePicker(
+                    startText: "From",
+                    endText: "To",
+                    doneText: "Yes",
+                    cancelText: "Cancel",
+                    interval: 5,
+                    initialStartTime: (_fromTime!=null)?_fromTime:widget.currentdate,
+                    initialEndTime: (_fromTime!=null)?_toTime:widget.currentdate.add(Duration(days: 0,hours: 0,minutes: 0,microseconds: 0)),
+                    mode: DateTimeRangePickerMode.time,
+                    minimumTime: DateTime.now().subtract(Duration(days: 2,hours: 1,minutes: 0,microseconds: 0)),
+                    maximumTime: DateTime.now().add(Duration(days: 7)),
+                    use24hFormat: true,
+                    onConfirm: (start, end) {
+                      setState(() {
+                      _fromTime=start;
+                      _fromMinutes =start.minute.toString();
+                      if(_fromTime.minute<10){
+                        _fromMinutes ="0"+start.minute.toString();
+                      }
+                      _toTime=end;
+                      _fromControler.text = DateFormat('dd-MM – kk:mm').format(start);
+                      _toControler.text = DateFormat('dd-MM – kk:mm').format(end);
+                      _formKey.currentState.validate();
+                      });
+                    }).showPicker(context);*/
+              },
+            ),
           ),
         ),
-        Text(resultString ?? "")
+      //  Text(resultString ?? "")
       ]);
 
     final fromText = Container(
-      child: Row(
-        children: [
-          textBoxFieldDisable(
-              nameLabel: "From: ",
+      child: textBoxFieldDisableCentered(
+              nameLabel: "",
               size: MediaQuery.of(context).size,
               hintText: "",
               textFieldController: _fromControler,
               validator: (value) {
-                if(_fromTime==null ){return 'No from time selected';}
-                else  if ((_fromTime.hour >_toTime.hour) || (_toTime.hour == _fromTime.hour && _toTime.minute < _fromTime.minute )) {return 'The from time is after the to Time';}
-                else if(_fromTime.hour ==_toTime.hour && _toTime.minute == _fromTime.minute ){return 'From time equal to time';}
+                if(_fromTime==null ||  _toTime==null){return '                                      No of time selected';}
+                else  if ((_fromTime.hour >_toTime.hour) || (_toTime.hour == _fromTime.hour && _toTime.minute < _fromTime.minute )) {return '                             The from time is after the to Time';}
+                else if(_fromTime.hour ==_toTime.hour && _toTime.minute == _fromTime.minute ){return '                                 From time equal to to time';}
                 else return null;}),
-        ],
-      ),
     );
+
 
     final toText = Container(
           child:textBoxFieldDisable(
-              nameLabel: "To: ",
+              nameLabel: "hi",
               size: MediaQuery.of(context).size,
               hintText: "",
               textFieldController: _toControler,
@@ -318,9 +491,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
               else  if ((_fromTime.hour >_toTime.hour) || (_toTime.hour == _fromTime.hour && _toTime.minute < _fromTime.minute )) {return 'The to time is before the from time ';}
               else if(_fromTime.hour ==_toTime.hour && _toTime.minute == _fromTime.minute ){return 'To time equal from time ';}
               else return null;}),
-            //  : SizedBox(width: sizeFrameWidth*0.1),
-          //SizedBox(width:  sizeFrameWidth*0.1),
-      );
+        );
 
     final bigTruncText = Container(
       height:4*defaultSpace,
@@ -369,13 +540,13 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
         color: Colors.transparent,
       child:Theme(
           data: Theme.of(context).copyWith(
-              canvasColor: mainColor, // background color for the dropdown items
+              canvasColor: Colors.white, // background color for the dropdown items
               buttonTheme: ButtonTheme.of(context).copyWith(
                 alignedDropdown: true,  //If false (the default), then the dropdown's menu will be wider than its button.
               )
           ),
           child:DropdownButton<String>(
-            dropdownColor: mainColor,
+            dropdownColor: Colors.white,
         elevation: 0,
         value: _maxDist,
         onChanged: (String newValue) {
@@ -425,26 +596,29 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
         child: Builder(
           builder: (context) => Container(
               color: Colors.white,
-              margin: EdgeInsets.only(left: defaultSpacewidth, right: defaultSpacewidth, bottom: 10),
+              margin: EdgeInsets.only(left: defaultSpacewidth, right: defaultSpacewidth, bottom: defaultSpacewidth),
               child: Column( children: [ Expanded(child: Stack(children:[Container( child:Center(child:Transform.rotate(angle: 0.8,child:Icon(Icons.thumb_up_rounded,size:300,color:  Colors.cyan.withOpacity(0.1),)))),
                 ListView(
-                  padding: EdgeInsets.only(left: defaultSpacewidth, right: defaultSpacewidth, bottom: 10),
+                  padding: EdgeInsets.only(left: defaultSpacewidth, right: defaultSpacewidth, bottom: defaultSpacewidth),
                   children: [
                     //SizedBox(height: defaultSpace),
                    // locationText,
                     SizedBox(height: defaultSpace),
-                    startPointText,
+                    chooseStartAndDestination,
                     SizedBox(height: defaultSpace),
+                    startPointText,
                     destinationText,
                     //SizedBox(height: 2*defaultSpace),
                     //timeText,
-                    chooseStartAndDestination,
-                    SizedBox(height: 2*defaultSpace),
-                    fromText,
-                    //SizedBox(height: defaultSpace),
-                    toText,
                     SizedBox(height: defaultSpace),
                     chooseTime,
+                    SizedBox(height: hasSpace*defaultSpace),
+                    //Center(child:Row(mainAxisAlignment: MainAxisAlignment.center,crossAxisAlignment: CrossAxisAlignment.start,children: [SizedBox(width: 10*defaultSpace,),Expanded(child:Times)],)),
+                    fromText,
+                    //fromText,
+                    //SizedBox(height: defaultSpace),
+                    //toText,
+                    SizedBox(height: defaultSpace),
                     //SizedBox(height: defaultSpace),
                     //preferenceTexts,
                     SizedBox(height: defaultSpace),
@@ -470,6 +644,21 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
     _destPointControler.dispose();
     super.dispose();
   }
+}
+class ColoredTabBar extends Container implements PreferredSizeWidget {
+  ColoredTabBar(this.color, this.tabBar);
+
+  final Color color;
+  final TabBar tabBar;
+
+  @override
+  Size get preferredSize => tabBar.preferredSize;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    color: color,
+    child: tabBar,
+  );
 }
 /*
   Widget dropDownButtonsColumn(List<String> list, String hint){

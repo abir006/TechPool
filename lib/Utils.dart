@@ -157,7 +157,7 @@ class MyLift{
       }
       break;
 
-      case "TimeStamp": {  this.time= (property as Timestamp).toDate().add(Duration(days: 0,hours: 2,minutes: 0,microseconds: 0)); }
+      case "TimeStamp": {  this.time= (property as Timestamp).toDate().add(Duration(days: 0,hours: 0,minutes: 0,microseconds: 0)); }
       break;
 
       case "NumberSeats": {  this.numberOfSeats = property; }

@@ -32,15 +32,21 @@ class UserRepository extends ChangeNotifier {
 /// A container class for Drive event.
 class Drive{
   String info;
-  Drive(this.info);
+  int numberOfSeats;
+  int numberOfPassengers;
+  DateTime dateTime;
+  Drive(this.info,this.numberOfSeats,this.numberOfPassengers,this.dateTime);
 }
 
 /// A container class for Lift event.
 class Lift{
   String info;
-  Lift(this.info);
+  int numberOfSeats;
+  int numberOfPassengers;
+  DateTime dateTime;
+  Lift(this.info,this.numberOfSeats,this.numberOfPassengers,this.dateTime);
 }
-
+/*
 /// A container class for DesiredLift event.
 class DesiredLift{
   String info;
@@ -51,7 +57,7 @@ class DesiredLift{
 class DesiredDrive{
   String info;
   DesiredDrive(this.info);
-}
+}*/
 
 class LocationsResult{
   Address fromAddress;
@@ -63,22 +69,12 @@ class LocationsResult{
 
 /// A util function for the calendar, returns the desired event container to
 /// display under the calendar, according to the type of event received.
-Container transformEvent(dynamic event){
+Widget transformEvent(dynamic event){
   if (event is Drive) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.green, width: 0.8),
-        borderRadius: BorderRadius.circular(12.0),
-      ),
-      margin:
-      const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-      child: ListTile(leading: Icon(Icons.directions_car,size: 30, color: mainColor,),
-        title: Text(event?.info),
-        onTap: () => print('$event tapped!'),
-      ),
-    );
+    return calendarListTile(event, Icon(Icons.directions_car,size: 30, color: mainColor,));
   } else if (event is Lift) {
-    return Container(
+    return calendarListTile(event, Transform.rotate(angle: 0.8,child: Icon(Icons.thumb_up_rounded,size: 30, color: mainColor)));
+    /*return Container(
       decoration: BoxDecoration(
         border: Border.all(color: Colors.green, width: 0.8),
         borderRadius: BorderRadius.circular(12.0),
@@ -89,8 +85,8 @@ Container transformEvent(dynamic event){
         title: Text(event?.info),
         onTap: () => print('$event tapped!'),
       ),
-    );
-  } else if (event is DesiredLift) {
+    );*/
+  /*} else if (event is DesiredLift) {
     return Container(
       decoration: BoxDecoration(
         border: Border.all(color: Colors.orange, width: 0.8),
@@ -102,11 +98,30 @@ Container transformEvent(dynamic event){
         title: Text(event?.info),
         onTap: () => print('$event tapped!'),
       ),
-    );
+    );*/
   }
   else{
     return null;
   }
+}
+
+Container calendarListTile(dynamic event,Widget leadingWidget) {
+  return Container(
+    decoration: BoxDecoration(
+      color: Colors.white,
+      boxShadow: [BoxShadow(color: Colors.black,blurRadius: 2.0,
+        spreadRadius: 0.0,offset: Offset(2.0, 2.0))],
+      border: Border.all(color: Colors.green, width: 0.8),
+      borderRadius: BorderRadius.circular(12.0),
+    ),
+    margin:
+    const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+    child: ListTile(leading: leadingWidget,
+      title: Text(event?.info),
+      onTap: () => print('$event tapped!'),
+    subtitle: Row(mainAxisAlignment: MainAxisAlignment.start,children: [Text("${event.dateTime.hour}:${event.dateTime.minute}"),Spacer(),Icon(Icons.person,color: Colors.black,),Text(": ${event.numberOfPassengers} / ${event.numberOfSeats}",style: TextStyle(color: Colors.black),)],),
+    trailing: Icon(Icons.chevron_right_sharp,color: Colors.black,size:30,)),
+  );
 }
 
 double clacDis(GeoPoint from,Coordinates to){

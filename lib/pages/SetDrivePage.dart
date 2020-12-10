@@ -484,81 +484,89 @@ class _SetDrivePageState extends State<SetDrivePage> {
         body: Form(
           key: _formKey2,
           child: Builder(
-            builder: (context) =>
-                Container(
+            builder: (context) => Container(
                     color: Colors.white,
                     margin: EdgeInsets.only(
                         left: defaultSpaceWidth,
                         right: defaultSpaceWidth,
-                        bottom: defaultSpace*3),
-                    child: Stack(children: [
-                      Container(
-                          child: Center(
-                              child: Icon(
-                                Icons.directions_car_sharp,
-                                size: 330,
-                                color: Colors.cyan.withOpacity(0.1),
-                              ))),
-                      ListView(
-                          padding: EdgeInsets.only(
-                              left: defaultSpaceWidth,
-                              right: defaultSpaceWidth,
-                              bottom: defaultSpace),
-                          children: [
-                            SizedBox(height: 1.5 * defaultSpace),
-                            chooseStartAndDestination,
-                            startPointText,
+                        bottom: 10),
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: Stack(children: [
+                            Container(
+                                child: Center(
+                                    child: Icon(
+                                      Icons.directions_car_sharp,
+                                      size: 330,
+                                      color: Colors.cyan.withOpacity(0.1),
+                                    ))),
+                            ListView(
+                                padding: EdgeInsets.only(
+                                    left: defaultSpaceWidth,
+                                    right: defaultSpaceWidth,
+                                    bottom: 10),
+                                children: [
+                                  SizedBox(height: 1.5 * defaultSpace),
+                                  chooseStartAndDestination,
+                                  startPointText,
 
-                      //       ...returnFromMapResult.stopAddresses.asMap().map((i, stop){
-                      //       if(stop!=null){
-                      //         return MapEntry(i, Container(
-                      //           child: Row(
-                      //             children: [
-                      //               textBoxFieldDisable(
-                      //                 nameLabel: "Stop " + i.toString() + ":", //Consider to edit,
-                      //                 size: MediaQuery.of(context).size,
-                      //                 hintText: "",
-                      //                 textFieldController: _stopPoint1Controller,
-                      //                 // validator: (value) {
-                      //                 //   if(_startPointController==null || _startPointController.text==""){return "No start point chosen";}
-                      //                 //   else return null;}
-                      //               ),
-                      //             ],
-                      //           ),
-                      //         ));
-                      //       }
-                      //       else
-                      //         return MapEntry(i, Container());
-                      //     }
-                      // ).values.toList(),
+                            //       ...returnFromMapResult.stopAddresses.asMap().map((i, stop){
+                            //       if(stop!=null){
+                            //         return MapEntry(i, Container(
+                            //           child: Row(
+                            //             children: [
+                            //               textBoxFieldDisable(
+                            //                 nameLabel: "Stop " + i.toString() + ":", //Consider to edit,
+                            //                 size: MediaQuery.of(context).size,
+                            //                 hintText: "",
+                            //                 textFieldController: _stopPoint1Controller,
+                            //                 // validator: (value) {
+                            //                 //   if(_startPointController==null || _startPointController.text==""){return "No start point chosen";}
+                            //                 //   else return null;}
+                            //               ),
+                            //             ],
+                            //           ),
+                            //         ));
+                            //       }
+                            //       else
+                            //         return MapEntry(i, Container());
+                            //     }
+                            // ).values.toList(),
 
-                            _numberOfStops > 0 ? stopPoint1text : Container(),
-                            _numberOfStops > 1 ? stopPoint2text : Container(),
-                            _numberOfStops > 2 ? stopPoint3text : Container(),
+                                  _numberOfStops > 0 ? stopPoint1text : Container(),
+                                  _numberOfStops > 1 ? stopPoint2text : Container(),
+                                  _numberOfStops > 2 ? stopPoint3text : Container(),
 
-                            destinationText,
-                            SizedBox(height: 1 * defaultSpace),
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                departureTimeButton,
-                                timeText1,
-                                priceAndBackSeatRowText,
-                                //priceText,
-                              ],
-                            ),
-                            SizedBox(height: defaultSpace),
-                            Divider(thickness: 3),
-                            properties,
-                            Divider(thickness: 3),
-                            // bigTrunkText,
-                            // backSeatText,
-                            // noteToPassengersText,
-                            SizedBox(height: 2 * defaultSpace),
-                            setDrive,
-                          ])
-                    ])),
+                                  destinationText,
+                                  SizedBox(height: 1 * defaultSpace),
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      departureTimeButton,
+                                      timeText1,
+                                      priceAndBackSeatRowText,
+                                      //priceText,
+                                    ],
+                                  ),
+                                  SizedBox(height: defaultSpace),
+                                  Divider(thickness: 3),
+                                  properties,
+                                  Divider(thickness: 3),
+                                  // bigTrunkText,
+                                  // backSeatText,
+                                  // noteToPassengersText,
+
+                                  // SizedBox(height: 2 * defaultSpace),
+                                  // setDrive,
+                                ])
+                          ]),
+                        ),
+                        setDrive,
+                        SizedBox(height: 2 * defaultSpace),
+                      ],
+                    )),
           ),
         ),
         backgroundColor: mainColor,

@@ -472,7 +472,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
             bigTrunkText,
               SizedBox(height: defaultSpace),
             backSeatText,
-              //SizedBox(height: defaultSpace),
+              //SizedBox(height: defaultSpace)
               noteToPassengersText,
             ],
           ));

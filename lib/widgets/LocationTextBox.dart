@@ -2,7 +2,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:geocoder/geocoder.dart';
+import 'package:geocoding/geocoding.dart';
 import '../Utils.dart';
+
+extension StringExtension on String {
+  String capitalize() {
+    return "${this[0].toUpperCase()}${this.substring(1)}";
+  }
+}
 
 class LocationTextBoxes2 extends StatefulWidget {
   final GlobalKey<ScaffoldState> _key;
@@ -34,8 +41,9 @@ class _LocationTextBoxes2State extends State<LocationTextBoxes2> {
 
   Future<bool> validateLegalCity(String city) async {
     try {
-      var cityAddress = await Geocoder.local.findAddressesFromQuery(city);
-      if (cityAddress.first.countryName.toLowerCase() == "israel") {
+      var cc = await locationFromAddress(city,localeIdentifier: "en");
+      var cityAddress = await placemarkFromCoordinates(cc[0].latitude, cc[0].longitude,localeIdentifier: "en");
+      if (cityAddress.first.country.toLowerCase() == "israel") {
         return false;
       } else {
         return true;
@@ -47,14 +55,18 @@ class _LocationTextBoxes2State extends State<LocationTextBoxes2> {
 
   Future<bool> validateLegalStreet(String city, String street) async {
     try {
-      var cityAddress = await Geocoder.local.findAddressesFromQuery(city);
-      address =
-          await Geocoder.local.findAddressesFromQuery(city + ", " + street);
+      var cc = await locationFromAddress(city,localeIdentifier: "en");
+      var cityAddress = await placemarkFromCoordinates(cc[0].latitude, cc[0].longitude,localeIdentifier: "en");
+      var cc2 = await locationFromAddress(city+ ", " + street);
+      var ccA = await placemarkFromCoordinates(cc2[0].latitude, cc2[0].longitude,localeIdentifier: "en");
+      address = [Address(coordinates: Coordinates(cc2[0].latitude,cc2[0].longitude),addressLine: (ccA[0].locality+", "+ccA[0].street),
+          countryName: ccA[0].country,countryCode: ccA[0].isoCountryCode, featureName: ccA[0].name,postalCode: ccA[0].postalCode, adminArea: ccA[0].administrativeArea,
+          subAdminArea: ccA[0].subAdministrativeArea, locality: ccA[0].locality, subLocality: ccA[0].subLocality, thoroughfare: ccA[0].thoroughfare, subThoroughfare: ccA[0].subThoroughfare )];
       if (address.first.countryName.toLowerCase() == "israel") {
-        if ((address.first.coordinates.latitude !=
-                    cityAddress.first.coordinates.latitude ||
-                address.first.coordinates.longitude !=
-                    cityAddress.first.coordinates.longitude) &&
+        if ((cc2.first.latitude !=
+            cc.first.latitude ||
+            cc2.first.longitude !=
+                cc.first.longitude) &&
             ((address.first.locality == cityAddress.first.locality) ||
                 (address.first.locality == cityAddress.first.subLocality))) {
           return false;
@@ -86,7 +98,7 @@ class _LocationTextBoxes2State extends State<LocationTextBoxes2> {
                   child: Text(
                     widget.leadingText + ":",
                     style:
-                        TextStyle(fontSize: 16, color: widget.leadingTextColor),
+                    TextStyle(fontSize: 16, color: widget.leadingTextColor),
                   )),
               Flexible(
                   fit: FlexFit.tight,
@@ -114,7 +126,7 @@ class _LocationTextBoxes2State extends State<LocationTextBoxes2> {
                         try {
                           var _streetError = await validateLegalCity(city.text);
                           var _cityError =
-                              await validateLegalStreet(city.text, street.text);
+                          await validateLegalStreet(city.text, street.text);
                           if (!_streetError && !_cityError) {
                             widget.updateAddress(address.first);
                             await widget.performOnPress(

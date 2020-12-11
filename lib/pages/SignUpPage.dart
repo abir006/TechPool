@@ -12,7 +12,6 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateMixin {
-  FirebaseFirestore db = FirebaseFirestore.instance;
   Animation<double> animation;
   AnimationController controller;
   final _formKey = GlobalKey<FormState>();

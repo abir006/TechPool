@@ -6,11 +6,12 @@ import '../Utils.dart';
 Widget textBoxField({AutovalidateMode validateMode = AutovalidateMode.disabled,@required Size size,@required String hintText,@required TextEditingController textFieldController,bool obscureText = false,Function validator,InputBorder inputBorder=InputBorder.none}) {
   return Container(decoration: BoxDecoration(
       color: Colors.white, borderRadius: containerBorderRadius),
-      padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+      padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
       width: size.width * 0.7,
-      child: TextFormField(autovalidateMode: validateMode,validator: validator,obscureText: obscureText,controller: textFieldController,
+      child: TextFormField(maxLines: 1,autovalidateMode: validateMode,validator: validator,obscureText: obscureText,controller: textFieldController,
           textAlign: TextAlign.left,
           decoration: InputDecoration(
+            isDense: true,
               border: inputBorder, hintText: hintText)));
 }
 

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
@@ -126,18 +127,19 @@ class _SignInPageState extends State<SignInPage> with SingleTickerProviderStateM
                                       )))
                             ]),
                       ),
-                      !_pressed ? Container(
-                          decoration: BoxDecoration(
+                      !_pressed ? TextButton(
+                          child: Container(decoration: BoxDecoration(
                               color: Colors.black,
                               borderRadius:
-                                  BorderRadius.all(Radius.circular(8))),
-                          width: size.width * 0.7,
-                          child: Row(mainAxisAlignment: MainAxisAlignment.center,children: [TextButton(
-                            child: Text(
+                              BorderRadius.all(Radius.circular(8))),
+                        width: size.width * 0.7,
+                            height: size.height*0.06,
+
+                            child: Row(mainAxisAlignment: MainAxisAlignment.center,children: [Text(
                               "Sign In",
                               style: TextStyle(color: Colors.white),
                               textAlign: TextAlign.center,
-                            ),
+                            ),Icon(Icons.login,color: Colors.white,)])),
                             onPressed: () async {
                               if (_formKey.currentState.validate()) {
                                 FocusScope.of(context).unfocus();
@@ -172,7 +174,7 @@ class _SignInPageState extends State<SignInPage> with SingleTickerProviderStateM
                                 }
                               }
                             },
-                          ), Icon(Icons.login,color: Colors.white,)]))  : Center(child: CircularProgressIndicator())
+                          ) : Center(child: CircularProgressIndicator())
                     ]))])));});
           });}
 

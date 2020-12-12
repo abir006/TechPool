@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoder/geocoder.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:tech_pool/pages/HomePage.dart';
 
 /// Apps default settings
 MaterialColor mainColor =  Colors.cyan;
@@ -217,3 +218,112 @@ class liftRes{
   liftRes({@required this.fromTime,@required this.toTime,@required this.indexDist,@required this.startAddress,@required this.destAddress, @required this.backSeat, @required this.bigTrunk});
 }
 
+/// enum to specify from which page the drawer is called
+enum DrawerSections { home, profile, notifications, favorites, chats, settings }
+
+/// returns a Drawer, with the user information from userRep, and highlithing
+/// and not rebuilding the current section (page).
+SafeArea techDrawer(UserRepository userRep, BuildContext context,
+    DrawerSections currentSection) {
+  return SafeArea(child: Drawer(
+      child: ListView(children: [
+        /*  UserAccountsDrawerHeader(
+            accountName: Text("Hello, ${userRep.user.displayName}.",style: TextStyle(color: Colors.white,fontSize: 18),),
+            accountEmail: Container(height: 20,child: Row(crossAxisAlignment: CrossAxisAlignment.end,mainAxisAlignment: MainAxisAlignment.spaceBetween,children: [
+          Text(userRep.user.email,style: TextStyle(color: Colors.white,fontSize: 14)),
+         IconButton(icon: Icon(Icons.logout,color: Colors.white,size: 25,),onPressed: () => {},)]))
+     ,currentAccountPicture: CircleAvatar(backgroundColor: secondColor,))*/
+        Container(
+          color: mainColor,
+          height: 180,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 30, left: 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CircleAvatar(
+                  backgroundColor: secondColor,
+                  radius: 50,
+                  backgroundImage:
+                  Image.asset("assets/images/DefaultAvatar.png").image,
+                ),
+                Spacer(),
+                Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                  Text("Hello, ${userRep.user?.displayName}.",
+                      style: TextStyle(color: Colors.white, fontSize: 20)),
+                  IconButton(
+                    icon: Icon(
+                      Icons.logout,
+                      color: Colors.white,
+                      size: 25,
+                    ),
+                    onPressed: () async => await (userRep.auth
+                        .signOut()
+                        .then((_) {
+                      Navigator.pop(context);
+                      userRep.user = null;
+                      Navigator.pop(context);
+                    })),
+                  )
+                ])
+              ],
+            ),
+          ),
+        ),
+        drawerListTile("Home",Icons.home_rounded,DrawerSections.home,currentSection, context),
+        drawerListTile("Profile",Icons.person,DrawerSections.profile,currentSection, context),
+        drawerListTile("Notifications",Icons.notifications,DrawerSections.notifications,currentSection, context),
+        drawerListTile("Favorite Locations",Icons.favorite,DrawerSections.favorites,currentSection, context),
+        drawerListTile("Chats",Icons.chat,DrawerSections.chats,currentSection, context),
+        drawerListTile("Settings",Icons.settings,DrawerSections.settings,currentSection, context),
+      ])));
+}
+
+/// creates a listTile for the drawer, with the relevant pageName,icon,tileSection for the tile.
+/// and the currentSection of the drawer.
+ListTile drawerListTile(String pageName,IconData icon,DrawerSections tileSection,DrawerSections currentSection, BuildContext context) {
+  return ListTile(
+    selected: currentSection == tileSection,
+    leading: Icon(
+      icon,
+      color: mainColor,
+      size: 35,
+    ),
+    title: Text(
+      pageName,
+      style: TextStyle(fontSize: 14),
+    ),
+    onTap: () {
+      if (currentSection == tileSection) {
+        Navigator.of(context).pop();
+      } else {
+        Navigator.of(context).pop();
+        switch(tileSection) {
+          case DrawerSections.home:
+            {
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => HomePage()));
+              break;
+            }
+          case DrawerSections.profile: {
+            break;
+          }
+          case DrawerSections.notifications: {
+            break;
+          }
+          case DrawerSections.favorites:{
+            break;
+          }
+          case DrawerSections.chats: {
+            break;
+          }
+          case DrawerSections.settings: {
+            break;
+          }
+        }
+      }
+    },
+  );
+}

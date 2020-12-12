@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:tech_pool/Utils.dart';
-import 'package:tech_pool/pages/HomePage.dart';
 import 'package:tech_pool/widgets/WelcomeSignUpButton.dart';
 import 'package:tech_pool/widgets/WelcomeSignInButton.dart';
 
@@ -18,15 +17,10 @@ class _LandingPageState extends State<LandingPage> {
 
     final welcomePage = Scaffold(body: Container(color: mainColor,height: size.height, width: size.width, child: Stack(alignment: Alignment.center,children: [Image.asset("assets/images/TechPoolWelcomeBackground.png"), TransparentSignInButton(), TransparentSignUnButton()],)));
 
-    return Consumer<UserRepository>(builder: (context, userRep, child) {
-        if(userRep.user == null){
-          return welcomePage;
-        }else if (!userRep.user.emailVerified){
-          return welcomePage;
-        }
-         return HomePage();
-      },
-    );
+    return Consumer<UserRepository>(builder: (context, userRep, child)
+    {
+      return welcomePage;
+    });
   }
 }
 

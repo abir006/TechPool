@@ -6,6 +6,7 @@ import 'package:tech_pool/Utils.dart';
 import 'package:tech_pool/widgets/TextBoxField.dart';
 
 import 'ForgotPasswordPage.dart';
+import 'HomePage.dart';
 
 class SignInPage extends StatefulWidget {
   @override
@@ -157,7 +158,10 @@ class _SignInPageState extends State<SignInPage> with SingleTickerProviderStateM
                                         controller.forward(from: 0.0);
                                       });
                                       await Future.delayed(Duration(seconds: 1, milliseconds: 1000));
-                                      Navigator.of(context).pop();
+                                      Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) => HomePage()));
                                     } else {
                                       _key.currentState.showSnackBar(SnackBar(content: Text("Please verify email", style: TextStyle(fontSize: 20, color: Colors.red),)));
                                       await userRep.auth.signOut().then((value) => userRep.user = null);

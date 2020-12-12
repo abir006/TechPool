@@ -6,6 +6,8 @@ import 'package:provider/provider.dart';
 import 'package:tech_pool/Utils.dart';
 import 'package:tech_pool/widgets/TextBoxField.dart';
 
+import 'HomePage.dart';
+
 class SignUpPage extends StatefulWidget {
   @override
   _SignUpPageState createState() => _SignUpPageState();
@@ -183,7 +185,10 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
                                     controller.forward(from: 0.0);
                                   });
                                   await Future.delayed(Duration(seconds: 1, milliseconds: 1000));
-                                  Navigator.of(context).pop();
+                                    Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => HomePage()));
                                   }));
                                 }catch(e) {
                                   if (_formKey?.currentState != null) {

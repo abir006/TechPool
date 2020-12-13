@@ -158,6 +158,7 @@ class _HomePageState extends State<HomePage> {
         ),
         backgroundColor: mainColor,
         appBar: AppBar(
+          elevation: 0,
           title: Text(
             "Home",
             style: TextStyle(color: Colors.white),
@@ -170,8 +171,8 @@ class _HomePageState extends State<HomePage> {
         ),
         drawer: techDrawer(userRep, context, DrawerSections.home),
         body: Container(
-            color: Colors.white,
-            margin: EdgeInsets.fromLTRB(10, 0, 10, 10),
+            decoration: pageContainerDecoration,
+            margin: pageContainerMargin,
             child: Column(children: [
               TableCalendar(
                   initialSelectedDay: selectedDay,
@@ -191,9 +192,12 @@ class _HomePageState extends State<HomePage> {
                   onDaySelected: _onDaySelected),
               Divider(indent: 5, endIndent: 5, thickness: 2),
               Flexible(
-                  child: ListView(children: [
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 4.0),
+                    child: ListView(children: [
                 ..._dailyEvents.map((event) => transformEvent(event)).toList()
-              ])),
+              ]),
+                  )),
             ])));
   }
 

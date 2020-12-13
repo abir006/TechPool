@@ -47,6 +47,7 @@ dependencies:
   configurable_expansion_tile: ^1.0.0
   flutter_datetime_picker: ^1.4.0
   jiffy: ^3.0.1
+  firebase_storage: ^5.2.0
 
 dev_dependencies:
   flutter_launcher_icons: "^0.8.0"

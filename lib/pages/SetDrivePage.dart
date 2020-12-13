@@ -9,14 +9,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-//import 'dart:convert';
+import 'package:configurable_expansion_tile/configurable_expansion_tile.dart';
 
+// mail for testing purposes:
+// ofir.asulin@campus.technion.ac.il
 
 class SetDrivePage extends StatefulWidget {
   DateTime currentDate;
   FirebaseFirestore db = FirebaseFirestore.instance;
-  //int numberOfSeatsIndex;
-  //SetDrivePage({Key key,@required this.currentDate,this.time,this.numberOfSeatsIndex}): super(key: key);
   SetDrivePage({Key key, @required this.currentDate}) : super(key: key);
   @override
   _SetDrivePageState createState() => _SetDrivePageState();
@@ -24,19 +24,15 @@ class SetDrivePage extends StatefulWidget {
 
 class _SetDrivePageState extends State<SetDrivePage> {
   final _formKey2 = GlobalKey<FormState>();
-
-  DateTime time;
   double _fontTextsSize = 17;
-  DateTime _hourTime;
-  DateTime _hourTimeCandidate;
-  bool bigTrunk = false;
-  bool fullBackSeat = false;
-  List<String> passengers = ["1", "2", "3", "4", "5", "6"];
-  String numberOfPassengers = "3";
+  DateTime _chosenTime;
+  DateTime _chosenTimeCandidate;
+  bool _bigTrunk = false;
+  bool _fullBackSeat = false;
+  List<String> _passengers = ["1", "2", "3", "4", "5", "6"];
+  String _numberOfPassengers = "3";
   TextEditingController _hourController;
-  int numberOfStops = 0;
-  //String price;
-  //String noteToPassengers = "";
+  int _numberOfStops = 0;
   TextEditingController _priceController;
   TextEditingController _noteController;
   TextEditingController _startPointController;
@@ -48,7 +44,6 @@ class _SetDrivePageState extends State<SetDrivePage> {
   LocationsResult returnFromMapResult;
   Address startAddress;
   Address destAddress;
-  //double _labelsTextsSize = 19;
 
   @override
   void initState() {
@@ -79,56 +74,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
       widget.numberOfSeatsIndex = null;
     }*/
 
-    /*final stopPoint1text = numberOfStops > 0
-        ? Container(
-            child: Row(
-              children: [
-                textBoxFieldDisable(
-                  nameLabel: "Stop 1:",
-                  size: MediaQuery.of(context).size,
-                  hintText: "",
-                  textFieldController: _stopPoint1Controller,
-                  // validator: (value) {
-                  //   if(_startPointController==null || _startPointController.text==""){return "No start point chosen";}
-                  //   else return null;}
-                ),
-              ],
-            ),
-          )
-        : Container();
-
-    final stopPoint2text = numberOfStops > 1
-        ? Container(
-            child: Row(
-              children: [
-                textBoxFieldDisable(
-                  nameLabel: "Stop 2:",
-                  size: MediaQuery.of(context).size,
-                  hintText: "",
-                  textFieldController: _stopPoint2Controller,
-                ),
-              ],
-            ),
-          )
-        : Container();
-
-    final stopPoint3text = numberOfStops > 2
-        ? Container(
-            child: Row(
-              children: [
-                textBoxFieldDisable(
-                  nameLabel: "Stop 3:",
-                  size: MediaQuery.of(context).size,
-                  hintText: "",
-                  textFieldController: _stopPoint3Controller,
-                ),
-              ],
-            ),
-          )
-        : Container();
-      */
-
-    final stopPoint1text_2 = Container(
+    final stopPoint1text = Container(
       child: Row(
         children: [
           textBoxFieldDisable(
@@ -140,7 +86,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
         ],
       ),
     );
-    final stopPoint2text_2 = Container(
+    final stopPoint2text = Container(
       child: Row(
         children: [
           textBoxFieldDisable(
@@ -152,7 +98,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
         ],
       ),
     );
-    final stopPoint3text_2 = Container(
+    final stopPoint3text = Container(
       child: Row(
         children: [
           textBoxFieldDisable(
@@ -230,17 +176,10 @@ class _SetDrivePageState extends State<SetDrivePage> {
                         returnFromMapResult.fromAddress.addressLine;
                     _destPointController.text =
                         returnFromMapResult.toAddress.addressLine;
-                    numberOfStops = returnFromMapResult.numberOfStops;
-                    if(numberOfStops > 0) _stopPoint1Controller.text = returnFromMapResult.stopAddresses[0].addressLine;
-                    if(numberOfStops > 1) _stopPoint2Controller.text = returnFromMapResult.stopAddresses[1].addressLine;
-                    if(numberOfStops > 2) _stopPoint3Controller.text = returnFromMapResult.stopAddresses[2].addressLine;
-                    /*numberOfStops = 0;
-                    for(int i = 0; i < returnFromMapResult.stopAddresses.length; i++) {
-                      //bool exists = returnFromMapResult.stopAddresses[i] as bool;
-                      bool exists = (returnFromMapResult.stopAddresses[i] != null);
-                      int addition = exists ? 1 : 0;
-                      numberOfStops += addition;
-                    }*/
+                    _numberOfStops = returnFromMapResult.numberOfStops;
+                    if(_numberOfStops > 0) _stopPoint1Controller.text = returnFromMapResult.stopAddresses[0].addressLine;
+                    if(_numberOfStops > 1) _stopPoint2Controller.text = returnFromMapResult.stopAddresses[1].addressLine;
+                    if(_numberOfStops > 2) _stopPoint3Controller.text = returnFromMapResult.stopAddresses[2].addressLine;
                   }
                 });
               },
@@ -263,7 +202,6 @@ class _SetDrivePageState extends State<SetDrivePage> {
               icon: Icon(Icons.timer),
               onPressed: () {
                 DateTime fixedTime = widget.currentDate.subtract(new Duration(hours: widget.currentDate.hour)).add(new Duration(hours: DateTime.now().hour));
-                //fixedTime.add(new Duration(minutes: 25));
 
                 showDialog(
                     context: context,
@@ -284,14 +222,11 @@ class _SetDrivePageState extends State<SetDrivePage> {
                               alignment: Alignment.center,
                               isForce2Digits: true,
                               minutesInterval: 5,
-                              //time: _hourTime != null ? _hourTime : fixedTime,
-                              time: _hourTime != null
-                                  ? _hourTime
-                                  : fixedTime,
+                              time: _chosenTime != null ? _chosenTime : fixedTime,
                               isShowSeconds: false,
                               onTimeChange: (time) {
                                 setState(() {
-                                  _hourTimeCandidate = time;
+                                  _chosenTimeCandidate = time;
                                 });
                               },
                             ),
@@ -299,7 +234,6 @@ class _SetDrivePageState extends State<SetDrivePage> {
                               mainAxisAlignment: MainAxisAlignment
                                   .center, //Center Row contents horizontally,
                               children: [
-                                //RaisedButton(
                                 FlatButton(
                                   child: Text('CANCEL',
                                       style: TextStyle(
@@ -311,16 +245,15 @@ class _SetDrivePageState extends State<SetDrivePage> {
                                   },
                                 ),
                                 //SizedBox(width: 2*defaultSpaceWidth),
-                                //RaisedButton(
                                 FlatButton(
                                   child: Text('CONFIRM',
                                       style: TextStyle(
                                           fontSize: 16, color: mainColor)),
                                   onPressed: () {
-                                    _hourTime = _hourTimeCandidate;
                                     _hourController.text =
-                                        DateFormat('dd-MM – kk:mm')
-                                            .format(_hourTimeCandidate);
+                                        DateFormat('dd/MM - kk:mm')
+                                            .format(_chosenTimeCandidate);
+                                    _chosenTime = _chosenTimeCandidate;
                                     Navigator.of(context).pop();
                                   },
                                 )
@@ -334,6 +267,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
           //Text(resultString ?? "")
         ]);
 
+
     final timeText1 = Container(
       child: textBoxFieldDisableCentered(
           //nameLabel: "Deppparture Time: ",
@@ -341,7 +275,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
           hintText: "",
           textFieldController: _hourController,
           validator: (value) {
-            if (_hourTime == null)
+            if (_chosenTime == null)
               return '                               Time not chosen';
             else
               return null;
@@ -360,10 +294,10 @@ class _SetDrivePageState extends State<SetDrivePage> {
           Theme(
               data: ThemeData(unselectedWidgetColor: secondColor),
               child: Checkbox(
-                  value: bigTrunk,
+                  value: _bigTrunk,
                   onChanged: (bool value) {
                     setState(() {
-                      bigTrunk = value;
+                      _bigTrunk = value;
                     });
                   })),
         ],
@@ -371,7 +305,8 @@ class _SetDrivePageState extends State<SetDrivePage> {
     );
 
     final backSeatText = Container(
-      height: 4 * defaultSpace,
+      height: 3*defaultSpace,
+      //height: MediaQuery.of(context).size.height,
       child: Row(
         children: [
           Text(
@@ -382,64 +317,26 @@ class _SetDrivePageState extends State<SetDrivePage> {
           Theme(
               data: ThemeData(unselectedWidgetColor: secondColor),
               child: Checkbox(
-                  value: fullBackSeat,
+                  value: _fullBackSeat,
                   onChanged: (bool value) {
                     setState(() {
-                      fullBackSeat = value;
+                      _fullBackSeat = value;
                     });
                   })),
         ],
       ),
     );
 
-    final seatsNumberText = Container(
-      height: 4 * defaultSpace,
-      child: Row(
-        children: [
-          Text(
-            'Number of seats: ',
-            style: TextStyle(
-                fontSize: _fontTextsSize, color: Colors.black.withOpacity(0.6)),
-          ),
-          Container(
-            color: Colors.transparent,
-            child: Theme(
-                data: Theme.of(context).copyWith(
-                    canvasColor:
-                        mainColor, // background color for the dropdown items
-                    buttonTheme: ButtonTheme.of(context).copyWith(
-                      alignedDropdown:
-                          true, //If false (the default), then the dropdown's menu will be wider than its button.
-                    )),
-                child: DropdownButton<String>(
-                    dropdownColor: mainColor,
-                    elevation: 0,
-                    value: numberOfPassengers,
-                    onChanged: (String newValue) {
-                      setState(() {
-                        numberOfPassengers = newValue;
-                      });
-                    },
-                    items: passengers
-                        .map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList())),
-          )
-        ],
-      ),
-    );
-
     final noteToPassengersText = Container(
+      height: 7.5*defaultSpace,
       child: TextFormField(
         maxLength: 150,
-        //150 characters to use:
+        //150 characters for test purposes:
         //wordwordword1wordwordword2wordwordword3wordwordword4wordwordword5wordwordword6wordwordword7wordwordword8wordwordword9wordwordword10wordwordword11
         //maxLengthEnforced: true,
         controller: _noteController,
         decoration: InputDecoration(
+          //counterText: '',
           labelText: 'Note to passengers:',
           labelStyle: TextStyle(fontSize: _fontTextsSize),
         ),
@@ -450,7 +347,8 @@ class _SetDrivePageState extends State<SetDrivePage> {
     );
 
     final priceText = Container(
-      margin: const EdgeInsets.only(right: 280),
+      margin: const EdgeInsets.only(right: 40),
+      width: defaultSpaceWidth*5,
       child: TextFormField(
           //maxLengthEnforced: true,
           maxLength: 3,
@@ -471,11 +369,54 @@ class _SetDrivePageState extends State<SetDrivePage> {
           }),
     );
 
+
+    final priceAndBackSeatRowText = Container(
+      width: MediaQuery.of(context).size.width,
+      height: 8 * defaultSpace,
+      child: Row(
+        children: [
+          priceText,
+          Text(
+            'Number of seats: ',
+            style: TextStyle(
+                fontSize: _fontTextsSize, color: Colors.black.withOpacity(0.6)),
+          ),
+          Container(
+            color: Colors.transparent,
+            child: Theme(
+                data: Theme.of(context).copyWith(
+                    canvasColor:
+                    mainColor, // background color for the dropdown items
+                    buttonTheme: ButtonTheme.of(context).copyWith(
+                      alignedDropdown:
+                      true, //If false (the default), then the dropdown's menu will be wider than its button.
+                    )),
+                child: DropdownButton<String>(
+                    dropdownColor: mainColor,
+                    elevation: 0,
+                    value: _numberOfPassengers,
+                    onChanged: (String newValue) {
+                      setState(() {
+                        _numberOfPassengers = newValue;
+                      });
+                    },
+                    items: _passengers
+                        .map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList())),
+          ),
+        ],
+      ),
+    );
+
     return Consumer<UserRepository>(builder: (context, userRep, child) {
       final setDrive = Container(
+          height: defaultSpace*4,
           padding: EdgeInsets.only(
               left: sizeFrameWidth * 0.23, right: sizeFrameWidth * 0.23),
-          height: 40,
           child: RaisedButton.icon(
               color: Colors.black,
               shape: RoundedRectangleBorder(
@@ -493,10 +434,10 @@ class _SetDrivePageState extends State<SetDrivePage> {
                   //driveName = "drive5"
                   CollectionReference drives = widget.db.collection('Drives');
                   drives.add({
-                    'BackSeatNotFull': !(fullBackSeat),
-                    'BigTrunk': bigTrunk,
+                    'BackSeatNotFull': !(_fullBackSeat),
+                    'BigTrunk': _bigTrunk,
                     'Note': _noteController.text,
-                    'NumberSeats': int.parse(numberOfPassengers),
+                    'NumberSeats': int.parse(_numberOfPassengers),
                     'Price': int.parse(_priceController.text),
                     'StartAddress': startAddress.addressLine,
                     'StartCity': startAddress.locality,
@@ -506,18 +447,35 @@ class _SetDrivePageState extends State<SetDrivePage> {
                     'Passengers': [],
                     'Stops': {},
                     'DestPoint': GeoPoint(destAddress.coordinates.latitude,destAddress.coordinates.longitude),
-                    'TimeStamp': DateTime.now().add(new Duration(days: 1)),//Should add+2?
-                    //'TimeStamp': _hourController.text,//Should add+2?
+                    'TimeStamp': _chosenTime,
                     'Driver': userRep.user.email,
                     //'Driver': "testing@technion.co.il",
                   })
                       .then((value) => Navigator.pop(context))
                       .catchError((error) => print("Something went wrong. Please try again"));
-
-
                 }
               }));
 
+      final properties = Container(
+          alignment: Alignment.bottomLeft,
+          color:Colors.transparent,
+          child:ConfigurableExpansionTile(
+            header: Container(color: Colors.transparent,child: Text("Properties",style:TextStyle(fontWeight: FontWeight.bold, fontSize: 17))),
+            animatedWidgetFollowingHeader: const Icon(
+              Icons.expand_more,
+              color: const Color(0xFF707070),
+            ),
+            headerBackgroundColorStart: Colors.transparent,
+            expandedBackgroundColor: Colors.transparent,
+            headerBackgroundColorEnd: Colors.transparent,
+            children: [
+            bigTrunkText,
+              SizedBox(height: defaultSpace),
+            backSeatText,
+              //SizedBox(height: defaultSpace)
+              noteToPassengersText,
+            ],
+          ));
 
       return Scaffold(
         appBar: AppBar(
@@ -526,94 +484,87 @@ class _SetDrivePageState extends State<SetDrivePage> {
         body: Form(
           key: _formKey2,
           child: Builder(
-            builder: (context) =>
-                Container(
+            builder: (context) => Container(
                     color: Colors.white,
                     margin: EdgeInsets.only(
                         left: defaultSpaceWidth,
                         right: defaultSpaceWidth,
                         bottom: 10),
-                    child: Stack(children: [
-                      Container(
-                          child: Center(
-                              child: Icon(
-                                Icons.directions_car_sharp,
-                                size: 330,
-                                color: Colors.cyan.withOpacity(0.1),
-                              ))),
-                      ListView(
-                          padding: EdgeInsets.only(
-                              left: defaultSpaceWidth,
-                              right: defaultSpaceWidth,
-                              bottom: 10),
-                          children: [
-                            //SizedBox(height: defaultSpace),
-                            //locationText,
-                            SizedBox(height: 1.5 * defaultSpace),
-                            chooseStartAndDestination,
-                            startPointText,
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: Stack(children: [
+                            Container(
+                                child: Center(
+                                    child: Icon(
+                                      Icons.directions_car_sharp,
+                                      size: 330,
+                                      color: Colors.cyan.withOpacity(0.1),
+                                    ))),
+                            ListView(
+                                padding: EdgeInsets.only(
+                                    left: defaultSpaceWidth,
+                                    right: defaultSpaceWidth,
+                                    bottom: 10),
+                                children: [
+                                  SizedBox(height: 1.5 * defaultSpace),
+                                  chooseStartAndDestination,
+                                  startPointText,
 
+                            //       ...returnFromMapResult.stopAddresses.asMap().map((i, stop){
+                            //       if(stop!=null){
+                            //         return MapEntry(i, Container(
+                            //           child: Row(
+                            //             children: [
+                            //               textBoxFieldDisable(
+                            //                 nameLabel: "Stop " + i.toString() + ":", //Consider to edit,
+                            //                 size: MediaQuery.of(context).size,
+                            //                 hintText: "",
+                            //                 textFieldController: _stopPoint1Controller,
+                            //                 // validator: (value) {
+                            //                 //   if(_startPointController==null || _startPointController.text==""){return "No start point chosen";}
+                            //                 //   else return null;}
+                            //               ),
+                            //             ],
+                            //           ),
+                            //         ));
+                            //       }
+                            //       else
+                            //         return MapEntry(i, Container());
+                            //     }
+                            // ).values.toList(),
 
-                            /*...returnFromMapResult.stopAddresses.asMap().map((i, stop){
-                            if(stop!=null){
-                              return MapEntry(i, Container(
-                                child: Row(
-                                  children: [
-                                    textBoxFieldDisable(
-                                      nameLabel: "Stop " + i.toString() + ":", //Consider to edit,
-                                      size: MediaQuery.of(context).size,
-                                      hintText: "",
-                                      textFieldController: _stopPoint1Controller,
-                                      // validator: (value) {
-                                      //   if(_startPointController==null || _startPointController.text==""){return "No start point chosen";}
-                                      //   else return null;}
-                                    ),
-                                  ],
-                                ),
-                              ));
-                            }
-                            else
-                              return MapEntry(i, Container());
-                          }
-                      ).values.toList(),*/
+                                  _numberOfStops > 0 ? stopPoint1text : Container(),
+                                  _numberOfStops > 1 ? stopPoint2text : Container(),
+                                  _numberOfStops > 2 ? stopPoint3text : Container(),
 
-                            numberOfStops > 0 ? stopPoint1text_2 : Container(),
-                            numberOfStops > 1 ? stopPoint2text_2 : Container(),
-                            numberOfStops > 2 ? stopPoint3text_2 : Container(),
-                            /*stopPoint1text,
-                      stopPoint2text,
-                      stopPoint3text,*/
-
-                            //if(numberOfStops > 0) Column(children: [SizedBox(height: defaultSpace), stopPoint1text]),
-                            // numberOfStops > 1 ? Column(children: [SizedBox(height: defaultSpace), stopPoint2text]) : null,
-                            // numberOfStops > 2 ? Column(children: [SizedBox(height: defaultSpace), stopPoint3text]) : null,
-                            // SizedBox(height: defaultSpace/3),
-                            // stopPoint2text,
-                            // SizedBox(height: defaultSpace/3),
-                            // stopPoint3text,
-
-                            destinationText,
-                            SizedBox(height: 2 * defaultSpace),
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                departureTimeButton,
-                                timeText1,
-                                priceText,
-                              ],
-                            ),
-                            SizedBox(height: 2 * defaultSpace),
-                            //propertiesText,
-                            //SizedBox(height: defaultSpace/2),
-                            bigTrunkText,
-                            backSeatText,
-                            seatsNumberText,
-                            noteToPassengersText,
-                            SizedBox(height: 2 * defaultSpace),
-                            setDrive,
-                          ])
-                    ])),
+                                  destinationText,
+                                  SizedBox(height: 1 * defaultSpace),
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      departureTimeButton,
+                                      timeText1,
+                                      priceAndBackSeatRowText,
+                                      //priceText,
+                                    ],
+                                  ),
+                                  SizedBox(height: defaultSpace),
+                                  Divider(thickness: 3),
+                                  properties,
+                                  Divider(thickness: 3),
+                                  // bigTrunkText,
+                                  // backSeatText,
+                                  // noteToPassengersText,
+                                ])
+                          ]),
+                        ),
+                        SizedBox(height: 1 * defaultSpace),
+                        setDrive,
+                        SizedBox(height: 2 * defaultSpace),
+                      ],
+                    )),
           ),
         ),
         backgroundColor: mainColor,

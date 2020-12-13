@@ -1,12 +1,16 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:tech_pool/Utils.dart';
 import 'package:tech_pool/widgets/TextBoxField.dart';
-
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'ForgotPasswordPage.dart';
 import 'HomePage.dart';
+
 
 class SignInPage extends StatefulWidget {
   @override
@@ -14,6 +18,7 @@ class SignInPage extends StatefulWidget {
 }
 
 class _SignInPageState extends State<SignInPage> with SingleTickerProviderStateMixin {
+  final cloudStorage = FirebaseStorage.instance;
   Animation<double> animation;
   AnimationController controller;
   final _formKey = GlobalKey<FormState>();
@@ -151,6 +156,21 @@ class _SignInPageState extends State<SignInPage> with SingleTickerProviderStateM
                                   await (userRep.auth.signInWithEmailAndPassword(email: _email.text, password: _password.text).then((user) async {
                                     if(user.user.emailVerified) {
                                       userRep.user = user.user;
+                                      var _imgUrl = await (cloudStorage
+                                          .ref('uploads')
+                                          .child(userRep.user.email)
+                                          .getDownloadURL());
+                                      userRep.profilePicture = Image.network(_imgUrl, loadingBuilder:(BuildContext context, Widget child,ImageChunkEvent loadingProgress) {
+                                        if (loadingProgress == null) return child;
+                                        return Center(
+                                          child: CircularProgressIndicator(
+                                            value: loadingProgress.expectedTotalBytes != null ?
+                                            loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes
+                                                : null,
+                                          ),
+                                        );
+                                      },
+                                      );
                                       setState(() {
                                         controller.stop();
                                         animation = new Tween(begin: 0.0, end: size.height).animate(controller);

@@ -225,58 +225,61 @@ enum DrawerSections { home, profile, notifications, favorites, chats, settings }
 /// and not rebuilding the current section (page).
 SafeArea techDrawer(UserRepository userRep, BuildContext context,
     DrawerSections currentSection) {
-  return SafeArea(child: Drawer(
-      child: ListView(children: [
-        /*  UserAccountsDrawerHeader(
-            accountName: Text("Hello, ${userRep.user.displayName}.",style: TextStyle(color: Colors.white,fontSize: 18),),
-            accountEmail: Container(height: 20,child: Row(crossAxisAlignment: CrossAxisAlignment.end,mainAxisAlignment: MainAxisAlignment.spaceBetween,children: [
-          Text(userRep.user.email,style: TextStyle(color: Colors.white,fontSize: 14)),
-         IconButton(icon: Icon(Icons.logout,color: Colors.white,size: 25,),onPressed: () => {},)]))
+  return SafeArea(child: ClipRRect(
+      borderRadius: BorderRadius.only(topRight: Radius.circular(20.0),bottomRight:Radius.circular(20.0)),child: Container(width: MediaQuery.of(context).size.width*0.7,
+        child: Drawer(
+        child: ListView(children: [
+          /*  UserAccountsDrawerHeader(
+              accountName: Text("Hello, ${userRep.user.displayName}.",style: TextStyle(color: Colors.white,fontSize: 18),),
+              accountEmail: Container(height: 20,child: Row(crossAxisAlignment: CrossAxisAlignment.end,mainAxisAlignment: MainAxisAlignment.spaceBetween,children: [
+            Text(userRep.user.email,style: TextStyle(color: Colors.white,fontSize: 14)),
+           IconButton(icon: Icon(Icons.logout,color: Colors.white,size: 25,),onPressed: () => {},)]))
      ,currentAccountPicture: CircleAvatar(backgroundColor: secondColor,))*/
-        Container(
-          color: mainColor,
-          height: 180,
-          child: Padding(
-            padding: const EdgeInsets.only(top: 30, left: 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CircleAvatar(
-                  backgroundColor: secondColor,
-                  radius: 50,
-                  backgroundImage:
-                  Image.asset("assets/images/DefaultAvatar.png").image,
-                ),
-                Spacer(),
-                Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                  Text("Hello, ${userRep.user?.displayName}.",
-                      style: TextStyle(color: Colors.white, fontSize: 20)),
-                  IconButton(
-                    icon: Icon(
-                      Icons.logout,
-                      color: Colors.white,
-                      size: 25,
-                    ),
-                    onPressed: () async => await (userRep.auth
-                        .signOut()
-                        .then((_) {
-                      Navigator.pop(context);
-                      userRep.user = null;
-                      Navigator.pop(context);
-                    })),
-                  )
-                ])
-              ],
+          Container(
+            color: mainColor,
+            height: 180,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 30, left: 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CircleAvatar(
+                    backgroundColor: secondColor,
+                    radius: 50,
+                    backgroundImage:
+                    Image.asset("assets/images/DefaultAvatar.png").image,
+                  ),
+                  Spacer(),
+                  Row(mainAxisSize: MainAxisSize.max,mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                    Flexible(flex: 5,child: Text("Hello, ${userRep.user?.displayName}.",
+                        style: TextStyle(color: Colors.white, fontSize: 20))),
+                    Flexible(flex: 1,child: IconButton(
+                      icon: Icon(
+                        Icons.logout,
+                        color: Colors.white,
+                        size: 25,
+                      ),
+                      onPressed: () async => await (userRep.auth
+                          .signOut()
+                          .then((_) {
+                        Navigator.pop(context);
+                        userRep.user = null;
+                        Navigator.pop(context);
+                      })),
+                    ))
+                  ])
+                ],
+              ),
             ),
           ),
-        ),
-        drawerListTile("Home",Icons.home_rounded,DrawerSections.home,currentSection, context),
-        drawerListTile("Profile",Icons.person,DrawerSections.profile,currentSection, context),
-        drawerListTile("Notifications",Icons.notifications,DrawerSections.notifications,currentSection, context),
-        drawerListTile("Favorite Locations",Icons.favorite,DrawerSections.favorites,currentSection, context),
-        drawerListTile("Chats",Icons.chat,DrawerSections.chats,currentSection, context),
-        drawerListTile("Settings",Icons.settings,DrawerSections.settings,currentSection, context),
-      ])));
+          drawerListTile("Home",Icons.home_rounded,DrawerSections.home,currentSection, context),
+          drawerListTile("Profile",Icons.person,DrawerSections.profile,currentSection, context),
+          drawerListTile("Notifications",Icons.notifications,DrawerSections.notifications,currentSection, context),
+          drawerListTile("Favorite Locations",Icons.favorite,DrawerSections.favorites,currentSection, context),
+          drawerListTile("Chats",Icons.chat,DrawerSections.chats,currentSection, context),
+          drawerListTile("Settings",Icons.settings,DrawerSections.settings,currentSection, context),
+        ])),
+      )));
 }
 
 /// creates a listTile for the drawer, with the relevant pageName,icon,tileSection for the tile.
@@ -327,3 +330,10 @@ ListTile drawerListTile(String pageName,IconData icon,DrawerSections tileSection
     },
   );
 }
+
+/// the decoration for the container inside the page body.
+final pageContainerDecoration = BoxDecoration(color: Colors.white,borderRadius: BorderRadius.all(Radius.circular(20.0)),
+  boxShadow: [BoxShadow(color: Colors.black,blurRadius: 4.0,
+      spreadRadius: 0.0,offset: Offset(0.0, 1.0))],);
+/// the margin for the container inside the page body.
+final pageContainerMargin = EdgeInsets.fromLTRB(10, 4, 10, 10);

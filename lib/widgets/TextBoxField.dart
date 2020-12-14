@@ -68,15 +68,27 @@ Widget labelText({@required String text}){
     ),
   );
 }
-Widget infoText({@required String text}){
+Widget generalInfoText({@required String text, int maxElepsis}){
   return Container(
     child: Text(
       text,
       style:
       TextStyle( fontSize: 17,),
       overflow: TextOverflow.ellipsis,
-      maxLines: 2,
+      maxLines:maxElepsis==null?2 : maxElepsis,
     ),
   );
 }
+Widget generalInfoTextField({@required TextEditingController controllerText,@required bool enabled,int maxLines,int maxLenth}){
+  return Container(
+    child: TextField(
+      maxLength: maxLenth==null?30:maxLenth,
+      controller: controllerText,
+      keyboardType: TextInputType.multiline,
+      maxLines: maxLines,
+      enabled: enabled,
+    ),
+  );
+}
+
 

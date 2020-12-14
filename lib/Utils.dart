@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:geocoder/geocoder.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:tech_pool/pages/HomePage.dart';
+import 'package:tech_pool/pages/ProfilePage.dart';
 
 /// Apps default settings
 MaterialColor mainColor =  Colors.cyan;
@@ -279,19 +280,19 @@ SafeArea techDrawer(UserRepository userRep, BuildContext context,
               ),
             ),
           ),
-          drawerListTile("Home",Icons.home_rounded,DrawerSections.home,currentSection, context),
-          drawerListTile("Profile",Icons.person,DrawerSections.profile,currentSection, context),
-          drawerListTile("Notifications",Icons.notifications,DrawerSections.notifications,currentSection, context),
-          drawerListTile("Favorite Locations",Icons.favorite,DrawerSections.favorites,currentSection, context),
-          drawerListTile("Chats",Icons.chat,DrawerSections.chats,currentSection, context),
-          drawerListTile("Settings",Icons.settings,DrawerSections.settings,currentSection, context),
+          drawerListTile("Home",Icons.home_rounded,DrawerSections.home,currentSection, context, userRep),
+          drawerListTile("Profile",Icons.person,DrawerSections.profile,currentSection, context, userRep),
+          drawerListTile("Notifications",Icons.notifications,DrawerSections.notifications,currentSection, context, userRep),
+          drawerListTile("Favorite Locations",Icons.favorite,DrawerSections.favorites,currentSection, context, userRep),
+          drawerListTile("Chats",Icons.chat,DrawerSections.chats,currentSection, context, userRep),
+          drawerListTile("Settings",Icons.settings,DrawerSections.settings,currentSection, context, userRep),
         ])),
       )));
 }
 
 /// creates a listTile for the drawer, with the relevant pageName,icon,tileSection for the tile.
 /// and the currentSection of the drawer.
-ListTile drawerListTile(String pageName,IconData icon,DrawerSections tileSection,DrawerSections currentSection, BuildContext context) {
+ListTile drawerListTile(String pageName,IconData icon,DrawerSections tileSection,DrawerSections currentSection, BuildContext context, UserRepository userRep) {
   return ListTile(
     selected: currentSection == tileSection,
     leading: Icon(
@@ -318,6 +319,10 @@ ListTile drawerListTile(String pageName,IconData icon,DrawerSections tileSection
               break;
             }
           case DrawerSections.profile: {
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => ProfilePage(email: userRep.user.email)));
             break;
           }
           case DrawerSections.notifications: {
@@ -337,6 +342,35 @@ ListTile drawerListTile(String pageName,IconData icon,DrawerSections tileSection
     },
   );
 }
+
+var userInfoKey = ["email","firstName","lastName","hobbies","faculty","aboutSelf","allowedPayments","phoneNumber",];
+enum userInfoKeyEnum{
+  email,
+  firstName,
+  lastName,
+  hobbies,
+  faculty,
+  aboutSelf,
+  allowedPayments,
+  phoneNumber,
+
+}
+
+class UserInfo{
+  Map<String,dynamic> keyToValueMap = { };
+  UserInfo();
+  void setProperty(String key,var property){
+    keyToValueMap[key] = property;
+  }
+
+  void setPropertyEnum(userInfoKeyEnum key,var property){
+    keyToValueMap[userInfoKey[key.index]] = property;
+  }
+  dynamic getPropertyEnum(userInfoKeyEnum key){
+    return keyToValueMap[userInfoKey[key.index]];
+  }
+}
+
 
 /// the decoration for the container inside the page body.
 final pageContainerDecoration = BoxDecoration(color: Colors.white,borderRadius: BorderRadius.all(Radius.circular(20.0)),

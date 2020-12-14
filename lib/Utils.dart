@@ -20,6 +20,7 @@ double lablesTextsSize = 19;
 ///[user] is the current user using the app.
 class UserRepository extends ChangeNotifier {
   final auth = FirebaseAuth.instance;
+  Image _profilePicture;
   User _user;
 
   set user(User value) {
@@ -27,7 +28,14 @@ class UserRepository extends ChangeNotifier {
     notifyListeners();
   }
 
+  set profilePicture(Image pic){
+    _profilePicture = pic;
+    notifyListeners();
+  }
+
   User get user => _user;
+
+  Image get profilePicture => _profilePicture;
 }
 
 /// A container class for Drive event.
@@ -239,15 +247,14 @@ SafeArea techDrawer(UserRepository userRep, BuildContext context,
             color: mainColor,
             height: 180,
             child: Padding(
-              padding: const EdgeInsets.only(top: 30, left: 10),
+              padding: const EdgeInsets.only(top: 50, left: 10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   CircleAvatar(
                     backgroundColor: secondColor,
-                    radius: 50,
-                    backgroundImage:
-                    Image.asset("assets/images/DefaultAvatar.png").image,
+                    radius: 40,
+                    backgroundImage: userRep.profilePicture.image,
                   ),
                   Spacer(),
                   Row(mainAxisSize: MainAxisSize.max,mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
@@ -290,11 +297,11 @@ ListTile drawerListTile(String pageName,IconData icon,DrawerSections tileSection
     leading: Icon(
       icon,
       color: mainColor,
-      size: 35,
+      size: 30,
     ),
     title: Text(
       pageName,
-      style: TextStyle(fontSize: 14),
+      style: TextStyle(fontSize: 12),
     ),
     onTap: () {
       if (currentSection == tileSection) {

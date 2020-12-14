@@ -205,8 +205,8 @@ class _ProfilePageState extends State<ProfilePage> {
             mainAxisAlignment:MainAxisAlignment.start,
             crossAxisAlignment:CrossAxisAlignment.start,
             children: [SizedBox(width: defaultSpacewidth*3),Expanded(child:DiscardUpdate),SizedBox(width: defaultSpacewidth*2),Expanded(child:acceptUpdate),SizedBox(width: defaultSpacewidth*3)])));
-    Widget allInfo (String email) {return FutureBuilder<void>(
-        future: initInfo(email), // a previously-obtained Future<String> or null
+    Widget allInfo (UserRepository userRep) {return FutureBuilder<void>(
+        future: initInfo(userRep.user.email), // a previously-obtained Future<String> or null
         builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
           if (snapshot.hasData) {
             return Container(
@@ -218,7 +218,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         left: defaultSpacewidth, right: defaultSpacewidth),
                     children: [
                       SizedBox(height: defaultSpace),
-                      Center(child: Stack(children: [Container(width: MediaQuery.of(context).size.height * 0.016 * 8, height: MediaQuery.of(context).size.height * 0.016 * 8, child:CircleAvatar(radius: 18, backgroundImage: NetworkImage(imageUrl,),),),
+                      Center(child: Stack(children: [Container(width: MediaQuery.of(context).size.height * 0.016 * 8, height: MediaQuery.of(context).size.height * 0.016 * 8, child:CircleAvatar(radius: 18, backgroundImage: isUser? userRep.profilePicture.image:NetworkImage(imageUrl)),),
                         isUser? Container(padding: EdgeInsets.only(
                             left: defaultSpacewidth * 4.8, top: defaultSpacewidth * 5.3),
                           child: ClipOval(
@@ -247,7 +247,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                           .putFile(File(pickedFile.path))
                                           .then((snapshot) => snapshot.ref.getDownloadURL());
                                       setState(() {
-                                        imageUrl = ret;
+                                        userRep.profilePicture =  Image.file((File(pickedFile.path)));
                                       });
                                     }
                                   },
@@ -290,15 +290,14 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
       ),
       body:  Consumer<UserRepository>(
-          builder: (context, auth, _) =>
+          builder: (context, userRep, _) =>
             Container(
                 decoration: pageContainerDecoration,
-          margin: EdgeInsets.only(
-              left: defaultSpacewidth, right: defaultSpacewidth, bottom: defaultSpacewidth),
+                margin: pageContainerMargin,
           //padding: EdgeInsets.only(left: defaultSpacewidth, right: defaultSpacewidth),
           child: Column(
             children: [
-              Expanded(child: allInfo(auth.user==null?"":auth.user.email)),
+              Expanded(child: allInfo(userRep)),
               SizedBox(height: defaultSpace),
               isUser? (editMode ? buttons : updateProfile):SizedBox(height: defaultSpace*0),
             ],

@@ -443,78 +443,84 @@ class _SetDrivePageState extends State<SetDrivePage> {
               icon: Icon(Icons.directions_car_sharp, color: Colors.white),
               label: Text("  Set Drive  ",
                   style: TextStyle(color: Colors.white, fontSize: 17)),
-              onPressed: () {
+              onPressed: () async {
                 if (_formKey2.currentState.validate()) {
-                  // try{
-                  // }
-                  // catch{
-                  // }
-                  Random random = new Random();
-                  final String driveName =
-                      "0_test_drive" + random.nextInt(1000).toString();
-                  CollectionReference drives = widget.db.collection('Drives');
-                  //drives.add({
-                  drives
-                      .doc(driveName)
-                      .set({
-                        'BackSeatNotFull': !(_fullBackSeat),
-                        'BigTrunk': _bigTrunk,
-                        'Note': _noteController.text,
-                        'NumberSeats': int.parse(_numberOfPassengers),
-                        'Price': int.parse(_priceController.text),
+                  try {
 
-                        'StartAddress': startAddress.addressLine,
-                        'StartCity': startAddress.locality,
-                        'StartPoint': GeoPoint(
-                            startAddress.coordinates.latitude,
-                            startAddress.coordinates.longitude),
+                    Random random = new Random();
+                    final String driveName =
+                        "0_test_drive" + random.nextInt(1000).toString();
+                    //drives.add({
 
-                        'DestAddress': destAddress.addressLine,
-                        'DestCity': destAddress.locality,
-                        'DestPoint': GeoPoint(destAddress.coordinates.latitude,
-                            destAddress.coordinates.longitude),
+                    CollectionReference drives = widget.db.collection('Drives');
+                    await drives
+                        .doc(driveName)
+                        .set({
+                      'BackSeatNotFull': !(_fullBackSeat),
+                      'BigTrunk': _bigTrunk,
+                      'Note': _noteController.text,
+                      'NumberSeats': int.parse(_numberOfPassengers),
+                      'Price': int.parse(_priceController.text),
 
-                        'Stop1Exists': stop1Address != null ? true : false,
-                        'Stop1Address': stop1Address != null
-                            ? stop1Address.addressLine
-                            : null,
-                        'Stop1City':
-                            stop1Address != null ? stop1Address.locality : null,
-                        'Stop1Point': stop1Address != null
-                            ? GeoPoint(stop1Address.coordinates.latitude,
-                                stop1Address.coordinates.longitude)
-                            : null,
+                      'StartAddress': startAddress.addressLine,
+                      'StartCity': startAddress.locality,
+                      'StartPoint': GeoPoint(
+                          startAddress.coordinates.latitude,
+                          startAddress.coordinates.longitude),
 
-                        'Stop2Exists': stop2Address != null ? true : false,
-                        'Stop2Address': stop2Address != null
-                            ? stop2Address.addressLine
-                            : null,
-                        'Stop2City':
-                            stop2Address != null ? stop1Address.locality : null,
-                        'Stop2Point': stop2Address != null
-                            ? GeoPoint(stop2Address.coordinates.latitude,
-                                stop2Address.coordinates.longitude)
-                            : null,
+                      'DestAddress': destAddress.addressLine,
+                      'DestCity': destAddress.locality,
+                      'DestPoint': GeoPoint(destAddress.coordinates.latitude,
+                          destAddress.coordinates.longitude),
 
-                        'Stop3Exists': stop3Address != null ? true : false,
-                        'Stop3Address': stop3Address != null
-                            ? stop3Address.addressLine
-                            : null,
-                        'Stop3City':
-                            stop3Address != null ? stop3Address.locality : null,
-                        'Stop3Point': stop3Address != null
-                            ? GeoPoint(stop3Address.coordinates.latitude,
-                                stop2Address.coordinates.longitude)
-                            : null,
 
-                        'Passengers': [],
-                        'TimeStamp': _chosenTime,
-                        //'Driver': userRep.user.email,
-                        'Driver': "testing@technion.co.il",
-                      })
-                      .then((value) => Navigator.pop(context))
-                      .catchError((error) =>
-                          print("Something went wrong. Please try again"));
+                      'Stop1Exists': stop1Address != null ? true : false,
+                      'Stop1Address': stop1Address != null
+                          ? stop1Address.addressLine
+                          : null,
+                      'Stop1City':
+                      stop1Address != null ? stop1Address.locality : null,
+                      'Stop1Point': stop1Address != null
+                          ? GeoPoint(stop1Address.coordinates.latitude,
+                          stop1Address.coordinates.longitude)
+                          : null,
+
+                      'Stop2Exists': stop2Address != null ? true : false,
+                      'Stop2Address': stop2Address != null
+                          ? stop2Address.addressLine
+                          : null,
+                      'Stop2City':
+                      stop2Address != null ? stop1Address.locality : null,
+                      'Stop2Point': stop2Address != null
+                          ? GeoPoint(stop2Address.coordinates.latitude,
+                          stop2Address.coordinates.longitude)
+                          : null,
+                      'Stop3Exists': stop3Address != null ? true : false,
+                      'Stop3Address': stop3Address != null
+                          ? stop3Address.addressLine
+                          : null,
+                      'Stop3City':
+                      stop3Address != null ? stop3Address.locality : null,
+                      'Stop3Point': stop3Address != null
+                          ? GeoPoint(stop3Address.coordinates.latitude,
+                          stop2Address.coordinates.longitude)
+                          : null,
+
+                      'Passengers': [],
+                      'TimeStamp': _chosenTime,
+                      //'Driver': userRep.user.email,
+                      'Driver': "testing@technion.co.il",
+                    });
+                    Scaffold.of(context).showSnackBar(SnackBar(content: Text("successfully", style: TextStyle(fontSize: 16,color: Colors.red),)));
+
+                    Navigator.pop(context);
+                        // .then((value) => Navigator.pop(context))
+                        // .catchError((error) =>
+                        // print("Something went wrong. Please try again"));
+                  }
+                  catch(e){
+                    Scaffold.of(context).showSnackBar(SnackBar(content: Text(e.message, style: TextStyle(fontSize: 16,color: Colors.red),)));
+                  }
                 }
               }));
 

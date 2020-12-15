@@ -21,6 +21,7 @@ double lablesTextsSize = 19;
 ///[user] is the current user using the app.
 class UserRepository extends ChangeNotifier {
   final auth = FirebaseAuth.instance;
+  final defaultPic = Image.asset("assets/images/profile.png");
   Image _profilePicture;
   User _user;
 
@@ -36,7 +37,7 @@ class UserRepository extends ChangeNotifier {
 
   User get user => _user;
 
-  Image get profilePicture => _profilePicture;
+  Image get profilePicture => _profilePicture ?? defaultPic;
 }
 
 /// A container class for Drive event.

@@ -175,6 +175,7 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
                                   await user.user.updateProfile(displayName: _firstName.text+" "+_lastName.text);
                                   await user.user.sendEmailVerification();
                                   userRep.user = user.user;
+                                  userRep.profilePicture = null;
                                   while(!await checkEmailVerified()) {
 
                                   }

@@ -459,11 +459,11 @@ class _SetDrivePageState extends State<SetDrivePage> {
                 }
               }));
 
-      final properties = Container(
+      final preferences = Container(
           alignment: Alignment.bottomLeft,
           color:Colors.transparent,
           child:ConfigurableExpansionTile(
-            header: Container(color: Colors.transparent,child: Text("Properties",style:TextStyle(fontWeight: FontWeight.bold, fontSize: 17))),
+            header: Container(color: Colors.transparent,child: Text("Preferences",style:TextStyle(fontWeight: FontWeight.bold, fontSize: 17))),
             animatedWidgetFollowingHeader: const Icon(
               Icons.expand_more,
               color: const Color(0xFF707070),
@@ -495,6 +495,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
                       color: Colors.white,
                       margin: EdgeInsets.only(
                           left: defaultSpaceWidth,
+                          top: defaultSpace/6,
                           right: defaultSpaceWidth,
                           bottom: 10),
                       child: Column(
@@ -559,7 +560,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
                                     ),
                                     SizedBox(height: defaultSpace),
                                     Divider(thickness: 3),
-                                    properties,
+                                    preferences,
                                     Divider(thickness: 3),
                                     // bigTrunkText,
                                     // backSeatText,

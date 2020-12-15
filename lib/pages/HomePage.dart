@@ -1,4 +1,3 @@
-import 'package:async/async.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -50,9 +49,9 @@ class _HomePageState extends State<HomePage> {
     return Consumer<UserRepository>(builder: (context, userRep, child) {
       return StreamBuilder<List<QuerySnapshot>>(
               stream: CombineLatestStream([
-              firestore.collection("Drives").where("Passengers", arrayContains: userRep.user.email).snapshots(),firestore
+              firestore.collection("Drives").where("Passengers", arrayContains: userRep.user?.email).snapshots(),firestore
                     .collection("Drives")
-                    .where('Driver', isEqualTo: userRep.user.email).snapshots()],(vals) => [vals[0],vals[1]]),
+                    .where('Driver', isEqualTo: userRep.user?.email).snapshots()],(vals) => [vals[0],vals[1]]),
               builder: (context, snapshot) {
                 _events = {};
                 _dailyEvents = [];

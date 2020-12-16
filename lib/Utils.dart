@@ -155,6 +155,9 @@ class MyLift{
   GeoPoint startPoint;
   bool bigTrunk;
   bool backSeat;
+
+  String imageUrl;
+  String driverName;
   var stops = new Map();
 
   void setProperty(String key,var property){
@@ -322,7 +325,7 @@ ListTile drawerListTile(String pageName,IconData icon,DrawerSections tileSection
             Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => ProfilePage(email: userRep.user.email)));
+                    builder: (context) => ProfilePage(email: userRep.user.email,fromProfile: true,)));
             break;
           }
           case DrawerSections.notifications: {

@@ -18,8 +18,9 @@ import 'package:multi_select_flutter/multi_select_flutter.dart';
 
 class ProfilePage extends StatefulWidget {
   String email;
+  bool fromProfile;
 
-  ProfilePage({Key key, @required this.email}) : super(key: key);
+  ProfilePage({Key key, @required this.email,@required this.fromProfile}) : super(key: key);
 
   @override
   _ProfilePageState createState() => _ProfilePageState();
@@ -45,9 +46,47 @@ class _ProfilePageState extends State<ProfilePage> {
   List<String> paymentsItems=["Cash","PayPal","Bit","PayBox"];
   ScrollController scrollCon;
 
+  Future<String> initInfo2(String email) async {
+    isUser = (widget.email == email)&&widget.fromProfile;
+      firestore.collection("Profiles").doc(widget.email).get().then(
+              (value) {
+      DocumentSnapshot q = value;
+      q.data().forEach((key, value) {
+        myInfo.setProperty(key, value);
+      });
+      myInfo.setPropertyEnum(userInfoKeyEnum.email, widget.email);
+      if (firstTime) {
+        _nameController.text =
+            myInfo.getPropertyEnum(userInfoKeyEnum.firstName) +
+                " " +
+                myInfo.getPropertyEnum(userInfoKeyEnum.lastName);
+        _facultyController.text =
+            myInfo.getPropertyEnum(userInfoKeyEnum.faculty);
+        _phoneNumberController.text =
+            myInfo.getPropertyEnum(userInfoKeyEnum.phoneNumber);
+        _hobbiesController.text =
+            myInfo.getPropertyEnum(userInfoKeyEnum.hobbies);
+        _aboutSelf.text = myInfo.getPropertyEnum(userInfoKeyEnum.aboutSelf);
+        payments =[];
+        List<dynamic> e = myInfo.getPropertyEnum(
+            userInfoKeyEnum.allowedPayments);
+        e.forEach((element) {
+          payments.add(element.toString());
+        });
+        return FirebaseStorage.instance
+            .ref('uploads')
+            .child(widget.email)
+            .getDownloadURL().then((value) {
+          imageUrl = value;
+          return "ok";
+
+        } );
+      }
+    });
+  }
 
   Future<String> initInfo(String email) async {
-    isUser = (widget.email == email);
+    isUser = (widget.email == email)&&widget.fromProfile;
     try {
       DocumentSnapshot q =
       await firestore.collection("Profiles").doc(widget.email).get();
@@ -126,7 +165,7 @@ class _ProfilePageState extends State<ProfilePage> {
     var sizeFrameWidth = MediaQuery.of(context).size.width;
     double defaultSpace = MediaQuery.of(context).size.height * 0.013;
     double defaultSpacewidth = MediaQuery.of(context).size.height * 0.016;
-    //Future<String> _calculation = initInfo();
+   // Future<String> _calculation = initInfo();
 
     final DiscardUpdate =
     RaisedButton.icon(
@@ -302,7 +341,7 @@ class _ProfilePageState extends State<ProfilePage> {
               isUser? (editMode ? buttons : updateProfile):SizedBox(height: defaultSpace*0),
             ],
           ))),
-      drawer:  Consumer<UserRepository>(builder: (context, auth, _) => techDrawer(auth, context, DrawerSections.profile)),
+      drawer: widget.fromProfile? Consumer<UserRepository>(builder: (context, auth, _) => techDrawer(auth, context, DrawerSections.profile)):null,
       backgroundColor: mainColor,
     );
   }

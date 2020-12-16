@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -10,6 +11,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:tech_pool/Utils.dart';
 import 'package:intl/intl.dart';
 import 'package:tech_pool/pages/LiftInfoPage.dart';
+import 'package:tech_pool/pages/ProfilePage.dart';
 import 'package:tech_pool/pages/SearchLiftPage.dart';
 
 
@@ -23,6 +25,7 @@ class LiftSearchReasultsPage extends StatefulWidget {
   bool backSeat;
   bool bigTrunk;
 
+
   LiftSearchReasultsPage({Key key,@required this.fromTime,@required this.toTime,@required this.indexDist,@required this.startAddress,@required this.destAddress, @required this.backSeat, @required this.bigTrunk}): super(key: key);
   
   @override
@@ -35,75 +38,192 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
   List<String> _searchParams = ["Time", "Distance"];
   String _currsSearchDrop = "Time";
   List<MyLift> liftList =  <MyLift>[];
+  DocumentSnapshot docProfile;
+  String imageUrl ="";
+  QuerySnapshot q;
 
+  Future<String> initPic(String id) async {
+      return imageUrl = await FirebaseStorage.instance
+      .ref('uploads')
+     .child(id)
+     .getDownloadURL();
+  }
+  Future<DocumentSnapshot> initSnapshot(String id) async {
+    try {
+      return docProfile = await firestore.collection("Profiles").doc(id).get();
+    }catch(e){
+      print(e);
+      return null;
+    }
+  }
+  Future<bool> initAll() async {
+     q  = await firestore.collection("Drives").where('TimeStamp', isLessThanOrEqualTo: Timestamp.fromDate(widget.toTime),isGreaterThanOrEqualTo: Timestamp.fromDate(widget.fromTime)).get();
+     return true;
+  }
+  Future<bool> initProfiles() async{
+    List<MyLift> tempLift =  <MyLift>[];
+    DocumentSnapshot docProfile;
+    String imageUrl ="";
+    tempLift.clear();
+    for(int i=0;i<liftList.length;i++) {
+      imageUrl ="";
+      docProfile = null;
+      imageUrl = await FirebaseStorage.instance
+          .ref('uploads')
+          .child(liftList[i].driver)
+          .getDownloadURL();
+      //docProfile = await firestore.collection("Profiles").doc(liftList[i].driver).get();
+    //  Future<bool> p3 = initSnapshot(liftList[i].driver);
+     // await p3;
+    //  Future<bool> p4 = initPic(liftList[i].driver);
+     //  await p4;
+     // var futures = List<Future>();
+
+     // futures.add(initSnapshot(liftList[i].driver));
+     // futures.add(initPic(liftList[i].driver));
+     // Future.wait(futures);
+   //   liftList[i].driverName = docProfile.data()["firstName"]+" "+docProfile.data()["lastName"];
+   //   liftList[i].driverName = (docProfile.data()["firstName"]+" "+docProfile.data()["lastName"]);
+      liftList[i].imageUrl = imageUrl;
+      tempLift.add(liftList[i]);
+    }
+    liftList.clear();
+    liftList.addAll(tempLift);
+    tempLift.clear();
+
+    for(int i=0;i<liftList.length;i++) {
+     docProfile = await firestore.collection("Profiles").doc(liftList[i].driver).get();
+      //Future<bool> p3 = initSnapshot(liftList[i].driver);
+      //await p3;
+      liftList[i].driverName = docProfile.data()["firstName"]+" "+docProfile.data()["lastName"];
+      liftList[i].driverName = (docProfile.data()["firstName"]+" "+docProfile.data()["lastName"]);
+      tempLift.add(liftList[i]);
+    }
+    liftList.clear();
+    liftList.addAll(tempLift);
+    return true;
+  }
 
   Future<String> initList() async {
-    try {
-      liftList.clear();
-      QuerySnapshot q  = await firestore.collection("Drives").where('TimeStamp', isLessThanOrEqualTo: Timestamp.fromDate(widget.toTime),isGreaterThanOrEqualTo: Timestamp.fromDate(widget.fromTime)).get();
-      q.docs.forEach(
-              (element) {
-        MyLift docLift = new MyLift("driver", "destAddress", "stopAddress", 5);
-        element.data().forEach((key, value) {
-          if(value!=null) {
-            docLift.setProperty(key,value);
+    Future<bool> p = initAll();
+    await p;
+      try {
+        liftList.clear();
+        //q  = await firestore.collection("Drives").where('TimeStamp', isLessThanOrEqualTo: Timestamp.fromDate(widget.toTime),isGreaterThanOrEqualTo: Timestamp.fromDate(widget.fromTime)).get();
+       // var futures2 = List<Future>();
+      //  futures2.add(initAll());
+      //  Future.wait(futures2);
+        q.docs.forEach(
+                (element) async {
+              MyLift docLift = new MyLift(
+                  "driver", "destAddress", "stopAddress", 5);
+              element.data().forEach((key, value) {
+                if (value != null) {
+                  docLift.setProperty(key, value);
+                }
+              });
+          //     docLift.imageUrl = await initPic(docLift.driver);
+               /*
+               await FirebaseStorage.instance
+                .ref('uploads')
+               .child(docLift.driver)
+               .getDownloadURL();*/
+
+        //    DocumentSnapshot q3 = await initSnapshot(docLift.driver);
+           // await firestore.collection("Profiles").doc(docLift.driver).get();
+          //  docLift.driverName = "0";
+       //     docLift.driverName = q3.data()["firstName"] + " " + q3.data()["lastName"];
+
+              /*   DocumentSnapshot q =
+              await firestore.collection("Profiles").doc(docLift.driver).get();
+              docLift.driverName = "0";
+               docLift.driverName =
+                   q2.docs.asMap()[docLift.driver][docLift.driver]["firstName"] + " " +    q2.docs.asMap()["lastName"];*/
+
+              liftList.add(docLift);
+            });
+      } catch (e) {
+        print(e);
+      }
+      Coordinates startPointing = widget.startAddress.coordinates;
+      Coordinates destPointing = widget.destAddress.coordinates;
+      List<MyLift> liftListDelete = <MyLift>[];
+      liftList.forEach((element) {
+        bool toRemove = false;
+        if (widget.backSeat) {
+          if (!element.backSeat) {
+            toRemove = true;
           }
+        }
+        if (widget.bigTrunk) {
+          if (!element.bigTrunk) {
+            toRemove = true;
+          }
+        }
+        double distToStart = clacDis(element.startPoint, startPointing);
+        double distToEnd = clacDis(element.destPoint, destPointing);
+        element.stops.forEach((key, value) {
+          GeoPoint pointStop = value as GeoPoint;
+          distToStart = min(distToStart, clacDis(pointStop, startPointing));
+          distToEnd = min(distToEnd, clacDis(pointStop, destPointing));
         });
-        liftList.add(docLift);
-      });
-    } catch (e) {
-    }
-    Coordinates startPointing = widget.startAddress.coordinates;
-    Coordinates destPointing = widget.destAddress.coordinates;
-    List<MyLift> liftListDelete =  <MyLift>[];
-    liftList.forEach((element) {
-      bool toRemove = false;
-      if(widget.backSeat){
-        if(!element.backSeat){
-          toRemove =true;
+        element.dist = (distToStart + distToEnd).toInt();
+        if (toRemove) {
+          liftListDelete.add(element);
         }
-      }
-      if(widget.bigTrunk){
-        if(!element.bigTrunk){
-          toRemove =true;
-        }
-      }
-      double distToStart = clacDis(element.startPoint,startPointing);
-      double distToEnd =  clacDis(element.destPoint,destPointing);
-      element.stops.forEach((key, value) {
-        GeoPoint pointStop = value as GeoPoint;
-        distToStart = min(distToStart,clacDis(pointStop,startPointing));
-        distToEnd = min(distToEnd,clacDis(pointStop,destPointing));
       });
-      element.dist = (distToStart+distToEnd).toInt();
-      if(toRemove){
-        liftListDelete.add(element);
-      }
-    });
 
-    liftListDelete.forEach((element) {
-      liftList.remove(element);
-    });
-    Comparator<MyLift> timeComparator = (a, b) {
-      if(a.time == b.time){
-        return a.dist.compareTo(b.dist);
-      }
-      return a.time.compareTo(b.time);
-    };
-
-    Comparator<MyLift> distComparator = (a, b) {
-      if(a.dist == b.dist){
+      liftListDelete.forEach((element) {
+        liftList.remove(element);
+      });
+      Comparator<MyLift> timeComparator = (a, b) {
+        if (a.time == b.time) {
+          return a.dist.compareTo(b.dist);
+        }
         return a.time.compareTo(b.time);
-      }
-      return a.dist.compareTo(b.dist);
-    };
+      };
 
-    if(_currsSearchDrop == "Time"){
-      liftList.sort(timeComparator);
-    }else{
-      liftList.sort(distComparator);
-    }
-    return "finish";
+      Comparator<MyLift> distComparator = (a, b) {
+        if (a.dist == b.dist) {
+          return a.time.compareTo(b.time);
+        }
+        return a.dist.compareTo(b.dist);
+      };
+/*
+    List<MyLift> tempLift =  <MyLift>[];
+    liftList.forEach((element) async {
+      DocumentSnapshot q =
+      await firestore.collection("Profiles").doc(element.driver).get();
+      element.driverName = q.data()["firstName"]+" "+q.data()["lastName"];
+       // element.driverName ="0";
+      element.driverName = (q.data()["firstName"]+" "+q.data()["lastName"]);
+      tempLift.add(element);
+    });
+    liftList=tempLift;*/
+      if (_currsSearchDrop == "Time") {
+        liftList.sort(timeComparator);
+      } else {
+        liftList.sort(distComparator);
+      }
+    await Future.wait(liftList.map((e) async {
+        DocumentSnapshot q =  await firestore.collection("Profiles").doc(e.driver).get();
+        e.driverName = q.data()["firstName"]+" "+q.data()["lastName"];
+        return e;
+      }));
+
+    await Future.wait(liftList.map((e) async {
+     e.imageUrl = await FirebaseStorage.instance
+          .ref('uploads')
+          .child(e.driver)
+          .getDownloadURL();
+      return e;
+    }));
+     // var futures = List<Future>();
+     // Future<bool> p2 = initProfiles();
+     // await p2;
+     // futures.add(initFire());
+      //Future.wait(futures);
+      return "finish";
   }
 
   @override
@@ -113,11 +233,12 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
     double defaultSpacewidth = MediaQuery.of(context).size.height * 0.016;
     Future<String> _calculation = initList();
     final searchLift = Container(
+      decoration: BoxDecoration(color: Colors.black,borderRadius: BorderRadius.only(topLeft:Radius.circular(20.0),topRight:Radius.circular(20.0) ),),
         child: FlatButton.icon(
             color: Colors.black,
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(18),
-                side: BorderSide(color: Colors.black)),
+                side: BorderSide(color: Colors.white)),
             icon: Icon(Icons.edit_outlined, color: Colors.white),
             label: Text("Edit Search",
                 style: TextStyle(color: Colors.white, fontSize: 17)),
@@ -137,13 +258,14 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
                     widget.toTime = returnResult.toTime;
                     widget.indexDist = returnResult.indexDist;
                     widget.bigTrunk = returnResult.bigTrunk;
+                    widget.backSeat = returnResult.backSeat;
                     widget.indexDist = returnResult.indexDist;
                   }
                 });
             }));
 
     final sortAndSearch = Container(
-        color: Colors.black.withOpacity(0.4),
+        decoration: BoxDecoration(color: Colors.black,borderRadius: BorderRadius.only(topLeft:Radius.circular(20.0),topRight:Radius.circular(20.0) )),
       child:Container(
           margin: EdgeInsets.only(
               left: defaultSpacewidth),
@@ -155,31 +277,37 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
           Container(
             child: Theme(
                 data: Theme.of(context).copyWith(
-                    canvasColor: Colors.grey,
+                    canvasColor: Colors.black,
                     // background color for the dropdown items
                     buttonTheme: ButtonTheme.of(context).copyWith(
                       alignedDropdown:
                           true, //If false (the default), then the dropdown's menu will be wider than its button.
                     )),
-                child: DropdownButton<String>(
-                    elevation: 0,
-                    value: _currsSearchDrop,
-                    onChanged: (String newValue) {
-                      setState(() {
-                        _currsSearchDrop = newValue;
-                      });
-                    },
-                    items: _searchParams
-                        .map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child:
-                            Text(value, style: TextStyle(color: Colors.white)),
-                      );
-                    }).toList())),
+                child: Container(
+                  child: DropdownButton<String>(
+                      underline: Container(color: Colors.white,height: 2,),
+                      elevation: 0,
+                      value: _currsSearchDrop,
+                      iconEnabledColor:Colors.white,
+                      iconDisabledColor:Colors.white,
+                      onChanged: (String newValue) {
+                        setState(() {
+                          _currsSearchDrop = newValue;
+                        });
+                      },
+                      items: _searchParams
+                          .map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child:
+                              Text(value, style: TextStyle(color: Colors.white)),
+                        );
+                      }).toList()),
+                )),
           ),
           Spacer(),
           searchLift,
+          SizedBox(width: defaultSpacewidth*0.2,)
         ])));
 
     final _fbuildTiles = ListView.separated(
@@ -191,12 +319,14 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
       },
     );
 
-    final _futureBuildLists = FutureBuilder<void>(
+    final _futureBuildLists =
+    FutureBuilder<void>(
       future:_calculation, // a previously-obtained Future<String> or null
       builder: (BuildContext context, AsyncSnapshot<void> snapshot){
         if(snapshot.hasData) {
           return  ListView.separated(
             shrinkWrap: true,
+            padding: EdgeInsets.only(left: defaultSpacewidth*0.4, right: defaultSpacewidth*0.4, bottom: defaultSpacewidth*0.4,top:defaultSpacewidth*0.4 ),
             itemCount: liftList.length,
             separatorBuilder: (BuildContext context, int index) => Divider(thickness: 4,),
             itemBuilder: (BuildContext context, int index) {
@@ -215,10 +345,9 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
         title: Text("Search Results",style: TextStyle(color: Colors.white),),
       ),
       body:Container(
-          margin: EdgeInsets.only(
-              left: defaultSpacewidth, right: defaultSpacewidth, bottom: 10),
+          decoration: pageContainerDecoration,
+          margin: pageContainerMargin,
           //padding: EdgeInsets.only(left: defaultSpacewidth, right: defaultSpacewidth),
-          color: Colors.white,
           child: Column(
             children: [sortAndSearch, Expanded(child:_futureBuildLists)],
           )),
@@ -250,11 +379,33 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
 
 
   Widget _buildTile(MyLift lift) {
-    return Container(
+   // FutureBuilder<void>(
+    //    future:initProfiles(),
+    //    builder: (BuildContext context, AsyncSnapshot<void> snapshot){
+        return Container(
+        decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [BoxShadow(color: Colors.black,blurRadius: 2.0,
+        spreadRadius: 0.0,offset: Offset(2.0, 2.0))],
+       border: Border.all(color: secondColor, width: 0.8),
+       borderRadius: BorderRadius.circular(12.0),),
       child:
           Row(
             children:[
-          Container(
+          InkWell(
+            onTap:() async{
+              await Navigator.of(context).push(
+                  MaterialPageRoute<liftRes>(
+                      builder: (BuildContext context) {
+                        return ProfilePage(email: lift.driver,fromProfile: false,);
+                      },
+                      fullscreenDialog: true
+                  ));
+              setState(() {
+
+              });
+          },
+          child:Container(
               margin: EdgeInsets.only(
                   left: MediaQuery.of(context).size.height * 0.016, top: MediaQuery.of(context).size.height * 0.016),
               width: MediaQuery.of(context).size.height * 0.016*4,
@@ -262,13 +413,15 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: Colors.teal,
-              )),
+                image:DecorationImage(fit: BoxFit.fill, image: NetworkImage(lift.imageUrl)),
+
+              ))),
               Container(
                   margin: EdgeInsets.only(
                       left: MediaQuery.of(context).size.height * 0.016, top: MediaQuery.of(context).size.height * 0.016),
                   child:Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                children: [infoText(lift.driver),placesText(lift.startCity,lift.destCity),allInfoText(lift.time, lift.dist~/1000, lift.price, lift.numberOfSeats, lift.passengers.length),],
+                children: [infoText(lift.driverName),placesText(lift.startCity,lift.destCity),allInfoText(lift.time, lift.dist~/1000, lift.price, lift.numberOfSeats, lift.passengers.length),],
               )),
         Spacer(),
        InkWell(
@@ -286,6 +439,7 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
             ],
       ),
     );
+   // });
   }
   Widget allInfoText(DateTime time,int dist, int price,int avaliable,int taken){
    return Container(
@@ -295,12 +449,14 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
        Text(DateFormat('kk:mm').format(time)),
        SizedBox(width: MediaQuery.of(context).size.height * 0.01),
        Container(child:Image.asset("assets/images/tl-.png",scale: 0.9)),
+       SizedBox(width: MediaQuery.of(context).size.height * 0.005),
        Text(dist.toString()+"km"),
        SizedBox(width: MediaQuery.of(context).size.height * 0.01),
        Icon(Icons.person),
        Text(taken.toString()+"/"+avaliable.toString()),
        SizedBox(width: MediaQuery.of(context).size.height * 0.01),
        Container(child:Image.asset("assets/images/shekel.png",scale: 0.9)),
+       SizedBox(width: MediaQuery.of(context).size.height * 0.003),
        Text(price.toString()),
 
      ],

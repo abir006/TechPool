@@ -1,12 +1,28 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:tech_pool/Utils.dart';
 import 'package:tech_pool/widgets/TextBoxField.dart';
-
 import 'HomePage.dart';
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:path_provider/path_provider.dart';
+import 'package:flutter/services.dart';
+
+class ImageUtils {
+  static Future<File> imageToFile({String imageName, String ext}) async {
+    var bytes = await rootBundle.load('assets/$imageName.$ext');
+    String tempPath = (await getTemporaryDirectory()).path;
+    File file = File('$tempPath/profile.png');
+    await file.writeAsBytes(
+        bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes));
+    return file;
+  }
+}
+
 
 class SignUpPage extends StatefulWidget {
   @override
@@ -14,6 +30,7 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateMixin {
+  final cloudStorage = FirebaseStorage.instance;
   FirebaseFirestore db = FirebaseFirestore.instance;
   Animation<double> animation;
   AnimationController controller;
@@ -175,6 +192,9 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
                                   await user.user.updateProfile(displayName: _firstName.text+" "+_lastName.text);
                                   await user.user.sendEmailVerification();
                                   userRep.user = user.user;
+                                  await cloudStorage.ref('uploads')
+                                      .child(userRep.user.email).putFile(await ImageUtils.imageToFile(imageName: "images/profile", ext: "png"));
+                                  userRep.profilePicture = Image.asset("assets/images/profile.png");
                                   while(!await checkEmailVerified()) {
 
                                   }

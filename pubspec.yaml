@@ -54,6 +54,7 @@ dependencies:
   multi_select_flutter: ^3.1.6
   rxdart: ^0.25.0
   async: ^2.4.2
+  path_provider: ^1.6.24
 
 dev_dependencies:
   flutter_launcher_icons: "^0.8.0"

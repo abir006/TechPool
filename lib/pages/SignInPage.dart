@@ -156,21 +156,15 @@ class _SignInPageState extends State<SignInPage> with SingleTickerProviderStateM
                                   await (userRep.auth.signInWithEmailAndPassword(email: _email.text, password: _password.text).then((user) async {
                                     if(user.user.emailVerified) {
                                       userRep.user = user.user;
-                                      var _imgUrl = await (cloudStorage
-                                          .ref('uploads')
-                                          .child(userRep.user.email)
-                                          .getDownloadURL());
-                                      userRep.profilePicture = Image.network(_imgUrl, loadingBuilder:(BuildContext context, Widget child,ImageChunkEvent loadingProgress) {
-                                        if (loadingProgress == null) return child;
-                                        return Center(
-                                          child: CircularProgressIndicator(
-                                            value: loadingProgress.expectedTotalBytes != null ?
-                                            loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes
-                                                : null,
-                                          ),
-                                        );
-                                      },
-                                      );
+                                      try {
+                                        var _imgUrl = await (cloudStorage
+                                            .ref('uploads')
+                                            .child(userRep.user.email)
+                                            .getDownloadURL());
+                                        userRep.profilePicture = Image.network(_imgUrl);
+                                      }catch(_){
+                                        userRep.profilePicture = null;
+                                      }
                                       setState(() {
                                         controller.stop();
                                         animation = new Tween(begin: 0.0, end: size.height).animate(controller);

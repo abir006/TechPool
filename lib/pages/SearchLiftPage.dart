@@ -73,7 +73,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
     double defaultSpace = MediaQuery.of(context).size.height*0.013;
     double defaultSpacewidth = MediaQuery.of(context).size.height*0.016;
     if(widget.currentdate == null) widget.currentdate = DateTime.now();
-    DateTime currentDate = DateTime(widget.currentdate.year,widget.currentdate.month,widget.currentdate.day,DateTime.now().hour+2,DateTime.now().minute,DateTime.now().second,DateTime.now().millisecond,DateTime.now().microsecond);
+    DateTime currentDate = DateTime(widget.currentdate.year,widget.currentdate.month,widget.currentdate.day,DateTime.now().hour,DateTime.now().minute,DateTime.now().second,DateTime.now().millisecond,DateTime.now().microsecond);
     if( widget.totime!=null) {
       _toTime = widget.totime;
       _toControler.text = DateFormat('kk:mm').format(widget.totime);
@@ -153,9 +153,9 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
         ],
       ),
     ),
-      InkWell(
-          onTap: (){},
-          child:Container(color:Colors.transparent,child:SizedBox(width: defaultSpace*8,height:defaultSpace*8,))),
+    //  InkWell(
+        //  onTap: (){},
+         // Container(color:Colors.transparent,child:SizedBox(width: defaultSpace*8,height:defaultSpace*9,)),
     ]);
 
     final destinationText =  Stack(children:[Container(
@@ -171,15 +171,13 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
                 else return null;}),
         ],
       )),
-      InkWell(
-          onTap: (){},
-          child:Container(color:Colors.transparent,child:SizedBox(width: defaultSpace*8,height:defaultSpace*8,))),
+         // Container(color:Colors.transparent,child:SizedBox(width: defaultSpace*8,height:defaultSpace*10,)),
     ]);
 
     final searchLift =
       Container(
           padding: EdgeInsets.only(left: sizeFrameWidth*0.2, right:sizeFrameWidth*0.2) ,
-        height: 40,
+        height: defaultSpace*4.5,
         child: RaisedButton.icon(
             color: Colors.black,
             shape: RoundedRectangleBorder(
@@ -314,7 +312,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.white,
-          toolbarHeight: 23,
+          toolbarHeight: defaultSpace*2.5,
           leading: Container(),
           titleSpacing: 0,
           bottom: ColoredTabBar(Colors.white,TabBar(
@@ -411,7 +409,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
                     onPressed: () {
                       setState(() {
                        if(_fromTimeTemp==null) _fromTimeTemp=currentDate;
-                       if(_toTimeTemp==null) _toTimeTemp =_toTime!=null?_toTime:_fromTimeTemp;
+                       if(_toTimeTemp==null) _toTimeTemp =(_toTime!=null?_toTime:_fromTimeTemp);
                        _fromTime=_fromTimeTemp;
                        _toTime = _toTimeTemp;
                         _toControler.text = DateFormat('kk:mm').format(_toTime);
@@ -587,6 +585,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
         ));
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
         title: Text("Search Lift",style: TextStyle(color:Colors.white),),
@@ -595,8 +594,8 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
         key: _formKey,
         child: Builder(
           builder: (context) => Container(
-              color: Colors.white,
-              margin: EdgeInsets.only(left: defaultSpacewidth, right: defaultSpacewidth, bottom: defaultSpacewidth),
+            decoration: pageContainerDecoration,
+            margin: pageContainerMargin,
               child: Column( children: [ Expanded(child: Stack(children:[Container( child:Center(child:Transform.rotate(angle: 0.8,child:Icon(Icons.thumb_up_rounded,size:300,color:  Colors.cyan.withOpacity(0.1),)))),
                 ListView(
                   padding: EdgeInsets.only(left: defaultSpacewidth, right: defaultSpacewidth, bottom: defaultSpacewidth),

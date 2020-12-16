@@ -82,6 +82,7 @@ Widget generalInfoText({@required String text, int maxElepsis}){
 Widget generalInfoTextField({@required TextEditingController controllerText,@required bool enabled,int maxLines,int maxLenth}){
   return Container(
     child: TextField(
+
       maxLength: maxLenth==null?30:maxLenth,
       controller: controllerText,
       keyboardType: TextInputType.multiline,
@@ -92,3 +93,18 @@ Widget generalInfoTextField({@required TextEditingController controllerText,@req
 }
 
 
+Widget generalInfoBoxTextField({@required TextEditingController controllerText,@required bool enabled,@required String nameLabel,int maxLines,int maxLenth}){
+  return Container(
+    child: TextField(
+      decoration:  InputDecoration(
+            labelText: nameLabel,
+            labelStyle: TextStyle(fontSize: 17),
+           ),
+      maxLength: maxLenth==null?30:maxLenth,
+      controller: controllerText,
+      keyboardType: TextInputType.multiline,
+      maxLines: maxLines,
+      enabled: enabled,
+    ),
+  );
+}

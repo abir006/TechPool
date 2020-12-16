@@ -46,9 +46,6 @@ class _SetDrivePageState extends State<SetDrivePage> {
   Address startAddress;
   Address destAddress;
   List<Map> stopAddressesList = [];
-  // Address stop1Address;
-  // Address stop2Address;
-  // Address stop3Address;
 
   @override
   void initState() {
@@ -185,17 +182,14 @@ class _SetDrivePageState extends State<SetDrivePage> {
                     if (_numberOfStops > 0) {
                       _stopPoint1Controller.text =
                           returnFromMapResult.stopAddresses[0].addressLine;
-                      //stop1Address = returnFromMapResult.stopAddresses[0];
-                    }
-                    if (_numberOfStops > 1) {
-                      _stopPoint2Controller.text =
-                          returnFromMapResult.stopAddresses[1].addressLine;
-                      //stop2Address = returnFromMapResult.stopAddresses[1];
-                    }
-                    if (_numberOfStops > 2) {
-                      _stopPoint3Controller.text =
-                          returnFromMapResult.stopAddresses[2].addressLine;
-                      //stop3Address = returnFromMapResult.stopAddresses[2];
+                      if (_numberOfStops > 1) {
+                        _stopPoint2Controller.text =
+                            returnFromMapResult.stopAddresses[1].addressLine;
+                        if (_numberOfStops > 2) {
+                          _stopPoint3Controller.text =
+                              returnFromMapResult.stopAddresses[2].addressLine;
+                        }
+                      }
                     }
                     for(int i = 0; i<_numberOfStops; i++){
                       //String stopName = "Stop" + (i+1).toString();
@@ -274,7 +268,6 @@ class _SetDrivePageState extends State<SetDrivePage> {
                                     });
                                   },
                                 ),
-                                //SizedBox(width: 2*defaultSpaceWidth),
                                 FlatButton(
                                   child: Text('CONFIRM',
                                       style: TextStyle(
@@ -299,7 +292,6 @@ class _SetDrivePageState extends State<SetDrivePage> {
 
     final timeText1 = Container(
       child: textBoxFieldDisableCentered(
-          //nameLabel: "Deppparture Time: ",
           size: MediaQuery.of(context).size,
           hintText: "",
           textFieldController: _hourController,
@@ -462,14 +454,14 @@ class _SetDrivePageState extends State<SetDrivePage> {
                     //Random random = new Random();
                     // final String driveName =
                     //     "0_test_drive" + random.nextInt(1000).toString();
-                    final String driveName =
-                        "0_test_" + DateTime.now().toString();
-                    //drives.add({
+                    // final String driveName =
+                    //     "0_test_" + DateTime.now().toString();
+                    // await drives
+                    //     .doc(driveName)
+                    //     .set({
 
                     CollectionReference drives = widget.db.collection('Drives');
-                    await drives
-                        .doc(driveName)
-                        .set({
+                    drives.add({
                       'BackSeatNotFull': !(_fullBackSeat),
                       'BigTrunk': _bigTrunk,
                       'Note': _noteController.text,
@@ -486,50 +478,18 @@ class _SetDrivePageState extends State<SetDrivePage> {
                       'DestCity': destAddress.locality,
                       'DestPoint': GeoPoint(destAddress.coordinates.latitude,
                           destAddress.coordinates.longitude),
+
                       'Stops' : stopAddressesList,
-                      // 'Stop1Exists': stop1Address != null ? true : false,
-                      // 'Stop1Address': stop1Address != null
-                      //     ? stop1Address.addressLine
-                      //     : null,
-                      // 'Stop1City':
-                      // stop1Address != null ? stop1Address.locality : null,
-                      // 'Stop1Point': stop1Address != null
-                      //     ? GeoPoint(stop1Address.coordinates.latitude,
-                      //     stop1Address.coordinates.longitude)
-                      //     : null,
-                      //
-                      // 'Stop2Exists': stop2Address != null ? true : false,
-                      // 'Stop2Address': stop2Address != null
-                      //     ? stop2Address.addressLine
-                      //     : null,
-                      // 'Stop2City':
-                      // stop2Address != null ? stop1Address.locality : null,
-                      // 'Stop2Point': stop2Address != null
-                      //     ? GeoPoint(stop2Address.coordinates.latitude,
-                      //     stop2Address.coordinates.longitude)
-                      //     : null,
-                      // 'Stop3Exists': stop3Address != null ? true : false,
-                      // 'Stop3Address': stop3Address != null
-                      //     ? stop3Address.addressLine
-                      //     : null,
-                      // 'Stop3City':
-                      // stop3Address != null ? stop3Address.locality : null,
-                      // 'Stop3Point': stop3Address != null
-                      //     ? GeoPoint(stop3Address.coordinates.latitude,
-                      //     stop2Address.coordinates.longitude)
-                      //     : null,
 
                       'Passengers': [],
                       'TimeStamp': _chosenTime,
-                      //'Driver': userRep.user.email,
-                      'Driver': "testing@technion.co.il",
+                      'Driver': userRep.user.email,
+                      //'Driver': "testing@technion.co.il",
                     });
 
                     Navigator.pop(context);
-                    //_key2.currentState.showSnackBar(SnackBar(content: Text("Successfully inserted", style: TextStyle(fontSize: 19,color: Colors.red),)));
                     // .then((value) => Navigator.pop(context))
-                        // .catchError((error) =>
-                        // print("Something went wrong. Please try again"));
+                    // .catchError((error) => print("Something went wrong. Please try again"));
                   }
                   catch(e){
                     _key2.currentState.showSnackBar(SnackBar(content: Text("Something went wrong. Please try again", style: TextStyle(fontSize: 19,color: Colors.red),)));
@@ -558,7 +518,6 @@ class _SetDrivePageState extends State<SetDrivePage> {
               bigTrunkText,
               SizedBox(height: defaultSpace),
               backSeatText,
-              //SizedBox(height: defaultSpace)
               noteToPassengersText,
             ],
           ));
@@ -645,16 +604,12 @@ class _SetDrivePageState extends State<SetDrivePage> {
                                     departureTimeButton,
                                     timeText1,
                                     priceAndBackSeatRowText,
-                                    //priceText,
                                   ],
                                 ),
                                 SizedBox(height: defaultSpace),
                                 Divider(thickness: 3),
                                 preferences,
                                 Divider(thickness: 3),
-                                // bigTrunkText,
-                                // backSeatText,
-                                // noteToPassengersText,
                               ])
                         ]),
                       ),

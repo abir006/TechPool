@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:tech_pool/Utils.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:tech_pool/pages/SearchLiftPage.dart';
+import 'package:rxdart/rxdart.dart';
 
 import 'SetDrivePage.dart';
 
@@ -33,52 +34,75 @@ class _HomePageState extends State<HomePage> {
   void _onDaySelected(DateTime day, List events, List holidays) {
     setState(() {
       selectedDay = day;
-      _dailyEvents = events;
+      /*_dailyEvents = events;
       _dailyEvents.sort((a, b) {
         if (a.dateTime.isAfter(b.dateTime)) {
           return 1;
         } else {
           return -1;
         }
-      });
+      });*/
     });
   }
-
   @override
   Widget build(BuildContext context) {
     return Consumer<UserRepository>(builder: (context, userRep, child) {
-      return firstLoad
-          ? FutureBuilder<QuerySnapshot>(
-              future: firestore
-                  .collection("Drives")
-                  .where('Driver', isEqualTo: userRep.user.email)
-                  .get(),
+      return StreamBuilder<List<QuerySnapshot>>(
+              stream: CombineLatestStream([
+              firestore.collection("Drives").where("Passengers", arrayContains: userRep.user?.email).snapshots(),firestore
+                    .collection("Drives")
+                    .where('Driver', isEqualTo: userRep.user?.email).snapshots()],(vals) => [vals[0],vals[1]]),
               builder: (context, snapshot) {
                 _events = {};
                 _dailyEvents = [];
                 if (snapshot.hasData) {
-                  firstLoad = false;
-                  snapshot.data.docs.forEach((element) {
-                    DateTime elementTime = element.data()["TimeStamp"].toDate();
-                    Drive drive = Drive(
-                        element.data()["StartCity"] +
+                  snapshot.data[1].docs.forEach((element) {
+                    var elementData = element.data();
+                    DateTime elementTime = elementData["TimeStamp"].toDate();
+                    var drive = Drive(
+                        elementData["StartCity"] +
                             " -> " +
-                            element.data()["DestCity"],
-                        element.data()["NumberSeats"],
-                        element.data()["Passengers"].length,
+                            elementData["DestCity"],
+                        elementData["NumberSeats"],
+                        elementData["Passengers"].length,
                         elementTime);
                     _events[Jiffy(elementTime)
                         .startOf(Units.DAY)
                         .add(Duration(hours: 12))] = (_events[Jiffy(elementTime)
-                                .startOf(Units.DAY)
-                                .add(Duration(hours: 12))] ??
-                            []) +
+                        .startOf(Units.DAY)
+                        .add(Duration(hours: 12))] ??
+                        []) +
                         [drive];
                     if (elementTime
-                            .isAfter(Jiffy(selectedDay).startOf(Units.DAY)) &&
+                        .isAfter(Jiffy(selectedDay).startOf(Units.DAY)) &&
                         elementTime
                             .isBefore(Jiffy(selectedDay).endOf(Units.DAY))) {
                       _dailyEvents.add(drive);
+                    }
+                  });
+                  snapshot.data[0].docs.forEach((element) {
+                    var elementData = element.data();
+                    DateTime elementTime = elementData["TimeStamp"].toDate();
+                    var lift = Lift(
+                        elementData["StartCity"] +
+                            " -> " +
+                            elementData["DestCity"],
+                        elementData["NumberSeats"],
+                        elementData["Passengers"].length,
+                        elementTime);
+                    _events[Jiffy(elementTime)
+                        .startOf(Units.DAY)
+                        .add(Duration(hours: 12))] = (_events[Jiffy(
+                        elementTime)
+                        .startOf(Units.DAY)
+                        .add(Duration(hours: 12))] ??
+                        []) +
+                        [lift];
+                    if (elementTime
+                        .isAfter(Jiffy(selectedDay).startOf(Units.DAY)) &&
+                        elementTime
+                            .isBefore(Jiffy(selectedDay).endOf(Units.DAY))) {
+                      _dailyEvents.add(lift);
                     }
                   });
                   _dailyEvents.sort((a, b) {
@@ -98,13 +122,9 @@ class _HomePageState extends State<HomePage> {
                         Text("Error loading events from cloud")
                       ]);
                 } else {
-                  return Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [Text("Loading"), LinearProgressIndicator()]);
+                  return _buildPage(context, userRep);
                 }
-              })
-          : _buildPage(context, userRep);
+              });
     });
   }
 

@@ -257,7 +257,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         left: defaultSpacewidth, right: defaultSpacewidth),
                     children: [
                       SizedBox(height: defaultSpace),
-                      Center(child: Stack(children: [Container(width: MediaQuery.of(context).size.height * 0.016 * 8, height: MediaQuery.of(context).size.height * 0.016 * 8, child:CircleAvatar(radius: 18, backgroundImage: isUser? userRep.profilePicture.image:NetworkImage(imageUrl)),),
+                      Center(child: Stack(children: [Container(width: MediaQuery.of(context).size.height * 0.016 * 8, height: MediaQuery.of(context).size.height * 0.016 * 8, child:CircleAvatar(radius: 18, backgroundImage: isUser? userRep.profilePicture.image:NetworkImage(imageUrl))),
                         isUser? Container(padding: EdgeInsets.only(
                             left: defaultSpacewidth * 4.8, top: defaultSpacewidth * 5.3),
                           child: ClipOval(

@@ -10,7 +10,6 @@ import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:configurable_expansion_tile/configurable_expansion_tile.dart';
-import 'dart:math';
 
 // mail for testing purposes:
 // ofir.asulin@campus.technion.ac.il
@@ -25,6 +24,7 @@ class SetDrivePage extends StatefulWidget {
 
 class _SetDrivePageState extends State<SetDrivePage> {
   final _formKey2 = GlobalKey<FormState>();
+  final _key2 = GlobalKey<ScaffoldState>();
   double _fontTextsSize = 17;
   DateTime _chosenTime;
   DateTime _chosenTimeCandidate;
@@ -45,9 +45,10 @@ class _SetDrivePageState extends State<SetDrivePage> {
   LocationsResult returnFromMapResult;
   Address startAddress;
   Address destAddress;
-  Address stop1Address;
-  Address stop2Address;
-  Address stop3Address;
+  List<Map> stopAddressesList = [];
+  // Address stop1Address;
+  // Address stop2Address;
+  // Address stop3Address;
 
   @override
   void initState() {
@@ -184,24 +185,35 @@ class _SetDrivePageState extends State<SetDrivePage> {
                     if (_numberOfStops > 0) {
                       _stopPoint1Controller.text =
                           returnFromMapResult.stopAddresses[0].addressLine;
-                      stop1Address = returnFromMapResult.stopAddresses[0];
+                      //stop1Address = returnFromMapResult.stopAddresses[0];
                     }
                     if (_numberOfStops > 1) {
                       _stopPoint2Controller.text =
                           returnFromMapResult.stopAddresses[1].addressLine;
-                      stop2Address = returnFromMapResult.stopAddresses[1];
+                      //stop2Address = returnFromMapResult.stopAddresses[1];
                     }
                     if (_numberOfStops > 2) {
                       _stopPoint3Controller.text =
                           returnFromMapResult.stopAddresses[2].addressLine;
-                      stop3Address = returnFromMapResult.stopAddresses[2];
+                      //stop3Address = returnFromMapResult.stopAddresses[2];
                     }
+                    for(int i = 0; i<_numberOfStops; i++){
+                      //String stopName = "Stop" + (i+1).toString();
+                      Map mapToAdd = {'stopPoint' : GeoPoint(
+                          returnFromMapResult.stopAddresses[i].coordinates.latitude,
+                          returnFromMapResult.stopAddresses[i].coordinates.longitude),
+                        'stopAddress' : returnFromMapResult.stopAddresses[i].addressLine.toString(),
+                                      'stopCity' : returnFromMapResult.stopAddresses[i].locality};
+                      stopAddressesList.add(mapToAdd);
+                    }
+
                   }
                 });
               },
             ),
           ),
         ]);
+
 
     final departureTimeButton = Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -447,9 +459,11 @@ class _SetDrivePageState extends State<SetDrivePage> {
                 if (_formKey2.currentState.validate()) {
                   try {
 
-                    Random random = new Random();
+                    //Random random = new Random();
+                    // final String driveName =
+                    //     "0_test_drive" + random.nextInt(1000).toString();
                     final String driveName =
-                        "0_test_drive" + random.nextInt(1000).toString();
+                        "0_test_" + DateTime.now().toString();
                     //drives.add({
 
                     CollectionReference drives = widget.db.collection('Drives');
@@ -472,55 +486,55 @@ class _SetDrivePageState extends State<SetDrivePage> {
                       'DestCity': destAddress.locality,
                       'DestPoint': GeoPoint(destAddress.coordinates.latitude,
                           destAddress.coordinates.longitude),
-
-
-                      'Stop1Exists': stop1Address != null ? true : false,
-                      'Stop1Address': stop1Address != null
-                          ? stop1Address.addressLine
-                          : null,
-                      'Stop1City':
-                      stop1Address != null ? stop1Address.locality : null,
-                      'Stop1Point': stop1Address != null
-                          ? GeoPoint(stop1Address.coordinates.latitude,
-                          stop1Address.coordinates.longitude)
-                          : null,
-
-                      'Stop2Exists': stop2Address != null ? true : false,
-                      'Stop2Address': stop2Address != null
-                          ? stop2Address.addressLine
-                          : null,
-                      'Stop2City':
-                      stop2Address != null ? stop1Address.locality : null,
-                      'Stop2Point': stop2Address != null
-                          ? GeoPoint(stop2Address.coordinates.latitude,
-                          stop2Address.coordinates.longitude)
-                          : null,
-                      'Stop3Exists': stop3Address != null ? true : false,
-                      'Stop3Address': stop3Address != null
-                          ? stop3Address.addressLine
-                          : null,
-                      'Stop3City':
-                      stop3Address != null ? stop3Address.locality : null,
-                      'Stop3Point': stop3Address != null
-                          ? GeoPoint(stop3Address.coordinates.latitude,
-                          stop2Address.coordinates.longitude)
-                          : null,
+                      'Stops' : stopAddressesList,
+                      // 'Stop1Exists': stop1Address != null ? true : false,
+                      // 'Stop1Address': stop1Address != null
+                      //     ? stop1Address.addressLine
+                      //     : null,
+                      // 'Stop1City':
+                      // stop1Address != null ? stop1Address.locality : null,
+                      // 'Stop1Point': stop1Address != null
+                      //     ? GeoPoint(stop1Address.coordinates.latitude,
+                      //     stop1Address.coordinates.longitude)
+                      //     : null,
+                      //
+                      // 'Stop2Exists': stop2Address != null ? true : false,
+                      // 'Stop2Address': stop2Address != null
+                      //     ? stop2Address.addressLine
+                      //     : null,
+                      // 'Stop2City':
+                      // stop2Address != null ? stop1Address.locality : null,
+                      // 'Stop2Point': stop2Address != null
+                      //     ? GeoPoint(stop2Address.coordinates.latitude,
+                      //     stop2Address.coordinates.longitude)
+                      //     : null,
+                      // 'Stop3Exists': stop3Address != null ? true : false,
+                      // 'Stop3Address': stop3Address != null
+                      //     ? stop3Address.addressLine
+                      //     : null,
+                      // 'Stop3City':
+                      // stop3Address != null ? stop3Address.locality : null,
+                      // 'Stop3Point': stop3Address != null
+                      //     ? GeoPoint(stop3Address.coordinates.latitude,
+                      //     stop2Address.coordinates.longitude)
+                      //     : null,
 
                       'Passengers': [],
                       'TimeStamp': _chosenTime,
                       //'Driver': userRep.user.email,
                       'Driver': "testing@technion.co.il",
                     });
-                    Scaffold.of(context).showSnackBar(SnackBar(content: Text("successfully", style: TextStyle(fontSize: 16,color: Colors.red),)));
 
                     Navigator.pop(context);
-                        // .then((value) => Navigator.pop(context))
+                    //_key2.currentState.showSnackBar(SnackBar(content: Text("Successfully inserted", style: TextStyle(fontSize: 19,color: Colors.red),)));
+                    // .then((value) => Navigator.pop(context))
                         // .catchError((error) =>
                         // print("Something went wrong. Please try again"));
                   }
                   catch(e){
-                    Scaffold.of(context).showSnackBar(SnackBar(content: Text(e.message, style: TextStyle(fontSize: 16,color: Colors.red),)));
+                    _key2.currentState.showSnackBar(SnackBar(content: Text("Something went wrong. Please try again", style: TextStyle(fontSize: 19,color: Colors.red),)));
                   }
+
                 }
               }));
 
@@ -550,6 +564,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
           ));
 
       return Scaffold(
+        key: _key2,
         appBar: AppBar(
           elevation: 0,
           title: Text("Set Drive", style: TextStyle(color: Colors.white)),

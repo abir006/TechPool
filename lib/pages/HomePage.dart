@@ -59,9 +59,9 @@ class _HomePageState extends State<HomePage> {
                   snapshot.data[1].docs.forEach((element) {
                     var elementData = element.data();
                     DateTime elementTime = elementData["TimeStamp"].toDate();
-                    var drive = Drive(
+                    var drive = Drive(element.id,
                         elementData["StartCity"] +
-                            " -> " +
+                            " \u{2192} " +
                             elementData["DestCity"],
                         elementData["NumberSeats"],
                         elementData["Passengers"].length,
@@ -83,9 +83,9 @@ class _HomePageState extends State<HomePage> {
                   snapshot.data[0].docs.forEach((element) {
                     var elementData = element.data();
                     DateTime elementTime = elementData["TimeStamp"].toDate();
-                    var lift = Lift(
+                    var lift = Lift(element.id,
                         elementData["StartCity"] +
-                            " -> " +
+                            " \u{2192} " +
                             elementData["DestCity"],
                         elementData["NumberSeats"],
                         elementData["Passengers"].length,
@@ -215,7 +215,7 @@ class _HomePageState extends State<HomePage> {
                   child: Padding(
                     padding: const EdgeInsets.only(bottom: 4.0),
                     child: ListView(children: [
-                ..._dailyEvents.map((event) => transformEvent(event)).toList()
+                ..._dailyEvents.map((event) => transformEvent(event,context)).toList()
               ]),
                   )),
             ])));

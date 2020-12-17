@@ -5,12 +5,6 @@ import 'package:geocoder/geocoder.dart';
 import 'package:geocoding/geocoding.dart';
 import '../Utils.dart';
 
-extension StringExtension on String {
-  String capitalize() {
-    return "${this[0].toUpperCase()}${this.substring(1)}";
-  }
-}
-
 class LocationTextBoxes2 extends StatefulWidget {
   final GlobalKey<ScaffoldState> _key;
   final Size size;

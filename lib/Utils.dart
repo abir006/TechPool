@@ -6,6 +6,8 @@ import 'package:geocoder/geocoder.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:tech_pool/pages/HomePage.dart';
 import 'package:tech_pool/pages/ProfilePage.dart';
+import 'package:intl/intl.dart';
+import 'package:tech_pool/pages/LiftInfoPage.dart';
 
 /// Apps default settings
 MaterialColor mainColor =  Colors.cyan;
@@ -42,20 +44,22 @@ class UserRepository extends ChangeNotifier {
 
 /// A container class for Drive event.
 class Drive{
+  String driveId;
   String info;
   int numberOfSeats;
   int numberOfPassengers;
   DateTime dateTime;
-  Drive(this.info,this.numberOfSeats,this.numberOfPassengers,this.dateTime);
+  Drive(this.driveId,this.info,this.numberOfSeats,this.numberOfPassengers,this.dateTime);
 }
 
 /// A container class for Lift event.
 class Lift{
+  String driveId;
   String info;
   int numberOfSeats;
   int numberOfPassengers;
   DateTime dateTime;
-  Lift(this.info,this.numberOfSeats,this.numberOfPassengers,this.dateTime);
+  Lift(this.driveId,this.info,this.numberOfSeats,this.numberOfPassengers,this.dateTime);
 }
 /*
 /// A container class for DesiredLift event.
@@ -80,11 +84,11 @@ class LocationsResult{
 
 /// A util function for the calendar, returns the desired event container to
 /// display under the calendar, according to the type of event received.
-Widget transformEvent(dynamic event){
+Widget transformEvent(dynamic event,BuildContext context){
   if (event is Drive) {
-    return calendarListTile(event, Icon(Icons.directions_car,size: 30, color: mainColor,));
+    return calendarListTile(event, Icon(Icons.directions_car,size: 30, color: mainColor),context);
   } else if (event is Lift) {
-    return calendarListTile(event, Transform.rotate(angle: 0.8,child: Icon(Icons.thumb_up_rounded,size: 30, color: mainColor)));
+    return calendarListTile(event, Transform.rotate(angle: 0.8,child: Icon(Icons.thumb_up_rounded,size: 30, color: mainColor)),context);
     /*return Container(
       decoration: BoxDecoration(
         border: Border.all(color: Colors.green, width: 0.8),
@@ -116,7 +120,8 @@ Widget transformEvent(dynamic event){
   }
 }
 
-Container calendarListTile(dynamic event,Widget leadingWidget) {
+Container calendarListTile(dynamic event,Widget leadingWidget,BuildContext context) {
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
   return Container(
     decoration: BoxDecoration(
       color: Colors.white,
@@ -129,8 +134,23 @@ Container calendarListTile(dynamic event,Widget leadingWidget) {
     const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
     child: ListTile(leading: leadingWidget,
       title: Text(event?.info),
-      onTap: () => print('$event tapped!'),
-    subtitle: Row(mainAxisAlignment: MainAxisAlignment.start,children: [Text("${event.dateTime.hour}:${event.dateTime.minute}"),Spacer(),Icon(Icons.person,color: Colors.black,),Text(": ${event.numberOfPassengers} / ${event.numberOfSeats}",style: TextStyle(color: Colors.black),)],),
+      onTap: () async {
+        var drive = await firestore.collection("Drives").doc(event.driveId).get();
+        MyLift docLift = new MyLift("driver", "destAddress", "stopAddress", 5);
+        drive.data().forEach((key, value) {
+          if(value!=null) {
+            docLift.setProperty(key,value);
+          }
+        });
+        docLift.dist = 0;
+        Navigator.of(context).push(new MaterialPageRoute<Null>(
+            builder: (BuildContext context) {
+              return LiftInfoPage(lift: docLift);
+            },
+            fullscreenDialog: true
+        ));
+      },
+    subtitle: Row(mainAxisAlignment: MainAxisAlignment.start,children: [Text("${(DateFormat.Hm().format(event.dateTime)).toString()}"),Spacer(),Icon(Icons.person,color: Colors.black,),Text(": ${event.numberOfPassengers} / ${event.numberOfSeats}",style: TextStyle(color: Colors.black),)],),
     trailing: Icon(Icons.chevron_right_sharp,color: Colors.black,size:30,)),
   );
 }
@@ -326,7 +346,7 @@ ListTile drawerListTile(String pageName,IconData icon,DrawerSections tileSection
             Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => ProfilePage(email: userRep.user.email,fromProfile: true,)));
+                    builder: (context) => ProfilePage(email: userRep.user.email,fromProfile: true)));
             break;
           }
           case DrawerSections.notifications: {
@@ -382,3 +402,9 @@ final pageContainerDecoration = BoxDecoration(color: Colors.white,borderRadius: 
       spreadRadius: 0.0,offset: Offset(0.0, 1.0))],);
 /// the margin for the container inside the page body.
 final pageContainerMargin = EdgeInsets.fromLTRB(10, 4, 10, 10);
+
+extension StringExtension on String {
+  String capitalize() {
+    return "${this[0].toUpperCase()}${this.substring(1)}";
+  }
+}

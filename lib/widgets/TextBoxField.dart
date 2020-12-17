@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import '../Utils.dart';
 
-Widget textBoxField({AutovalidateMode validateMode = AutovalidateMode.disabled,@required Size size,@required String hintText,@required TextEditingController textFieldController,bool obscureText = false,Function validator,InputBorder inputBorder=InputBorder.none}) {
+Widget textBoxField({AutovalidateMode validateMode = AutovalidateMode.disabled,@required Size size,@required String hintText,@required TextEditingController textFieldController,bool obscureText = false,Function validator,InputBorder inputBorder=InputBorder.none,TextCapitalization textCap = TextCapitalization.sentences}) {
   return Container(decoration: BoxDecoration(
       color: Colors.white, borderRadius: containerBorderRadius),
       padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
       width: size.width * 0.7,
-      child: TextFormField(maxLines: 1,autovalidateMode: validateMode,validator: validator,obscureText: obscureText,controller: textFieldController,
+      child: TextFormField(textCapitalization: textCap,maxLines: 1,autovalidateMode: validateMode,validator: validator,obscureText: obscureText,controller: textFieldController,
           textAlign: TextAlign.left,
           decoration: InputDecoration(
             isDense: true,

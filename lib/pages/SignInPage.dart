@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -7,7 +5,6 @@ import 'package:provider/provider.dart';
 import 'package:tech_pool/Utils.dart';
 import 'package:tech_pool/widgets/TextBoxField.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'ForgotPasswordPage.dart';
 import 'HomePage.dart';
 
@@ -93,6 +90,7 @@ class _SignInPageState extends State<SignInPage> with SingleTickerProviderStateM
                             return null;
                           }),
                       textBoxField(
+                        textCap: TextCapitalization.none,
                           size: size,
                           hintText: "Password",
                           textFieldController: _password,

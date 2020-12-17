@@ -131,12 +131,14 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
                           textFieldController: _email,
                           validator: (value) {if (value.isEmpty) {return 'Please enter email';} else if(!value.toLowerCase().endsWith("@campus.technion.ac.il") && !value.toLowerCase().endsWith("@technion.ac.il") ) { return 'Must use technion email';} return null;}),
                       textBoxField(
+                          textCap: TextCapitalization.none,
                           size: size,
                           hintText: "Password",
                           textFieldController: _password,
                           obscureText: true,
                           validator: (value) {if (value.isEmpty) {return 'Please enter password';} else if(value.length < 6) {return 'Must enter atleast 6 characters';} return null;}),
                       textBoxField(
+                          textCap: TextCapitalization.none,
                           size: size,
                           hintText: "Validate password",
                           textFieldController: _passwordValidate,
@@ -188,7 +190,7 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
                                 try{
                                   await (userRep.auth.createUserWithEmailAndPassword(email: _email.text, password: _password.text).then((user) async {
                                     await db.collection("Profiles").doc(_email.text).set(
-                                        {"firstName" : _firstName.text, "lastName" : _lastName.text});
+                                        {"firstName" : _firstName.text.capitalize(), "lastName" : _lastName.text.capitalize});
                                   await user.user.updateProfile(displayName: _firstName.text+" "+_lastName.text);
                                   await user.user.sendEmailVerification();
                                   userRep.user = user.user;

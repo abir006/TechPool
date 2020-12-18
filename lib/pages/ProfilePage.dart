@@ -164,6 +164,8 @@ class _ProfilePageState extends State<ProfilePage> {
           .collection('Profiles')
           .doc(widget.email)
           .update(saveAllFields.keyToValueMap);
+      Provider.of<UserRepository>(context,listen: false)
+          .changeDisplayName(_firstNameController.text + " " + _lastNameController.text);
       } catch(e){}
     _nameController.text = _firstNameController.text + " " + _lastNameController.text;
   }
@@ -306,7 +308,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       SizedBox(height: defaultSpace),
                       editMode ? SizedBox(height: 0):labelText(text: "Name: ") ,
                       editMode ? generalInfoBoxTextField(nameLabel:"First Name: ",controllerText: _firstNameController, enabled: true, maxLines: 1) : generalInfoText(text: _nameController.text),
-                      editMode ? generalInfoBoxTextField(nameLabel:"Laset Name: ",controllerText: _lastNameController, enabled: true, maxLines: 1) : SizedBox(height: 0),
+                      editMode ? generalInfoBoxTextField(nameLabel:"Last Name: ",controllerText: _lastNameController, enabled: true, maxLines: 1) : SizedBox(height: 0),
                       editMode ? SizedBox(height: 0):SizedBox(height: defaultSpace),
                       editMode ? SizedBox(height: 0):labelText(text: "Faculty: ") ,
                       editMode ? generalInfoBoxTextField(nameLabel:"Faculty: ",controllerText: _facultyController, enabled: true, maxLines: 1) : generalInfoText(text: _facultyController.text),

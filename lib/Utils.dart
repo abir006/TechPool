@@ -37,6 +37,12 @@ class UserRepository extends ChangeNotifier {
     notifyListeners();
   }
 
+  void changeDisplayName(String name) async{
+    await _user.updateProfile(displayName: name);
+    _user = auth.currentUser;
+    notifyListeners();
+  }
+
   User get user => _user;
 
   Image get profilePicture => _profilePicture ?? defaultPic;

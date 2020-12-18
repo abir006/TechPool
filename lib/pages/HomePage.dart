@@ -7,7 +7,6 @@ import 'package:tech_pool/Utils.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:tech_pool/pages/SearchLiftPage.dart';
 import 'package:rxdart/rxdart.dart';
-
 import 'SetDrivePage.dart';
 
 class HomePage extends StatefulWidget {
@@ -44,6 +43,7 @@ class _HomePageState extends State<HomePage> {
       });*/
     });
   }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<UserRepository>(builder: (context, userRep, child) {
@@ -220,8 +220,6 @@ class _HomePageState extends State<HomePage> {
                   )),
             ])));
   }
-
-
 
   @override
   void dispose() {

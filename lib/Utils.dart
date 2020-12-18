@@ -4,10 +4,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoder/geocoder.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:tech_pool/pages/CalendarEventInfo.dart';
 import 'package:tech_pool/pages/HomePage.dart';
 import 'package:tech_pool/pages/ProfilePage.dart';
 import 'package:intl/intl.dart';
-import 'package:tech_pool/pages/LiftInfoPage.dart';
 
 /// Apps default settings
 MaterialColor mainColor =  Colors.cyan;
@@ -34,6 +34,12 @@ class UserRepository extends ChangeNotifier {
 
   set profilePicture(Image pic){
     _profilePicture = pic;
+    notifyListeners();
+  }
+
+  void changeDisplayName(String name) async{
+    await _user.updateProfile(displayName: name);
+    _user = auth.currentUser;
     notifyListeners();
   }
 
@@ -83,13 +89,14 @@ class LocationsResult{
   LocationsResult(this.fromAddress, this.toAddress,this.stopAddresses,this.numberOfStops);
 }
 
+enum CalendarEventType { Drive, Lift }
 /// A util function for the calendar, returns the desired event container to
 /// display under the calendar, according to the type of event received.
 Widget transformEvent(dynamic event, BuildContext context){
   if (event is Drive) {
-    return calendarListTile(event, Icon(Icons.directions_car,size: 30, color: mainColor),context);
+    return calendarListTile(event, Icon(Icons.directions_car,size: 30, color: mainColor),context,CalendarEventType.Drive);
   } else if (event is Lift) {
-    return calendarListTile(event, Transform.rotate(angle: 0.8,child: Icon(Icons.thumb_up_rounded,size: 30, color: mainColor)),context);
+    return calendarListTile(event, Transform.rotate(angle: 0.8,child: Icon(Icons.thumb_up_rounded,size: 30, color: mainColor)),context,CalendarEventType.Lift);
     /*return Container(
       decoration: BoxDecoration(
         border: Border.all(color: Colors.green, width: 0.8),
@@ -121,7 +128,7 @@ Widget transformEvent(dynamic event, BuildContext context){
   }
 }
 
-Container calendarListTile(dynamic event,Widget leadingWidget,BuildContext context) {
+Container calendarListTile(dynamic event,Widget leadingWidget,BuildContext context,CalendarEventType eventType) {
   FirebaseFirestore firestore = FirebaseFirestore.instance;
   return Container(
     decoration: BoxDecoration(
@@ -143,10 +150,17 @@ Container calendarListTile(dynamic event,Widget leadingWidget,BuildContext conte
             docLift.setProperty(key,value);
           }
         });
-        docLift.dist = 0;
+        if(eventType == CalendarEventType.Lift) {
+          docLift.stops = [];
+        }
+        else{
+          docLift.dist = 0;
+        }
+        docLift.passengersInfo = Map<String, Map<String, dynamic>>.from(drive.data()["PassengersInfo"]?? {}) ;
+        docLift.payments = (await firestore.collection("Profiles").doc(docLift.driver).get()).data()["allowedPayments"].join(", ");
         Navigator.of(context).push(new MaterialPageRoute<Null>(
             builder: (BuildContext context) {
-              return LiftInfoPage(lift: docLift);
+              return CalendarEventInfo(lift: docLift,type: eventType);
             },
             fullscreenDialog: true
         ));
@@ -287,7 +301,10 @@ class MyLift{
 
   String imageUrl;
   String driverName;
-  var stops = new Map();
+  String liftId;
+  Map<String,Map<String, dynamic>> passengersInfo;
+  String payments;
+  var stops = new List<dynamic>();
 
   void setProperty(String key,var property){
     switch(key) {
@@ -341,7 +358,6 @@ class MyLift{
       case "BackSeatNotFull":{ backSeat = property;}
       break;
 
-
       default: { }
       break;
     }}
@@ -355,7 +371,6 @@ class liftRes{
   Address destAddress;
   bool backSeat;
   bool bigTrunk;
-
   liftRes({@required this.fromTime,@required this.toTime,@required this.indexDist,@required this.startAddress,@required this.destAddress, @required this.backSeat, @required this.bigTrunk});
 }
 

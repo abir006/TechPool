@@ -30,6 +30,8 @@ class _ProfilePageState extends State<ProfilePage> {
   FirebaseFirestore firestore = FirebaseFirestore.instance;
   UserInfo myInfo = UserInfo();
   UserInfo saveAllFields = UserInfo();
+  TextEditingController _firstNameController;
+  TextEditingController _lastNameController;
   TextEditingController _nameController;
   TextEditingController _facultyController;
   TextEditingController _hobbiesController;
@@ -45,7 +47,7 @@ class _ProfilePageState extends State<ProfilePage> {
   List<String> payments2=[];
   List<String> paymentsItems=["Cash","PayPal","Bit","PayBox"];
   ScrollController scrollCon;
-
+/*
   Future<String> initInfo2(String email) async {
     isUser = (widget.email == email)&&widget.fromProfile;
       firestore.collection("Profiles").doc(widget.email).get().then(
@@ -56,10 +58,9 @@ class _ProfilePageState extends State<ProfilePage> {
       });
       myInfo.setPropertyEnum(userInfoKeyEnum.email, widget.email);
       if (firstTime) {
-        _nameController.text =
-            myInfo.getPropertyEnum(userInfoKeyEnum.firstName) +
-                " " +
-                myInfo.getPropertyEnum(userInfoKeyEnum.lastName);
+        _firstNameController.text = myInfo.getPropertyEnum(userInfoKeyEnum.firstName);
+        _lastNameController.text =  myInfo.getPropertyEnum(userInfoKeyEnum.lastName);
+        _nameController.text = _firstNameController.text + " " + _lastNameController.text;
         _facultyController.text =
             myInfo.getPropertyEnum(userInfoKeyEnum.faculty);
         _phoneNumberController.text =
@@ -83,7 +84,7 @@ class _ProfilePageState extends State<ProfilePage> {
         } );
       }
     });
-  }
+  }*/
 
   Future<String> initInfo(String email) async {
     isUser = (widget.email == email)&&widget.fromProfile;
@@ -95,10 +96,9 @@ class _ProfilePageState extends State<ProfilePage> {
       });
       myInfo.setPropertyEnum(userInfoKeyEnum.email, widget.email);
       if (firstTime) {
-        _nameController.text =
-            myInfo.getPropertyEnum(userInfoKeyEnum.firstName) +
-                " " +
-                myInfo.getPropertyEnum(userInfoKeyEnum.lastName);
+        _firstNameController.text = myInfo.getPropertyEnum(userInfoKeyEnum.firstName);
+        _lastNameController.text =  myInfo.getPropertyEnum(userInfoKeyEnum.lastName);
+        _nameController.text = _firstNameController.text + " " + _lastNameController.text;
         _facultyController.text =
             myInfo.getPropertyEnum(userInfoKeyEnum.faculty);
         _phoneNumberController.text =
@@ -127,12 +127,16 @@ class _ProfilePageState extends State<ProfilePage> {
   void initState() {
     super.initState();
     _nameController = TextEditingController();
+    _firstNameController = TextEditingController();
+    _lastNameController = TextEditingController();
     _facultyController = TextEditingController();
     _phoneNumberController = TextEditingController();
     _hobbiesController = TextEditingController();
     _aboutSelf = TextEditingController();
   }
   void saveAll(){
+    saveAllFields.setPropertyEnum(userInfoKeyEnum.firstName, _firstNameController.text);
+    saveAllFields.setPropertyEnum(userInfoKeyEnum.lastName, _lastNameController.text);
     saveAllFields.setPropertyEnum(userInfoKeyEnum.hobbies, _hobbiesController.text);
     saveAllFields.setPropertyEnum(userInfoKeyEnum.faculty, _facultyController.text);
     saveAllFields.setPropertyEnum(userInfoKeyEnum.phoneNumber, _phoneNumberController.text);
@@ -144,11 +148,14 @@ class _ProfilePageState extends State<ProfilePage> {
     saveAllFields.setPropertyEnum(userInfoKeyEnum.allowedPayments, payments2);
   }
   void updadteAll(){
+    _firstNameController.text = saveAllFields.getPropertyEnum(userInfoKeyEnum.hobbies);
+    _lastNameController = saveAllFields.getPropertyEnum(userInfoKeyEnum.faculty);
     _hobbiesController.text =saveAllFields.getPropertyEnum(userInfoKeyEnum.hobbies);
     _facultyController.text = saveAllFields.getPropertyEnum(userInfoKeyEnum.faculty);
     _phoneNumberController.text = saveAllFields.getPropertyEnum(userInfoKeyEnum.phoneNumber);
     _aboutSelf.text= saveAllFields.getPropertyEnum(userInfoKeyEnum.aboutSelf);
-    payments = saveAllFields.getPropertyEnum(userInfoKeyEnum.allowedPayments);
+     payments = saveAllFields.getPropertyEnum(userInfoKeyEnum.allowedPayments);
+    _nameController.text = _firstNameController.text + " " + _lastNameController.text;
   }
   void updateInfo() async {
     try {
@@ -157,7 +164,10 @@ class _ProfilePageState extends State<ProfilePage> {
           .collection('Profiles')
           .doc(widget.email)
           .update(saveAllFields.keyToValueMap);
+      Provider.of<UserRepository>(context,listen: false)
+          .changeDisplayName(_firstNameController.text + " " + _lastNameController.text);
       } catch(e){}
+    _nameController.text = _firstNameController.text + " " + _lastNameController.text;
   }
   @override
   Widget build(BuildContext context) {
@@ -276,8 +286,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                   onTap: () async {
                                     var pickedFile = await picker.getImage(
                                       source: ImageSource.gallery,
-                                      maxHeight: 150,
-                                      maxWidth: 150,
+                                      maxHeight: 100,
+                                      maxWidth: 100,
                                     );
                                     if (pickedFile != null) {
                                       String ret = await FirebaseStorage.instance
@@ -296,21 +306,22 @@ class _ProfilePageState extends State<ProfilePage> {
                       ])),
                       isUser? Center(child: generalInfoText(text: myInfo.getPropertyEnum(userInfoKeyEnum.email)),): SizedBox(height: defaultSpace*0),
                       SizedBox(height: defaultSpace),
-                      labelText(text: "Name: "),
-                      editMode ? generalInfoTextField(controllerText: _nameController, enabled: true, maxLines: 1) : generalInfoText(text: _nameController.text),
-                      SizedBox(height: defaultSpace),
-                      labelText(text: "Faculty: "),
-                      editMode ? generalInfoTextField(controllerText: _facultyController, enabled: true, maxLines: 1) : generalInfoText(text: _facultyController.text),
-                      SizedBox(height: defaultSpace),
-                      labelText(text: "Phone number: "),
-                      editMode ? generalInfoTextField(controllerText: _phoneNumberController, enabled: true, maxLines: 1) : generalInfoText(text: _phoneNumberController.text),
-                      SizedBox(height: defaultSpace),
-                      labelText(text: "Hobbies: "),
-                      editMode ? generalInfoTextField(controllerText: _hobbiesController, enabled: true, maxLines: 1) : generalInfoText(text: _hobbiesController.text),
-                      SizedBox(height: defaultSpace),
-                      labelText(text: "About self: "),
-                      editMode ? generalInfoTextField(controllerText: _aboutSelf, enabled: true, maxLenth: 185) : generalInfoText(text: _aboutSelf.text, maxElepsis: 5),
-                      SizedBox(height: defaultSpace),
+                      editMode ? SizedBox(height: 0):labelText(text: "Name: ") ,
+                      editMode ? generalInfoBoxTextField(nameLabel:"First Name: ",controllerText: _firstNameController, enabled: true, maxLines: 1) : generalInfoText(text: _nameController.text),
+                      editMode ? generalInfoBoxTextField(nameLabel:"Last Name: ",controllerText: _lastNameController, enabled: true, maxLines: 1) : SizedBox(height: 0),
+                      editMode ? SizedBox(height: 0):SizedBox(height: defaultSpace),
+                      editMode ? SizedBox(height: 0):labelText(text: "Faculty: ") ,
+                      editMode ? generalInfoBoxTextField(nameLabel:"Faculty: ",controllerText: _facultyController, enabled: true, maxLines: 1) : generalInfoText(text: _facultyController.text),
+                      editMode ? SizedBox(height: 0):SizedBox(height: defaultSpace),
+                      editMode ? SizedBox(height: 0):labelText(text: "Phone number: ") ,
+                      editMode ? generalInfoBoxTextField(nameLabel:"Phone number: ",controllerText: _phoneNumberController, enabled: true, maxLines: 1) : generalInfoText(text: _phoneNumberController.text),
+                      editMode ? SizedBox(height: 0):SizedBox(height: defaultSpace),
+                      editMode ? SizedBox(height: 0):labelText(text: "Hobbies: ") ,
+                      editMode ? generalInfoBoxTextField(nameLabel:"Hobbies: ",controllerText: _hobbiesController, enabled: true, maxLines: 1) : generalInfoText(text: _hobbiesController.text),
+                      editMode ? SizedBox(height: 0):SizedBox(height: defaultSpace),
+                      editMode ? SizedBox(height: 0):labelText(text:"About self: ") ,
+                      editMode ? generalInfoBoxTextField(nameLabel:"About self: ",controllerText: _aboutSelf, enabled: true, maxLenth: 185) : generalInfoText(text: _aboutSelf.text, maxElepsis: 5),
+                      editMode ? SizedBox(height: 0): SizedBox(height: defaultSpace),
                       labelText(text: "Allowed Payment method: "),
                       editMode ? SizedBox(height: defaultSpace):SizedBox(height: defaultSpace*0),
                       editMode ? multi2: Stack(children:[Container(child: MultiSelectChipDisplay(textStyle: TextStyle(color: Colors.black), decoration: BoxDecoration(color: Colors.white), items:payments.map((e) => MultiSelectItem(e, e)).toList(), onTap: (value) {},),),Container(color: Colors.transparent,width: 100*defaultSpacewidth,height: 10*defaultSpace,)]),
@@ -323,8 +334,9 @@ class _ProfilePageState extends State<ProfilePage> {
         });}
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
         title: Text(
-          "Lift Info",
+          "Profile Page",
           style: TextStyle(color: Colors.white),
         ),
       ),
@@ -348,6 +360,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   void dispose() {
+    _firstNameController.dispose();
+    _lastNameController.dispose();
     _nameController.dispose();
     _facultyController.dispose();
     _phoneNumberController.dispose();

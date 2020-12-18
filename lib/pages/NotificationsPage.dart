@@ -1,14 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:jiffy/jiffy.dart';
 import 'package:provider/provider.dart';
 import 'package:tech_pool/Utils.dart';
-import 'package:table_calendar/table_calendar.dart';
-import 'package:tech_pool/pages/SearchLiftPage.dart';
 import 'package:rxdart/rxdart.dart';
-
-import 'SetDrivePage.dart';
 
 class NotificationsPage extends StatefulWidget {
   @override
@@ -18,30 +13,14 @@ class NotificationsPage extends StatefulWidget {
 class _NotificationsPageState extends State<NotificationsPage> {
   FirebaseFirestore firestore = FirebaseFirestore.instance;
   DateTime selectedDay = DateTime.now();
-  Map<DateTime, List> _events;
   List _notifications;
-  bool firstLoad = true;
 
   @override
   void initState() {
     super.initState();
-    _events = {};
     _notifications = [];
   }
 
-  /*void _onDaySelected(DateTime day, List events, List holidays) {
-    setState(() {
-      selectedDay = day;
-      /*_dailyEvents = events;
-      _dailyEvents.sort((a, b) {
-        if (a.dateTime.isAfter(b.dateTime)) {
-          return 1;
-        } else {
-          return -1;
-        }
-      });*/
-    });
-  }*/
   @override
   Widget build(BuildContext context) {
     return Consumer<UserRepository>(builder: (context, userRep, child) {
@@ -49,9 +28,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
           stream: CombineLatestStream([
           firestore.collection("Notifications").doc(userRep.user?.email).collection("UserNotifications").snapshots()],
                   (values) => [values[0]]),
-          //TODO:
           builder: (context, snapshot) {
-            _events = {};
             _notifications = [];
             if (snapshot.hasData) {
               snapshot.data[0].docs.forEach((element) {

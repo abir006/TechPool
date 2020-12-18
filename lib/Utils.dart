@@ -61,6 +61,7 @@ class Lift{
   DateTime dateTime;
   Lift(this.driveId,this.info,this.numberOfSeats,this.numberOfPassengers,this.dateTime);
 }
+
 /*
 /// A container class for DesiredLift event.
 class DesiredLift{
@@ -84,7 +85,7 @@ class LocationsResult{
 
 /// A util function for the calendar, returns the desired event container to
 /// display under the calendar, according to the type of event received.
-Widget transformEvent(dynamic event,BuildContext context){
+Widget transformEvent(dynamic event, BuildContext context){
   if (event is Drive) {
     return calendarListTile(event, Icon(Icons.directions_car,size: 30, color: mainColor),context);
   } else if (event is Lift) {
@@ -158,6 +159,113 @@ Container calendarListTile(dynamic event,Widget leadingWidget,BuildContext conte
 double clacDis(GeoPoint from,Coordinates to){
   return (Geolocator.distanceBetween(from.latitude,from.longitude,to.latitude,to.longitude).abs());
 }
+
+
+class AcceptedLiftNotification {
+  String driveId;
+  String info;
+  int numberOfSeats;
+  int numberOfPassengers;
+  DateTime dateTime;
+  AcceptedLiftNotification(this.driveId,this.info,this.numberOfSeats,this.numberOfPassengers,this.dateTime);
+}
+
+class RejectedLiftNotification {
+  String driveId;
+  String info;
+  int numberOfSeats;
+  int numberOfPassengers;
+  DateTime dateTime;
+  RejectedLiftNotification(this.driveId,this.info,this.numberOfSeats,this.numberOfPassengers,this.dateTime);
+}
+
+class RequestedLiftNotification {
+  String driveId;
+  String info;
+  int numberOfSeats;
+  int numberOfPassengers;
+  DateTime dateTime;
+  RequestedLiftNotification(this.driveId,this.info,this.numberOfSeats,this.numberOfPassengers,this.dateTime);
+}
+
+Widget notificationSwitcher(dynamic notification,BuildContext context){
+  if (notification is AcceptedLiftNotification) {
+    return notificationListTile(notification, Icon(Icons.directions_car,size: 30, color: mainColor), Icon(Icons.directions_car,size: 30, color: mainColor), context);
+  } else if (notification is RejectedLiftNotification) {
+    return notificationListTile(notification, Transform.rotate(angle: 0.8,
+        child: Icon(Icons.thumb_up_rounded, size: 30, color: mainColor)),
+        Icon(Icons.directions_car, size: 30, color: mainColor), context);
+  } else if (notification is RequestedLiftNotification) {
+    return notificationListTile(notification, Transform.rotate(angle: 0.8,
+        child: Icon(Icons.thumb_up_rounded, size: 30, color: mainColor)),
+        Icon(Icons.directions_car, size: 30, color: mainColor), context);
+  }
+  else{
+    return null;
+  }
+
+/*return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.green, width: 0.8),
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      margin:
+      const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      child: ListTile(leading: Transform.rotate(angle: 0.8,child: Icon(Icons.thumb_up_rounded,size: 30, color: mainColor,)),
+        title: Text(event?.info),
+        onTap: () => print('$event tapped!'),
+      ),
+    );*/
+    /*} else if (event is DesiredLift) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.orange, width: 0.8),
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      margin:
+      const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      child: ListTile(leading: Transform.rotate(angle: 0.8,child: Icon(Icons.thumb_up_rounded,size: 30, color: mainColor,)),
+        title: Text(event?.info),
+        onTap: () => print('$event tapped!'),
+      ),
+    );*/
+}
+
+Container notificationListTile(dynamic notification, Widget leadingWidget, Widget trailingWidget, BuildContext context) {
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
+  return Container(
+    decoration: BoxDecoration(
+      color: Colors.white,
+      boxShadow: [BoxShadow(color: Colors.black,blurRadius: 2.0,
+          spreadRadius: 0.0,offset: Offset(2.0, 2.0))],
+      border: Border.all(color: Colors.green, width: 0.8),
+      borderRadius: BorderRadius.circular(12.0),
+    ),
+    margin:
+    const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+    child: ListTile(leading: leadingWidget,
+        title: Text(notification?.info),
+        onTap: () async {
+          var drive = await firestore.collection("Drives").doc(notification.driveId).get();
+          MyLift docLift = new MyLift("driver", "destAddress", "stopAddress", 5);
+          drive.data().forEach((key, value) {
+            if(value!=null) {
+              docLift.setProperty(key,value);
+            }
+          });
+          docLift.dist = 0;
+          Navigator.of(context).push(new MaterialPageRoute<Null>(
+              builder: (BuildContext context) {
+                return LiftInfoPage(lift: docLift);
+              },
+              fullscreenDialog: true
+          ));
+        },
+        subtitle: Row(mainAxisAlignment: MainAxisAlignment.start,children: [Text("${(DateFormat.Hm().format(notification.dateTime)).toString()}"),Spacer(),Icon(Icons.person,color: Colors.black,),Text(": ${notification.numberOfPassengers} / ${notification.numberOfSeats}",style: TextStyle(color: Colors.black),)],),
+        trailing: Icon(Icons.chevron_right_sharp,color: Colors.black,size:30,)),
+  );
+}
+
 
 class MyLift{
   String destCity;

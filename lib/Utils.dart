@@ -179,6 +179,7 @@ class MyLift{
 
   String imageUrl;
   String driverName;
+  String liftId;
   var stops = new Map();
 
   void setProperty(String key,var property){
@@ -247,7 +248,6 @@ class liftRes{
   Address destAddress;
   bool backSeat;
   bool bigTrunk;
-
   liftRes({@required this.fromTime,@required this.toTime,@required this.indexDist,@required this.startAddress,@required this.destAddress, @required this.backSeat, @required this.bigTrunk});
 }
 

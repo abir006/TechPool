@@ -139,7 +139,7 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
               docLift.driverName = "0";
                docLift.driverName =
                    q2.docs.asMap()[docLift.driver][docLift.driver]["firstName"] + " " +    q2.docs.asMap()["lastName"];*/
-
+              docLift.liftId = element.id;
               liftList.add(docLift);
             });
       } catch (e) {
@@ -429,7 +429,14 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
          onTap:() {
            Navigator.of(context).push(new MaterialPageRoute<Null>(
              builder: (BuildContext context) {
-               return LiftInfoPage(lift: lift);
+               return LiftInfoPage(lift: lift,resLift:liftRes(
+                 fromTime: widget.fromTime,
+                 toTime: widget.toTime,
+                 indexDist:2,
+                 startAddress: widget.startAddress,
+                 destAddress: widget.destAddress,
+                 bigTrunk: widget.bigTrunk,
+                 backSeat: widget.backSeat,));
              },
              fullscreenDialog: true
          ));

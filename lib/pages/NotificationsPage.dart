@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:tech_pool/Utils.dart';
+import 'ProfilePage.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:intl/intl.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class NotificationsPage extends StatefulWidget {
   @override
@@ -14,6 +17,17 @@ class _NotificationsPageState extends State<NotificationsPage> {
   FirebaseFirestore firestore = FirebaseFirestore.instance;
   DateTime selectedDay = DateTime.now();
   List _notifications;
+
+  Widget infoText(String info) {
+    return  Container(
+        width: MediaQuery.of(context).size.height * 0.016*20,
+        child: Text(info,
+          style: TextStyle(fontSize: fontTextsSize, color: Colors.black),
+          overflow: TextOverflow.ellipsis,
+          maxLines: 2,
+        )
+    );
+  }
 
   @override
   void initState() {
@@ -37,17 +51,18 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 String driveId = elementData["driveId"];
                 String driverFullName = elementData["driverFullName"];
                 String driverId = elementData["driverId"];//email
-                String path = elementData["startCity"] +
-                    " \u{2192} " +
-                    elementData["destCity"];
+                String startCity = elementData["startCity"];
+                String destCity = elementData["destCity"];
                 int price = elementData["price"];
                 int distance = elementData["distance"];
-                DateTime timeStamp = elementData["TimeStamp"].toDate();
+                DateTime liftTime = elementData["liftTime"].toDate();
+                DateTime notificationTime = elementData["notificationTime"].toDate();
                 var notification;
                 switch(type) {
                   case "AcceptedLift" : {
                     notification = AcceptedLiftNotification(driveId, driverId,
-                        driverFullName, path, price, distance, timeStamp);
+                        driverFullName, startCity, destCity, price, distance,
+                        liftTime, notificationTime);
                     /*send type?*/
                   }
                   break;
@@ -63,7 +78,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   }
                   break;*/
                 }
-
                 _notifications.add(notification);
               });
               /*snapshot.data[0].docs.forEach((element) {
@@ -141,10 +155,179 @@ class _NotificationsPageState extends State<NotificationsPage> {
             ])));
   }
 
-
+  Widget notificationSwitcher(dynamic notification,BuildContext context){
+    if (notification is AcceptedLiftNotification) {
+      return acceptedLiftNotificationListTile(notification, Icon(Icons.directions_car,size: 30, color: mainColor), Transform.rotate(angle: 0.8,
+          child: Icon(Icons.thumb_up_rounded, size: 30, color: Colors.green)), context);
+    } /*else if (notification is RejectedLiftNotification) {
+    return notificationListTile(notification, Transform.rotate(angle: 0.8,
+        child: Icon(Icons.thumb_up_rounded, size: 30, color: mainColor)),
+        Icon(Icons.directions_car, size: 30, color: mainColor), context);
+  } else if (notification is RequestedLiftNotification) {
+    return notificationListTile(notification, Transform.rotate(angle: 0.8,
+        child: Icon(Icons.thumb_up_rounded, size: 30, color: mainColor)),
+        Icon(Icons.directions_car, size: 30, color: mainColor), context);
+  }*/
+    else{
+      return null;
+    }
+  }
 
   @override
   void dispose() {
     super.dispose();
+  }
+
+
+  Future<List<String>> initNames(String name) {
+    List<String> ret = [];
+    return FirebaseStorage.instance
+        .ref('uploads')
+        .child(name)
+        .getDownloadURL()
+        .then((value) {
+      ret.add(value);
+      return firestore.collection("Profiles").doc(name).get().then((value) {
+        ret.add(value.data()["firstName"] + " " + value.data()["lastName"]);
+        return ret;
+      });
+    });
+    //  return null;
+  }
+
+  Widget _buildTile(AcceptedLiftNotification acceptedLiftNotification) {
+    return FutureBuilder<List<String>>(
+        future: initNames(acceptedLiftNotification.driverId),
+        builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
+          if (snapshot.hasData) {
+            return Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [BoxShadow(color: Colors.black, blurRadius: 2.0,
+                    spreadRadius: 0.0, offset: Offset(2.0, 2.0))
+                ],
+                border: Border.all(color: secondColor, width: 0.8),
+                borderRadius: BorderRadius.circular(12.0),),
+              child:
+              Row(
+                children: [
+                  InkWell(
+                      onTap: () async {
+                        await Navigator.of(context).push(
+                            MaterialPageRoute<liftRes>(
+                                builder: (BuildContext context) {
+                                  return ProfilePage(
+                                    email: acceptedLiftNotification.driverId, fromProfile: false,);
+                                },
+                                fullscreenDialog: true
+                            ));
+                        setState(() {
+
+                        });
+                      },
+                      child: Container(
+                          margin: EdgeInsets.only(
+                              left: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .height * 0.016, top: MediaQuery
+                              .of(context)
+                              .size
+                              .height * 0.016),
+                          width: MediaQuery
+                              .of(context)
+                              .size
+                              .height * 0.016 * 4,
+                          height: MediaQuery
+                              .of(context)
+                              .size
+                              .height * 0.016 * 4,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.teal,
+                            image: DecorationImage(fit: BoxFit.fill,
+                                image: NetworkImage(snapshot.data[0])),
+
+                          ))),
+                  Container(
+                      margin: EdgeInsets.only(
+                          left: MediaQuery
+                              .of(context)
+                              .size
+                              .height * 0.016, top: MediaQuery
+                          .of(context)
+                          .size
+                          .height * 0.016),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          infoText(snapshot.data[1]),
+                          placesText(acceptedLiftNotification.startCity, acceptedLiftNotification.destCity),
+                          allInfoText(acceptedLiftNotification.liftTime, acceptedLiftNotification.distance ~/ 1000, acceptedLiftNotification.price),
+                        ],
+                      )),
+                  Spacer(),
+                  InkWell(
+                    child: Icon(Icons.arrow_forward_ios_outlined),
+                    onTap: () {
+                      /*Navigator.of(context).push(new MaterialPageRoute<Null>(
+                          builder: (BuildContext context) {
+                            return LiftInfoPage(lift: lift, resLift: liftRes(
+                              fromTime: widget.fromTime,
+                              toTime: widget.toTime,
+                              indexDist: 2,
+                              startAddress: widget.startAddress,
+                              destAddress: widget.destAddress,
+                              bigTrunk: widget.bigTrunk,
+                              backSeat: widget.backSeat,));
+                          },
+                          fullscreenDialog: true
+                      ));*/
+                    },
+                  ),
+                  SizedBox(width: MediaQuery
+                      .of(context)
+                      .size
+                      .height * 0.016,)
+                ],
+              ),
+            );
+          }else {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+        });
+  }
+  Widget allInfoText(DateTime time,int dist, int price){
+    return Container(
+        child:Row(
+          children: [
+            Icon(Icons.timer),
+            Text(DateFormat('kk:mm').format(time)),
+            SizedBox(width: MediaQuery.of(context).size.height * 0.01),
+            Container(child:Image.asset("assets/images/tl-.png",scale: 0.9)),
+            SizedBox(width: MediaQuery.of(context).size.height * 0.005),
+            Text(dist.toString()+"km"),
+            SizedBox(width: MediaQuery.of(context).size.height * 0.01),
+            //Icon(Icons.person),
+            //Text(taken.toString()+"/"+avaliable.toString()),
+            //SizedBox(width: MediaQuery.of(context).size.height * 0.01),
+            Container(child:Image.asset("assets/images/shekel.png",scale: 0.9)),
+            SizedBox(width: MediaQuery.of(context).size.height * 0.003),
+            Text(price.toString()),
+          ],
+        ));
+  }
+
+  Widget placesText(String from, String to) {
+    return  Container(
+        width: MediaQuery.of(context).size.height * 0.016*20,
+        child: Text(from + " -> " + to,
+          style: TextStyle(fontSize: fontTextsSize, color: Colors.black),
+          overflow: TextOverflow.ellipsis,
+          maxLines: 2,
+        )
+    );
   }
 }

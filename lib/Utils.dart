@@ -179,16 +179,19 @@ class AcceptedLiftNotification {
   String driveId;
   String driverId;//email
   String driverFullName;
-  String path;
+  String startCity;
+  String destCity;
   int price;
   int distance;
-  DateTime timeStamp;
+  DateTime liftTime;
+  DateTime notificationTime;
   //String type;
   //String pictureUrl;
   // int numberOfSeats;
   // int numberOfPassengers;
   AcceptedLiftNotification(this.driveId, this.driverId, this.driverFullName,
-      this.path, this.price, this.distance, this.timeStamp, );
+      this.startCity, this.destCity, this.price, this.distance, this.liftTime,
+      this.notificationTime);
 }
 
 /*class RejectedLiftNotification {
@@ -240,12 +243,12 @@ Container acceptedLiftNotificationListTile(dynamic notification, Widget leadingW
             }
           });
           docLift.dist = 0;
-          Navigator.of(context).push(new MaterialPageRoute<Null>(
+          /*Navigator.of(context).push(new MaterialPageRoute<Null>(
               builder: (BuildContext context) {
                 return LiftInfoPage(lift: docLift);
               },
               fullscreenDialog: true
-          ));
+          ));*/
         },
         subtitle: Row(mainAxisAlignment: MainAxisAlignment.start,children: [Text("${(DateFormat.Hm().format(notification.dateTime)).toString()}"),Spacer(),Icon(Icons.person,color: Colors.black,),Text(": ${notification.numberOfPassengers} / ${notification.numberOfSeats}",style: TextStyle(color: Colors.black),)],),
         trailing: Icon(Icons.chevron_right_sharp,color: Colors.black,size:30,)),
@@ -275,12 +278,12 @@ Container notificationListTile(dynamic notification, Widget leadingWidget, Widge
             }
           });
           docLift.dist = 0;
-          Navigator.of(context).push(new MaterialPageRoute<Null>(
+          /*Navigator.of(context).push(new MaterialPageRoute<Null>(
               builder: (BuildContext context) {
                 return LiftInfoPage(lift: docLift);
               },
               fullscreenDialog: true
-          ));
+          ));*/
         },
         subtitle: Row(mainAxisAlignment: MainAxisAlignment.start,children: [Text("${(DateFormat.Hm().format(notification.dateTime)).toString()}"),Spacer(),Icon(Icons.person,color: Colors.black,),Text(": ${notification.numberOfPassengers} / ${notification.numberOfSeats}",style: TextStyle(color: Colors.black),)],),
         trailing: Icon(Icons.chevron_right_sharp,color: Colors.black,size:30,)),
@@ -288,9 +291,10 @@ Container notificationListTile(dynamic notification, Widget leadingWidget, Widge
 }
 
 
-Widget notificationSwitcher(dynamic notification,BuildContext context){
+Widget notificationSwitcher2(dynamic notification,BuildContext context){
   if (notification is AcceptedLiftNotification) {
-    return acceptedLiftNotificationListTile(notification, Icon(Icons.directions_car,size: 30, color: mainColor), Icon(Icons.directions_car,size: 30, color: mainColor), context);
+    return acceptedLiftNotificationListTile(notification, Icon(Icons.directions_car,size: 30, color: mainColor), Transform.rotate(angle: 0.8,
+        child: Icon(Icons.thumb_up_rounded, size: 30, color: Colors.green)), context);
   } /*else if (notification is RejectedLiftNotification) {
     return notificationListTile(notification, Transform.rotate(angle: 0.8,
         child: Icon(Icons.thumb_up_rounded, size: 30, color: mainColor)),

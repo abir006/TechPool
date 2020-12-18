@@ -284,8 +284,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                   onTap: () async {
                                     var pickedFile = await picker.getImage(
                                       source: ImageSource.gallery,
-                                      maxHeight: 150,
-                                      maxWidth: 150,
+                                      maxHeight: 100,
+                                      maxWidth: 100,
                                     );
                                     if (pickedFile != null) {
                                       String ret = await FirebaseStorage.instance

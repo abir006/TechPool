@@ -180,7 +180,7 @@ class MyLift{
   String imageUrl;
   String driverName;
   String liftId;
-  var stops = new Map();
+  var stops = new List<dynamic>();
 
   void setProperty(String key,var property){
     switch(key) {

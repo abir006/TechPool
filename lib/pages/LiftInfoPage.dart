@@ -43,14 +43,17 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
     List<Widget> _buildRowList() {
       List<Widget> stops = [];
       int i = 1;
-      widget.lift.stops.forEach((key, value) {
-        stops.add(Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            labelText(text: "Stop-" + i.toString() + " "),
-            Expanded(child: infoText(key.toString()))
-          ],
-        ));
+      widget.lift.stops.forEach((key) {
+        (key as Map).forEach((key, value) {
+          if(key=="stopAddress")
+          stops.add(Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              labelText(text: "Stop-" + i.toString() + " "),
+              Expanded(child: infoText(value.toString()))
+            ],
+          ));
+        });
         stops.add(SizedBox(height: defaultSpace));
         i++;
       });

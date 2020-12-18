@@ -33,46 +33,35 @@ class _NotificationsPageState extends State<NotificationsPage> {
             if (snapshot.hasData) {
               snapshot.data[0].docs.forEach((element) {
                 var elementData = element.data();
-                DateTime elementTime = elementData["TimeStamp"].toDate();
-                String notificationType = elementData["NotificationType"];
+                String type = elementData["type"];
+                String driveId = elementData["driveId"];
+                String driverFullName = elementData["driverFullName"];
+                String driverId = elementData["driverId"];//email
+                String path = elementData["startCity"] +
+                    " \u{2192} " +
+                    elementData["destCity"];
+                int price = elementData["price"];
+                int distance = elementData["distance"];
+                DateTime timeStamp = elementData["TimeStamp"].toDate();
                 var notification;
-                switch(notificationType) {
-                  case "AcceptedLiftNotification" : {
-                    notification = AcceptedLiftNotification(element.id,
-                        elementData["StartCity"] +
-                            " \u{2192} " +
-                            elementData["DestCity"],
-                        elementData["NumberSeats"],
-                        elementData["Passengers"].length,
-                        elementTime);
-
+                switch(type) {
+                  case "AcceptedLift" : {
+                    notification = AcceptedLiftNotification(driveId, driverId,
+                        driverFullName, path, price, distance, timeStamp);
+                    /*send type?*/
                   }
                   break;
 
-                  case "RejectedLiftNotification" : {
-                    notification = RejectedLiftNotification(element.id,
-                        elementData["StartCity"] +
-                            " \u{2192} " +
-                            elementData["DestCity"],
-                        elementData["NumberSeats"],
-                        elementData["Passengers"].length,
-                        elementTime);
-
+                  /*case "RejectedLift" : {
+                    notification = RejectedLiftNotification();
                   }
                   break;
 
                   //default: {
-                  case "RequestedLiftNotification" : {
-                    notification = RequestedLiftNotification(element.id,
-                        elementData["StartCity"] +
-                            " \u{2192} " +
-                            elementData["DestCity"],
-                        elementData["NumberSeats"],
-                        elementData["Passengers"].length,
-                        elementTime);
-
+                  case "RequestedLift" : {
+                    notification = RequestedLiftNotification();
                   }
-                  break;
+                  break;*/
                 }
 
                 _notifications.add(notification);

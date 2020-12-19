@@ -178,7 +178,7 @@ double clacDis(GeoPoint from,Coordinates to){
 class LiftNotification {
   String driveId;
   String driverId;//email
-  String driverFullName;
+  //String driverFullName; this.driverFullName,
   String startCity;
   String destCity;
   int price;
@@ -186,12 +186,16 @@ class LiftNotification {
   DateTime liftTime;
   DateTime notificationTime;
   String type;
+  String passengerId;
   //String pictureUrl;
   // int numberOfSeats;
   // int numberOfPassengers;
-  LiftNotification(this.driveId, this.driverId, this.driverFullName,
-      this.startCity, this.destCity, this.price, this.distance, this.liftTime,
-      this.notificationTime, this.type);
+  LiftNotification(this.driveId, this.driverId, this.startCity, this.destCity,
+      this.price, this.distance, this.liftTime, this.notificationTime,
+      this.type, [this.passengerId]);//optional
+  LiftNotification.requested(this.driveId, this.driverId, this.startCity, this.destCity,
+      this.price, this.distance, this.liftTime, this.notificationTime,
+      this.type, this.passengerId);
 }
 
 /*class RejectedLiftNotification {

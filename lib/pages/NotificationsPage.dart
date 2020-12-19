@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:tech_pool/Utils.dart';
+import 'LiftInfoPage.dart';
 import 'ProfilePage.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:intl/intl.dart';
@@ -39,7 +40,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
               snapshot.data[0].docs.forEach((element) {
                 var elementData = element.data();
                 String driveId = elementData["driveId"];
-                String driverFullName = elementData["driverFullName"];
+                //String driverFullName = elementData["driverFullName"];
                 String driverId = elementData["driverId"];//email
                 String startCity = elementData["startCity"];
                 String destCity = elementData["destCity"];
@@ -49,31 +50,41 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 DateTime notificationTime = elementData["notificationTime"].toDate();
                 String type = elementData["type"];
                 var notification;
-                // switch(type) {
-                //   case "AcceptedLift" : {
-                //     notification = Notification(driveId, driverId,
-                //         driverFullName, startCity, destCity, price, distance,
-                //         liftTime, notificationTime, type);
-                //     /*send type?*/
-                //   }
-                //   break;
-                //
-                //   /*case "RejectedLift" : {
-                //     notification = RejectedLiftNotification();
-                //   }
-                //   break;
-                //
-                //   //default: {
-                //   case "RequestedLift" : {
-                //     notification = RequestedLiftNotification();
-                //   }
-                //   break;*/
-                // }
+                switch(type) {
+                  case "RequestedLift" :
+                    {
+                      String passengerId = elementData["passengerId"];
+                      notification = LiftNotification.requested(
+                          driveId,
+                          driverId,
+                          //driverFullName,
+                          startCity,
+                          destCity,
+                          price,
+                          distance,
+                          liftTime,
+                          notificationTime,
+                          type,
+                          passengerId);
+                      break;
+                    }
+                  default:
+                    {
+                      notification = LiftNotification(
+                          driveId,
+                          driverId,
+                          //driverFullName,
+                          startCity,
+                          destCity,
+                          price,
+                          distance,
+                          liftTime,
+                          notificationTime,
+                          type);
 
-                notification = LiftNotification(driveId, driverId,
-                    driverFullName, startCity, destCity, price, distance,
-                    liftTime, notificationTime, type);
-
+                      break;
+                    }
+                }
                 _notifications.add(notification);
               });
               _notifications.sort((a, b) {
@@ -130,7 +141,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   return _buildRejectedTile(_notifications[index]);
                 }
                 else if(_notifications[index].type == "RequestedLift") {
-                  return _buildAcceptedTile(_notifications[index]);
+                  return _buildRequestedTile(_notifications[index]);
                 }
                 else {
                   return null;
@@ -309,8 +320,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                               backSeat: widget.backSeat,));
                           },
                           fullscreenDialog: true
-                      ));*/
-                    },
+                      )*/                  },
                   ),
                   SizedBox(width: MediaQuery
                       .of(context)
@@ -444,6 +454,123 @@ class _NotificationsPageState extends State<NotificationsPage> {
         });
   }
 
+  Widget _buildRequestedTile(LiftNotification liftNotification) {
+    return FutureBuilder<List<String>>(
+        future: initNames(liftNotification.passengerId),
+        builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
+          if (snapshot.hasData) {
+            return Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [BoxShadow(color: Colors.black, blurRadius: 2.0,
+                    spreadRadius: 0.0, offset: Offset(2.0, 2.0))
+                ],
+                border: Border.all(color: secondColor, width: 0.65),
+                borderRadius: BorderRadius.circular(12.0),),
+              child:
+              Row(
+                children: [
+                  InkWell(
+                      onTap: () async {
+                        await Navigator.of(context).push(
+                            MaterialPageRoute<liftRes>(
+                                builder: (BuildContext context) {
+                                  return ProfilePage(
+                                    email: liftNotification.passengerId, fromProfile: false,);
+                                },
+                                fullscreenDialog: true
+                            ));
+                        setState(() {
+
+                        });
+                      },
+                      child: Container(
+                          margin: EdgeInsets.only(
+                              left: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .height * 0.016, top: MediaQuery
+                              .of(context)
+                              .size
+                              .height * 0.004),
+                          width: MediaQuery
+                              .of(context)
+                              .size
+                              .height * 0.016 * 4,
+                          height: MediaQuery
+                              .of(context)
+                              .size
+                              .height * 0.016 * 4,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.teal,
+                            image: DecorationImage(//fit: BoxFit.fill,
+                                image: NetworkImage(snapshot.data[0])),
+
+                          ))),
+                  Container(
+                      margin: EdgeInsets.only(
+                          left: MediaQuery
+                              .of(context)
+                              .size
+                              .height * 0.016,
+                          top: MediaQuery
+                              .of(context)
+                              .size
+                              .height * 0.008),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          infoTextRequested(snapshot.data[1]),
+                          //infoTextRequested(liftNotification.passengerId),
+                          placesText(liftNotification.startCity, liftNotification.destCity),
+                          allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000, liftNotification.price),
+                        ],
+                      )),
+                  InkWell(
+                    child: Container(
+                      child: Flexible(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Transform.rotate(angle: 0.8,
+                                child: Icon(Icons.thumb_up_rounded, size: 30, color: Colors.green)),
+                            Text("Accepted", style: TextStyle(fontSize: 15, color: Colors.green),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                    onTap: () {
+                      /*Navigator.of(context).push(new MaterialPageRoute<Null>(
+                          builder: (BuildContext context) {
+                            return LiftInfoPage(lift: lift, resLift: liftRes(
+                              fromTime: widget.fromTime,
+                              toTime: widget.toTime,
+                              indexDist: 2,
+                              startAddress: widget.startAddress,
+                              destAddress: widget.destAddress,
+                              bigTrunk: widget.bigTrunk,
+                              backSeat: widget.backSeat,));
+                          },
+                          fullscreenDialog: true
+                      )*/                  },
+                  ),
+                  SizedBox(width: MediaQuery
+                      .of(context)
+                      .size
+                      .height * 0.008),
+                ],
+              ),
+            );
+          }else {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+        });
+  }
+
   Widget allInfoText(DateTime time,int dist, int price){
     return Container(
         child:Row(
@@ -480,6 +607,17 @@ class _NotificationsPageState extends State<NotificationsPage> {
     return  Container(
         width: MediaQuery.of(context).size.height * 0.016*17.5,
         child: Text("Driver: " + info,
+          style: TextStyle(fontSize: fontTextsSize, color: Colors.black),
+          overflow: TextOverflow.ellipsis,
+          maxLines: 2,
+        )
+    );
+  }
+
+  Widget infoTextRequested(String info) {
+    return  Container(
+        width: MediaQuery.of(context).size.height * 0.016*17.5,
+        child: Text("Hitchhiker: " + info,
           style: TextStyle(fontSize: fontTextsSize, color: Colors.black),
           overflow: TextOverflow.ellipsis,
           maxLines: 2,

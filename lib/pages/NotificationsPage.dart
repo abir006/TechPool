@@ -117,7 +117,22 @@ class _NotificationsPageState extends State<NotificationsPage> {
           ),
         ),
         drawer: techDrawer(userRep, context, DrawerSections.home),
-        body: Container(
+      body:Container(
+          decoration: pageContainerDecoration,
+          margin: pageContainerMargin,
+          //padding: EdgeInsets.only(left: defaultSpacewidth, right: defaultSpacewidth),
+          child: Column(
+            children: [Expanded(child:ListView.separated(
+              shrinkWrap: true,
+              padding: EdgeInsets.only(left: defaultSpacewidth*0.4, right: defaultSpacewidth*0.4, bottom: defaultSpacewidth*0.4,top:defaultSpacewidth*0.4 ),
+              itemCount: _notifications.length,
+              separatorBuilder: (BuildContext context, int index) => Divider(thickness: 4,),
+              itemBuilder: (BuildContext context, int index) {
+                return _buildTile(_notifications[index]);
+              },
+            ))],
+          )),
+        /*body: Container(
             decoration: pageContainerDecoration,
             margin: pageContainerMargin,
             child: Column(children: [
@@ -144,7 +159,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
 
                   )),
-            ])));
+            ])
+        )*/
+    );
   }
 
   Widget notificationSwitcher(dynamic notification,BuildContext context){
@@ -237,7 +254,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: Colors.teal,
-                            image: DecorationImage(fit: BoxFit.fill,
+                            image: DecorationImage(//fit: BoxFit.fill,
                                 image: NetworkImage(snapshot.data[0])),
 
                           ))),
@@ -261,13 +278,22 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       )),
                   //Spacer(),
                   InkWell(
-                    child: Column(
-                      children: [
-                        Transform.rotate(angle: 0.8,
-                            child: Icon(Icons.thumb_up_rounded, size: 30, color: Colors.green)),
-                        Text("Acc", style: TextStyle(fontSize: 14, color: Colors.green),
-                        )
-                      ],
+                    child: Container(
+                      width: MediaQuery
+              .of(context)
+              .size
+              .width * 0.2,
+                      margin: EdgeInsets.only(
+                          right: 15),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Transform.rotate(angle: 0.8,
+                              child: Icon(Icons.thumb_up_rounded, size: 30, color: Colors.green)),
+                          Text("Acceptedddd", style: TextStyle(fontSize: 14, color: Colors.green),
+                          )
+                        ],
+                      ),
                     ),
                     onTap: () {
                       /*Navigator.of(context).push(new MaterialPageRoute<Null>(
@@ -289,6 +315,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       .of(context)
                       .size
                       .height * 0.016,)
+
                 ],
               ),
             );

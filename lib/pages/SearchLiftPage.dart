@@ -312,7 +312,8 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.white,
-          toolbarHeight: defaultSpace*2.5,
+          toolbarHeight: defaultSpace*2.8,
+          elevation: 0,
           leading: Container(),
           titleSpacing: 0,
           bottom: ColoredTabBar(Colors.white,TabBar(
@@ -384,7 +385,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
                     context: context,
                     builder: (_) => new SimpleDialog(
                         backgroundColor:Colors.white,
-                       children: [Container(height: defaultSpace*25,width:defaultSpace*30,child:newChooseTime),
+                       children: [Container(height: defaultSpace*30,width:defaultSpace*30,child:newChooseTime),
               Row(
                 mainAxisAlignment: MainAxisAlignment
                     .center, //Center Row contents horizontally,

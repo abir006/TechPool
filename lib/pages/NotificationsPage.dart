@@ -18,17 +18,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
   DateTime selectedDay = DateTime.now();
   List _notifications;
 
-  Widget infoText(String info) {
-    return  Container(
-        width: MediaQuery.of(context).size.height * 0.016*20,
-        child: Text("Driver: " + info,
-          style: TextStyle(fontSize: fontTextsSize, color: Colors.black),
-          overflow: TextOverflow.ellipsis,
-          maxLines: 2,
-        )
-    );
-  }
-
   @override
   void initState() {
     super.initState();
@@ -210,12 +199,17 @@ class _NotificationsPageState extends State<NotificationsPage> {
         builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
           if (snapshot.hasData) {
             return Container(
+              margin: EdgeInsets.only(
+                  right: MediaQuery
+                      .of(context)
+                      .size
+                      .width * 0.008,),
               decoration: BoxDecoration(
                 color: Colors.white,
                 boxShadow: [BoxShadow(color: Colors.black, blurRadius: 2.0,
                     spreadRadius: 0.0, offset: Offset(2.0, 2.0))
                 ],
-                border: Border.all(color: secondColor, width: 0.8),
+                border: Border.all(color: secondColor, width: 0.65),
                 borderRadius: BorderRadius.circular(12.0),),
               child:
               Row(
@@ -277,39 +271,42 @@ class _NotificationsPageState extends State<NotificationsPage> {
                         ],
                       )),
                   //Spacer(),
-                  InkWell(
-                    child: Container(
-                      width: MediaQuery
+
+                  Flexible(
+                    child: InkWell(
+                      child: Container(
+                        /*width: MediaQuery
               .of(context)
               .size
-              .width * 0.2,
-                      margin: EdgeInsets.only(
-                          right: 15),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Transform.rotate(angle: 0.8,
-                              child: Icon(Icons.thumb_up_rounded, size: 30, color: Colors.green)),
-                          Text("Acceptedddd", style: TextStyle(fontSize: 14, color: Colors.green),
-                          )
-                        ],
+              .width * 0.2,*/
+                        /*margin: EdgeInsets.only(
+                            right: 15),*/
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Transform.rotate(angle: 0.8,
+                                child: Icon(Icons.thumb_up_rounded, size: 30, color: Colors.green)),
+                            Text("Accepted", style: TextStyle(fontSize: 14, color: Colors.green),
+                            )
+                          ],
+                        ),
                       ),
+                      onTap: () {
+                        /*Navigator.of(context).push(new MaterialPageRoute<Null>(
+                            builder: (BuildContext context) {
+                              return LiftInfoPage(lift: lift, resLift: liftRes(
+                                fromTime: widget.fromTime,
+                                toTime: widget.toTime,
+                                indexDist: 2,
+                                startAddress: widget.startAddress,
+                                destAddress: widget.destAddress,
+                                bigTrunk: widget.bigTrunk,
+                                backSeat: widget.backSeat,));
+                            },
+                            fullscreenDialog: true
+                        ));*/
+                      },
                     ),
-                    onTap: () {
-                      /*Navigator.of(context).push(new MaterialPageRoute<Null>(
-                          builder: (BuildContext context) {
-                            return LiftInfoPage(lift: lift, resLift: liftRes(
-                              fromTime: widget.fromTime,
-                              toTime: widget.toTime,
-                              indexDist: 2,
-                              startAddress: widget.startAddress,
-                              destAddress: widget.destAddress,
-                              bigTrunk: widget.bigTrunk,
-                              backSeat: widget.backSeat,));
-                          },
-                          fullscreenDialog: true
-                      ));*/
-                    },
                   ),
                   SizedBox(width: MediaQuery
                       .of(context)
@@ -349,8 +346,19 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   Widget placesText(String from, String to) {
     return  Container(
-        width: MediaQuery.of(context).size.height * 0.016*20,
+        width: MediaQuery.of(context).size.height * 0.016*17,
         child: Text(from + " \u{2192} " + to,
+          style: TextStyle(fontSize: fontTextsSize, color: Colors.black),
+          overflow: TextOverflow.ellipsis,
+          maxLines: 2,
+        )
+    );
+  }
+
+  Widget infoText(String info) {
+    return  Container(
+        width: MediaQuery.of(context).size.height * 0.016*17,
+        child: Text("Driver: " + info,
           style: TextStyle(fontSize: fontTextsSize, color: Colors.black),
           overflow: TextOverflow.ellipsis,
           maxLines: 2,

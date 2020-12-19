@@ -16,7 +16,7 @@ class NotificationsPage extends StatefulWidget {
 class _NotificationsPageState extends State<NotificationsPage> {
   FirebaseFirestore firestore = FirebaseFirestore.instance;
   DateTime selectedDay = DateTime.now();
-  List _notifications;
+  List<LiftNotification> _notifications;
 
   @override
   void initState() {
@@ -38,7 +38,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
             if (snapshot.hasData) {
               snapshot.data[0].docs.forEach((element) {
                 var elementData = element.data();
-                String type = elementData["type"];
                 String driveId = elementData["driveId"];
                 String driverFullName = elementData["driverFullName"];
                 String driverId = elementData["driverId"];//email
@@ -48,31 +47,37 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 int distance = elementData["distance"];
                 DateTime liftTime = elementData["liftTime"].toDate();
                 DateTime notificationTime = elementData["notificationTime"].toDate();
+                String type = elementData["type"];
                 var notification;
-                switch(type) {
-                  case "AcceptedLift" : {
-                    notification = AcceptedLiftNotification(driveId, driverId,
-                        driverFullName, startCity, destCity, price, distance,
-                        liftTime, notificationTime);
-                    /*send type?*/
-                  }
-                  break;
+                // switch(type) {
+                //   case "AcceptedLift" : {
+                //     notification = Notification(driveId, driverId,
+                //         driverFullName, startCity, destCity, price, distance,
+                //         liftTime, notificationTime, type);
+                //     /*send type?*/
+                //   }
+                //   break;
+                //
+                //   /*case "RejectedLift" : {
+                //     notification = RejectedLiftNotification();
+                //   }
+                //   break;
+                //
+                //   //default: {
+                //   case "RequestedLift" : {
+                //     notification = RequestedLiftNotification();
+                //   }
+                //   break;*/
+                // }
 
-                  /*case "RejectedLift" : {
-                    notification = RejectedLiftNotification();
-                  }
-                  break;
+                notification = LiftNotification(driveId, driverId,
+                    driverFullName, startCity, destCity, price, distance,
+                    liftTime, notificationTime, type);
 
-                  //default: {
-                  case "RequestedLift" : {
-                    notification = RequestedLiftNotification();
-                  }
-                  break;*/
-                }
                 _notifications.add(notification);
               });
               _notifications.sort((a, b) {
-                if (a.dateTime.isAfter(b.dateTime)) {
+                if (a.notificationTime.isAfter(b.notificationTime)) {
                   return 1;
                 } else {
                   return -1;
@@ -117,7 +122,19 @@ class _NotificationsPageState extends State<NotificationsPage> {
               itemCount: _notifications.length,
               separatorBuilder: (BuildContext context, int index) => Divider(thickness: 4,),
               itemBuilder: (BuildContext context, int index) {
-                return _buildTile(_notifications[index]);
+                //return _buildTile(_notifications[index]);
+                if(_notifications[index].type == "AcceptedLift") {
+                  return _buildAcceptedTile(_notifications[index]);
+                }
+                else if(_notifications[index].type == "RejectedLift") {
+                  return _buildRejectedTile(_notifications[index]);
+                }
+                else if(_notifications[index].type == "RequestedLift") {
+                  return _buildAcceptedTile(_notifications[index]);
+                }
+                else {
+                  return null;
+                }
               },
             ))],
           )),
@@ -154,7 +171,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
   }
 
   Widget notificationSwitcher(dynamic notification,BuildContext context){
-    if (notification is AcceptedLiftNotification) {
+    if (notification is LiftNotification) {
       return acceptedLiftNotificationListTile(notification, Icon(Icons.directions_car,size: 30, color: mainColor), Transform.rotate(angle: 0.8,
           child: Icon(Icons.thumb_up_rounded, size: 30, color: Colors.green)), context);
     } /*else if (notification is RejectedLiftNotification) {
@@ -193,17 +210,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
     //  return null;
   }
 
-  Widget _buildTile(AcceptedLiftNotification acceptedLiftNotification) {
+  Widget _buildAcceptedTile(LiftNotification liftNotification) {
     return FutureBuilder<List<String>>(
-        future: initNames(acceptedLiftNotification.driverId),
+        future: initNames(liftNotification.driverId),
         builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
           if (snapshot.hasData) {
             return Container(
-              margin: EdgeInsets.only(
-                  right: MediaQuery
-                      .of(context)
-                      .size
-                      .width * 0.008,),
               decoration: BoxDecoration(
                 color: Colors.white,
                 boxShadow: [BoxShadow(color: Colors.black, blurRadius: 2.0,
@@ -220,7 +232,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                             MaterialPageRoute<liftRes>(
                                 builder: (BuildContext context) {
                                   return ProfilePage(
-                                    email: acceptedLiftNotification.driverId, fromProfile: false,);
+                                    email: liftNotification.driverId, fromProfile: false,);
                                 },
                                 fullscreenDialog: true
                             ));
@@ -266,53 +278,44 @@ class _NotificationsPageState extends State<NotificationsPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           infoText(snapshot.data[1]),
-                          placesText(acceptedLiftNotification.startCity, acceptedLiftNotification.destCity),
-                          allInfoText(acceptedLiftNotification.liftTime, acceptedLiftNotification.distance ~/ 1000, acceptedLiftNotification.price),
+                          placesText(liftNotification.startCity, liftNotification.destCity),
+                          allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000, liftNotification.price),
                         ],
                       )),
-                  //Spacer(),
-
-                  Flexible(
-                    child: InkWell(
-                      child: Container(
-                        /*width: MediaQuery
-              .of(context)
-              .size
-              .width * 0.2,*/
-                        /*margin: EdgeInsets.only(
-                            right: 15),*/
+                  InkWell(
+                    child: Container(
+                      child: Flexible(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Transform.rotate(angle: 0.8,
                                 child: Icon(Icons.thumb_up_rounded, size: 30, color: Colors.green)),
-                            Text("Accepted", style: TextStyle(fontSize: 14, color: Colors.green),
+                            Text("Accepted", style: TextStyle(fontSize: 15, color: Colors.green),
                             )
                           ],
                         ),
                       ),
-                      onTap: () {
-                        /*Navigator.of(context).push(new MaterialPageRoute<Null>(
-                            builder: (BuildContext context) {
-                              return LiftInfoPage(lift: lift, resLift: liftRes(
-                                fromTime: widget.fromTime,
-                                toTime: widget.toTime,
-                                indexDist: 2,
-                                startAddress: widget.startAddress,
-                                destAddress: widget.destAddress,
-                                bigTrunk: widget.bigTrunk,
-                                backSeat: widget.backSeat,));
-                            },
-                            fullscreenDialog: true
-                        ));*/
-                      },
                     ),
+                    onTap: () {
+                      /*Navigator.of(context).push(new MaterialPageRoute<Null>(
+                          builder: (BuildContext context) {
+                            return LiftInfoPage(lift: lift, resLift: liftRes(
+                              fromTime: widget.fromTime,
+                              toTime: widget.toTime,
+                              indexDist: 2,
+                              startAddress: widget.startAddress,
+                              destAddress: widget.destAddress,
+                              bigTrunk: widget.bigTrunk,
+                              backSeat: widget.backSeat,));
+                          },
+                          fullscreenDialog: true
+                      ));*/
+                    },
                   ),
                   SizedBox(width: MediaQuery
                       .of(context)
                       .size
-                      .height * 0.016,)
-
+                      .height * 0.008),
                 ],
               ),
             );
@@ -323,6 +326,124 @@ class _NotificationsPageState extends State<NotificationsPage> {
           }
         });
   }
+
+  Widget _buildRejectedTile(LiftNotification liftNotification) {
+    return FutureBuilder<List<String>>(
+        future: initNames(liftNotification.driverId),
+        builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
+          if (snapshot.hasData) {
+            return Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [BoxShadow(color: Colors.black, blurRadius: 2.0,
+                    spreadRadius: 0.0, offset: Offset(2.0, 2.0))
+                ],
+                border: Border.all(color: secondColor, width: 0.65),
+                borderRadius: BorderRadius.circular(12.0),),
+              child:
+              Row(
+                children: [
+                  InkWell(
+                      onTap: () async {
+                        await Navigator.of(context).push(
+                            MaterialPageRoute<liftRes>(
+                                builder: (BuildContext context) {
+                                  return ProfilePage(
+                                    email: liftNotification.driverId, fromProfile: false,);
+                                },
+                                fullscreenDialog: true
+                            ));
+                        setState(() {
+
+                        });
+                      },
+                      child: Container(
+                          margin: EdgeInsets.only(
+                              left: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .height * 0.016, top: MediaQuery
+                              .of(context)
+                              .size
+                              .height * 0.004),
+                          width: MediaQuery
+                              .of(context)
+                              .size
+                              .height * 0.016 * 4,
+                          height: MediaQuery
+                              .of(context)
+                              .size
+                              .height * 0.016 * 4,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.teal,
+                            image: DecorationImage(//fit: BoxFit.fill,
+                                image: NetworkImage(snapshot.data[0])),
+
+                          ))),
+                  Container(
+                      margin: EdgeInsets.only(
+                          left: MediaQuery
+                              .of(context)
+                              .size
+                              .height * 0.016,
+                          top: MediaQuery
+                              .of(context)
+                              .size
+                              .height * 0.008),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          infoText(snapshot.data[1]),
+                          placesText(liftNotification.startCity, liftNotification.destCity),
+                          allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000, liftNotification.price),
+                        ],
+                      )),
+                  InkWell(
+                    child: Container(
+                      child: Flexible(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Transform.rotate(angle: 0.8,
+                                child: Icon(Icons.thumb_up_rounded, size: 30, color: Colors.red)),
+                            Text("Rejected", style: TextStyle(fontSize: 15, color: Colors.red),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                    onTap: () {
+                      /*Navigator.of(context).push(new MaterialPageRoute<Null>(
+                          builder: (BuildContext context) {
+                            return LiftInfoPage(lift: lift, resLift: liftRes(
+                              fromTime: widget.fromTime,
+                              toTime: widget.toTime,
+                              indexDist: 2,
+                              startAddress: widget.startAddress,
+                              destAddress: widget.destAddress,
+                              bigTrunk: widget.bigTrunk,
+                              backSeat: widget.backSeat,));
+                          },
+                          fullscreenDialog: true
+                      ));*/
+                    },
+                  ),
+                  SizedBox(width: MediaQuery
+                      .of(context)
+                      .size
+                      .height * 0.008),
+                ],
+              ),
+            );
+          }else {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+        });
+  }
+
   Widget allInfoText(DateTime time,int dist, int price){
     return Container(
         child:Row(
@@ -346,7 +467,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   Widget placesText(String from, String to) {
     return  Container(
-        width: MediaQuery.of(context).size.height * 0.016*17,
+        width: MediaQuery.of(context).size.height * 0.016*17.5,
         child: Text(from + " \u{2192} " + to,
           style: TextStyle(fontSize: fontTextsSize, color: Colors.black),
           overflow: TextOverflow.ellipsis,
@@ -357,7 +478,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   Widget infoText(String info) {
     return  Container(
-        width: MediaQuery.of(context).size.height * 0.016*17,
+        width: MediaQuery.of(context).size.height * 0.016*17.5,
         child: Text("Driver: " + info,
           style: TextStyle(fontSize: fontTextsSize, color: Colors.black),
           overflow: TextOverflow.ellipsis,

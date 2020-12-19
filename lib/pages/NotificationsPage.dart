@@ -28,7 +28,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
   @override
   Widget build(BuildContext context) {
     double defaultSpacewidth = MediaQuery.of(context).size.height * 0.016;
-
     return Consumer<UserRepository>(builder: (context, userRep, child) {
       return StreamBuilder<List<QuerySnapshot>>(
           stream: CombineLatestStream([

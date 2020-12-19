@@ -21,7 +21,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
   Widget infoText(String info) {
     return  Container(
         width: MediaQuery.of(context).size.height * 0.016*20,
-        child: Text(info,
+        child: Text("Driver: " + info,
           style: TextStyle(fontSize: fontTextsSize, color: Colors.black),
           overflow: TextOverflow.ellipsis,
           maxLines: 2,
@@ -37,6 +37,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   @override
   Widget build(BuildContext context) {
+    double defaultSpacewidth = MediaQuery.of(context).size.height * 0.016;
+
     return Consumer<UserRepository>(builder: (context, userRep, child) {
       return StreamBuilder<List<QuerySnapshot>>(
           stream: CombineLatestStream([
@@ -80,31 +82,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 }
                 _notifications.add(notification);
               });
-              /*snapshot.data[0].docs.forEach((element) {
-                var elementData = element.data();
-                DateTime elementTime = elementData["TimeStamp"].toDate();
-                var lift = Lift(element.id,
-                    elementData["StartCity"] +
-                        " \u{2192} " +
-                        elementData["DestCity"],
-                    elementData["NumberSeats"],
-                    elementData["Passengers"].length,
-                    elementTime);
-                _events[Jiffy(elementTime)
-                    .startOf(Units.DAY)
-                    .add(Duration(hours: 12))] = (_events[Jiffy(
-                    elementTime)
-                    .startOf(Units.DAY)
-                    .add(Duration(hours: 12))] ??
-                    []) +
-                    [lift];
-                if (elementTime
-                    .isAfter(Jiffy(selectedDay).startOf(Units.DAY)) &&
-                    elementTime
-                        .isBefore(Jiffy(selectedDay).endOf(Units.DAY))) {
-                  _notifications.add(lift);
-                }
-              });*/
               _notifications.sort((a, b) {
                 if (a.dateTime.isAfter(b.dateTime)) {
                   return 1;
@@ -129,6 +106,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
   }
 
   Scaffold _buildPage(BuildContext context, UserRepository userRep) {
+    double defaultSpacewidth = MediaQuery.of(context).size.height * 0.016;
     return Scaffold(
         backgroundColor: mainColor,
         appBar: AppBar(
@@ -148,9 +126,23 @@ class _NotificationsPageState extends State<NotificationsPage> {
               Flexible(
                   child: Padding(
                     padding: const EdgeInsets.only(bottom: 4.0),
-                    child: ListView(children: [
+                    child:
+
+                    /*ListView(children: [
                       ..._notifications.map((notification) => notificationSwitcher(notification, context)).toList()
-                    ]),
+                    ]
+                    ),*/
+                    ListView.separated(
+                      shrinkWrap: true,
+                      padding: EdgeInsets.only(left: defaultSpacewidth*0.4, right: defaultSpacewidth*0.4, bottom: defaultSpacewidth*0.4,top:defaultSpacewidth*0.4 ),
+                      itemCount: _notifications.length,
+                      separatorBuilder: (BuildContext context, int index) => Divider(thickness: 4,),
+                      itemBuilder: (BuildContext context, int index) {
+                        return _buildTile(_notifications[index]);
+                      },
+                    )
+
+
                   )),
             ])));
   }
@@ -233,7 +225,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                   .height * 0.016, top: MediaQuery
                               .of(context)
                               .size
-                              .height * 0.016),
+                              .height * 0.004),
                           width: MediaQuery
                               .of(context)
                               .size
@@ -254,10 +246,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
                           left: MediaQuery
                               .of(context)
                               .size
-                              .height * 0.016, top: MediaQuery
+                              .height * 0.016,
+                          top: MediaQuery
                           .of(context)
                           .size
-                          .height * 0.016),
+                          .height * 0.008),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -266,9 +259,16 @@ class _NotificationsPageState extends State<NotificationsPage> {
                           allInfoText(acceptedLiftNotification.liftTime, acceptedLiftNotification.distance ~/ 1000, acceptedLiftNotification.price),
                         ],
                       )),
-                  Spacer(),
+                  //Spacer(),
                   InkWell(
-                    child: Icon(Icons.arrow_forward_ios_outlined),
+                    child: Column(
+                      children: [
+                        Transform.rotate(angle: 0.8,
+                            child: Icon(Icons.thumb_up_rounded, size: 30, color: Colors.green)),
+                        Text("Acc", style: TextStyle(fontSize: 14, color: Colors.green),
+                        )
+                      ],
+                    ),
                     onTap: () {
                       /*Navigator.of(context).push(new MaterialPageRoute<Null>(
                           builder: (BuildContext context) {
@@ -323,7 +323,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
   Widget placesText(String from, String to) {
     return  Container(
         width: MediaQuery.of(context).size.height * 0.016*20,
-        child: Text(from + " -> " + to,
+        child: Text(from + " \u{2192} " + to,
           style: TextStyle(fontSize: fontTextsSize, color: Colors.black),
           overflow: TextOverflow.ellipsis,
           maxLines: 2,

@@ -31,7 +31,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
     return Consumer<UserRepository>(builder: (context, userRep, child) {
       return StreamBuilder<List<QuerySnapshot>>(
           stream: CombineLatestStream([
-          firestore.collection("Notifications").doc(userRep.user?.email).collection("UserNotifications").snapshots()],
+            firestore.collection("Notifications").doc(userRep.user?.email).collection("UserNotifications").snapshots()],
+              //firestore.collection("Notifications").doc("abir@campus.technion.ac.il").collection("UserNotifications").snapshots()],
                   (values) => [values[0]]),
           builder: (context, snapshot) {
             _notifications = [];
@@ -39,7 +40,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
               snapshot.data[0].docs.forEach((element) {
                 var elementData = element.data();
                 String driveId = elementData["driveId"];
-                //String driverFullName = elementData["driverFullName"];
                 String driverId = elementData["driverId"];//email
                 String startCity = elementData["startCity"];
                 String destCity = elementData["destCity"];
@@ -53,10 +53,14 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   case "RequestedLift" :
                     {
                       String passengerId = elementData["passengerId"];
+                      String passengerNote = elementData["passengerNote"];
+                      bool bigBag = elementData["bigBag"];
+                      String startAddress = elementData["startAddress"];
+                      String destAddress = elementData["destAddress"];
+                      //bool backSeat = elementData["backSeat"];
                       notification = LiftNotification.requested(
                           driveId,
                           driverId,
-                          //driverFullName,
                           startCity,
                           destCity,
                           price,
@@ -64,7 +68,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
                           liftTime,
                           notificationTime,
                           type,
-                          passengerId);
+                          passengerId,
+                          passengerNote,
+                          bigBag,
+                          startAddress,
+                          destAddress
+                      );
                       break;
                     }
                   default:
@@ -72,7 +81,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       notification = LiftNotification(
                           driveId,
                           driverId,
-                          //driverFullName,
                           startCity,
                           destCity,
                           price,
@@ -180,7 +188,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
     );
   }
 
-  Widget notificationSwitcher(dynamic notification,BuildContext context){
+  /*Widget notificationSwitcher(dynamic notification,BuildContext context){
     if (notification is LiftNotification) {
       return acceptedLiftNotificationListTile(notification, Icon(Icons.directions_car,size: 30, color: mainColor), Transform.rotate(angle: 0.8,
           child: Icon(Icons.thumb_up_rounded, size: 30, color: Colors.green)), context);
@@ -196,7 +204,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
     else{
       return null;
     }
-  }
+  }*/
 
   @override
   void dispose() {
@@ -289,7 +297,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                         children: [
                           infoText(snapshot.data[1]),
                           placesText(liftNotification.startCity, liftNotification.destCity),
-                          allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000, liftNotification.price),
+                          allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000),
                         ],
                       )),
                   InkWell(
@@ -405,7 +413,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                         children: [
                           infoText(snapshot.data[1]),
                           placesText(liftNotification.startCity, liftNotification.destCity),
-                          allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000, liftNotification.price),
+                          allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000),
                         ],
                       )),
                   InkWell(
@@ -456,6 +464,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
   Widget _buildRequestedTile(LiftNotification liftNotification) {
     return FutureBuilder<List<String>>(
         future: initNames(liftNotification.passengerId),
+        //future: initNames("ofir.asulin@campus.technion.ac.il"),
         builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
           if (snapshot.hasData) {
             return Container(
@@ -522,7 +531,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                         children: [
                           infoTextRequested(snapshot.data[1]),
                           placesText(liftNotification.startCity, liftNotification.destCity),
-                          allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000, liftNotification.price),
+                          allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000),
                         ],
                       )),
                   InkWell(
@@ -571,12 +580,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
         });
   }
 
-  Widget allInfoText(DateTime time,int dist, int price){
+  Widget allInfoText(DateTime time,int dist){
     return Container(
         child:Row(
           children: [
             Icon(Icons.timer),
-            Text(DateFormat('kk:mm').format(time)),
+            Text(DateFormat('dd/MM kk:mm').format(time)),
             SizedBox(width: MediaQuery.of(context).size.height * 0.01),
             Container(child:Image.asset("assets/images/tl-.png",scale: 0.9)),
             SizedBox(width: MediaQuery.of(context).size.height * 0.005),
@@ -585,9 +594,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
             //Icon(Icons.person),
             //Text(taken.toString()+"/"+avaliable.toString()),
             //SizedBox(width: MediaQuery.of(context).size.height * 0.01),
-            Container(child:Image.asset("assets/images/shekel.png",scale: 0.9)),
-            SizedBox(width: MediaQuery.of(context).size.height * 0.003),
-            Text(price.toString()),
+            // Container(child:Image.asset("assets/images/shekel.png",scale: 0.9)),
+            // SizedBox(width: MediaQuery.of(context).size.height * 0.003),
+            // Text(price.toString()),
           ],
         ));
   }

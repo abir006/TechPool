@@ -554,7 +554,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
                               backSeat: widget.backSeat,));
                           },
                           fullscreenDialog: true
-                      )*/                  },
+                      )*/
+                    },
                   ),
                   SizedBox(width: MediaQuery
                       .of(context)

@@ -419,15 +419,17 @@ enum DrawerSections { home, profile, notifications, favorites, chats, settings }
 /// and not rebuilding the current section (page).
 SafeArea techDrawer(UserRepository userRep, BuildContext context,
     DrawerSections currentSection) {
+  final GlobalKey<ScaffoldState> _key = GlobalKey<ScaffoldState>();
   return SafeArea(child: ClipRRect(
       borderRadius: BorderRadius.only(topRight: Radius.circular(20.0),bottomRight:Radius.circular(20.0)),child: Container(width: MediaQuery.of(context).size.width*0.7,
-        child: Drawer(
-        child: ListView(children: [
-          /*  UserAccountsDrawerHeader(
-              accountName: Text("Hello, ${userRep.user.displayName}.",style: TextStyle(color: Colors.white,fontSize: 18),),
-              accountEmail: Container(height: 20,child: Row(crossAxisAlignment: CrossAxisAlignment.end,mainAxisAlignment: MainAxisAlignment.spaceBetween,children: [
-            Text(userRep.user.email,style: TextStyle(color: Colors.white,fontSize: 14)),
-           IconButton(icon: Icon(Icons.logout,color: Colors.white,size: 25,),onPressed: () => {},)]))
+        child: Scaffold(key: _key,
+          body: Drawer(
+          child: ListView(children: [
+            /*  UserAccountsDrawerHeader(
+                accountName: Text("Hello, ${userRep.user.displayName}.",style: TextStyle(color: Colors.white,fontSize: 18),),
+                accountEmail: Container(height: 20,child: Row(crossAxisAlignment: CrossAxisAlignment.end,mainAxisAlignment: MainAxisAlignment.spaceBetween,children: [
+              Text(userRep.user.email,style: TextStyle(color: Colors.white,fontSize: 14)),
+             IconButton(icon: Icon(Icons.logout,color: Colors.white,size: 25,),onPressed: () => {},)]))
      ,currentAccountPicture: CircleAvatar(backgroundColor: secondColor,))*/
           Container(
             color: mainColor,
@@ -471,19 +473,20 @@ SafeArea techDrawer(UserRepository userRep, BuildContext context,
               ),
             ),
           ),
-          drawerListTile("Home",Icons.home_rounded,DrawerSections.home,currentSection, context, userRep),
-          drawerListTile("Profile",Icons.person,DrawerSections.profile,currentSection, context, userRep),
-          drawerListTile("Notifications",Icons.notifications,DrawerSections.notifications,currentSection, context, userRep),
-          drawerListTile("Favorite Locations",Icons.favorite,DrawerSections.favorites,currentSection, context, userRep),
-          drawerListTile("Chats",Icons.chat,DrawerSections.chats,currentSection, context, userRep),
-          drawerListTile("Settings",Icons.settings,DrawerSections.settings,currentSection, context, userRep),
+          drawerListTile("Home",Icons.home_rounded,DrawerSections.home,currentSection, context, userRep,_key),
+          drawerListTile("Profile",Icons.person,DrawerSections.profile,currentSection, context, userRep,_key),
+          drawerListTile("Notifications",Icons.notifications,DrawerSections.notifications,currentSection, context, userRep,_key),
+          drawerListTile("Favorite Locations",Icons.favorite,DrawerSections.favorites,currentSection, context, userRep,_key),
+          drawerListTile("Chats",Icons.chat,DrawerSections.chats,currentSection, context, userRep,_key),
+          drawerListTile("Settings",Icons.settings,DrawerSections.settings,currentSection, context, userRep,_key)
         ])),
-      )));
+      ))));
 }
 
 /// creates a listTile for the drawer, with the relevant pageName,icon,tileSection for the tile.
 /// and the currentSection of the drawer.
-ListTile drawerListTile(String pageName,IconData icon,DrawerSections tileSection,DrawerSections currentSection, BuildContext context, UserRepository userRep) {
+
+ListTile drawerListTile(String pageName,IconData icon,DrawerSections tileSection,DrawerSections currentSection, BuildContext context, UserRepository userRep,GlobalKey<ScaffoldState> key) {
   return ListTile(
     selected: currentSection == tileSection,
     leading: Icon(
@@ -499,10 +502,10 @@ ListTile drawerListTile(String pageName,IconData icon,DrawerSections tileSection
       if (currentSection == tileSection) {
         Navigator.of(context).pop();
       } else {
-        Navigator.of(context).pop();
         switch(tileSection) {
           case DrawerSections.home:
             {
+              Navigator.pop(context);
               Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
@@ -510,6 +513,7 @@ ListTile drawerListTile(String pageName,IconData icon,DrawerSections tileSection
               break;
             }
           case DrawerSections.profile: {
+            Navigator.pop(context);
             Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
@@ -517,6 +521,7 @@ ListTile drawerListTile(String pageName,IconData icon,DrawerSections tileSection
             break;
           }
           case DrawerSections.notifications: {
+            Navigator.pop(context);
             Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
@@ -524,12 +529,18 @@ ListTile drawerListTile(String pageName,IconData icon,DrawerSections tileSection
             break;
           }
           case DrawerSections.favorites:{
+            //Navigator.of(context).pop();
+            key.currentState.showSnackBar(SnackBar(content: Text("This feature is not yet implemented", style: TextStyle(fontSize: 20),)));
             break;
           }
           case DrawerSections.chats: {
+            //Navigator.of(context).pop();
+            key.currentState.showSnackBar(SnackBar(content: Text("This feature is not yet implemented", style: TextStyle(fontSize: 20),)));
             break;
           }
           case DrawerSections.settings: {
+            //Navigator.of(context).pop();
+            key.currentState.showSnackBar(SnackBar(content: Text("This feature is not yet implemented", style: TextStyle(fontSize: 20,),)));
             break;
           }
         }

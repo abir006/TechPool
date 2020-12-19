@@ -7,6 +7,7 @@ import 'package:geocoder/geocoder.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:tech_pool/pages/CalendarEventInfo.dart';
 import 'package:tech_pool/pages/HomePage.dart';
+import 'package:tech_pool/pages/NotificationsPage.dart';
 import 'package:tech_pool/pages/ProfilePage.dart';
 import 'package:intl/intl.dart';
 import 'package:tech_pool/widgets/WelcomeSignInButton.dart';
@@ -516,6 +517,10 @@ ListTile drawerListTile(String pageName,IconData icon,DrawerSections tileSection
             break;
           }
           case DrawerSections.notifications: {
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => NotificationsPage()));
             break;
           }
           case DrawerSections.favorites:{

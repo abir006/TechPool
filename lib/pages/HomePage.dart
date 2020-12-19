@@ -5,6 +5,7 @@ import 'package:jiffy/jiffy.dart';
 import 'package:provider/provider.dart';
 import 'package:tech_pool/Utils.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:tech_pool/pages/NotificationsPage.dart';
 import 'package:tech_pool/pages/SearchLiftPage.dart';
 import 'package:rxdart/rxdart.dart';
 import 'SetDrivePage.dart';
@@ -132,7 +133,10 @@ class _HomePageState extends State<HomePage> {
                 actions: [
                 IconButton(
                 icon: Icon(Icons.notifications),
-                onPressed: null)
+                onPressed: () => Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => NotificationsPage())))
                 ],
                 ),
                 drawer: techDrawer(userRep, context, DrawerSections.home),
@@ -203,7 +207,10 @@ class _HomePageState extends State<HomePage> {
           actions: [
             IconButton(
                 icon: Icon(Icons.notifications),
-                onPressed: null)
+                onPressed:() => Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+            builder: (context) => NotificationsPage())))
           ],
         ),
         drawer: techDrawer(userRep, context, DrawerSections.home),

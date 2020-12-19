@@ -60,13 +60,11 @@ class MyApp extends StatelessWidget {
                 ),
                 home: FutureBuilder<Object>(
     future: (encryptedSharedPreferences.getString("email").then((value) {
-      email=value;
-      print(email);}).then((_) => encryptedSharedPreferences.getString("password")).then((val) {pass=val; print(pass);})
+      email=value;}).then((_) => encryptedSharedPreferences.getString("password")).then((val) {pass=val; print(pass);})
         .then((_) => auth.signInWithEmailAndPassword(email: email, password: pass)).then((user) => userRep.user = user.user).then((_) => cloudStorage
         .ref('uploads')
         .child(userRep.user.email)
         .getDownloadURL()).then((imgUrl) =>  userRep.profilePicture = Image.network(imgUrl)).then((_) => true).catchError((e) {
-          print(e);
           return false;
     }
     )),
@@ -74,10 +72,8 @@ class MyApp extends StatelessWidget {
           final size = MediaQuery.of(context).size;
           if (snapshot.hasData) {
             if(!snapshot.data) {
-              print("false");
               return LandingPage();
             } else {
-              print("true");
               return HomePage();
             }
             } else if(snapshot.hasError) {

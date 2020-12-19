@@ -120,7 +120,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
             style: TextStyle(color: Colors.white),
           ),
         ),
-        drawer: techDrawer(userRep, context, DrawerSections.home),
+        drawer: techDrawer(userRep, context, DrawerSections.notifications),
       body:Container(
           decoration: pageContainerDecoration,
           margin: pageContainerMargin,

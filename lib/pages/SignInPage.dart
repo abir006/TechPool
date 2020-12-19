@@ -7,6 +7,7 @@ import 'package:tech_pool/widgets/TextBoxField.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'ForgotPasswordPage.dart';
 import 'HomePage.dart';
+import 'package:encrypted_shared_preferences/encrypted_shared_preferences.dart';
 
 
 class SignInPage extends StatefulWidget {
@@ -24,6 +25,7 @@ class _SignInPageState extends State<SignInPage> with SingleTickerProviderStateM
   TextEditingController _email;
   TextEditingController _password;
   bool _pressed;
+  EncryptedSharedPreferences encryptedSharedPreferences = EncryptedSharedPreferences();
   
 
   @override
@@ -160,6 +162,26 @@ class _SignInPageState extends State<SignInPage> with SingleTickerProviderStateM
                                             .child(userRep.user.email)
                                             .getDownloadURL());
                                         userRep.profilePicture = Image.network(_imgUrl);
+                                        if(_checkedValue) {
+                                          encryptedSharedPreferences.setString(
+                                              "email", _email.text).then((
+                                              success) {
+                                            if (success) {
+                                              encryptedSharedPreferences
+                                                  .setString(
+                                                  "password", _password.text).then((value) {if(!value){
+                                                _key.currentState.showSnackBar(
+                                                    SnackBar(content: Text(
+                                                        "Couldnt save login information"),));
+                                              }});
+                                            }
+                                            else {
+                                              _key.currentState.showSnackBar(
+                                                  SnackBar(content: Text(
+                                                      "Couldnt save login information"),));
+                                            }
+                                          });
+                                        }
                                       }catch(_){
                                         userRep.profilePicture = null;
                                       }
@@ -170,6 +192,7 @@ class _SignInPageState extends State<SignInPage> with SingleTickerProviderStateM
                                         controller.forward(from: 0.0);
                                       });
                                       await Future.delayed(Duration(seconds: 1, milliseconds: 1000));
+                                      Navigator.pop(context);
                                       Navigator.pushReplacement(
                                           context,
                                           MaterialPageRoute(

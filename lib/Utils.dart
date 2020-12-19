@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:encrypted_shared_preferences/encrypted_shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,8 @@ import 'package:tech_pool/pages/CalendarEventInfo.dart';
 import 'package:tech_pool/pages/HomePage.dart';
 import 'package:tech_pool/pages/ProfilePage.dart';
 import 'package:intl/intl.dart';
+import 'package:tech_pool/widgets/WelcomeSignInButton.dart';
+import 'package:tech_pool/widgets/WelcomeSignUpButton.dart';
 
 /// Apps default settings
 MaterialColor mainColor =  Colors.cyan;
@@ -309,9 +312,15 @@ SafeArea techDrawer(UserRepository userRep, BuildContext context,
                       onPressed: () async => await (userRep.auth
                           .signOut()
                           .then((_) {
-                        Navigator.pop(context);
-                        userRep.user = null;
-                        Navigator.pop(context);
+                        final EncryptedSharedPreferences encryptedSharedPreferences = EncryptedSharedPreferences();
+                            encryptedSharedPreferences.clear();
+                             Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) {
+                                      var size = MediaQuery.of(context).size;
+                                      return Scaffold(body: Container(height: size.height, width: size.width,color: mainColor,
+  child: Stack(alignment: Alignment.center,children: [Image.asset("assets/images/TechPoolWelcomeBackground.png"), TransparentSignInButton(), TransparentSignUnButton()],)));}));
                       })),
                     ))
                   ])

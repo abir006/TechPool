@@ -122,7 +122,24 @@ class _HomePageState extends State<HomePage> {
                         Text("Error loading events from cloud")
                       ]);
                 } else {
-                  return _buildPage(context, userRep);
+                  return Scaffold(backgroundColor: mainColor,
+                  appBar: AppBar(
+                  elevation: 0,
+                      title: Text(
+                      "Home",
+                      style: TextStyle(color: Colors.white),
+                ),
+                actions: [
+                IconButton(
+                icon: Icon(Icons.notifications),
+                onPressed: null)
+                ],
+                ),
+                drawer: techDrawer(userRep, context, DrawerSections.home),
+                body: Container(
+                decoration: pageContainerDecoration,
+                margin: pageContainerMargin,
+                child: Center(child: CircularProgressIndicator())));
                 }
               });
     });

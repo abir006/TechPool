@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:encrypted_shared_preferences/encrypted_shared_preferences.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -30,6 +31,7 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateMixin {
+  EncryptedSharedPreferences encryptedSharedPreferences = EncryptedSharedPreferences();
   final cloudStorage = FirebaseStorage.instance;
   FirebaseFirestore db = FirebaseFirestore.instance;
   Animation<double> animation;
@@ -197,6 +199,26 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
                                   await cloudStorage.ref('uploads')
                                       .child(userRep.user.email).putFile(await ImageUtils.imageToFile(imageName: "images/profile", ext: "png"));
                                   userRep.profilePicture = Image.asset("assets/images/profile.png");
+                                    if(_checkedValue) {
+                                      encryptedSharedPreferences.setString(
+                                          "email", _email.text).then((
+                                          success) {
+                                        if (success) {
+                                          encryptedSharedPreferences
+                                              .setString(
+                                              "password", _password.text).then((value) {if(!value){
+                                            _key.currentState.showSnackBar(
+                                                SnackBar(content: Text(
+                                                    "Couldnt save login information"),));
+                                          }});
+                                        }
+                                        else {
+                                          _key.currentState.showSnackBar(
+                                              SnackBar(content: Text(
+                                                  "Couldnt save login information"),));
+                                        }
+                                      });
+                                    }
                                   while(!await checkEmailVerified()) {
 
                                   }
@@ -207,6 +229,7 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
                                     controller.forward(from: 0.0);
                                   });
                                   await Future.delayed(Duration(seconds: 1, milliseconds: 1000));
+                                    Navigator.pop(context);
                                     Navigator.pushReplacement(
                                         context,
                                         MaterialPageRoute(

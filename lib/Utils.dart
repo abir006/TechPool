@@ -175,7 +175,7 @@ double clacDis(GeoPoint from,Coordinates to){
 }
 
 
-class AcceptedLiftNotification {
+class LiftNotification {
   String driveId;
   String driverId;//email
   String driverFullName;
@@ -185,13 +185,13 @@ class AcceptedLiftNotification {
   int distance;
   DateTime liftTime;
   DateTime notificationTime;
-  //String type;
+  String type;
   //String pictureUrl;
   // int numberOfSeats;
   // int numberOfPassengers;
-  AcceptedLiftNotification(this.driveId, this.driverId, this.driverFullName,
+  LiftNotification(this.driveId, this.driverId, this.driverFullName,
       this.startCity, this.destCity, this.price, this.distance, this.liftTime,
-      this.notificationTime);
+      this.notificationTime, this.type);
 }
 
 /*class RejectedLiftNotification {
@@ -292,7 +292,7 @@ Container notificationListTile(dynamic notification, Widget leadingWidget, Widge
 
 
 Widget notificationSwitcher2(dynamic notification,BuildContext context){
-  if (notification is AcceptedLiftNotification) {
+  if (notification is LiftNotification) {
     return acceptedLiftNotificationListTile(notification, Icon(Icons.directions_car,size: 30, color: mainColor), Transform.rotate(angle: 0.8,
         child: Icon(Icons.thumb_up_rounded, size: 30, color: Colors.green)), context);
   } /*else if (notification is RejectedLiftNotification) {

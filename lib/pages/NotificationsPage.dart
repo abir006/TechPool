@@ -522,7 +522,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           infoTextRequested(snapshot.data[1]),
-                          //infoTextRequested(liftNotification.passengerId),
                           placesText(liftNotification.startCity, liftNotification.destCity),
                           allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000, liftNotification.price),
                         ],
@@ -533,9 +532,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Transform.rotate(angle: 0.8,
-                                child: Icon(Icons.thumb_up_rounded, size: 30, color: Colors.green)),
-                            Text("Accepted", style: TextStyle(fontSize: 15, color: Colors.green),
+                            Icon(Icons.more_horiz, size: 30, color: Colors.orange),
+                            /*Transform.rotate(angle: 0.8,
+                                child: Icon(Icons.thumb_up_rounded, size: 30, color: Colors.orange)),*/
+                            Text("Respond", style: TextStyle(fontSize: 15, color: Colors.orange),
                             )
                           ],
                         ),

@@ -482,6 +482,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
                       'Stops' : stopAddressesList,
 
                       'Passengers': [],
+                      'PassengersInfo': {},
                       'TimeStamp': _chosenTime,
                       'Driver': userRep.user.email,
                       //'Driver': "testing@technion.co.il",

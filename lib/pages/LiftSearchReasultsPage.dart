@@ -58,8 +58,90 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
     });
     //  return null;
   }
-  
-  Future<List<String>> initList2(UserRepository userRep) async {
+
+  void filter(QuerySnapshot value,UserRepository userRep){
+    q = value;
+    liftList.clear();
+    q.docs.forEach(
+            (element) async {
+          MyLift docLift = new MyLift(
+              "driver", "destAddress", "stopAddress", 5);
+          element.data().forEach((key, value) {
+            if (value != null) {
+              docLift.setProperty(key, value);
+            }
+          });
+          docLift.liftId = element.id;
+          liftList.add(docLift);
+        });
+
+    Coordinates startPointing = widget.startAddress.coordinates;
+    Coordinates destPointing = widget.destAddress.coordinates;
+    List<MyLift> liftListDelete = <MyLift>[];
+    liftList.forEach((element) {
+      bool toRemove = false;
+      if (widget.backSeat) {
+        if (!element.backSeat) {
+          toRemove = true;
+        }
+      }
+      if (widget.bigTrunk) {
+        if (!element.bigTrunk) {
+          toRemove = true;
+        }
+      }
+      toRemove = element.driver == userRep.user.email || toRemove;
+      toRemove = element.passengers.contains(userRep.user.email) || toRemove;
+      toRemove = element.passengers.length>=element.numberOfSeats || toRemove;
+      double distToStart = clacDis(element.startPoint, startPointing);
+      double distToEnd = clacDis(element.destPoint, destPointing);
+      element.stops.forEach((key) {
+        (key as Map).forEach((key, value) {
+          if (key == "stopPoint") {
+            GeoPoint pointStop = value as GeoPoint;
+            distToStart = min(distToStart, clacDis(pointStop, startPointing));
+            distToEnd = min(distToEnd, clacDis(pointStop, destPointing));
+          }
+        });
+      });
+      element.dist = (distToStart + distToEnd).toInt();
+      if(element.dist> widget.distances[widget.indexDist]) toRemove = true;
+      if (toRemove) {
+        liftListDelete.add(element);
+      }
+    });
+
+    liftListDelete.forEach((element) {
+      liftList.remove(element);
+    });
+    Comparator<MyLift> timeComparator = (a, b) {
+      if (a.time == b.time) {
+        return a.dist.compareTo(b.dist);
+      }
+      return a.time.compareTo(b.time);
+    };
+
+    Comparator<MyLift> distComparator = (a, b) {
+      if (a.dist == b.dist) {
+        return a.time.compareTo(b.time);
+      }
+      return a.dist.compareTo(b.dist);
+    };
+
+    if (_currsSearchDrop == "Time") {
+      liftList.sort(timeComparator);
+    } else {
+      liftList.sort(distComparator);
+    }
+}
+
+  /*Stream<QuerySnapshot> initList3(UserRepository userRep) async* {
+    return firestore.collection("Drives")
+        .where('TimeStamp', isLessThanOrEqualTo: Timestamp.fromDate(widget.toTime),isGreaterThanOrEqualTo: Timestamp.fromDate(widget.fromTime))
+        .snapshots();
+  }*/
+
+  Future<dynamic> initList2(UserRepository userRep) async {
     return firestore.collection("Drives")
         .where('TimeStamp', isLessThanOrEqualTo: Timestamp.fromDate(widget.toTime),isGreaterThanOrEqualTo: Timestamp.fromDate(widget.fromTime))
         .get().then((value) {
@@ -95,6 +177,7 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
         }
         toRemove = element.driver == userRep.user.email || toRemove;
         toRemove = element.passengers.contains(userRep.user.email) || toRemove;
+        toRemove = element.passengers.length>=element.numberOfSeats || toRemove;
         double distToStart = clacDis(element.startPoint, startPointing);
         double distToEnd = clacDis(element.destPoint, destPointing);
         element.stops.forEach((key) {
@@ -237,10 +320,13 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
 
 
     final _futureBuildLists = Consumer<UserRepository>(
-      builder: (context, userRep, _) => FutureBuilder<List<String>>(
-      future:initList2(userRep), // a previously-obtained Future<String> or null
-      builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot){
+      builder: (context, userRep, _) =>  StreamBuilder<QuerySnapshot>(
+      stream:firestore.collection("Drives")
+          .where('TimeStamp', isLessThanOrEqualTo: Timestamp.fromDate(widget.toTime),isGreaterThanOrEqualTo: Timestamp.fromDate(widget.fromTime))
+          .snapshots(), // a previously-obtained Future<String> or null
+      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot){
         if(snapshot.hasData) {
+          filter(snapshot.data, userRep);
           if(liftList.length>0){
           return  ListView.separated(
             shrinkWrap: true,
@@ -291,7 +377,27 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
         future: initNames(lift.driver),
         builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
           if (snapshot.hasData) {
-            return Container(
+            return InkWell(
+              onTap: () async {
+                liftRes temp =  liftRes(
+                  fromTime: widget.fromTime,
+                  toTime: widget.toTime,
+                  indexDist: 2,
+                  startAddress: widget.startAddress,
+                  destAddress: widget.destAddress,
+                  bigTrunk: widget.bigTrunk,
+                  backSeat: widget.backSeat,);
+                await Navigator.of(context).push(new MaterialPageRoute<Null>(
+                    builder: (BuildContext context) {
+                      return LiftInfoPage(lift: lift, resLift:temp);
+                    },
+                    fullscreenDialog: true
+                ));
+                setState(() {
+
+                });
+              },
+                child: Container(
               decoration: BoxDecoration(
                 color: Colors.white,
                 boxShadow: [BoxShadow(color: Colors.black, blurRadius: 2.0,
@@ -304,7 +410,7 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
                 children: [
                   InkWell(
                       onTap: () async {
-                        await Navigator.of(context).push(
+                      await Navigator.of(context).push(
                             MaterialPageRoute<liftRes>(
                                 builder: (BuildContext context) {
                                   return ProfilePage(
@@ -316,7 +422,9 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
 
                         });
                       },
-                      child: Container(
+                     // child: Hero(
+                       // tag: 'dash',
+                          child: Container(
                           margin: EdgeInsets.only(
                               left: MediaQuery
                                   .of(context)
@@ -359,31 +467,14 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
                         ],
                       )),
                   Spacer(),
-                  InkWell(
-                    child: Icon(Icons.arrow_forward_ios_outlined),
-                    onTap: () {
-                      Navigator.of(context).push(new MaterialPageRoute<Null>(
-                          builder: (BuildContext context) {
-                            return LiftInfoPage(lift: lift, resLift: liftRes(
-                              fromTime: widget.fromTime,
-                              toTime: widget.toTime,
-                              indexDist: 2,
-                              startAddress: widget.startAddress,
-                              destAddress: widget.destAddress,
-                              bigTrunk: widget.bigTrunk,
-                              backSeat: widget.backSeat,));
-                          },
-                          fullscreenDialog: true
-                      ));
-                    },
-                  ),
+                  Icon(Icons.arrow_forward_ios_outlined),
                   SizedBox(width: MediaQuery
                       .of(context)
                       .size
                       .height * 0.016,)
                 ],
               ),
-            );
+            ));
           }else {
             return Center(
               child: CircularProgressIndicator(),

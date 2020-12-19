@@ -14,7 +14,6 @@ import 'package:tech_pool/widgets/TextBoxField.dart';
 import 'package:tech_pool/pages/LiftSearchReasultsPage.dart';
 import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
 
-
 class SearchLiftPage extends StatefulWidget {
   DateTime currentdate;
   DateTime fromtime;
@@ -25,7 +24,18 @@ class SearchLiftPage extends StatefulWidget {
   bool bigTrunk;
   bool backSeat;
   bool popOrNot;
-  SearchLiftPage({Key key,@required this.currentdate,this.fromtime,this.totime,this.indexDis, this.startAd, this.destAd, this.bigTrunk, this.backSeat, this.popOrNot}): super(key: key);
+  SearchLiftPage(
+      {Key key,
+      @required this.currentdate,
+      this.fromtime,
+      this.totime,
+      this.indexDis,
+      this.startAd,
+      this.destAd,
+      this.bigTrunk,
+      this.backSeat,
+      this.popOrNot})
+      : super(key: key);
   @override
   _SearchLiftPageState createState() => _SearchLiftPageState();
 }
@@ -41,8 +51,8 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
   DateTime _toTimeTemp = null;
   bool checkedBigTrunck = false;
   bool backSeatNotfull = false;
-  List<String> _distances = ["1km","5km","20km","40km"];
-  String _maxDist ="20km";
+  List<String> _distances = ["1km", "5km", "20km", "40km"];
+  String _maxDist = "20km";
   TextEditingController _fromControler;
   TextEditingController _toControler;
   TextEditingController _startPointControler;
@@ -53,10 +63,16 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
   bool checkpoints = true;
   bool checkPointError = false;
   int hasSpace = 0;
-
+  bool _validateTime = true;
+  bool _validateLocations = true;
+  List<String> _errors = [
+    "Choose from and to time",
+    "From time equal to to time",
+    "The from time is after the to time"
+  ];
+  int _indexError = 0;
 
   double _spaces = 0;
-
 
   @override
   void initState() {
@@ -70,44 +86,80 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
   @override
   Widget build(BuildContext context) {
     var sizeFrameWidth = MediaQuery.of(context).size.width;
-    double defaultSpace = MediaQuery.of(context).size.height*0.013;
-    double defaultSpacewidth = MediaQuery.of(context).size.height*0.016;
-    if(widget.currentdate == null) widget.currentdate = DateTime.now();
-    DateTime currentDate = DateTime(widget.currentdate.year,widget.currentdate.month,widget.currentdate.day,DateTime.now().hour,DateTime.now().minute,DateTime.now().second,DateTime.now().millisecond,DateTime.now().microsecond);
-    if( widget.totime!=null) {
+    double defaultSpace = MediaQuery.of(context).size.height * 0.013;
+    double defaultSpacewidth = MediaQuery.of(context).size.height * 0.016;
+    if (widget.currentdate == null) widget.currentdate = DateTime.now();
+    DateTime currentDate = DateTime(
+        widget.currentdate.year,
+        widget.currentdate.month,
+        widget.currentdate.day,
+        DateTime.now().hour,
+        DateTime.now().minute,
+        DateTime.now().second,
+        DateTime.now().millisecond,
+        DateTime.now().microsecond);
+    if (widget.totime != null) {
       _toTime = widget.totime;
       _toControler.text = DateFormat('kk:mm').format(widget.totime);
-      widget.totime=null;
+      widget.totime = null;
     }
-    if(widget.fromtime!=null) {
+    if (widget.fromtime != null) {
       _fromTime = widget.fromtime;
-      _fromControler.text = DateFormat('dd/MM  kk:mm').format(widget.fromtime)+"-"+_toControler.text;
-      widget.fromtime=null;
+      _fromControler.text = DateFormat('dd/MM  kk:mm').format(widget.fromtime) +
+          "-" +
+          _toControler.text;
+      widget.fromtime = null;
     }
-    if(widget.indexDis!=null){
-      _maxDist =_distances[widget.indexDis];
-       widget.indexDis = null;
+    if (widget.indexDis != null) {
+      _maxDist = _distances[widget.indexDis];
+      widget.indexDis = null;
     }
-    if(widget.startAd!=null){
-      fromAddress=widget.startAd;
+    if (widget.startAd != null) {
+      fromAddress = widget.startAd;
       _startPointControler.text = fromAddress.addressLine;
       widget.startAd = null;
     }
 
-    if(widget.destAd!=null){
-      destAddress=widget.destAd;
+    if (widget.destAd != null) {
+      destAddress = widget.destAd;
       _destPointControler.text = destAddress.addressLine;
       widget.destAd = null;
     }
 
-    if(widget.backSeat!=null){
+    if (widget.backSeat != null) {
       backSeatNotfull = widget.backSeat;
       widget.backSeat = null;
     }
 
-    if(widget.bigTrunk!=null){
+    if (widget.bigTrunk != null) {
       checkedBigTrunck = widget.bigTrunk;
       widget.bigTrunk = null;
+    }
+
+    void checklocations(){
+      _validateLocations = true;
+      if (_startPointControler.text == "") {
+        _validateLocations = false;
+      }
+    }
+    void checktimes(){
+      _validateTime = true;
+      if (_fromTime == null || _toTime == null) {
+        _validateTime = false;
+        _indexError = 0;
+      }else {
+        if ((_fromTime.hour > _toTime.hour) ||
+            (_toTime.hour == _fromTime.hour &&
+                _toTime.minute < _fromTime.minute)) {
+          _validateTime = false;
+          _indexError = 2;
+        }
+        if (_fromTime.hour == _toTime.hour &&
+            _toTime.minute == _fromTime.minute) {
+          _validateTime = false;
+          _indexError = 1;
+        }
+      }
     }
 
     final locationText = Center(
@@ -130,152 +182,170 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
 
     final preferenceTexts = Center(
         child: Container(
-          child: Text(
-            'Preferences',
-            style:
+      child: Text(
+        'Preferences',
+        style:
             TextStyle(fontSize: _lablesTextsSize, fontWeight: FontWeight.bold),
-          ),
-        ));
+      ),
+    ));
 
-
-    final startPointText = Stack(children:[
-        Container(
-      child: Row(
-        children: [
-          textBoxFieldDisable(
-              nameLabel: "Start point : ",
+    final startPointText = Stack(children: [
+      Container(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            searchLableText(
+              text: "Start: ",
+            ),
+            Expanded(child: generalInfoText(text: _startPointControler.text)),
+            /*Expanded(child: textBoxFieldDisable(
               size: MediaQuery.of(context).size,
               hintText: "",
               textFieldController: _startPointControler,
               validator: (value) {
                 if(checkpoints && (_startPointControler==null || _startPointControler.text=="")){checkPointError=true;return "No start point chosen";}
-                else {checkPointError=false;return null;}}),
-        ],
+                else {checkPointError=false;return null;}})),*/
+          ],
+        ),
       ),
-    ),
-    //  InkWell(
-        //  onTap: (){},
-         // Container(color:Colors.transparent,child:SizedBox(width: defaultSpace*8,height:defaultSpace*9,)),
+      //  InkWell(
+      //  onTap: (){},
+      //Container(color:Colors.transparent,child:SizedBox(width: defaultSpace*8,height:defaultSpace*9,)),
     ]);
 
-    final destinationText =  Stack(children:[Container(
-      child: Row(
+    final destinationText = Stack(children: [
+      Container(
+          child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          textBoxFieldDisable(
-              nameLabel: "Destination point: ",
+          searchLableText(
+            text: "Destination: ",
+          ),
+          Expanded(child: generalInfoText(text: _destPointControler.text)),
+          /*child: textBoxFieldDisable(
+              //nameLabel: "Destination point: ",
               size: MediaQuery.of(context).size,
               hintText: "",
               textFieldController: _destPointControler,
               validator: (value) {
                 if(checkpoints &&(_destPointControler==null || _destPointControler.text=="")){return "No destination chosen";}
-                else return null;}),
+                else return null;})),*/
         ],
       )),
-         // Container(color:Colors.transparent,child:SizedBox(width: defaultSpace*8,height:defaultSpace*10,)),
+      // Container(color:Colors.transparent,child:SizedBox(width: defaultSpace*8,height:defaultSpace*10,)),
     ]);
 
-    final searchLift =
-      Container(
-          padding: EdgeInsets.only(left: sizeFrameWidth*0.2, right:sizeFrameWidth*0.2) ,
-        height: defaultSpace*4.5,
+    final searchLift = Container(
+        padding: EdgeInsets.only(
+            left: sizeFrameWidth * 0.2, right: sizeFrameWidth * 0.2),
+        height: defaultSpace * 4.5,
         child: RaisedButton.icon(
             color: Colors.black,
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(18),
                 side: BorderSide(color: Colors.black)),
-            icon: Icon(Icons.search,color: Colors.white) ,
-            label: Text("Search Lift  ",style: TextStyle(color: Colors.white,fontSize: 17)),
+            icon: Icon(Icons.search, color: Colors.white),
+            label: Text("Search Lift  ",
+                style: TextStyle(color: Colors.white, fontSize: 17)),
             onPressed: () {
-              if (_formKey.currentState.validate()) {
-                if(widget.popOrNot==false) {
+              setState(() {
+                checklocations();
+                checktimes();
+
+              });
+              if (_validateLocations && _validateTime) {
+                if (widget.popOrNot == false) {
                   Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>
-                            LiftSearchReasultsPage(fromTime: _fromTime,
-                              toTime: _toTime,
-                              indexDist: _distances.indexOf(_maxDist),
-                              startAddress: fromAddress,
-                              destAddress: destAddress,
-                              bigTrunk: checkedBigTrunck,
-                              backSeat: backSeatNotfull,),
+                        builder: (context) => LiftSearchReasultsPage(
+                          fromTime: _fromTime,
+                          toTime: _toTime,
+                          indexDist: _distances.indexOf(_maxDist),
+                          startAddress: fromAddress,
+                          destAddress: destAddress,
+                          bigTrunk: checkedBigTrunck,
+                          backSeat: backSeatNotfull,
+                        ),
                       ));
-                }else{
+                } else {
                   Navigator.pop<liftRes>(
-                      context, liftRes(
-                    fromTime: _fromTime,
-                    toTime: _toTime,
-                    indexDist: _distances.indexOf(_maxDist),
-                    startAddress: fromAddress,
-                    destAddress: destAddress,
-                    bigTrunk: checkedBigTrunck,
-                    backSeat: backSeatNotfull,));
+                      context,
+                      liftRes(
+                        fromTime: _fromTime,
+                        toTime: _toTime,
+                        indexDist: _distances.indexOf(_maxDist),
+                        startAddress: fromAddress,
+                        destAddress: destAddress,
+                        bigTrunk: checkedBigTrunck,
+                        backSeat: backSeatNotfull,
+                      ));
                 }
               }
-            }
-        ));
+            }));
 
-    final clearButton =Column(mainAxisAlignment: MainAxisAlignment.start,crossAxisAlignment: CrossAxisAlignment.start, children: [ SizedBox(
-        width: sizeFrameWidth*0.1,
-        child: RaisedButton.icon(
-        color: Colors.white,
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
-            side: BorderSide(color: Colors.black)),
-        icon: Icon(Icons.delete_outline) ,
-        label: Text("Delete"),
-        onPressed: () {}
-    ))]);
+    final clearButton = Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+              width: sizeFrameWidth * 0.1,
+              child: RaisedButton.icon(
+                  color: Colors.white,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18),
+                      side: BorderSide(color: Colors.black)),
+                  icon: Icon(Icons.delete_outline),
+                  label: Text("Delete"),
+                  onPressed: () {}))
+        ]);
 
-    final chooseStartAndDestination =
-    Column(mainAxisAlignment: MainAxisAlignment.start,crossAxisAlignment: CrossAxisAlignment.center, children: [
-      Container(
-        child: RaisedButton.icon(
-          color: Colors.white,
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(18),
-              side: BorderSide(color: Colors.black)),
-          label: Text("Choose Start and Destination"),
-          icon: Icon(Icons.map),
-          onPressed: () async {
-            returnResult = await Navigator.of(context).push(
-                MaterialPageRoute<LocationsResult>(
-                builder: (BuildContext context) {
-                  return LocationSearch(showAddStops: false);
-                },
-                fullscreenDialog: true
-            ));
-              setState(() {
-                if (returnResult != null) {
-                  fromAddress = returnResult.fromAddress;
-                  destAddress = returnResult.toAddress;
-                  _startPointControler.text =
-                      returnResult.fromAddress.addressLine;
-                  _destPointControler.text = returnResult.toAddress.addressLine;
-                }
-              });
-
-          },
-        ),
-      ),
-    ]);
-
+    final chooseStartAndDestination = Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            child: RaisedButton.icon(
+              color: Colors.white,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18),
+                  side: BorderSide(color: Colors.black)),
+              label: Text("Choose Start and Destination"),
+              icon: Icon(Icons.map),
+              onPressed: () async {
+                returnResult = await Navigator.of(context)
+                    .push(MaterialPageRoute<LocationsResult>(
+                        builder: (BuildContext context) {
+                          return LocationSearch(showAddStops: false);
+                        },
+                        fullscreenDialog: true));
+                setState(() {
+                  if (returnResult != null) {
+                    fromAddress = returnResult.fromAddress;
+                    destAddress = returnResult.toAddress;
+                    _startPointControler.text =
+                        returnResult.fromAddress.addressLine;
+                    _destPointControler.text =
+                        returnResult.toAddress.addressLine;
+                    checklocations();
+                  }
+                });
+              },
+            ),
+          ),
+        ]);
 
     final toTimePicker = TimePickerSpinner(
       is24HourMode: true,
-      normalTextStyle:
-      TextStyle(fontSize: 28, color: Colors.grey),
-      highlightedTextStyle:
-      TextStyle(fontSize: 34, color: Colors.teal),
+      normalTextStyle: TextStyle(fontSize: 28, color: Colors.grey),
+      highlightedTextStyle: TextStyle(fontSize: 34, color: Colors.teal),
       //spacing: 50,
       //itemHeight: 80,
       alignment: Alignment.center,
       isForce2Digits: true,
       minutesInterval: 5,
       //time: _hourTime != null ? _hourTime : fixedTime,
-      time: _toTime != null
-          ? _toTime
-          : currentDate,
+      time: _toTime != null ? _toTime : currentDate,
       isShowSeconds: false,
       onTimeChange: (time) {
         setState(() {
@@ -286,19 +356,15 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
 
     final fromTimePicker = TimePickerSpinner(
       is24HourMode: true,
-      normalTextStyle:
-      TextStyle(fontSize: 28, color: Colors.grey),
-      highlightedTextStyle:
-      TextStyle(fontSize: 34, color: Colors.teal),
+      normalTextStyle: TextStyle(fontSize: 28, color: Colors.grey),
+      highlightedTextStyle: TextStyle(fontSize: 34, color: Colors.teal),
       //spacing: 50,
       //itemHeight: 80,
       alignment: Alignment.center,
       isForce2Digits: true,
       minutesInterval: 5,
       //time: _hourTime != null ? _hourTime : fixedTime,
-      time: _fromTime != null
-          ? _fromTime
-          : currentDate,
+      time: _fromTime != null ? _fromTime : currentDate,
       isShowSeconds: false,
       onTimeChange: (time) {
         setState(() {
@@ -312,15 +378,19 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.white,
-          toolbarHeight: defaultSpace*2.5,
+          toolbarHeight: defaultSpace * 2.8,
+          elevation: 0,
           leading: Container(),
           titleSpacing: 0,
-          bottom: ColoredTabBar(Colors.white,TabBar(
-            tabs: [
-              Text("From",style:TextStyle(fontSize: 18, color: mainColor)),
-              Text("To",style:TextStyle(fontSize: 18, color: mainColor)),
-            ],
-          )),
+          bottom: ColoredTabBar(
+              Colors.white,
+              TabBar(
+                tabs: [
+                  Text("From",
+                      style: TextStyle(fontSize: 18, color: mainColor)),
+                  Text("To", style: TextStyle(fontSize: 18, color: mainColor)),
+                ],
+              )),
         ),
         body: TabBarView(
           children: [
@@ -368,70 +438,77 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
           ],*/
         ));
 */
-    final chooseTime =
-    Column(mainAxisAlignment: MainAxisAlignment.center,crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Center(
-          child: Container(
-            child: RaisedButton.icon(
-              color: Colors.white,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18),
-                  side: BorderSide(color: Colors.black)),
-              label: Text("Choose time"),
-              icon: Icon(Icons.timer),
-              onPressed: () {
-                showDialog(
-                    context: context,
-                    builder: (_) => new SimpleDialog(
-                        backgroundColor:Colors.white,
-                       children: [Container(height: defaultSpace*25,width:defaultSpace*30,child:newChooseTime),
-              Row(
-                mainAxisAlignment: MainAxisAlignment
-                    .center, //Center Row contents horizontally,
-                children: [
-                  //RaisedButton(
-                  FlatButton(
-                    child: Text('CANCEL',
-                        style: TextStyle(
-                            fontSize: 16, color: mainColor)),
-                    onPressed: () {
-                      setState(() {
-                        Navigator.of(context).pop();
-                      });
-                    },
-                  ),
-                  //SizedBox(width: 2*defaultSpaceWidth),
-                  //RaisedButton(
-                  FlatButton(
-                    child: Text('CONFIRM',
-                        style: TextStyle(
-                            fontSize: 16, color: mainColor)),
-                    onPressed: () {
-                      setState(() {
-                       if(_fromTimeTemp==null) _fromTimeTemp=currentDate;
-                       if(_toTimeTemp==null) _toTimeTemp =(_toTime!=null?_toTime:_fromTimeTemp);
-                       _fromTime=_fromTimeTemp;
-                       _toTime = _toTimeTemp;
-                        _toControler.text = DateFormat('kk:mm').format(_toTime);
-                       _fromControler.text = DateFormat('dd/MM  kk:mm').format(_fromTime)+" - "+ _toControler.text;
-                        if(_fromTime==null || ((_fromTime.hour >_toTime.hour) || (_toTime.hour == _fromTime.hour && _toTime.minute < _fromTime.minute )) ||
-                         (_fromTime.hour ==_toTime.hour && _toTime.minute == _fromTime.minute)){
-                        hasSpace=2;
-                        }else{
-                          hasSpace=0;
-                        }
-                        if(!checkPointError) checkpoints = false;
-                        _formKey.currentState.validate();
-                        checkpoints = true;
-                      });
-                      Navigator.of(context).pop();
-                    },
-                  )
-                ],
-              ),
-            ],
-                    ));
-                /*
+    final chooseTime = Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Container(
+              child: RaisedButton.icon(
+                color: Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18),
+                    side: BorderSide(color: Colors.black)),
+                label: Text("Choose time"),
+                icon: Icon(Icons.timer),
+                onPressed: () {
+                  showDialog(
+                      context: context,
+                      builder: (_) => new SimpleDialog(
+                            backgroundColor: Colors.white,
+                            children: [
+                              Container(
+                                  height: defaultSpace * 30,
+                                  width: defaultSpace * 30,
+                                  child: newChooseTime),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment
+                                    .center, //Center Row contents horizontally,
+                                children: [
+                                  //RaisedButton(
+                                  FlatButton(
+                                    child: Text('CANCEL',
+                                        style: TextStyle(
+                                            fontSize: 16, color: mainColor)),
+                                    onPressed: () {
+                                      setState(() {
+                                        Navigator.of(context).pop();
+                                      });
+                                    },
+                                  ),
+                                  //SizedBox(width: 2*defaultSpaceWidth),
+                                  //RaisedButton(
+                                  FlatButton(
+                                    child: Text('CONFIRM',
+                                        style: TextStyle(
+                                            fontSize: 16, color: mainColor)),
+                                    onPressed: () {
+                                      setState(() {
+                                        if (_fromTimeTemp == null)
+                                          _fromTimeTemp = currentDate;
+                                        if (_toTimeTemp == null)
+                                          _toTimeTemp = (_toTime != null
+                                              ? _toTime
+                                              : _fromTimeTemp);
+                                        _fromTime = _fromTimeTemp;
+                                        _toTime = _toTimeTemp;
+                                        _toControler.text =
+                                            DateFormat('kk:mm').format(_toTime);
+                                        _fromControler.text =
+                                            DateFormat('dd/MM  kk:mm')
+                                                    .format(_fromTime) +
+                                                " - " +
+                                                _toControler.text;
+                                        checktimes();
+                                      });
+                                      Navigator.of(context).pop();
+                                    },
+                                  )
+                                ],
+                              ),
+                            ],
+                          ));
+                  /*
                 DateTimeRangePicker(
                     startText: "From",
                     endText: "To",
@@ -457,15 +534,19 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
                       _formKey.currentState.validate();
                       });
                     }).showPicker(context);*/
-              },
+                },
+              ),
             ),
           ),
-        ),
-      //  Text(resultString ?? "")
-      ]);
+          //  Text(resultString ?? "")
+        ]);
 
-    final fromText = Container(
-      child: textBoxFieldDisableCentered(
+    final fromText = Center(
+        child: Container(
+            child: generalInfoText(
+      text: _fromControler.text,
+    ))
+        /*textBoxFieldDisableCentered(
               nameLabel: "",
               size: MediaQuery.of(context).size,
               hintText: "",
@@ -474,25 +555,32 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
                 if(_fromTime==null ||  _toTime==null){return '                                      No of time selected';}
                 else  if ((_fromTime.hour >_toTime.hour) || (_toTime.hour == _fromTime.hour && _toTime.minute < _fromTime.minute )) {return '                             The from time is after the to Time';}
                 else if(_fromTime.hour ==_toTime.hour && _toTime.minute == _fromTime.minute ){return '                                 From time equal to to time';}
-                else return null;}),
-    );
-
-
-    final toText = Container(
-          child:textBoxFieldDisable(
-              nameLabel: "hi",
-              size: MediaQuery.of(context).size,
-              hintText: "",
-              textFieldController: _toControler,
-              validator: (value) {
-                if(_fromTime==null ){return 'No to time selected';}
-              else  if ((_fromTime.hour >_toTime.hour) || (_toTime.hour == _fromTime.hour && _toTime.minute < _fromTime.minute )) {return 'The to time is before the from time ';}
-              else if(_fromTime.hour ==_toTime.hour && _toTime.minute == _fromTime.minute ){return 'To time equal from time ';}
-              else return null;}),
+                else return null;}),*/
         );
 
+    final toText = Container(
+      child: textBoxFieldDisable(
+          nameLabel: "hi",
+          size: MediaQuery.of(context).size,
+          hintText: "",
+          textFieldController: _toControler,
+          validator: (value) {
+            if (_fromTime == null) {
+              return 'No to time selected';
+            } else if ((_fromTime.hour > _toTime.hour) ||
+                (_toTime.hour == _fromTime.hour &&
+                    _toTime.minute < _fromTime.minute)) {
+              return 'The to time is before the from time ';
+            } else if (_fromTime.hour == _toTime.hour &&
+                _toTime.minute == _fromTime.minute) {
+              return 'To time equal from time ';
+            } else
+              return null;
+          }),
+    );
+
     final bigTruncText = Container(
-      height:4*defaultSpace,
+      height: 4 * defaultSpace,
       child: Row(
         children: [
           Text(
@@ -500,16 +588,21 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
             style: TextStyle(
                 fontSize: _fontTextsSize, color: Colors.black.withOpacity(0.6)),
           ),
-      Theme(
-        data: ThemeData(unselectedWidgetColor: secondColor),
-         child: Checkbox(value: checkedBigTrunck, onChanged: (bool value){
-    setState(() {checkedBigTrunck = value;});})),
+          Theme(
+              data: ThemeData(unselectedWidgetColor: secondColor),
+              child: Checkbox(
+                  value: checkedBigTrunck,
+                  onChanged: (bool value) {
+                    setState(() {
+                      checkedBigTrunck = value;
+                    });
+                  })),
         ],
       ),
     );
 
     final backSeatText = Container(
-      height:4*defaultSpace,
+      height: 4 * defaultSpace,
       child: Row(
         children: [
           Text(
@@ -517,16 +610,21 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
             style: TextStyle(
                 fontSize: _fontTextsSize, color: Colors.black.withOpacity(0.6)),
           ),
-      Theme(
-        data: ThemeData(unselectedWidgetColor: secondColor),
-          child:Checkbox(value: backSeatNotfull, onChanged: (bool value) {
-            setState(() {backSeatNotfull = value;});})),
+          Theme(
+              data: ThemeData(unselectedWidgetColor: secondColor),
+              child: Checkbox(
+                  value: backSeatNotfull,
+                  onChanged: (bool value) {
+                    setState(() {
+                      backSeatNotfull = value;
+                    });
+                  })),
         ],
       ),
     );
 
     final maxDistance = Container(
-      height:4*defaultSpace,
+      height: 4 * defaultSpace,
       child: Row(
         children: [
           Text(
@@ -534,38 +632,44 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
             style: TextStyle(
                 fontSize: _fontTextsSize, color: Colors.black.withOpacity(0.6)),
           ),
-      Container(
-        color: Colors.transparent,
-      child:Theme(
-          data: Theme.of(context).copyWith(
-              canvasColor: Colors.white, // background color for the dropdown items
-              buttonTheme: ButtonTheme.of(context).copyWith(
-                alignedDropdown: true,  //If false (the default), then the dropdown's menu will be wider than its button.
-              )
-          ),
-          child:DropdownButton<String>(
-            dropdownColor: Colors.white,
-        elevation: 0,
-        value: _maxDist,
-        onChanged: (String newValue) {
-          setState(() {
-            _maxDist = newValue;
-          });
-        },
-        items: _distances.map<DropdownMenuItem<String>>((String value) {
-          return DropdownMenuItem<String>(
-            value: value,
-            child: Text(value),
-          );
-        }).toList())),
-      )],
+          Container(
+            color: Colors.transparent,
+            child: Theme(
+                data: Theme.of(context).copyWith(
+                    canvasColor:
+                        Colors.white, // background color for the dropdown items
+                    buttonTheme: ButtonTheme.of(context).copyWith(
+                      alignedDropdown:
+                          true, //If false (the default), then the dropdown's menu will be wider than its button.
+                    )),
+                child: DropdownButton<String>(
+                    dropdownColor: Colors.white,
+                    elevation: 0,
+                    value: _maxDist,
+                    onChanged: (String newValue) {
+                      setState(() {
+                        _maxDist = newValue;
+                      });
+                    },
+                    items: _distances
+                        .map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList())),
+          )
+        ],
       ),
     );
     final prefer = Container(
         alignment: Alignment.bottomLeft,
-        color:Colors.transparent,
-        child:ConfigurableExpansionTile(
-          header: Container(color: Colors.transparent,child: Text("Preferences",style:TextStyle(fontWeight: FontWeight.bold, fontSize: 17))),
+        color: Colors.transparent,
+        child: ConfigurableExpansionTile(
+          header: Container(
+              color: Colors.transparent,
+              child: Text("Preferences",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17))),
           animatedWidgetFollowingHeader: const Icon(
             Icons.expand_more,
             color: const Color(0xFF707070),
@@ -588,49 +692,80 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
         elevation: 0,
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
-        title: Text("Search Lift",style: TextStyle(color:Colors.white),),
+        title: Text(
+          "Search Lift",
+          style: TextStyle(color: Colors.white),
+        ),
       ),
-      body:  Form(
-        key: _formKey,
-        child: Builder(
-          builder: (context) => Container(
-            decoration: pageContainerDecoration,
-            margin: pageContainerMargin,
-              child: Column( children: [ Expanded(child: Stack(children:[Container( child:Center(child:Transform.rotate(angle: 0.8,child:Icon(Icons.thumb_up_rounded,size:300,color:  Colors.cyan.withOpacity(0.1),)))),
-                ListView(
-                  padding: EdgeInsets.only(left: defaultSpacewidth, right: defaultSpacewidth, bottom: defaultSpacewidth),
-                  children: [
-                    //SizedBox(height: defaultSpace),
-                   // locationText,
-                    SizedBox(height: defaultSpace),
-                    chooseStartAndDestination,
-                    SizedBox(height: defaultSpace),
-                    startPointText,
-                    destinationText,
-                    //SizedBox(height: 2*defaultSpace),
-                    //timeText,
-                    SizedBox(height: defaultSpace),
-                    chooseTime,
-                    SizedBox(height: hasSpace*defaultSpace),
-                    //Center(child:Row(mainAxisAlignment: MainAxisAlignment.center,crossAxisAlignment: CrossAxisAlignment.start,children: [SizedBox(width: 10*defaultSpace,),Expanded(child:Times)],)),
-                    fromText,
-                    //fromText,
-                    //SizedBox(height: defaultSpace),
-                    //toText,
-                    SizedBox(height: defaultSpace),
-                    //SizedBox(height: defaultSpace),
-                    //preferenceTexts,
-                    SizedBox(height: defaultSpace),
-                    Divider(thickness: 3,),
-                    prefer,
-                    Divider(thickness: 3,),
-                    //SizedBox(height:2*defaultSpace),
-                  ])])),
-                searchLift,
-                SizedBox(height: 2*defaultSpace),
-              ]),
-           // searchLift,
-    )) ),
+      body: Form(
+          key: _formKey,
+          child: Builder(
+              builder: (context) => Container(
+                    decoration: pageContainerDecoration,
+                    margin: pageContainerMargin,
+                    child: Column(children: [
+                      Expanded(
+                          child: Stack(children: [
+                        Container(
+                            child: Center(
+                                child: Transform.rotate(
+                                    angle: 0.8,
+                                    child: Icon(
+                                      Icons.thumb_up_rounded,
+                                      size: 300,
+                                      color: Colors.cyan.withOpacity(0.1),
+                                    )))),
+                        ListView(
+                            padding: EdgeInsets.only(
+                                left: defaultSpacewidth,
+                                right: defaultSpacewidth,
+                                bottom: defaultSpacewidth),
+                            children: [
+                              SizedBox(height: defaultSpace),
+                              chooseStartAndDestination,
+                              SizedBox(height: defaultSpace),
+                              startPointText,
+                              SizedBox(height: 2 * defaultSpace),
+                              destinationText,
+                              SizedBox(height: 2 * defaultSpace),
+                              _validateLocations
+                                  ? SizedBox(height: 0 * defaultSpace)
+                                  : Center(
+                                      child: Text(
+                                          "Choose start and destination",
+                                          style: TextStyle(color: Colors.red))),
+                              SizedBox(height: 4 * defaultSpace),
+                              chooseTime,
+                              //Center(child:Row(mainAxisAlignment: MainAxisAlignment.center,crossAxisAlignment: CrossAxisAlignment.start,children: [SizedBox(width: 10*defaultSpace,),Expanded(child:Times)],)),
+                              fromText,
+                              SizedBox(height: 0.5 * defaultSpace),
+                              _validateTime
+                                  ? SizedBox(height: 0 * defaultSpace)
+                                  : Center(
+                                      child: Text(_errors[_indexError],
+                                          style: TextStyle(color: Colors.red))),
+                              //fromText,
+                              //SizedBox(height: defaultSpace),
+                              //toText,
+                              SizedBox(height: defaultSpace),
+                              //SizedBox(height: defaultSpace),
+                              //preferenceTexts,
+                              SizedBox(height: defaultSpace),
+                              Divider(
+                                thickness: 3,
+                              ),
+                              prefer,
+                              Divider(
+                                thickness: 3,
+                              ),
+                              //SizedBox(height:2*defaultSpace),
+                            ])
+                      ])),
+                      searchLift,
+                      SizedBox(height: 2 * defaultSpace),
+                    ]),
+                    // searchLift,
+                  ))),
       backgroundColor: mainColor,
     );
   }
@@ -644,6 +779,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
     super.dispose();
   }
 }
+
 class ColoredTabBar extends Container implements PreferredSizeWidget {
   ColoredTabBar(this.color, this.tabBar);
 
@@ -655,8 +791,19 @@ class ColoredTabBar extends Container implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    color: color,
-    child: tabBar,
+        color: color,
+        child: tabBar,
+      );
+}
+
+Widget searchLableText({@required String text}) {
+  return Container(
+    child: Text(
+      text,
+      style: TextStyle(fontSize: 17, color: Colors.black.withOpacity(0.6)),
+      overflow: TextOverflow.ellipsis,
+      maxLines: 2,
+    ),
   );
 }
 /*

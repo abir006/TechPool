@@ -35,6 +35,7 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
   void initState() {
     super.initState();
     myNoteController = TextEditingController();
+    widget.lift.payments="";
   }
 
   Future<bool> addRequest(UserRepository userRep) async {
@@ -116,46 +117,62 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
       );
     }
 
-    final additionInfo = Container(
-        alignment: Alignment.bottomLeft,
-        color: Colors.white,
-        child: ConfigurableExpansionTile(
-          header: Container(
-              alignment: Alignment.bottomLeft,
-              child: Text("Additional info",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17))),
-          animatedWidgetFollowingHeader: const Icon(
-            Icons.expand_more,
-            color: const Color(0xFF707070),
-          ),
-          //tilePadding: EdgeInsets.symmetric(horizontal: 0),
-          // backgroundColor: Colors.white,
-          // trailing: Icon(Icons.arrow_drop_down,color: Colors.black,),
-          //title: Text("Passenger info"),
-          children: [
-            Row(children: [
-              labelText(text: "Big Trunk: "),
-              widget.lift.bigTrunk
-                  ? Icon(Icons.check_circle_outline, color: Colors.teal)
-                  : Icon(Icons.cancel_outlined, color: Colors.pink)
-            ]),
-            SizedBox(height: defaultSpace),
-            Row(children: [
-              labelText(text: "Backseat not full?: "),
-              widget.lift.backSeat
-                  ? Icon(Icons.check_circle_outline, color: Colors.teal)
-                  : Icon(Icons.cancel_outlined, color: Colors.pink)
-            ]),
-            SizedBox(height: defaultSpace),
-            _buildRow(context),
-            SizedBox(height: defaultSpace),
-            Row(children: [
-              labelText(text: "Drivers note: "),
-              Expanded(child: infoText(widget.lift.note))
-            ]),
-            SizedBox(height: defaultSpace),
-            ],
-        ));
+    final additionInfo =  FutureBuilder<DocumentSnapshot>(
+        future:  firestore.collection("Profiles").doc(widget.lift.driver).get(), // a previously-obtained Future<String> or null
+        builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+          if (snapshot.hasData) {
+            widget.lift.payments =snapshot.data.data()["allowedPayments"].join(", ");
+            return Container(
+                alignment: Alignment.bottomLeft,
+                color: Colors.white,
+                child: ConfigurableExpansionTile(
+                  header: Container(
+                      alignment: Alignment.bottomLeft,
+                      child: Text("Additional info",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 17))),
+                  animatedWidgetFollowingHeader: const Icon(
+                    Icons.expand_more,
+                    color: const Color(0xFF707070),
+                  ),
+                  //tilePadding: EdgeInsets.symmetric(horizontal: 0),
+                  // backgroundColor: Colors.white,
+                  // trailing: Icon(Icons.arrow_drop_down,color: Colors.black,),
+                  //title: Text("Passenger info"),
+                  children: [
+                    Row(children: [
+                      labelText(text: "Big Trunk: "),
+                      widget.lift.bigTrunk
+                          ? Icon(Icons.check_circle_outline, color: Colors.teal)
+                          : Icon(Icons.cancel_outlined, color: Colors.pink)
+                    ]),
+                    SizedBox(height: defaultSpace),
+                    Row(children: [
+                      labelText(text: "Backseat not full?: "),
+                      widget.lift.backSeat
+                          ? Icon(Icons.check_circle_outline, color: Colors.teal)
+                          : Icon(Icons.cancel_outlined, color: Colors.pink)
+                    ]),
+                    SizedBox(height: defaultSpace),
+                    _buildRow(context),
+                    SizedBox(height: defaultSpace),
+                    Row(children: [
+                      labelText(text: "Drivers note: "),
+                      Expanded(child: infoText(widget.lift.note))
+                    ]),
+                    SizedBox(height: defaultSpace),
+                    Row(children: [
+                      labelText(text: "Payment methods: "),
+                      Expanded(child: infoText(widget.lift.payments))
+                    ]),
+                  ],
+                ));
+          } else {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+    });
 
     final passengers = Container(
         alignment: Alignment.bottomLeft,
@@ -197,30 +214,31 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
             onPressed: () async {
               bool checkVal = await addRequest(userRep);
               if (checkVal == false) {
-                showAlertDialog(context,"The Lift is not available","The lift is full.\nPress ok to return to results");
+                showAlertDialog(context,"The lift is not available","The lift is full.\nPress ok to return to results");
               } else {
-                showAlertDialog(context,"The Request Has been sent","Press ok to return to results");
+                showAlertDialog(context,"The request has been sent","Press ok to return to results");
               }
             }));
     });
 
-    final allInfo = Container(
-        child: ListView(
-            shrinkWrap: true,
-            padding: EdgeInsets.only(
-                left: defaultSpacewidth, right: defaultSpacewidth),
-            children: [
-          SizedBox(height: defaultSpace),
-              Text("Driver:",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-              _buildTile(widget.lift),
-              Divider(
-                thickness: 3,
-              ),
+    final allInfo =
+       Container(
+          child: ListView(
+              shrinkWrap: true,
+              padding: EdgeInsets.only(
+                  left: defaultSpacewidth, right: defaultSpacewidth),
+              children: [
               SizedBox(height: defaultSpace),
+          Text("Driver:",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+          _buildTile(widget.lift),
+          Divider(
+            thickness: 3,
+          ),
+          SizedBox(height: defaultSpace),
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
               labelText(text: "Date and time: "),
               Expanded(
                   child: infoText(
@@ -264,8 +282,8 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
           ]),
           SizedBox(height: defaultSpace),
         */  Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
+            //mainAxisAlignment: MainAxisAlignment.start,
+            //  crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
           labelText(text: "Price: "),

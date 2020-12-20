@@ -40,15 +40,21 @@ void main() {
   });
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   // This widget is the root of your application.
   @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  final auth = FirebaseAuth.instance;
+  final cloudStorage = FirebaseStorage.instance;
+  final EncryptedSharedPreferences encryptedSharedPreferences = EncryptedSharedPreferences();
+  var email = "";
+  var pass = "";
+
+  @override
   Widget build(BuildContext context) {
-    var email = "";
-    var pass = "";
-    final auth = FirebaseAuth.instance;
-    final cloudStorage = FirebaseStorage.instance;
-    final EncryptedSharedPreferences encryptedSharedPreferences = EncryptedSharedPreferences();
     return Builder(builder: (BuildContext context) {return  ChangeNotifierProvider<UserRepository>(
                   create: (context) => UserRepository(), child: MaterialApp(
                 title: 'TechPool',
@@ -57,10 +63,11 @@ class MyApp extends StatelessWidget {
                   primaryIconTheme: IconThemeData(color: Colors.white),
                   unselectedWidgetColor: Colors.white,
                 ),
-                home: Consumer<UserRepository>(builder: (context, userRep, child) {
+                home: Builder(builder: (context) {
+                  var userRep = Provider.of<UserRepository>(context,listen: false);
                   return FutureBuilder<Object>(
     future: (encryptedSharedPreferences.getString("email").then((value) {
-      email=value;}).then((_) => encryptedSharedPreferences.getString("password")).then((val) {pass=val; print(pass);})
+      email=value;print(value);}).then((_) => encryptedSharedPreferences.getString("password")).then((val) {pass=val;print(val);})
         .then((_) => auth.signInWithEmailAndPassword(email: email, password: pass)).then((user) => userRep.user = user.user).then((_) => cloudStorage
         .ref('uploads')
         .child(userRep.user?.email)
@@ -82,7 +89,8 @@ class MyApp extends StatelessWidget {
               return Scaffold(body: Container(color: mainColor,height: size.height, width: size.width, child: Stack(alignment: Alignment.center,children: [Image.asset("assets/images/try.png"), Center(child: CircularProgressIndicator(),)],)));
             }
           }
-        );},
+        ,
+                  );},
                 )));});
   }
 }

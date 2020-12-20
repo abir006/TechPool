@@ -127,7 +127,7 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
                           hintText: "Last name",
                           textFieldController: _lastName,
                           validator: validateNotEmpty("last name")),
-                      textBoxField(
+                      textBoxField( textCap: TextCapitalization.none,
                           size: size,
                           hintText: "Email",
                           textFieldController: _email,
@@ -171,19 +171,21 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
                                   style: TextStyle(color: Colors.white)),
                             ]),
                       ),
-                      !_pressed ? Container(
+                      !_pressed ? TextButton(
+                        child: Container(
                           decoration: BoxDecoration(
                               color: Colors.black,
                               borderRadius:
                                   BorderRadius.all(Radius.circular(8))),
                           width: size.width * 0.7,
-                        child: Row(mainAxisAlignment: MainAxisAlignment.center,children: [TextButton(
-                            child: Text(
+                          height: size.height*0.06,
+                          child: Row(mainAxisAlignment: MainAxisAlignment.center,children: [Text(
                               "Sign Up",
                               style: TextStyle(color: Colors.white),
                               textAlign: TextAlign.center,
-                            ),
+                            ),Icon(Icons.account_circle,color: Colors.white)])),
                             onPressed: () async {
+                          _email.text = _email.text.toLowerCase();
                               if (_formKey.currentState.validate()) {
                                 FocusScope.of(context).unfocus();
                                 setState(() {
@@ -191,14 +193,18 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
                                 });
                                 try{
                                   await (userRep.auth.createUserWithEmailAndPassword(email: _email.text, password: _password.text).then((user) async {
+                                    print(user.user.email);
                                     await db.collection("Profiles").doc(_email.text).set(
-                                        {"firstName" : _firstName.text.capitalize(), "lastName" : _lastName.text.capitalize});
+                                        {"firstName" : _firstName.text, "lastName" : _lastName.text,"aboutSelf" : "","hobbies" : "", "faculty" :"","phoneNumber": "","allowedPayments" : []});
                                   await user.user.updateProfile(displayName: _firstName.text+" "+_lastName.text);
                                   await user.user.sendEmailVerification();
                                   userRep.user = user.user;
                                   await cloudStorage.ref('uploads')
                                       .child(userRep.user.email).putFile(await ImageUtils.imageToFile(imageName: "images/profile", ext: "png"));
                                   userRep.profilePicture = Image.asset("assets/images/profile.png");
+                                  while(!await checkEmailVerified()) {
+
+                                  }
                                     if(_checkedValue) {
                                       encryptedSharedPreferences.setString(
                                           "email", _email.text).then((
@@ -219,9 +225,6 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
                                         }
                                       });
                                     }
-                                  while(!await checkEmailVerified()) {
-
-                                  }
                                   setState(() {
                                     controller.stop();
                                     animation = new Tween(begin: 0.0, end: size.height).animate(controller);
@@ -247,7 +250,7 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
                                 }
                               }
                             },
-                          ),Icon(Icons.account_circle,color: Colors.white)])) : Container(width: size.width*0.7,child: Wrap(direction: Axis.horizontal,children: [Text("A verification email sent to: \n${_email.text}, \nplease verify.", style: TextStyle(backgroundColor: secondColor, color: Colors.white, fontSize: 20),), Center(child: CircularProgressIndicator(),)]))
+                          ) : Container(width: size.width*0.7,child: Wrap(direction: Axis.horizontal,children: [Text("A verification email sent to: \n${_email.text}, \nplease verify.", style: TextStyle(backgroundColor: secondColor, color: Colors.white, fontSize: 20),), Center(child: CircularProgressIndicator(),)]))
                     ]))])));});
   });}
 

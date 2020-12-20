@@ -49,21 +49,21 @@ class MyApp extends StatelessWidget {
     final auth = FirebaseAuth.instance;
     final cloudStorage = FirebaseStorage.instance;
     final EncryptedSharedPreferences encryptedSharedPreferences = EncryptedSharedPreferences();
-    var userRep = UserRepository();
-    return Builder(builder: (BuildContext context) {return  ChangeNotifierProvider.value(
-                  value: userRep, child: MaterialApp(
+    return Builder(builder: (BuildContext context) {return  ChangeNotifierProvider<UserRepository>(
+                  create: (context) => UserRepository(), child: MaterialApp(
                 title: 'TechPool',
                 theme: ThemeData(
                   primaryColor: mainColor,
                   primaryIconTheme: IconThemeData(color: Colors.white),
                   unselectedWidgetColor: Colors.white,
                 ),
-                home: FutureBuilder<Object>(
+                home: Consumer<UserRepository>(builder: (context, userRep, child) {
+                  return FutureBuilder<Object>(
     future: (encryptedSharedPreferences.getString("email").then((value) {
       email=value;}).then((_) => encryptedSharedPreferences.getString("password")).then((val) {pass=val; print(pass);})
         .then((_) => auth.signInWithEmailAndPassword(email: email, password: pass)).then((user) => userRep.user = user.user).then((_) => cloudStorage
         .ref('uploads')
-        .child(userRep.user.email)
+        .child(userRep.user?.email)
         .getDownloadURL()).then((imgUrl) =>  userRep.profilePicture = Image.network(imgUrl)).then((_) => true).catchError((e) {
           return false;
     }
@@ -82,6 +82,7 @@ class MyApp extends StatelessWidget {
               return Scaffold(body: Container(color: mainColor,height: size.height, width: size.width, child: Stack(alignment: Alignment.center,children: [Image.asset("assets/images/try.png"), Center(child: CircularProgressIndicator(),)],)));
             }
           }
-        )));});
+        );},
+                )));});
   }
 }

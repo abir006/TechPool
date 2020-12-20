@@ -328,13 +328,13 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
             ],
           ),
           SizedBox(height: defaultSpace),
-          Row(children: [
+          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
             labelText(text: "${widget.type == CalendarEventType.Drive ? "Starting Point" : "Pickup Point"}: "),
             Expanded(child: infoText(widget.type == CalendarEventType.Drive ? widget.lift.startAddress : widget.lift.passengersInfo[userRep.user.email]["startAddress"]))
           ]),
           SizedBox(height: defaultSpace),
           _buildRow(context),
-          Row(children: [
+          Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
             labelText(text: "Destination: "),
             Expanded(child: infoText(widget.type == CalendarEventType.Drive ? widget.lift.destAddress : widget.lift.passengersInfo[userRep.user.email]["destAddress"]))
           ]),
@@ -353,22 +353,22 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                 : Icon(Icons.cancel_outlined, color: Colors.pink)
           ]),
           SizedBox(height: defaultSpace),
-          Row(children: [
+          Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
             labelText(text: "${widget.type==CalendarEventType.Drive? "My":"Drivers"} note: "),
             Expanded(child: infoText(widget.lift.note))
           ]),
               ...(widget.type == CalendarEventType.Lift ? ([SizedBox(height: defaultSpace),
-          Row(children: [
+          Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
                 labelText(text: "My note: "),
                 Expanded(child: infoText(widget.lift.passengersInfo[userRep.user.email]["note"]))
           ])]) : []),
           SizedBox(height: defaultSpace),
-          Row(children: [
+          Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
             labelText(text: "Price: "),
             Expanded(child: infoText(widget.lift.price.toString()))
           ]),
               SizedBox(height: defaultSpace),
-              Row(children: [
+              Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
                 labelText(text: "Payment methods: "),
                 Expanded(child: infoText(widget.lift.payments))
               ]),

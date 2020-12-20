@@ -91,108 +91,120 @@ class _LocationSearchState extends State<LocationSearch> {
     var textBoxes2 =
         LocationTextBoxes2(updateToAddress,size, _goToAddress, _key, 0.0, "To", Colors.red);
     return Scaffold(
+      resizeToAvoidBottomPadding: false,
+      backgroundColor: mainColor,
       key: _key,
       appBar: AppBar(
           title: Text(
         "Address Search",
         style: TextStyle(color: Colors.white),
       )),
-      body: Column(children: [
-        textBoxes,
-        ...stopTextBoxes,
-        (stopNumber < 3 && widget.showAddStops)
-            ? Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.black),
-                ),
-                width: 120,
-                height: 26,
-                child: RaisedButton(
-                    color: Colors.white,
-                    onPressed: () {
-                      setState(() {
-                        stopTextBoxes.insert(
-                            stopNumber,
-                            Row(children: [
-                              SizedBox(
-                                  width: 28,
-                                  child: IconButton(
-                                      alignment: Alignment.centerLeft,
-                                      iconSize: 20,
-                                      icon: Icon(Icons.delete,
-                                          color: Colors.black),
-                                      onPressed: () {
-                                        setState(() {
-                                          stopAddresses[stopNumber-1] = null;
-                                          stopTextBoxes
-                                              .removeAt(stopNumber - 1);
-                                          stopNumber = stopNumber - 1;
-                                        });
-                                      })),
-                              Flexible(
-                                  child: LocationTextBoxes2(stopFunctions[stopNumber],
-                                      size,
-                                      _goToAddress,
-                                      _key,
-                                      stopColor[stopNumber],
-                                      "Stop${stopNumber+1}",
-                                      stopTextColor[stopNumber]))
-                            ]));
-                        stopNumber = stopNumber + 1;
-                      });
-                    },
-                    child: Row(
-                      children: [
-                        Icon(Icons.add_location_alt),
-                        Text("Add stop")
-                      ],
-                    )))
-            : Container(),
-        textBoxes2,
-        Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.white),
+      body: Container(color: Colors.white,
+        height: size.height,
+        child: Column(
+          children: [
+            Expanded(
+              child: Column(children: [
+                textBoxes,
+                ...stopTextBoxes,
+                (stopNumber < 3 && widget.showAddStops)
+                    ? Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black),
+                        ),
+                        width: 120,
+                        height: 26,
+                        child: RaisedButton(
+                            color: Colors.white,
+                            onPressed: () {
+                              setState(() {
+                                stopTextBoxes.insert(
+                                    stopNumber,
+                                    Row(children: [
+                                      SizedBox(
+                                          width: 28,
+                                          child: IconButton(
+                                              alignment: Alignment.centerLeft,
+                                              iconSize: 20,
+                                              icon: Icon(Icons.delete,
+                                                  color: Colors.black),
+                                              onPressed: () {
+                                                setState(() {
+                                                  stopAddresses[stopNumber-1] = null;
+                                                  stopTextBoxes
+                                                      .removeAt(stopNumber - 1);
+                                                  stopNumber = stopNumber - 1;
+                                                });
+                                              })),
+                                      Flexible(flex:1,
+                                          child: LocationTextBoxes2(stopFunctions[stopNumber],
+                                              size,
+                                              _goToAddress,
+                                              _key,
+                                              stopColor[stopNumber],
+                                              "Stop${stopNumber+1}",
+                                              stopTextColor[stopNumber]))
+                                    ]));
+                                stopNumber = stopNumber + 1;
+                              });
+                            },
+                            child: Row(
+                              children: [
+                                Icon(Icons.add),
+                                Text("Add stop")
+                              ],
+                            )))
+                    : Container(),
+                textBoxes2,
+                Flexible(
+                    child: GoogleMap(
+                  mapType: MapType.normal,
+                  compassEnabled: false,
+                  myLocationEnabled: false,
+                  myLocationButtonEnabled: false,
+                  markers: Set<Marker>.of(markers.values),
+                  mapToolbarEnabled: false,
+                  initialCameraPosition: _kTechnion,
+                  onMapCreated: (GoogleMapController controller) {
+                    _controller.complete(controller);
+                  },
+                )),Container(
+                      width: size.width,
+                      height: size.height*0.068,
+                      child: RaisedButton(color: mainColor,onPressed: () {
+                        if(fromAddress != null && toAddress != null) {
+                          if (stopNumber == 0 ||
+                              (stopNumber == 1 && stopAddresses[0] != null) ||
+                              (stopNumber == 2 && stopAddresses[0] != null &&
+                                  stopAddresses[1] != null) ||
+                              (stopNumber == 3 && stopAddresses[0] != null &&
+                                  stopAddresses[1] != null && stopAddresses[2] != null)) {
+                            Navigator.pop<LocationsResult>(
+                                context, LocationsResult(
+                                fromAddress, toAddress, stopAddresses,stopNumber));
+                          } else {
+                            _key.currentState.showSnackBar(SnackBar(content: Positioned(bottom: MediaQuery.of(context).viewInsets.bottom,
+                              child: Text(
+                                "Please select addresses before submitting",
+                                style: TextStyle(fontSize: 16),),
+                            ),));
+                          }
+                        }
+                        else {
+                          _key.currentState.showSnackBar(SnackBar(content: Positioned(bottom: MediaQuery.of(context).viewInsets.bottom,
+                            child: Text(
+                              "Please select addresses before submitting",
+                              style: TextStyle(fontSize: 16),),
+                          ),));
+                        }
+                      },child:  Container( color: Colors.black,width: size.width*0.6,
+                          height: size.height*0.058,child: Row(mainAxisAlignment: MainAxisAlignment.center,children: [Icon(Icons.approval,color: Colors.white,),Text(" Submit locations",style: TextStyle(color: Colors.white),)]))),
+                )
+              ],
+              ),
             ),
-            width: 160,
-            height: 26,
-            child: RaisedButton(color: Colors.black,onPressed: () {
-              if(fromAddress != null && toAddress != null) {
-                if (stopNumber == 0 ||
-                    (stopNumber == 1 && stopAddresses[0] != null) ||
-                    (stopNumber == 2 && stopAddresses[0] != null &&
-                        stopAddresses[1] != null) ||
-                    (stopNumber == 3 && stopAddresses[0] != null &&
-                        stopAddresses[1] != null && stopAddresses[2] != null)) {
-                  Navigator.pop<LocationsResult>(
-                      context, LocationsResult(
-                      fromAddress, toAddress, stopAddresses,stopNumber));
-                } else {
-                  _key.currentState.showSnackBar(SnackBar(content: Text(
-                    "Please select addresses before submitting",
-                    style: TextStyle(fontSize: 16),),));
-                }
-              }
-              else {
-                _key.currentState.showSnackBar(SnackBar(content: Text(
-                  "Please select addresses before submitting",
-                  style: TextStyle(fontSize: 16),),));
-              }
-            },child: Text("Submit locations",style: TextStyle(color: Colors.white),),)),
-        
-        Flexible(
-            child: GoogleMap(
-          mapType: MapType.normal,
-          compassEnabled: false,
-          myLocationEnabled: false,
-          myLocationButtonEnabled: false,
-          markers: Set<Marker>.of(markers.values),
-          mapToolbarEnabled: false,
-          initialCameraPosition: _kTechnion,
-          onMapCreated: (GoogleMapController controller) {
-            _controller.complete(controller);
-          },
-        )),
-      ],
+          ],
+        ),
       ),
     );
   }
@@ -219,5 +231,4 @@ class _LocationSearchState extends State<LocationSearch> {
   void dispose() {
     super.dispose();
   }
-
 }

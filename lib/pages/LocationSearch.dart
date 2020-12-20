@@ -197,7 +197,7 @@ class _LocationSearchState extends State<LocationSearch> {
                               style: TextStyle(fontSize: 16),),
                           ),));
                         }
-                      },child:  Container( color: Colors.black,width: size.width*0.6,
+                      },child:  Container(decoration: BoxDecoration(color: Colors.black,borderRadius: BorderRadius.circular(18)),width: size.width*0.6,
                           height: size.height*0.058,child: Row(mainAxisAlignment: MainAxisAlignment.center,children: [Icon(Icons.approval,color: Colors.white,),Text(" Submit locations",style: TextStyle(color: Colors.white),)]))),
                 )
               ],

@@ -89,11 +89,13 @@ class _LocationTextBoxes2State extends State<LocationTextBoxes2> {
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              Text(
-                    widget.leadingText + ":",
-                    style:
-                    TextStyle(fontSize: 16, color: widget.leadingTextColor),
-                  ),
+              Container(width: 46,
+                child: Text(
+                      widget.leadingText + ":",
+                      style:
+                      TextStyle(fontSize: 16, color: widget.leadingTextColor),
+                    ),
+              ),
               Flexible(
                 fit: FlexFit.loose,
                   flex: 3,

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:geocoder/geocoder.dart';
@@ -95,12 +96,15 @@ class _LocationSearchState extends State<LocationSearch> {
       backgroundColor: mainColor,
       key: _key,
       appBar: AppBar(
+        elevation: 0,
           title: Text(
         "Address Search",
         style: TextStyle(color: Colors.white),
       )),
-      body: Container(color: Colors.white,
+      body: Container(
         height: size.height,
+        decoration: pageContainerDecoration,
+        margin: pageContainerMargin,
         child: Column(
           children: [
             Expanded(
@@ -171,7 +175,7 @@ class _LocationSearchState extends State<LocationSearch> {
                 )),Container(
                       width: size.width,
                       height: size.height*0.068,
-                      child: RaisedButton(color: mainColor,onPressed: () {
+                      child: RaisedButton(shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(bottomLeft: Radius.circular(18),bottomRight: Radius.circular(18))),color: Colors.white,onPressed: () {
                         if(fromAddress != null && toAddress != null) {
                           if (stopNumber == 0 ||
                               (stopNumber == 1 && stopAddresses[0] != null) ||

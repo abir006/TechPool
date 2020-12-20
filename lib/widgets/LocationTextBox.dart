@@ -81,7 +81,8 @@ class _LocationTextBoxes2State extends State<LocationTextBoxes2> {
   Widget build(BuildContext context) {
     return Container(
         decoration: BoxDecoration(
-            color: Colors.white, borderRadius: containerBorderRadius),
+        borderRadius: BorderRadius.circular(18),
+            color: Colors.white),
         padding: const EdgeInsets.fromLTRB(4, 0, 0, 0),
         height: 40,
         width: widget.size.width,

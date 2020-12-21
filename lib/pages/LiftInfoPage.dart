@@ -18,6 +18,8 @@ import 'package:configurable_expansion_tile/configurable_expansion_tile.dart';
 
 import 'ProfilePage.dart';
 
+enum _errorsRequest {repetRequest,generalError,isOK}
+
 class LiftInfoPage extends StatefulWidget {
   MyLift lift = new MyLift("driver", "destAddress", "stopAddress", 5);
   liftRes resLift =new liftRes();
@@ -38,14 +40,24 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
     widget.lift.payments="";
   }
 
-  Future<bool> addRequest(UserRepository userRep) async {
-    bool retValue;
+  Future<_errorsRequest> addRequest(UserRepository userRep) async {
     try{
-      retValue = await firestore.runTransaction((transaction) async {
+    QuerySnapshot q = await firestore.collection("Notifications").doc(widget.lift.driver).collection("UserNotifications").where("driveId",isEqualTo:widget.lift.liftId ).where("passengerId",isEqualTo:userRep.user.email ).where( "type", isEqualTo: "RequestedLift",).get();
+    if(q.docs.isNotEmpty){
+      return _errorsRequest.repetRequest;
+    }
+    }catch(e){
+      return  _errorsRequest.generalError;
+    }
+    try{
+     return  await firestore.runTransaction((transaction) async {
          return transaction.get(firestore.collection("Drives")
             .doc(widget.lift.liftId))
             .then((value) async {
-           retValue = ((List.from(value.data()["Passengers"])).length < (value.data()["NumberSeats"] as int));
+           bool retValueT = ((List.from(value.data()["Passengers"])).length < (value.data()["NumberSeats"] as int));
+           if(!retValueT){
+             return _errorsRequest.generalError;
+           }
            transaction.set(firestore.collection("Notifications").doc(widget.lift.driver).collection("UserNotifications").doc(),
               {
                 "destCity": widget.resLift.destAddress.locality,
@@ -64,12 +76,11 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
                 "type": "RequestedLift",
               }
           );
-          return  true&&retValue;
+          return  _errorsRequest.isOK;
         });
       });
       }catch(e){
-
-       return  false;
+      return  _errorsRequest.generalError;
       }
     }
 
@@ -114,12 +125,13 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
         ),
       );
     }
-
-    final additionInfo =  FutureBuilder<DocumentSnapshot>(
+    Widget additionInfo() {
+    return FutureBuilder<DocumentSnapshot>(
         future:  firestore.collection("Profiles").doc(widget.lift.driver).get(), // a previously-obtained Future<String> or null
         builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
           if (snapshot.hasData) {
             widget.lift.payments =snapshot.data.data()["allowedPayments"].join(", ");
+            widget.lift.payments =  widget.lift.payments.isEmpty?"Contact driver": widget.lift.payments;
             return Container(
                 alignment: Alignment.bottomLeft,
                 color: Colors.white,
@@ -153,12 +165,14 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
                     ]),
                     SizedBox(height: defaultSpace),
                     _buildRow(context),
-                    SizedBox(height: defaultSpace),
-                    Row(children: [
+                    widget.lift.note.isEmpty?SizedBox(height: 0,) :SizedBox(height: defaultSpace),
+                    widget.lift.note.isEmpty? SizedBox(height: 0,) : Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                       labelText(text: "Drivers note: "),
                       Expanded(child: infoText(widget.lift.note))
                     ]),
-                    SizedBox(height: defaultSpace),
+                    widget.lift.note.isEmpty?SizedBox(height: 0,) : SizedBox(height: defaultSpace),
                     Row(children: [
                       labelText(text: "Payment methods: "),
                       Expanded(child: infoText(widget.lift.payments))
@@ -166,11 +180,14 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
                   ],
                 ));
           } else {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
+            if(snapshot.hasError){
+              return Center(child: Text("Error loading info", style: TextStyle(fontSize: 20),),);
+            } else{
+              return Center(
+                child: CircularProgressIndicator(),);
+            }
           }
-    });
+    });}
 
     final passengers = Container(
         alignment: Alignment.bottomLeft,
@@ -210,11 +227,17 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
             label: Text("Request Lift  ",
                 style: TextStyle(color: Colors.white, fontSize: 17)),
             onPressed: () async {
-              bool checkVal = await addRequest(userRep);
-              if (checkVal == false) {
-                showAlertDialog(context,"The lift is not available","Press ok to return to results");
+              _errorsRequest checkVal = await addRequest(userRep);
+              if (checkVal == _errorsRequest.isOK) {
+                showAlertDialog(context, "The request has been sent", "Press ok to return to results");
               } else {
-                showAlertDialog(context,"The request has been sent","Press ok to return to results");
+                if (checkVal == _errorsRequest.generalError) {
+                  showAlertDialog(context, "The lift is not available",
+                      "Press ok to return to results");
+                }
+                  else {
+                  showAlertDialog(context,"You already requested this lift","Press ok to return to results");
+                }
               }
             }));
     });
@@ -247,7 +270,7 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
           Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-            labelText(text: "Starting Point: "),
+            labelText(text: "Start: "),
             Expanded(child: infoText(widget.lift.startAddress))
           ]),
           SizedBox(height: defaultSpace),
@@ -260,28 +283,14 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
             Expanded(child: infoText(widget.lift.destAddress))
           ]),
           SizedBox(height: defaultSpace),
-      /*    Row(children: [
-            labelText(text: "Big Trunk: "),
-            widget.lift.bigTrunk
-                ? Icon(Icons.check_circle_outline, color: Colors.teal)
-                : Icon(Icons.cancel_outlined, color: Colors.pink)
-          ]),
-          SizedBox(height: defaultSpace),
-          Row(children: [
-            labelText(text: "Backseat not full?: "),
-            widget.lift.backSeat
-                ? Icon(Icons.check_circle_outline, color: Colors.teal)
-                : Icon(Icons.cancel_outlined, color: Colors.pink)
-          ]),
-          SizedBox(height: defaultSpace),
-          Row(children: [
-            labelText(text: "Drivers note: "),
-            Expanded(child: infoText(widget.lift.note))
-          ]),
-          SizedBox(height: defaultSpace),
-        */  Row(
-            //mainAxisAlignment: MainAxisAlignment.start,
-            //  crossAxisAlignment: CrossAxisAlignment.start,
+                Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      labelText(text: "Passengers: "),
+                      infoText(widget.lift.passengers.length.toString()+"/"+widget.lift.numberOfSeats.toString()),
+                    ]),
+                SizedBox(height: defaultSpace),
+                Row(
               mainAxisSize: MainAxisSize.min,
               children: [
           labelText(text: "Price: "),
@@ -291,7 +300,7 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
           Divider(
             thickness: 3,
           ),
-              additionInfo,
+              additionInfo(),
               Divider(
                 thickness: 3,
               ),
@@ -303,30 +312,32 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
               Container(
                // width:300*defaultSpacewidth,
                // color: Colors.red,
-             //   decoration: BoxDecoration(
-               //   color: Colors.white,
-               //   boxShadow: [BoxShadow(color: Colors.black, blurRadius: 2.0,
-              //        spreadRadius: 0.0, offset: Offset(2.0, 2.0))
-              //    ],
-             //     border: Border.all(color: secondColor, width: 0.8),
-             //     borderRadius: BorderRadius.circular(15.0),),
-                child: Column(
-                children:[generalInfoBoxTextField(controllerText: myNoteController, enabled: true, maxLines: 1,nameLabel: "Request note to driver:",maxLenth: 120),
-                    Row(
+               // decoration: BoxDecoration(
+              //    color: Colors.white,//Color(0xFFF5F5F5),
+                 // boxShadow: [
+                  //  BoxShadow(color: Colors.black, blurRadius: 2.0,
+                  //    spreadRadius: 0.0, offset: Offset(2.0, 2.0))
+                 // ],
+                //  border: Border.all(color: secondColor, width: 0.8),
+                  //borderRadius: BorderRadius.circular(15.0),
+                  //padding: const EdgeInsets.all(4),
+                  child: Column(
+                  children:[generalInfoBoxTextField(controllerText: myNoteController, enabled: true,maxLines:null,nameLabel: "Request note to driver:",maxLenth: 150),
+                      Row(
             //    mainAxisAlignment: MainAxisAlignment.start,
             //    crossAxisAlignment: CrossAxisAlignment.start,
              //   mainAxisSize: MainAxisSize.min,
-                  children: [
-                 /*   CheckboxListTile(
-                      title: Text('Big Bag'),
-                      value: bigBag,
-                       onChanged: (bool value){setState(() {bigBag = value;});}),*/
+                    children: [
+                   /*   CheckboxListTile(
+                        title: Text('Big Bag'),
+                        value: bigBag,
+                         onChanged: (bool value){setState(() {bigBag = value;});}),*/
 
-                    labelText(text: "Big Bag: "),
-                    Container(alignment:Alignment.topLeft,child: Theme(data: ThemeData(unselectedWidgetColor: secondColor), child:Checkbox(value: bigBag,
-                      onChanged: (bool value){setState(() {bigBag = value;});}))),
-                  ],)]),
-              ),
+                      labelText(text: "Big Bag: "),
+                      Container(alignment:Alignment.topLeft,child: Theme(data: ThemeData(unselectedWidgetColor: secondColor), child:Checkbox(value: bigBag,
+                        onChanged: (bool value){setState(() {bigBag = value;});}))),
+                    ],)]),
+                ),
               SizedBox(height: defaultSpace*2),
             ]));
 
@@ -350,18 +361,22 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
 
 
   Future<List<String>> initNames(String name) {
-    List<String> ret = [];
-    return FirebaseStorage.instance
-        .ref('uploads')
-        .child(name)
-        .getDownloadURL()
-        .then((value) {
-      ret.add(value);
-      return firestore.collection("Profiles").doc(name).get().then((value) {
-        ret.add(value.data()["firstName"] + " " + value.data()["lastName"]);
-        return ret;
+      List<String> ret = [];
+      return FirebaseStorage.instance
+          .ref('uploads')
+          .child(name)
+          .getDownloadURL()
+          .then((value) {
+        ret.add(value);
+        return firestore.collection("Profiles").doc(name).get().then((value) {
+          ret.add(value.data()["firstName"] + " " + value.data()["lastName"]);
+          return ret;
+        }).catchError((e) {
+          return Future.error(e);
+        });
+      }).catchError((e) {
+        return Future.error(e);
       });
-    });
     //  return null;
   }
 
@@ -420,9 +435,12 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
               ),
             );
           } else {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
+            if(snapshot.hasError){
+              return Center(child: Text("Error loading info", style: TextStyle(fontSize: 15),),);
+            } else{
+              return Center(
+                child: CircularProgressIndicator(),);
+            }
           }
         });
   }
@@ -431,6 +449,9 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
     return FutureBuilder<List<String>>(
         future: initNames(lift.driver),
         builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
+          if(snapshot.hasError){
+            return Center(child: Text("Error loading info", style: TextStyle(fontSize: 15),),);
+          }else{
           if (snapshot.hasData) {
             return Container(
               child: Row(
@@ -486,9 +507,9 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
               ),
             );
           } else {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
+              return Center(
+                child: CircularProgressIndicator(),);
+            }
           }
         });
   }
@@ -510,8 +531,8 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
         child: Text(
           info,
           style: TextStyle(fontSize: fontTextsSize, color: Colors.black),
-          overflow: TextOverflow.ellipsis,
-          maxLines: 2,
+          //overflow: TextOverflow.ellipsis,
+          maxLines: null,
         ));
   }
 

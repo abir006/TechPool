@@ -100,7 +100,7 @@ Widget generalInfoBoxTextField({@required TextEditingController controllerText,@
             labelText: nameLabel,
             labelStyle: TextStyle(fontSize: 17),
            ),
-      maxLength: maxLenth==null?30:maxLenth,
+      maxLength: maxLenth==null?120:maxLenth,
       controller: controllerText,
       keyboardType: TextInputType.multiline,
       maxLines: maxLines,

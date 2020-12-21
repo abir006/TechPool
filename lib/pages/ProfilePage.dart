@@ -118,7 +118,7 @@ class _ProfilePageState extends State<ProfilePage> {
             .getDownloadURL();
       }
     } catch (e) {
-
+        return Future.error(e);
     }
     return "success";
   }
@@ -307,29 +307,32 @@ class _ProfilePageState extends State<ProfilePage> {
                       isUser? Center(child: generalInfoText(text: myInfo.getPropertyEnum(userInfoKeyEnum.email)),): SizedBox(height: defaultSpace*0),
                       SizedBox(height: defaultSpace),
                       editMode ? SizedBox(height: 0):labelText(text: "Name: ") ,
-                      editMode ? generalInfoBoxTextField(nameLabel:"First Name: ",controllerText: _firstNameController, enabled: true, maxLines: 1) : generalInfoText(text: _nameController.text),
-                      editMode ? generalInfoBoxTextField(nameLabel:"Last Name: ",controllerText: _lastNameController, enabled: true, maxLines: 1) : SizedBox(height: 0),
+                      editMode ? generalInfoBoxTextField(nameLabel:"First Name: ",controllerText: _firstNameController, enabled: true, maxLines: null,maxLenth: 20) : generalInfoText(text: _nameController.text),
+                      editMode ? generalInfoBoxTextField(nameLabel:"Last Name: ",controllerText: _lastNameController, enabled: true, maxLines: null,maxLenth: 20) : SizedBox(height: 0),
                       editMode ? SizedBox(height: 0):SizedBox(height: defaultSpace),
                       editMode ? SizedBox(height: 0):labelText(text: "Faculty: ") ,
-                      editMode ? generalInfoBoxTextField(nameLabel:"Faculty: ",controllerText: _facultyController, enabled: true, maxLines: 1) : generalInfoText(text: _facultyController.text),
+                      editMode ? generalInfoBoxTextField(nameLabel:"Faculty: ",controllerText: _facultyController, enabled: true, maxLines: null) : generalInfoText(text: _facultyController.text),
                       editMode ? SizedBox(height: 0):SizedBox(height: defaultSpace),
                       editMode ? SizedBox(height: 0):labelText(text: "Phone number: ") ,
-                      editMode ? generalInfoBoxTextField(nameLabel:"Phone number: ",controllerText: _phoneNumberController, enabled: true, maxLines: 1) : generalInfoText(text: _phoneNumberController.text),
+                      editMode ? generalInfoBoxTextField(nameLabel:"Phone number: ",controllerText: _phoneNumberController, enabled: true, maxLines: null) : generalInfoText(text: _phoneNumberController.text),
                       editMode ? SizedBox(height: 0):SizedBox(height: defaultSpace),
                       editMode ? SizedBox(height: 0):labelText(text: "Hobbies: ") ,
-                      editMode ? generalInfoBoxTextField(nameLabel:"Hobbies: ",controllerText: _hobbiesController, enabled: true, maxLines: 1) : generalInfoText(text: _hobbiesController.text),
+                      editMode ? generalInfoBoxTextField(nameLabel:"Hobbies: ",controllerText: _hobbiesController, enabled: true, maxLines: null) : generalInfoText(text: _hobbiesController.text),
                       editMode ? SizedBox(height: 0):SizedBox(height: defaultSpace),
                       editMode ? SizedBox(height: 0):labelText(text:"About self: ") ,
-                      editMode ? generalInfoBoxTextField(nameLabel:"About self: ",controllerText: _aboutSelf, enabled: true, maxLenth: 185) : generalInfoText(text: _aboutSelf.text, maxElepsis: 5),
+                      editMode ? generalInfoBoxTextField(nameLabel:"About self: ",controllerText: _aboutSelf, enabled: true, maxLenth: 300) : generalInfoText(text: _aboutSelf.text),
                       editMode ? SizedBox(height: 0): SizedBox(height: defaultSpace),
                       labelText(text: "Allowed Payment method: "),
                       editMode ? SizedBox(height: defaultSpace):SizedBox(height: defaultSpace*0),
                       editMode ? multi2: Stack(children:[Container(child: MultiSelectChipDisplay(textStyle: TextStyle(color: Colors.black), decoration: BoxDecoration(color: Colors.white), items:payments.map((e) => MultiSelectItem(e, e)).toList(), onTap: (value) {},),),Container(color: Colors.transparent,width: 100*defaultSpacewidth,height: 10*defaultSpace,)]),
                 ]));
           } else {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
+            if(snapshot.hasError){
+              return Center(child: Text("Error loading info", style: TextStyle(fontSize: 15),),);
+            } else{
+              return Center(
+                child: CircularProgressIndicator(),);
+            }
           }
         });}
     return Scaffold(

@@ -94,7 +94,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
         widget.currentdate.month,
         widget.currentdate.day,
         DateTime.now().hour,
-        DateTime.now().minute,
+        (DateTime.now().minute~/5)*5,
         DateTime.now().second,
         DateTime.now().millisecond,
         DateTime.now().microsecond);
@@ -255,7 +255,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
               });
               if (_validateLocations && _validateTime) {
                 if (widget.popOrNot == false) {
-                  Navigator.pushReplacement(
+                  Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => LiftSearchReasultsPage(
@@ -489,7 +489,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
                                         if (_toTimeTemp == null)
                                           _toTimeTemp = (_toTime != null
                                               ? _toTime
-                                              : _fromTimeTemp);
+                                              : currentDate);
                                         _fromTime = _fromTimeTemp;
                                         _toTime = _toTimeTemp;
                                         _toControler.text =
@@ -543,9 +543,12 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
 
     final fromText = Center(
         child: Container(
-            child: generalInfoText(
-      text: _fromControler.text,
-    ))
+          child:generalInfoText(text: _fromControler.text),
+          /*child:Row(
+            children:[labelText(text:"Time and Date:"),generalInfoText(text: _fromControler.text),
+            ]),*/
+
+    )
         /*textBoxFieldDisableCentered(
               nameLabel: "",
               size: MediaQuery.of(context).size,
@@ -727,6 +730,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
                               startPointText,
                               SizedBox(height: 2 * defaultSpace),
                               destinationText,
+                              SizedBox(height: 2*defaultSpace),
                               _validateLocations
                                   ? SizedBox(height: 0 * defaultSpace)
                                   : Center(

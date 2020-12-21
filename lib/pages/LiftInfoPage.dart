@@ -41,37 +41,35 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
   Future<bool> addRequest(UserRepository userRep) async {
     bool retValue;
     try{
-
-      retValue = await firestore.collection("Drives").doc(widget.lift.liftId).get().then((value) {
-        return ((List.from(value.data()["Passengers"])).length < (value.data()["NumberSeats"] as int));
-        });
-        if (retValue == false) {
-        return  retValue;
-      }else{
-         await firestore.collection("Notifications").doc(widget.lift.driver).collection("UserNotifications").add(
-             {
-               "destCity": widget.resLift.destAddress.locality,
-               "destAddress": widget.resLift.destAddress.addressLine,
-               "startCity": widget.resLift.startAddress.locality,
-               "startAddress": widget.resLift.startAddress.addressLine,
-               "distance": widget.lift.dist,
-               "driveId": widget.lift.liftId,
-               "driverId": widget.lift.driver,
-               "liftTime": widget.lift.time,
-               "notificationTime": DateTime.now(),
-               "price": widget.lift.price,
-               "passengerId": userRep.user.email,
-               "passengerNote": myNoteController.text,
-               "bigBag":bigBag,
-               "type": "RequestedLift",
-             }
+      retValue = await firestore.runTransaction((transaction) async {
+         return transaction.get(firestore.collection("Drives")
+            .doc(widget.lift.liftId))
+            .then((value) async {
+           retValue = ((List.from(value.data()["Passengers"])).length < (value.data()["NumberSeats"] as int));
+           transaction.set(firestore.collection("Notifications").doc(widget.lift.driver).collection("UserNotifications").doc(),
+              {
+                "destCity": widget.resLift.destAddress.locality,
+                "destAddress": widget.resLift.destAddress.addressLine,
+                "startCity": widget.resLift.startAddress.locality,
+                "startAddress": widget.resLift.startAddress.addressLine,
+                "distance": widget.lift.dist,
+                "driveId": widget.lift.liftId,
+                "driverId": widget.lift.driver,
+                "liftTime": widget.lift.time,
+                "notificationTime": DateTime.now(),
+                "price": widget.lift.price,
+                "passengerId": userRep.user.email,
+                "passengerNote": myNoteController.text,
+                "bigBag":bigBag,
+                "type": "RequestedLift",
+              }
           );
-          return  true;
-
-      }
+          return  true&&retValue;
+        });
+      });
       }catch(e){
 
-      return  false;
+       return  false;
       }
     }
 
@@ -214,7 +212,7 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
             onPressed: () async {
               bool checkVal = await addRequest(userRep);
               if (checkVal == false) {
-                showAlertDialog(context,"The lift is not available","The lift is full.\nPress ok to return to results");
+                showAlertDialog(context,"The lift is not available","Press ok to return to results");
               } else {
                 showAlertDialog(context,"The request has been sent","Press ok to return to results");
               }

@@ -432,16 +432,14 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       )),
                   InkWell(
                     child: Container(
-                      child: Flexible(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Transform.rotate(angle: 0.8,
-                                child: Icon(Icons.thumb_up_rounded, size: 30, color: Colors.green)),
-                            Text("Accepted", style: TextStyle(fontSize: 15, color: Colors.green),
-                            )
-                          ],
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Transform.rotate(angle: 0.8,
+                              child: Icon(Icons.thumb_up_rounded, size: 30, color: Colors.green)),
+                          Text("Accepted", style: TextStyle(fontSize: 15, color: Colors.green),
+                          )
+                        ],
                       ),
                     ),
                     onTap: () {
@@ -557,16 +555,14 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       )),
                   InkWell(
                     child: Container(
-                      child: Flexible(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Transform.rotate(angle: 0.8,
-                                child: Icon(Icons.thumb_up_rounded, size: 30, color: Colors.red)),
-                            Text("Rejected", style: TextStyle(fontSize: 15, color: Colors.red),
-                            )
-                          ],
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Transform.rotate(angle: 0.8,
+                              child: Icon(Icons.thumb_up_rounded, size: 30, color: Colors.red)),
+                          Text("Rejected", style: TextStyle(fontSize: 15, color: Colors.red),
+                          )
+                        ],
                       ),
                     ),
                     onTap: () {
@@ -684,17 +680,15 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       )),
                   InkWell(
                     child: Container(
-                      child: Flexible(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Icon(Icons.more_horiz, size: 30, color: Colors.orange),
-                            /*Transform.rotate(angle: 0.8,
-                                child: Icon(Icons.thumb_up_rounded, size: 30, color: Colors.orange)),*/
-                            Text("Respond", style: TextStyle(fontSize: 15, color: Colors.orange),
-                            )
-                          ],
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Icon(Icons.more_horiz, size: 30, color: Colors.orange),
+                          /*Transform.rotate(angle: 0.8,
+                              child: Icon(Icons.thumb_up_rounded, size: 30, color: Colors.orange)),*/
+                          Text("Respond", style: TextStyle(fontSize: 15, color: Colors.orange),
+                          )
+                        ],
                       ),
                     ),
                     onTap: () {

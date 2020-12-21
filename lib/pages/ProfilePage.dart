@@ -148,8 +148,8 @@ class _ProfilePageState extends State<ProfilePage> {
     saveAllFields.setPropertyEnum(userInfoKeyEnum.allowedPayments, payments2);
   }
   void updadteAll(){
-    _firstNameController.text = saveAllFields.getPropertyEnum(userInfoKeyEnum.hobbies);
-    _lastNameController = saveAllFields.getPropertyEnum(userInfoKeyEnum.faculty);
+    _firstNameController.text = saveAllFields.getPropertyEnum(userInfoKeyEnum.firstName);
+    _lastNameController.text = saveAllFields.getPropertyEnum(userInfoKeyEnum.lastName);
     _hobbiesController.text =saveAllFields.getPropertyEnum(userInfoKeyEnum.hobbies);
     _facultyController.text = saveAllFields.getPropertyEnum(userInfoKeyEnum.faculty);
     _phoneNumberController.text = saveAllFields.getPropertyEnum(userInfoKeyEnum.phoneNumber);

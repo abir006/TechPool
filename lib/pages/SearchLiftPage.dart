@@ -723,18 +723,21 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
                             children: [
                               SizedBox(height: defaultSpace),
                               chooseStartAndDestination,
-                              SizedBox(height: defaultSpace),
+                              SizedBox(height: 2* defaultSpace),
                               startPointText,
                               SizedBox(height: 2 * defaultSpace),
                               destinationText,
-                              SizedBox(height: 2 * defaultSpace),
                               _validateLocations
                                   ? SizedBox(height: 0 * defaultSpace)
                                   : Center(
                                       child: Text(
                                           "Choose start and destination",
                                           style: TextStyle(color: Colors.red))),
-                              SizedBox(height: 4 * defaultSpace),
+                              SizedBox(height: defaultSpace),
+                              Divider(
+                                thickness: 3,
+                              ),
+                              SizedBox(height:  defaultSpace),
                               chooseTime,
                               //Center(child:Row(mainAxisAlignment: MainAxisAlignment.center,crossAxisAlignment: CrossAxisAlignment.start,children: [SizedBox(width: 10*defaultSpace,),Expanded(child:Times)],)),
                               fromText,

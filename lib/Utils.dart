@@ -154,6 +154,7 @@ Container calendarListTile(dynamic event,Widget leadingWidget,BuildContext conte
             docLift.setProperty(key,value);
           }
         });
+        docLift.liftId = event.driveId;
         if(eventType == CalendarEventType.Lift) {
           docLift.stops = [];
         }

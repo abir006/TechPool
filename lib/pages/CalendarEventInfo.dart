@@ -24,9 +24,46 @@ class CalendarEventInfo extends StatefulWidget {
 class _CalendarEventInfoState extends State<CalendarEventInfo> {
   FirebaseFirestore firestore = FirebaseFirestore.instance;
   bool bigBag= false;
+  final _errorSnack = GlobalKey<ScaffoldState>();
+
   @override
   void initState() {
     super.initState();
+  }
+  Future<bool> _cancelRequest(UserRepository userRep) async {
+    try{
+     return await firestore.runTransaction((transaction) async {
+        return transaction.get(firestore.collection("Drives")
+            .doc(widget.lift.liftId))
+            .then((value) async {
+          List<String> tempPassengers = List.from(value.data()["Passengers"]);
+          tempPassengers.remove((userRep.user.email));
+          value.data()["Passengers"] = tempPassengers;
+          Map<String,Map<String, dynamic>> tempPassengersInfo  = Map<String, Map<String, dynamic>>.from(value.data()["PassengersInfo"]);
+          tempPassengersInfo.remove(userRep.user.email).remove(userRep.user.email);
+          transaction.update((firestore.collection("Drives").doc(widget.lift.liftId)),{"Passengers":tempPassengers,"PassengersInfo":tempPassengersInfo});
+          transaction.set(firestore.collection("Notifications").doc(widget.lift.driver).collection("UserNotifications").doc(),
+              {
+                "destCity": widget.lift.destCity,
+                "destAddress": widget.lift.destAddress,
+                "startCity": widget.lift.startCity,
+                "startAddress": widget.lift.startAddress,
+                "distance": (widget.lift.passengersInfo[userRep.user.email]["dist"]~/ 1000),
+                "driveId": widget.lift.liftId,
+                "driverId": widget.lift.driver,
+                "liftTime": widget.lift.time,
+                "notificationTime": DateTime.now(),
+                "price": widget.lift.price,
+                "passengerId": userRep.user.email,
+                "type": "CanceledLift",
+              }
+          );
+          return  true;
+        });
+      });
+    }catch(e){
+      return  false;
+    }
   }
 
   @override
@@ -292,21 +329,34 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
             ..._buildPassengersList(),
           ],
         ));
-    final searchLift = Container(
-        padding: EdgeInsets.only(
-            left: sizeFrameWidth * 0.2,
-            right: sizeFrameWidth * 0.2,
-            bottom: defaultSpace * 2),
-        height: defaultSpace * 6,
-        child: RaisedButton.icon(
-            color: Colors.red[800],
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(18),
-                side: BorderSide(color: Colors.black)),
-            icon:  Icon(Icons.delete,color: Colors.white,),
-            label: Text("Cancel ${widget.type == CalendarEventType.Drive ? "Drive" : "Lift"}",
-                style: TextStyle(color: Colors.white, fontSize: 17)),
-            onPressed: () {}));
+
+    final searchLift =
+
+       Consumer<UserRepository>(builder: (context, userRep, child) {
+         return Container(
+             padding: EdgeInsets.only(
+                 left: sizeFrameWidth * 0.2,
+                 right: sizeFrameWidth * 0.2,
+                 bottom: defaultSpace * 2),
+             height: defaultSpace * 6,
+             child: RaisedButton.icon(
+                 color: Colors.red[800],
+                 shape: RoundedRectangleBorder(
+                     borderRadius: BorderRadius.circular(18),
+                     side: BorderSide(color: Colors.black)),
+                 icon: Icon(Icons.delete, color: Colors.white,),
+                 label: Text("Cancel ${widget.type == CalendarEventType.Drive
+                     ? "Drive"
+                     : "Lift"}",
+                     style: TextStyle(color: Colors.white, fontSize: 17)),
+                 onPressed:  () async{
+                   if(widget.type == CalendarEventType.Lift){
+                     showAlertDialog(context, "Cancel Lift", "Are you sure you want to cancel?\nThere is no going back", userRep);
+                   }
+                  // _errorSnack.currentState.showSnackBar(SnackBar(content: Text("The lift couldn't be deleted, it could have been canceled", style: TextStyle(fontSize: 19,color: Colors.red),)));
+                 //await  cancelRequest(userRep);
+                 }));
+       });
 
     final allInfo = Container(
         child: ListView(
@@ -392,6 +442,7 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
             ]));
 
     return Scaffold(
+      key: _errorSnack,
       appBar: AppBar(
         elevation: 0,
         title: Text(
@@ -411,12 +462,50 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
   });
   }
 
+  showAlertDialog(BuildContext context,String title,String info,UserRepository usrRep) {
+    Widget okButton = FlatButton(
+      textColor: mainColor,
+      child: Text("Yes"),
+      onPressed: () async {
+        bool retval =await _cancelRequest(usrRep);
+        Navigator.pop(context);
+        Navigator.pop(context);
 
+      },
+    );
+
+    Widget cancelButton = FlatButton(
+      child: Text("Cancel"),
+      textColor: mainColor,
+      onPressed:  () {
+        Navigator.pop(context);
+      },
+    );
+
+    AlertDialog alert = AlertDialog(
+      title: Text(title),
+      content: Text(info,style:TextStyle(fontSize: 17)),
+      actions: [
+        cancelButton,
+        okButton,
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
 
   void dispose() {
     super.dispose();
   }
+
 }
+
 
 /*
  Widget _buildTiles() {

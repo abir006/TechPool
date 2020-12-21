@@ -238,8 +238,8 @@ class _HomePageState extends State<HomePage> {
               Flexible(
                   child: Padding(
                     padding: const EdgeInsets.only(bottom: 4.0),
-                    child: ListView(children: [
-                ..._dailyEvents.map((event) => transformEvent(event,context)).toList()
+                    child: ListView(children: [...(_dailyEvents.isEmpty? [ListTile(leading: Icon(Icons.calendar_today),title: Text("No events yet"),)] :
+                    _dailyEvents.map((event) => transformEvent(event,context)).toList())
               ]),
                   )),
             ])));

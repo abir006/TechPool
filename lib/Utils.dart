@@ -101,34 +101,9 @@ Widget transformEvent(dynamic event, BuildContext context){
     return calendarListTile(event, Icon(Icons.directions_car,size: 30, color: mainColor),context,CalendarEventType.Drive);
   } else if (event is Lift) {
     return calendarListTile(event, Transform.rotate(angle: 0.8,child: Icon(Icons.thumb_up_rounded,size: 30, color: mainColor)),context,CalendarEventType.Lift);
-    /*return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.green, width: 0.8),
-        borderRadius: BorderRadius.circular(12.0),
-      ),
-      margin:
-      const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-      child: ListTile(leading: Transform.rotate(angle: 0.8,child: Icon(Icons.thumb_up_rounded,size: 30, color: mainColor,)),
-        title: Text(event?.info),
-        onTap: () => print('$event tapped!'),
-      ),
-    );*/
-  /*} else if (event is DesiredLift) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.orange, width: 0.8),
-        borderRadius: BorderRadius.circular(12.0),
-      ),
-      margin:
-      const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-      child: ListTile(leading: Transform.rotate(angle: 0.8,child: Icon(Icons.thumb_up_rounded,size: 30, color: mainColor,)),
-        title: Text(event?.info),
-        onTap: () => print('$event tapped!'),
-      ),
-    );*/
   }
   else{
-    return null;
+    return Container();
   }
 }
 
@@ -154,6 +129,7 @@ Container calendarListTile(dynamic event,Widget leadingWidget,BuildContext conte
             docLift.setProperty(key,value);
           }
         });
+        docLift.liftId = event.driveId;
         if(eventType == CalendarEventType.Lift) {
           docLift.stops = [];
         }
@@ -401,7 +377,7 @@ ListTile drawerListTile(String pageName,IconData icon,DrawerSections tileSection
             Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => ProfilePage(email: userRep.user.email,fromProfile: true)));
+                    builder: (context) => ProfilePage(email: userRep.user?.email,fromProfile: true)));
             break;
           }
           case DrawerSections.notifications: {

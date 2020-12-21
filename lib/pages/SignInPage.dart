@@ -148,6 +148,7 @@ class _SignInPageState extends State<SignInPage> with SingleTickerProviderStateM
                             ),Icon(Icons.login,color: Colors.white,)])),
                             onPressed: () async {
                               if (_formKey.currentState.validate()) {
+                                _email.text = _email.text.toLowerCase();
                                 FocusScope.of(context).unfocus();
                                 setState(() {
                                   _pressed = true;

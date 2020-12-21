@@ -25,12 +25,14 @@ class _LocationTextBoxes2State extends State<LocationTextBoxes2> {
   TextEditingController city;
   TextEditingController street;
   var address;
+  bool _pressed;
 
   @override
   void initState() {
     super.initState();
     city = TextEditingController(text: "");
     street = TextEditingController(text: "");
+    _pressed = false;
   }
 
   Future<bool> validateLegalCity(String city) async {
@@ -79,24 +81,25 @@ class _LocationTextBoxes2State extends State<LocationTextBoxes2> {
   Widget build(BuildContext context) {
     return Container(
         decoration: BoxDecoration(
-            color: Colors.white, borderRadius: containerBorderRadius),
-        padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+        borderRadius: BorderRadius.circular(18),
+            color: Colors.white),
+        padding: const EdgeInsets.fromLTRB(4, 0, 0, 0),
+        height: 40,
         width: widget.size.width,
         child: Row(
             mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
+              Container(width: 46,
+                child: Text(
+                      widget.leadingText + ":",
+                      style:
+                      TextStyle(fontSize: 16, color: widget.leadingTextColor),
+                    ),
+              ),
               Flexible(
-                  fit: FlexFit.tight,
-                  flex: 2,
-                  child: Text(
-                    widget.leadingText + ":",
-                    style:
-                    TextStyle(fontSize: 16, color: widget.leadingTextColor),
-                  )),
-              Flexible(
-                  fit: FlexFit.tight,
-                  flex: 2,
+                fit: FlexFit.loose,
+                  flex: 3,
                   child: TextFormField(
                       controller: city,
                       textAlign: TextAlign.left,
@@ -104,7 +107,7 @@ class _LocationTextBoxes2State extends State<LocationTextBoxes2> {
                           border: InputBorder.none, hintText: "City"))),
               VerticalDivider(width: 6),
               Flexible(
-                  fit: FlexFit.tight,
+                  fit: FlexFit.loose,
                   flex: 5,
                   child: TextFormField(
                       controller: street,
@@ -112,11 +115,12 @@ class _LocationTextBoxes2State extends State<LocationTextBoxes2> {
                       decoration: InputDecoration(
                           border: InputBorder.none,
                           hintText: "Street\\place"))),
-              Flexible(
-                  fit: FlexFit.tight,
-                  flex: 3,
-                  child: TextButton(
+                  TextButton(
                       onPressed: () async {
+                        FocusScope.of(context).unfocus();
+                        setState(() {
+                          _pressed = true;
+                        });
                         try {
                           var _streetError = await validateLegalCity(city.text);
                           var _cityError =
@@ -137,13 +141,18 @@ class _LocationTextBoxes2State extends State<LocationTextBoxes2> {
                             content: Text("Address not found"),
                           ));
                         }
+                        setState(() {
+                          _pressed = false;
+                        });
                       },
                       child: Container(
-                          width: 50,
-                          child: Text(
-                            "Search",
-                            style: TextStyle(fontSize: 16, color: secondColor),
-                          ))))
+                          width: 80,
+                          child: !_pressed ? Row(mainAxisAlignment: MainAxisAlignment.center,children: [Flexible(child: Icon(Icons.add_location_alt,color: secondColor,)),Flexible(
+                            child: Text(
+                              "Select",
+                              style: TextStyle(fontSize: 14, color: secondColor),
+                            ),
+                          ),]) : Center(child: CircularProgressIndicator())))
             ]));
   }
 

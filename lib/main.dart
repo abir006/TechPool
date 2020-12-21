@@ -1,5 +1,4 @@
 import 'package:encrypted_shared_preferences/encrypted_shared_preferences.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -47,7 +46,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final auth = FirebaseAuth.instance;
   final cloudStorage = FirebaseStorage.instance;
   final EncryptedSharedPreferences encryptedSharedPreferences = EncryptedSharedPreferences();
   var email = "";
@@ -67,12 +65,20 @@ class _MyAppState extends State<MyApp> {
                   var userRep = Provider.of<UserRepository>(context,listen: false);
                   return FutureBuilder<Object>(
     future: (encryptedSharedPreferences.getString("email").then((value) {
-      email=value;print(value);}).then((_) => encryptedSharedPreferences.getString("password")).then((val) {pass=val;print(val);})
-        .then((_) => auth.signInWithEmailAndPassword(email: email, password: pass)).then((user) => userRep.user = user.user).then((_) => cloudStorage
+      email=value;}).then((_) => encryptedSharedPreferences.getString("password")).then((val) {pass=val;})
+        .then((_) => Future.sync(() {
+      if (email.isNotEmpty && pass.isNotEmpty) {
+        return userRep.auth.signInWithEmailAndPassword(
+            email: email, password: pass);
+      }else{
+        throw Exception("bad info");
+      }
+    })
+    ).then((user) => userRep.user = user.user).then((_) => cloudStorage
         .ref('uploads')
         .child(userRep.user?.email)
         .getDownloadURL()).then((imgUrl) =>  userRep.profilePicture = Image.network(imgUrl)).then((_) => true).catchError((e) {
-          return false;
+      return false;
     }
     )),
         builder: (context, snapshot) {

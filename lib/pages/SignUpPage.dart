@@ -97,7 +97,21 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
         backgroundColor: mainColor,
         key: _key,
         appBar: AppBar(
-          leading: IconButton(icon: Icon(Icons.arrow_back, color: Colors.white,), onPressed: () async {  await userRep.auth.signOut(); Navigator.of(context).pop();},),
+          leading: IconButton(icon: Icon(Icons.arrow_back, color: Colors.white,), onPressed: () async { if(_pressed) {
+            showDialog(context: context, builder: (_) => AlertDialog(title: Text("Notice"),content: Text("Exiting sign up now will stop the process and delete the account"),actions: [
+              FlatButton(onPressed:()=> Navigator.of(context).pop(), child: Text("Cancel")),
+              FlatButton(onPressed: () async {
+                await userRep.auth.currentUser.delete();
+                await userRep.auth.signOut();
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+              }, child: Text("Continue"))
+            ],));
+          }else{
+            await userRep.auth.signOut();
+            Navigator.of(context).pop();
+          }
+          }),
             title: Text(
           "Sign Up",
           style: TextStyle(color: Colors.white),

@@ -55,7 +55,7 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
         ret.add(value.data()["firstName"] + " " + value.data()["lastName"]);
         return ret;
       });
-    });
+    }).catchError((e) {return Future.error(e);});
     //  return null;
   }
 
@@ -247,10 +247,11 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(18),
                 side: BorderSide(color: Colors.white)),
-            icon: Icon(Icons.edit_outlined, color: Colors.white),
+            icon: Icon(Icons.search, color: Colors.white),
             label: Text("Edit Search",
                 style: TextStyle(color: Colors.white, fontSize: 17)),
             onPressed: () async {
+              /*
             liftRes    returnResult = await Navigator.of(context).push(
                     MaterialPageRoute<liftRes>(
                         builder: (BuildContext context) {
@@ -269,7 +270,7 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
                     widget.backSeat = returnResult.backSeat;
                     widget.indexDist = returnResult.indexDist;
                   }
-                });
+                });*/
             }));
 
     final sortAndSearch = Container(
@@ -314,7 +315,7 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
                 )),
           ),
           Spacer(),
-          searchLift,
+          //searchLift,
           SizedBox(width: defaultSpacewidth*0.2,)
         ])));
 
@@ -338,7 +339,10 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
             },
           );}else{
             return Center(child: Text("No lifts found", style: TextStyle(fontSize: 30),),);
-          };
+          }
+          
+        }else if(snapshot.hasError){
+          return Center(child: Text("Error Loading the Lifts", style: TextStyle(fontSize: 30),),);
         }else{
           return Center(child: CircularProgressIndicator(),);
         }
@@ -348,29 +352,32 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
 
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
         title: Text("Search Results",style: TextStyle(color: Colors.white),),
+        actions: [
+          IconButton(
+              icon: Icon(Icons.home),
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+              } )
+        ],
       ),
+
       body:Container(
           decoration: pageContainerDecoration,
           margin: pageContainerMargin,
           //padding: EdgeInsets.only(left: defaultSpacewidth, right: defaultSpacewidth),
-          child: Column(
-            children: [sortAndSearch, Expanded(child:_futureBuildLists)],
+          child: Container(
+              padding: const EdgeInsets.only(bottom: 6.0),
+            child: Column(
+
+              children: [sortAndSearch, Expanded(child:_futureBuildLists)],
+            ),
           )),
       backgroundColor: mainColor,
     );
   }
-  
-
-  void _openInfoDialog() {
-    Navigator.of(context).push(new MaterialPageRoute<Null>(
-        builder: (BuildContext context) {
-          return null;
-        },
-        fullscreenDialog: true
-    ));
-  }
-
 
   Widget _buildTile(MyLift lift) {
     return FutureBuilder<List<String>>(
@@ -443,7 +450,7 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
                               .height * 0.016 * 4,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Colors.teal,
+                            color: secondColor,
                             image: DecorationImage(fit: BoxFit.fill,
                                 image: NetworkImage(snapshot.data[0])),
 
@@ -476,9 +483,12 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
               ),
             ));
           }else {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
+            if(snapshot.hasError){
+              return Center(child: Text("Error Loading Lift", style: TextStyle(fontSize: 20),),);
+            } else{
+              return Center(
+                child: CircularProgressIndicator(),);
+            }
           }
         });
   }
@@ -518,7 +528,7 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
   Widget placesText(String from,String to) {
     return  Container(
       width: MediaQuery.of(context).size.height * 0.016*20,
-        child: Text(from+" -> "+to,
+        child: Text(from+" \u{2192} "+to,
           style: TextStyle(fontSize: fontTextsSize, color: Colors.black),
             overflow: TextOverflow.ellipsis,
           maxLines: 2,

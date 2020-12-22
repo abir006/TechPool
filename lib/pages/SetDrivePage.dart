@@ -239,7 +239,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
                               normalTextStyle:
                                   TextStyle(fontSize: 28, color: Colors.grey),
                               highlightedTextStyle:
-                                  TextStyle(fontSize: 34, color: Colors.teal),
+                                  TextStyle(fontSize: 34, color: secondColor),
                               //spacing: 50,
                               //itemHeight: 80,
                               alignment: Alignment.center,

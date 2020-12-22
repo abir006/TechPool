@@ -154,7 +154,7 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                               MediaQuery.of(context).size.height * 0.016 * 4,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: Colors.teal,
+                                color: secondColor,
                                 image: DecorationImage(
                                     fit: BoxFit.fill,
                                     image: NetworkImage(snapshot.data[0])),
@@ -218,7 +218,7 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                                   MediaQuery.of(context).size.height * 0.016 * 4,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    color: Colors.teal,
+                                    color: secondColor,
                                     image: DecorationImage(
                                         fit: BoxFit.fill,
                                         image: NetworkImage(snapshot.data[0])),
@@ -244,12 +244,12 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                       ...(widget.type == CalendarEventType.Drive ? ([Row(children: [
               labelText(text: "Backseat not full?: "),
               snapshot.data[4]
-              ? Icon(Icons.check_circle_outline, color: Colors.teal)
+              ? Icon(Icons.check_circle_outline, color: secondColor)
                   : Icon(Icons.cancel_outlined, color: Colors.pink)
               ]),Row(children: [
               labelText(text: "Big Trunk: "),
               snapshot.data[5]
-              ? Icon(Icons.check_circle_outline, color: Colors.teal)
+              ? Icon(Icons.check_circle_outline, color:secondColor)
                   : Icon(Icons.cancel_outlined, color: Colors.pink)
               ]),Row(children: [
                         labelText(text: "Destination: "),
@@ -392,14 +392,14 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
           Row(children: [
             labelText(text: "Big Trunk: "),
             widget.lift.bigTrunk
-                ? Icon(Icons.check_circle_outline, color: Colors.teal)
+                ? Icon(Icons.check_circle_outline, color: secondColor)
                 : Icon(Icons.cancel_outlined, color: Colors.pink)
           ]),
           SizedBox(height: defaultSpace),
           Row(children: [
             labelText(text: "Backseat not full?: "),
             widget.lift.backSeat
-                ? Icon(Icons.check_circle_outline, color: Colors.teal)
+                ? Icon(Icons.check_circle_outline, color: secondColor)
                 : Icon(Icons.cancel_outlined, color: Colors.pink)
           ]),
           SizedBox(height: defaultSpace),

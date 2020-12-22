@@ -338,7 +338,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
     final toTimePicker = TimePickerSpinner(
       is24HourMode: true,
       normalTextStyle: TextStyle(fontSize: 28, color: Colors.grey),
-      highlightedTextStyle: TextStyle(fontSize: 34, color: Colors.teal),
+      highlightedTextStyle: TextStyle(fontSize: 34, color: secondColor),
       //spacing: 50,
       //itemHeight: 80,
       alignment: Alignment.center,
@@ -357,7 +357,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
     final fromTimePicker = TimePickerSpinner(
       is24HourMode: true,
       normalTextStyle: TextStyle(fontSize: 28, color: Colors.grey),
-      highlightedTextStyle: TextStyle(fontSize: 34, color: Colors.teal),
+      highlightedTextStyle: TextStyle(fontSize: 34, color: secondColor),
       //spacing: 50,
       //itemHeight: 80,
       alignment: Alignment.center,
@@ -541,24 +541,10 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
           //  Text(resultString ?? "")
         ]);
 
-    final fromText = Center(
-        child: Container(
-          child:generalInfoText(text: _fromControler.text),
-          /*child:Row(
-            children:[labelText(text:"Time and Date:"),generalInfoText(text: _fromControler.text),
-            ]),*/
-
-    )
-        /*textBoxFieldDisableCentered(
-              nameLabel: "",
-              size: MediaQuery.of(context).size,
-              hintText: "",
-              textFieldController: _fromControler,
-              validator: (value) {
-                if(_fromTime==null ||  _toTime==null){return '                                      No of time selected';}
-                else  if ((_fromTime.hour >_toTime.hour) || (_toTime.hour == _fromTime.hour && _toTime.minute < _fromTime.minute )) {return '                             The from time is after the to Time';}
-                else if(_fromTime.hour ==_toTime.hour && _toTime.minute == _fromTime.minute ){return '                                 From time equal to to time';}
-                else return null;}),*/
+    final fromText = Container(
+          child:Stack(
+            children:[labelText(text:"Time:"), Center(child:generalInfoText(text: _fromControler.text))
+            ]),
         );
 
     final toText = Container(

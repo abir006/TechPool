@@ -450,7 +450,7 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
                               .height * 0.016 * 4,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Colors.teal,
+                            color: secondColor,
                             image: DecorationImage(fit: BoxFit.fill,
                                 image: NetworkImage(snapshot.data[0])),
 
@@ -528,7 +528,7 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
   Widget placesText(String from,String to) {
     return  Container(
       width: MediaQuery.of(context).size.height * 0.016*20,
-        child: Text(from+" -> "+to,
+        child: Text(from+" \u{2192} "+to,
           style: TextStyle(fontSize: fontTextsSize, color: Colors.black),
             overflow: TextOverflow.ellipsis,
           maxLines: 2,

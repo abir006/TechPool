@@ -269,7 +269,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                               .height * 0.016 * 4,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Colors.teal,
+                            color: secondColor,
                             image: DecorationImage(//fit: BoxFit.fill,
                                 image: NetworkImage(snapshot.data[0])),
 
@@ -385,7 +385,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                               .height * 0.016 * 4,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Colors.teal,
+                            color: secondColor,
                             image: DecorationImage(//fit: BoxFit.fill,
                                 image: NetworkImage(snapshot.data[0])),
 
@@ -502,7 +502,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                               .height * 0.016 * 4,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Colors.teal,
+                            color: secondColor,
                             image: DecorationImage(//fit: BoxFit.fill,
                                 image: NetworkImage(snapshot.data[0])),
 

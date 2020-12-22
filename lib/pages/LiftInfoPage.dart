@@ -153,14 +153,14 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
                     Row(children: [
                       labelText(text: "Big Trunk: "),
                       widget.lift.bigTrunk
-                          ? Icon(Icons.check_circle_outline, color: Colors.teal)
+                          ? Icon(Icons.check_circle_outline, color: secondColor)
                           : Icon(Icons.cancel_outlined, color: Colors.pink)
                     ]),
                     SizedBox(height: defaultSpace),
                     Row(children: [
                       labelText(text: "Backseat not full?: "),
                       widget.lift.backSeat
-                          ? Icon(Icons.check_circle_outline, color: Colors.teal)
+                          ? Icon(Icons.check_circle_outline, color: secondColor)
                           : Icon(Icons.cancel_outlined, color: Colors.pink)
                     ]),
                     SizedBox(height: defaultSpace),
@@ -242,8 +242,19 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
             }));
     });
 
-    final allInfo =
-       Container(
+    final allInfo = StreamBuilder<DocumentSnapshot>(
+        stream:firestore.collection("Drives").doc(widget.lift.liftId).snapshots(), // a previously-obtained Future<String> or null
+        builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot){
+       if(snapshot.hasData) {
+         snapshot.data.data().forEach((key, value) {
+                 if (value != null) {
+                   widget.lift.setProperty(key, value);
+                 }
+               });
+         if(widget.lift.numberOfSeats<=widget.lift.passengers.length){
+           return Center(child: Text("Lift not available", style: TextStyle(fontSize: 30),),);
+         }
+         return Container(
           child: ListView(
               shrinkWrap: true,
               padding: EdgeInsets.only(
@@ -328,18 +339,21 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
             //    crossAxisAlignment: CrossAxisAlignment.start,
              //   mainAxisSize: MainAxisSize.min,
                     children: [
-                   /*   CheckboxListTile(
-                        title: Text('Big Bag'),
-                        value: bigBag,
-                         onChanged: (bool value){setState(() {bigBag = value;});}),*/
-
                       labelText(text: "Big Bag: "),
                       Container(alignment:Alignment.topLeft,child: Theme(data: ThemeData(unselectedWidgetColor: secondColor), child:Checkbox(value: bigBag,
                         onChanged: (bool value){setState(() {bigBag = value;});}))),
                     ],)]),
                 ),
               SizedBox(height: defaultSpace*2),
-            ]));
+            ]));}
+       else{
+          if(snapshot.hasError){
+          return Center(child: Text("Lift not available", style: TextStyle(fontSize: 30),),);
+          }else{
+          return Center(child: CircularProgressIndicator(),);
+          }
+       }
+       });
 
     return Scaffold(
       appBar: AppBar(
@@ -412,7 +426,7 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
                               MediaQuery.of(context).size.height * 0.016 * 4,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Colors.teal,
+                            color: secondColor,
                             image: DecorationImage(
                                 fit: BoxFit.fill,
                                 image: NetworkImage(snapshot.data[0])),
@@ -480,7 +494,7 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
                               MediaQuery.of(context).size.height * 0.016 * 4,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Colors.teal,
+                            color: secondColor,
                             image: DecorationImage(
                                 fit: BoxFit.fill,
                                 image: NetworkImage(snapshot.data[0])),

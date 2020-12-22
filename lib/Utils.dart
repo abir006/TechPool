@@ -153,7 +153,7 @@ Container calendarListTile(dynamic event,Widget leadingWidget,BuildContext conte
 double clacDis(GeoPoint from,Coordinates to){
   return (Geolocator.distanceBetween(from.latitude,from.longitude,to.latitude,to.longitude).abs());
 }
-
+enum NotificationInfoType {Accepted, Requested}
 
 class LiftNotification {
   String driveId;

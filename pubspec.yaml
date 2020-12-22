@@ -67,7 +67,9 @@ dev_dependencies:
 flutter_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/images/TechPoolCarUsers.png"
+  image_path: "assets/images/TechPoolCar.png"
+  adaptive_icon_background: "#FF00BCD4"
+  adaptive_icon_foreground: "assets/images/TechPoolCarLauncher.png"
 flutter_launcher_name:
   name: "TechPool"
 

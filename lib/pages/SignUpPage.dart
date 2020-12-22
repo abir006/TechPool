@@ -215,6 +215,7 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
                                   await cloudStorage.ref('uploads')
                                       .child(userRep.user.email).putFile(await ImageUtils.imageToFile(imageName: "images/profile", ext: "png"));
                                   userRep.profilePicture = Image.asset("assets/images/profile.png");
+                                  await db.collection("Notifications").doc(_email.text).set({});
                                   while(!await checkEmailVerified()) {
 
                                   }

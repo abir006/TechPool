@@ -48,7 +48,7 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                 "destAddress": widget.lift.destAddress,
                 "startCity": widget.lift.startCity,
                 "startAddress": widget.lift.startAddress,
-                "distance": (widget.lift.passengersInfo[userRep.user.email]["dist"]~/ 1000),
+                "distance": (widget.lift.passengersInfo[userRep.user.email]["dist"]/ 1000),
                 "driveId": widget.lift.liftId,
                 "driverId": widget.lift.driver,
                 "liftTime": widget.lift.time,
@@ -103,9 +103,9 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
             ret.add(value.data()["firstName"] + " " + value.data()["lastName"]);
             if(widget.type == CalendarEventType.Drive){
             ret.add(widget.lift.passengersInfo[name]["startAddress"]);
-            ret.add(widget.lift.passengersInfo[name]["dist"]~/ 1000);
-            ret.add(widget.lift.passengersInfo[name]["bigTrunk"]);
-            ret.add(widget.lift.passengersInfo[name]["backSeatNotFull"]);
+            ret.add(widget.lift.passengersInfo[name]["dist"]/ 1000);
+            ret.add(widget.lift.passengersInfo[name]["bigBag"]);
+            //ret.add(widget.lift.passengersInfo[name]["backSeatNotFull"]);
             ret.add(widget.lift.passengersInfo[name]["note"]);
             ret.add(widget.lift.passengersInfo[name]["destAddress"]);
             }
@@ -114,11 +114,11 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
         });
         //  return null;
       }
-      Widget allInfoText(int dist) {
+      Widget allInfoText(double dist) {
         return Container(
             child: Row(
               children: [
-                Text(dist.toString() + "km"),
+                Text(dist.toStringAsFixed(1) + "km"),
                 SizedBox(width: MediaQuery.of(context).size.height * 0.01),
               ],
             ));
@@ -154,7 +154,7 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                               MediaQuery.of(context).size.height * 0.016 * 4,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: Colors.teal,
+                                color: secondColor,
                                 image: DecorationImage(
                                     fit: BoxFit.fill,
                                     image: NetworkImage(snapshot.data[0])),
@@ -168,7 +168,7 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                             children: [
                               infoText(snapshot.data[1]),
                               placesText(lift.startAddress),
-                              allInfoText(lift.passengersInfo[userRep.user.email]["dist"] ~/ 1000),
+                              allInfoText(widget.type == CalendarEventType.PendingLift ? widget.lift.dist / 1000 : lift.passengersInfo[userRep.user.email]["dist"] / 1000),
                             ],
                           )),
                       Spacer(),
@@ -218,7 +218,7 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                                   MediaQuery.of(context).size.height * 0.016 * 4,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    color: Colors.teal,
+                                    color: secondColor,
                                     image: DecorationImage(
                                         fit: BoxFit.fill,
                                         image: NetworkImage(snapshot.data[0])),
@@ -242,20 +242,15 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                         ],
                       ),
                       ...(widget.type == CalendarEventType.Drive ? ([Row(children: [
-              labelText(text: "Backseat not full?: "),
+              labelText(text: "Big Bag: "),
               snapshot.data[4]
-              ? Icon(Icons.check_circle_outline, color: Colors.teal)
-                  : Icon(Icons.cancel_outlined, color: Colors.pink)
-              ]),Row(children: [
-              labelText(text: "Big Trunk: "),
-              snapshot.data[5]
-              ? Icon(Icons.check_circle_outline, color: Colors.teal)
+              ? Icon(Icons.check_circle_outline, color: secondColor)
                   : Icon(Icons.cancel_outlined, color: Colors.pink)
               ]),Row(children: [
                         labelText(text: "Destination: "),
-                        Expanded(child: infoText(snapshot.data[7]))
+                        Expanded(child: infoText(snapshot.data[6]))
                       ]),Row(children: [
-                        labelText(text: "Note: "), Expanded(child: infoText(snapshot.data[6]))
+                        labelText(text: "Note: "), Expanded(child: infoText(snapshot.data[5]))
                       ]),Divider(thickness: 1)]) : [])],
                   ),
                 );
@@ -350,7 +345,7 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                      : "Lift"}",
                      style: TextStyle(color: Colors.white, fontSize: 17)),
                  onPressed:  () async{
-                   if(widget.type == CalendarEventType.Lift){
+                   if(widget.type == CalendarEventType.Lift || widget.type == CalendarEventType.PendingLift){
                      showAlertDialog(context, "Cancel Lift", "Are you sure you want to cancel?\nThere is no going back", userRep);
                    }
                   // _errorSnack.currentState.showSnackBar(SnackBar(content: Text("The lift couldn't be deleted, it could have been canceled", style: TextStyle(fontSize: 19,color: Colors.red),)));
@@ -365,9 +360,6 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                 left: defaultSpacewidth, right: defaultSpacewidth),
             children: [
           SizedBox(height: defaultSpace),
-          Text("${widget.type == CalendarEventType.Lift ? "Lift" : "Drive"} Info",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-          SizedBox(height: defaultSpace),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -379,27 +371,27 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
           ),
           SizedBox(height: defaultSpace),
           Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            labelText(text: "${widget.type == CalendarEventType.Drive ? "Starting Point" : "Pickup Point"}: "),
-            Expanded(child: infoText(widget.type == CalendarEventType.Drive ? widget.lift.startAddress : widget.lift.passengersInfo[userRep.user.email]["startAddress"]))
+            labelText(text: "${(widget.type == CalendarEventType.Drive || widget.type == CalendarEventType.PendingLift) ? "Starting Point" : "Pickup Point"}: "),
+            Expanded(child: infoText((widget.type == CalendarEventType.Drive || widget.type == CalendarEventType.PendingLift) ? widget.lift.startAddress : widget.lift.passengersInfo[userRep.user.email]["startAddress"]))
           ]),
           SizedBox(height: defaultSpace),
           _buildRow(context),
           Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
             labelText(text: "Destination: "),
-            Expanded(child: infoText(widget.type == CalendarEventType.Drive ? widget.lift.destAddress : widget.lift.passengersInfo[userRep.user.email]["destAddress"]))
+            Expanded(child: infoText((widget.type == CalendarEventType.Drive || widget.type == CalendarEventType.PendingLift) ? widget.lift.destAddress : widget.lift.passengersInfo[userRep.user.email]["destAddress"]))
           ]),
           SizedBox(height: defaultSpace),
           Row(children: [
             labelText(text: "Big Trunk: "),
             widget.lift.bigTrunk
-                ? Icon(Icons.check_circle_outline, color: Colors.teal)
+                ? Icon(Icons.check_circle_outline, color: secondColor)
                 : Icon(Icons.cancel_outlined, color: Colors.pink)
           ]),
           SizedBox(height: defaultSpace),
           Row(children: [
             labelText(text: "Backseat not full?: "),
             widget.lift.backSeat
-                ? Icon(Icons.check_circle_outline, color: Colors.teal)
+                ? Icon(Icons.check_circle_outline, color: secondColor)
                 : Icon(Icons.cancel_outlined, color: Colors.pink)
           ]),
           SizedBox(height: defaultSpace),
@@ -425,7 +417,7 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
           Divider(
             thickness: 3,
           ),
-              ...(widget.type == CalendarEventType.Lift ? ([Text("Driver:",
+              ...(widget.type == CalendarEventType.Lift || widget.type == CalendarEventType.PendingLift ? ([Text("Driver:",
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
           _buildTile(widget.lift),
           SizedBox(height: defaultSpace),
@@ -446,7 +438,7 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
       appBar: AppBar(
         elevation: 0,
         title: Text(
-          "${widget.type == CalendarEventType.Lift ? "Lift" : "Drive"} Info",
+          "${widget.type == CalendarEventType.Drive ? "Drive" : "Lift"} Info",
           style: TextStyle(color: Colors.white),
         ),
       ),

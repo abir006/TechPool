@@ -72,6 +72,14 @@ class Lift{
   Lift(this.driveId,this.info,this.numberOfSeats,this.numberOfPassengers,this.dateTime);
 }
 
+class PendingLift{
+  String driveId;
+  String info;
+  DateTime dateTime;
+  int dist;
+  PendingLift(this.driveId,this.info,this.dateTime,this.dist);
+}
+
 /*
 /// A container class for DesiredLift event.
 class DesiredLift{
@@ -93,7 +101,7 @@ class LocationsResult{
   LocationsResult(this.fromAddress, this.toAddress,this.stopAddresses,this.numberOfStops);
 }
 
-enum CalendarEventType { Drive, Lift }
+enum CalendarEventType { Drive, Lift , PendingLift }
 /// A util function for the calendar, returns the desired event container to
 /// display under the calendar, according to the type of event received.
 Widget transformEvent(dynamic event, BuildContext context){
@@ -101,6 +109,8 @@ Widget transformEvent(dynamic event, BuildContext context){
     return calendarListTile(event, Icon(Icons.directions_car,size: 30, color: mainColor),context,CalendarEventType.Drive);
   } else if (event is Lift) {
     return calendarListTile(event, Transform.rotate(angle: 0.8,child: Icon(Icons.thumb_up_rounded,size: 30, color: mainColor)),context,CalendarEventType.Lift);
+  } else if (event is PendingLift) {
+    return calendarListTile(event, Transform.rotate(angle: 0.8,child: Icon(Icons.thumb_up_rounded,size: 30, color: mainColor)),context,CalendarEventType.PendingLift);
   }
   else{
     return Container();
@@ -114,7 +124,7 @@ Container calendarListTile(dynamic event,Widget leadingWidget,BuildContext conte
       color: Colors.white,
       boxShadow: [BoxShadow(color: Colors.black,blurRadius: 2.0,
         spreadRadius: 0.0,offset: Offset(2.0, 2.0))],
-      border: Border.all(color: Colors.green, width: 0.8),
+      border: Border.all(color: eventType == CalendarEventType.PendingLift ? Colors.orange : Colors.green, width: 0.8),
       borderRadius: BorderRadius.circular(12.0),
     ),
     margin:
@@ -133,6 +143,9 @@ Container calendarListTile(dynamic event,Widget leadingWidget,BuildContext conte
         if(eventType == CalendarEventType.Lift) {
           docLift.stops = [];
         }
+        if(eventType == CalendarEventType.PendingLift){
+          docLift.dist = event.dist;
+        }
         else{
           docLift.dist = 0;
         }
@@ -145,7 +158,7 @@ Container calendarListTile(dynamic event,Widget leadingWidget,BuildContext conte
             fullscreenDialog: true
         ));
       },
-    subtitle: Row(mainAxisAlignment: MainAxisAlignment.start,children: [Text("${(DateFormat.Hm().format(event.dateTime)).toString()}"),Spacer(),Icon(Icons.person,color: Colors.black,),Text(": ${event.numberOfPassengers} / ${event.numberOfSeats}",style: TextStyle(color: Colors.black),)],),
+    subtitle: Row(mainAxisAlignment: MainAxisAlignment.start,children: [Text("${(DateFormat.Hm().format(event.dateTime)).toString()}"),...(eventType != CalendarEventType.PendingLift ? [Spacer(),Icon(Icons.person,color: Colors.black,),Text(" ${event.numberOfPassengers} / ${event.numberOfSeats}",style: TextStyle(color: Colors.black),)] : [])]),
     trailing: Icon(Icons.chevron_right_sharp,color: Colors.black,size:30,)),
   );
 }
@@ -153,147 +166,32 @@ Container calendarListTile(dynamic event,Widget leadingWidget,BuildContext conte
 double clacDis(GeoPoint from,Coordinates to){
   return (Geolocator.distanceBetween(from.latitude,from.longitude,to.latitude,to.longitude).abs());
 }
-
+enum NotificationInfoType {Accepted, Requested}
 
 class LiftNotification {
   String driveId;
   String driverId;//email
-  //String driverFullName; this.driverFullName,
   String startCity;
   String destCity;
-  int price;
   int distance;
+  int price;
   DateTime liftTime;
   DateTime notificationTime;
   String type;
   String passengerId;
-  //String pictureUrl;
+  String passengerNote;
+  bool bigBag;
+  String startAddress;
+  String destAddress;
   // int numberOfSeats;
   // int numberOfPassengers;
   LiftNotification(this.driveId, this.driverId, this.startCity, this.destCity,
-      this.price, this.distance, this.liftTime, this.notificationTime,
-      this.type, [this.passengerId]);//optional
+  this.price, this.distance, this.liftTime, this.notificationTime,
+  this.type, [this.passengerId, this.passengerNote, this.bigBag, this.startAddress, this.destAddress]);//optional
   LiftNotification.requested(this.driveId, this.driverId, this.startCity, this.destCity,
       this.price, this.distance, this.liftTime, this.notificationTime,
-      this.type, this.passengerId);
+      this.type, this.passengerId, this.passengerNote, this.bigBag, this.startAddress, this.destAddress);
 }
-
-/*class RejectedLiftNotification {
-  String driveId;
-  String driverFullName;
-  String driverId;//email
-  String startCity;
-  String destCity;
-  int price;
-  DateTime timeStamp;
-  int distance;
-  RejectedLiftNotification(this.driveId, this.driverFullName, this.driverId,
-      this.startCity, this.destCity, this.price, this.timeStamp, this.distance);
-}
-
-class RequestedLiftNotification {
-  String driveId;
-  String driverFullName;
-  String driverId;//email
-  String startCity;
-  String destCity;
-  int price;
-  DateTime timeStamp;
-  int distance;
-  RequestedLiftNotification(this.driveId, this.driverFullName, this.driverId,
-      this.startCity, this.destCity, this.price, this.timeStamp, this.distance);
-}*/
-
-Container acceptedLiftNotificationListTile(dynamic notification, Widget leadingWidget, Widget trailingWidget, BuildContext context) {
-  FirebaseFirestore firestore = FirebaseFirestore.instance;
-  return Container(
-    decoration: BoxDecoration(
-      color: Colors.white,
-      boxShadow: [BoxShadow(color: Colors.black,blurRadius: 2.0,
-          spreadRadius: 0.0,offset: Offset(2.0, 2.0))],
-      border: Border.all(color: Colors.green, width: 0.8),
-      borderRadius: BorderRadius.circular(12.0),
-    ),
-    margin:
-    const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-    child: ListTile(leading: leadingWidget,
-        title: Text(notification?.info),
-        onTap: () async {
-          var drive = await firestore.collection("Drives").doc(notification.driveId).get();
-          MyLift docLift = new MyLift("driver", "destAddress", "stopAddress", 5);
-          drive.data().forEach((key, value) {
-            if(value!=null) {
-              docLift.setProperty(key,value);
-            }
-          });
-          docLift.dist = 0;
-          /*Navigator.of(context).push(new MaterialPageRoute<Null>(
-              builder: (BuildContext context) {
-                return LiftInfoPage(lift: docLift);
-              },
-              fullscreenDialog: true
-          ));*/
-        },
-        subtitle: Row(mainAxisAlignment: MainAxisAlignment.start,children: [Text("${(DateFormat.Hm().format(notification.dateTime)).toString()}"),Spacer(),Icon(Icons.person,color: Colors.black,),Text(": ${notification.numberOfPassengers} / ${notification.numberOfSeats}",style: TextStyle(color: Colors.black),)],),
-        trailing: Icon(Icons.chevron_right_sharp,color: Colors.black,size:30,)),
-  );
-}
-
-Container notificationListTile(dynamic notification, Widget leadingWidget, Widget trailingWidget, BuildContext context) {
-  FirebaseFirestore firestore = FirebaseFirestore.instance;
-  return Container(
-    decoration: BoxDecoration(
-      color: Colors.white,
-      boxShadow: [BoxShadow(color: Colors.black,blurRadius: 2.0,
-          spreadRadius: 0.0,offset: Offset(2.0, 2.0))],
-      border: Border.all(color: Colors.green, width: 0.8),
-      borderRadius: BorderRadius.circular(12.0),
-    ),
-    margin:
-    const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-    child: ListTile(leading: leadingWidget,
-        title: Text(notification?.info),
-        onTap: () async {
-          var drive = await firestore.collection("Drives").doc(notification.driveId).get();
-          MyLift docLift = new MyLift("driver", "destAddress", "stopAddress", 5);
-          drive.data().forEach((key, value) {
-            if(value!=null) {
-              docLift.setProperty(key,value);
-            }
-          });
-          docLift.dist = 0;
-          /*Navigator.of(context).push(new MaterialPageRoute<Null>(
-              builder: (BuildContext context) {
-                return LiftInfoPage(lift: docLift);
-              },
-              fullscreenDialog: true
-          ));*/
-        },
-        subtitle: Row(mainAxisAlignment: MainAxisAlignment.start,children: [Text("${(DateFormat.Hm().format(notification.dateTime)).toString()}"),Spacer(),Icon(Icons.person,color: Colors.black,),Text(": ${notification.numberOfPassengers} / ${notification.numberOfSeats}",style: TextStyle(color: Colors.black),)],),
-        trailing: Icon(Icons.chevron_right_sharp,color: Colors.black,size:30,)),
-  );
-}
-
-
-Widget notificationSwitcher2(dynamic notification,BuildContext context){
-  if (notification is LiftNotification) {
-    return acceptedLiftNotificationListTile(notification, Icon(Icons.directions_car,size: 30, color: mainColor), Transform.rotate(angle: 0.8,
-        child: Icon(Icons.thumb_up_rounded, size: 30, color: Colors.green)), context);
-  } /*else if (notification is RejectedLiftNotification) {
-    return notificationListTile(notification, Transform.rotate(angle: 0.8,
-        child: Icon(Icons.thumb_up_rounded, size: 30, color: mainColor)),
-        Icon(Icons.directions_car, size: 30, color: mainColor), context);
-  } else if (notification is RequestedLiftNotification) {
-    return notificationListTile(notification, Transform.rotate(angle: 0.8,
-        child: Icon(Icons.thumb_up_rounded, size: 30, color: mainColor)),
-        Icon(Icons.directions_car, size: 30, color: mainColor), context);
-  }*/
-  else{
-    return null;
-  }
-}
-
-
 
 class MyLift{
   String destCity;
@@ -312,7 +210,6 @@ class MyLift{
   GeoPoint startPoint;
   bool bigTrunk;
   bool backSeat;
-
   String imageUrl;
   String driverName;
   String liftId;
@@ -411,40 +308,44 @@ SafeArea techDrawer(UserRepository userRep, BuildContext context,
             color: mainColor,
             height: 180,
             child: Padding(
-              padding: const EdgeInsets.only(top: 50, left: 10),
+              padding: const EdgeInsets.only(top: 40, left: 10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CircleAvatar(
-                    backgroundColor: secondColor,
-                    radius: 40,
-                    backgroundImage: userRep.profilePicture.image,
+                  Expanded(
+                    child: CircleAvatar(
+                      backgroundColor: secondColor,
+                      radius: 40,
+                      backgroundImage: userRep.profilePicture.image,
+                    ),
                   ),
-                  Spacer(),
-                  Row(mainAxisSize: MainAxisSize.max,mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                    Flexible(flex: 5,child: Text("Hello, ${userRep.user?.displayName}.",
-                        style: TextStyle(color: Colors.white, fontSize: 20))),
-                    Flexible(flex: 1,child: IconButton(
-                      icon: Icon(
-                        Icons.logout,
-                        color: Colors.white,
-                        size: 25,
-                      ),
-                      onPressed: () async => await (userRep.auth
-                          .signOut()
-                          .then((_) {
-                        final EncryptedSharedPreferences encryptedSharedPreferences = EncryptedSharedPreferences();
-                            encryptedSharedPreferences.clear();
-                             Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) {
-                                      var size = MediaQuery.of(context).size;
-                                      return Scaffold(body: Container(height: size.height, width: size.width,color: mainColor,
+                  //Spacer(),
+                  Expanded(
+                    child: Row(mainAxisSize: MainAxisSize.max,mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                      Flexible(flex: 5,child: Text("Hello, ${userRep.user?.displayName}.",
+                          style: TextStyle(color: Colors.white, fontSize: 20))),
+                      Flexible(flex: 1,child: IconButton(
+                        icon: Icon(
+                          Icons.logout,
+                          color: Colors.white,
+                          size: 25,
+                        ),
+                        onPressed: () async => await (userRep.auth
+                            .signOut()
+                            .then((_) {
+                          final EncryptedSharedPreferences encryptedSharedPreferences = EncryptedSharedPreferences();
+                              encryptedSharedPreferences.clear();
+                               Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) {
+                                        var size = MediaQuery.of(context).size;
+                                        return Scaffold(body: Container(height: size.height, width: size.width,color: mainColor,
   child: Stack(alignment: Alignment.center,children: [Image.asset("assets/images/TechPoolWelcomeBackground.png"), TransparentSignInButton(), TransparentSignUnButton()],)));}));
-                      })),
-                    ))
-                  ])
+                        })),
+                      ))
+                    ]),
+                  )
                 ],
               ),
             ),

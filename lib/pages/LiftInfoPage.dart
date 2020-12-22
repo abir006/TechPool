@@ -76,6 +76,23 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
                 "type": "RequestedLift",
               }
           );
+           transaction.set(firestore.collection("Notifications").doc(userRep.user.email).collection("Pending").doc(),
+               {
+                 "destCity": widget.resLift.destAddress.locality,
+                 "destAddress": widget.resLift.destAddress.addressLine,
+                 "startCity": widget.resLift.startAddress.locality,
+                 "startAddress": widget.resLift.startAddress.addressLine,
+                 "distance": widget.lift.dist,
+                 "driveId": widget.lift.liftId,
+                 "driverId": widget.lift.driver,
+                 "liftTime": widget.lift.time,
+                 "timeStamp": DateTime.now(),
+                 "price": widget.lift.price,
+                 "passengerId": userRep.user.email,
+                 "passengerNote": myNoteController.text,
+                 "bigBag":bigBag,
+               }
+           );
           return  _errorsRequest.isOK;
         });
       });
@@ -153,14 +170,14 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
                     Row(children: [
                       labelText(text: "Big Trunk: "),
                       widget.lift.bigTrunk
-                          ? Icon(Icons.check_circle_outline, color: Colors.teal)
+                          ? Icon(Icons.check_circle_outline, color: secondColor)
                           : Icon(Icons.cancel_outlined, color: Colors.pink)
                     ]),
                     SizedBox(height: defaultSpace),
                     Row(children: [
                       labelText(text: "Backseat not full?: "),
                       widget.lift.backSeat
-                          ? Icon(Icons.check_circle_outline, color: Colors.teal)
+                          ? Icon(Icons.check_circle_outline, color: secondColor)
                           : Icon(Icons.cancel_outlined, color: Colors.pink)
                     ]),
                     SizedBox(height: defaultSpace),
@@ -242,8 +259,19 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
             }));
     });
 
-    final allInfo =
-       Container(
+    final allInfo = StreamBuilder<DocumentSnapshot>(
+        stream:firestore.collection("Drives").doc(widget.lift.liftId).snapshots(), // a previously-obtained Future<String> or null
+        builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot){
+       if(snapshot.hasData) {
+         snapshot.data.data().forEach((key, value) {
+                 if (value != null) {
+                   widget.lift.setProperty(key, value);
+                 }
+               });
+         if(widget.lift.numberOfSeats<=widget.lift.passengers.length){
+           return Center(child: Text("Lift not available", style: TextStyle(fontSize: 30),),);
+         }
+         return Container(
           child: ListView(
               shrinkWrap: true,
               padding: EdgeInsets.only(
@@ -304,7 +332,26 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
               Divider(
                 thickness: 3,
               ),
-              passengers,
+             Container(
+                 alignment: Alignment.bottomLeft,
+                 color: Colors.white,
+                 child: ConfigurableExpansionTile(
+                   header: Container(
+                       alignment: Alignment.bottomLeft,
+                       child: Text("Passengers info",
+                           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17))),
+                   animatedWidgetFollowingHeader: const Icon(
+                     Icons.expand_more,
+                     color: const Color(0xFF707070),
+                   ),
+                   //tilePadding: EdgeInsets.symmetric(horizontal: 0),
+                   // backgroundColor: Colors.white,
+                   // trailing: Icon(Icons.arrow_drop_down,color: Colors.black,),
+                   //title: Text("Passenger info"),
+                   children: [
+                     ..._buildPassengersList(),
+                   ],
+                 )),
           Divider(
             thickness: 3,
           ),
@@ -328,18 +375,21 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
             //    crossAxisAlignment: CrossAxisAlignment.start,
              //   mainAxisSize: MainAxisSize.min,
                     children: [
-                   /*   CheckboxListTile(
-                        title: Text('Big Bag'),
-                        value: bigBag,
-                         onChanged: (bool value){setState(() {bigBag = value;});}),*/
-
                       labelText(text: "Big Bag: "),
                       Container(alignment:Alignment.topLeft,child: Theme(data: ThemeData(unselectedWidgetColor: secondColor), child:Checkbox(value: bigBag,
                         onChanged: (bool value){setState(() {bigBag = value;});}))),
                     ],)]),
                 ),
               SizedBox(height: defaultSpace*2),
-            ]));
+            ]));}
+       else{
+          if(snapshot.hasError){
+          return Center(child: Text("Lift not available", style: TextStyle(fontSize: 30),),);
+          }else{
+          return Center(child: CircularProgressIndicator(),);
+          }
+       }
+       });
 
     return Scaffold(
       appBar: AppBar(
@@ -412,7 +462,7 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
                               MediaQuery.of(context).size.height * 0.016 * 4,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Colors.teal,
+                            color: secondColor,
                             image: DecorationImage(
                                 fit: BoxFit.fill,
                                 image: NetworkImage(snapshot.data[0])),
@@ -480,7 +530,7 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
                               MediaQuery.of(context).size.height * 0.016 * 4,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Colors.teal,
+                            color: secondColor,
                             image: DecorationImage(
                                 fit: BoxFit.fill,
                                 image: NetworkImage(snapshot.data[0])),
@@ -495,7 +545,7 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
                         children: [
                           infoText(snapshot.data[1]),
                           //placesText(lift.startAddress),
-                          allInfoText(lift.dist ~/ 1000),
+                          allInfoText(lift.dist / 1000),
                           //SizedBox(height:MediaQuery.of(context).size.height * 0.016 ,)
                         ],
                       )),
@@ -514,13 +564,13 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
         });
   }
 
-  Widget allInfoText(int dist) {
+  Widget allInfoText(double dist) {
     return Container(
         child: Row(
       children: [
         Container(child:Image.asset("assets/images/tl-.png",scale: 0.9)),
         SizedBox(width: MediaQuery.of(context).size.height * 0.01),
-        Text(dist.toString() + "km"),
+        Text(dist.toStringAsFixed(1) + "km"),
       ],
     ));
   }

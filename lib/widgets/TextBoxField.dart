@@ -74,8 +74,8 @@ Widget generalInfoText({@required String text, int maxElepsis}){
       text,
       style:
       TextStyle( fontSize: 17,),
-      overflow: TextOverflow.ellipsis,
-      maxLines:maxElepsis==null?2 : maxElepsis,
+     // overflow: TextOverflow.ellipsis,
+      maxLines: maxElepsis,
     ),
   );
 }

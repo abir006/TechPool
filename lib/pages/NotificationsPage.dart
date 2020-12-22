@@ -36,7 +36,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   (values) => [values[0]]),
           builder: (context, snapshot) {
             _notifications = [];
-            if (snapshot.hasData) {
+              if (snapshot.hasData) {
               snapshot.data[0].docs.forEach((element) {
                 var elementData = element.data();
                 String driveId = elementData["driveId"];
@@ -107,6 +107,42 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   return -1;
                 }
               });
+              if(_notifications.length == 0){
+                double defaultSpacewidth = MediaQuery.of(context).size.width * 0.016;
+
+                return Scaffold(
+                  backgroundColor: mainColor,
+                  appBar: AppBar(
+                    elevation: 0,
+                    title: Text(
+                      "Notifications",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                  drawer: techDrawer(userRep, context, DrawerSections.notifications),
+                  body: Container(
+                      decoration: pageContainerDecoration,
+                      margin: pageContainerMargin,
+                      //padding: EdgeInsets.only(bottom: 6.0,top: 7.0, left: defaultSpacewidth, right: defaultSpacewidth*4),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                          Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Icon(Icons.update, size: 30),
+                            SizedBox(width: MediaQuery.of(context).size.width * 0.02),
+                            Text("No notifications",style: TextStyle(fontSize: 30, color: Colors.black))
+                          ]),
+                          Spacer()
+                        ],
+                      ),
+
+                  ));
+              }
               return _buildPage(context, userRep);
             } else if (snapshot.hasError) {
               return Column(
@@ -117,7 +153,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     Text("Error on loading notifications from the database. Please try again.")
                   ]);
             } else {
-              return _buildPage(context, userRep);
+                return _buildPage(context, userRep);
             }
           });
     });

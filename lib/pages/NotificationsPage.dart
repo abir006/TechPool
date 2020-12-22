@@ -131,6 +131,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
         ),
         drawer: techDrawer(userRep, context, DrawerSections.notifications),
       body:Container(
+          padding: const EdgeInsets.only(bottom: 6.0, top: 7.0),
           decoration: pageContainerDecoration,
           margin: pageContainerMargin,
           //padding: EdgeInsets.only(left: defaultSpacewidth, right: defaultSpacewidth),
@@ -446,7 +447,43 @@ class _NotificationsPageState extends State<NotificationsPage> {
                         ],
                       ),
                     ),
-                    onTap: () {
+
+                    //AcceptedInfoPage
+                    onTap:  () async {
+                      var drive = await firestore.collection("Drives").doc(
+                          liftNotification.driveId).get();
+                      MyLift liftToShow = new MyLift(
+                          "driver", "destAddress", "stopAddress", 5);
+                      drive.data().forEach((key, value) {
+                        if (value != null) {
+                          liftToShow.setProperty(key, value);
+                        }
+                      });
+                      //TODO: Support Start Address and Dest Address in accept too
+
+                      //liftToShow.note = liftNotification.; //No need in accepted? will put driver note instead
+                      liftToShow.liftId = liftNotification.driveId;
+                      liftToShow.stops = [];
+                      //else {
+                      liftToShow.dist = liftNotification.distance;
+                      //}
+                      liftToShow.passengersInfo =
+                      Map<String, Map<String, dynamic>>.from(
+                          drive.data()["PassengersInfo"] ?? {});
+                      liftToShow.payments = (await firestore.collection(
+                          "Profiles").doc(liftNotification.driverId).get())
+                          .data()["allowedPayments"].join(", ");
+
+                      Navigator.of(context).push(new MaterialPageRoute<Null>(
+                          builder: (BuildContext context) {
+                            return NotificationInfo(
+                                lift: liftToShow,
+                                notification: liftNotification,
+                                type: NotificationInfoType.Accepted);
+                          },
+                          fullscreenDialog: true
+                      ));
+                    },
                       /*Navigator.of(context).push(new MaterialPageRoute<Null>(
                           builder: (BuildContext context) {
                             return LiftInfoPage(lift: lift, resLift: liftRes(
@@ -459,7 +496,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                               backSeat: widget.backSeat,));
                           },
                           fullscreenDialog: true
-                      )*/                  },
+                      )*/
                   ),
                   SizedBox(width: MediaQuery
                       .of(context)
@@ -570,19 +607,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       ),
                     ),
                     onTap: () {
-                      /*Navigator.of(context).push(new MaterialPageRoute<Null>(
-                          builder: (BuildContext context) {
-                            return LiftInfoPage(lift: lift, resLift: liftRes(
-                              fromTime: widget.fromTime,
-                              toTime: widget.toTime,
-                              indexDist: 2,
-                              startAddress: widget.startAddress,
-                              destAddress: widget.destAddress,
-                              bigTrunk: widget.bigTrunk,
-                              backSeat: widget.backSeat,));
-                          },
-                          fullscreenDialog: true
-                      ));*/
+
                     },
                   ),
                   SizedBox(width: MediaQuery
@@ -710,6 +735,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
                           fullscreenDialog: true
                       )
                     },*/
+
+                    //RequestedInfoPage
                       onTap: () async {
                         var drive = await firestore.collection("Drives").doc(
                             liftNotification.driveId).get();
@@ -720,27 +747,17 @@ class _NotificationsPageState extends State<NotificationsPage> {
                             liftToShow.setProperty(key, value);
                           }
                         });
-                        //TODO: Add BigBag support
-                        //TODO: Add Distance support
-                        //TODO: Delete BigTrunk from requested?
-                        //TODO: Support Start Address and Dest Address
 
-                        liftToShow.note = liftNotification.passengerNote;//TODO in accepted: No need in accepted?
+                        liftToShow.note = liftNotification.passengerNote;
                         liftToShow.liftId = liftNotification.driveId;
-                        //if (eventType == CalendarEventType.Lift) {
-                        //TODO in accepted: Will happen in accepted? Or I want to show stops..
-                          //liftToShow.stops = [];
-                        //}
-                        //else {
-                          liftToShow.dist = liftNotification.distance;
-                        //}
+                        liftToShow.dist = liftNotification.distance;
+
                         liftToShow.passengersInfo =
                         Map<String, Map<String, dynamic>>.from(
                             drive.data()["PassengersInfo"] ?? {});
                         liftToShow.payments = (await firestore.collection(
                             "Profiles").doc(liftNotification.passengerId).get())
                             .data()["allowedPayments"].join(", ");
-                        //TODO in accepted, show driver payments here (driverId instead of passengerID)
 
                         Navigator.of(context).push(new MaterialPageRoute<Null>(
                             builder: (BuildContext context) {

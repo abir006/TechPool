@@ -23,7 +23,7 @@ class NotificationInfo extends StatefulWidget {
 
 class _NotificationInfoState extends State<NotificationInfo> {
   FirebaseFirestore firestore = FirebaseFirestore.instance;
-  bool bigBag = false;
+  //bool bigBag = false;
   final _errorSnack = GlobalKey<ScaffoldState>();
 
   @override
@@ -33,7 +33,7 @@ class _NotificationInfoState extends State<NotificationInfo> {
 
   @override
   Widget build(BuildContext context) {
-    bool bigBag = widget.notification.bigBag;
+    //bool bigBag = widget.notification.bigBag;
 
     return Consumer<UserRepository>(builder: (context, userRep, child) {
 
@@ -59,9 +59,9 @@ class _NotificationInfoState extends State<NotificationInfo> {
             ));
       }
 
+
       Future<List<dynamic>> initNames(String name) {
         List<dynamic> ret = [];
-        //Check a lift which is full of
         return FirebaseStorage.instance
             .ref('uploads')
             .child(name)
@@ -70,24 +70,30 @@ class _NotificationInfoState extends State<NotificationInfo> {
           ret.add(value);
           return firestore.collection("Profiles").doc(name).get().then((value) {
             ret.add(value.data()["firstName"] + " " + value.data()["lastName"]);
-            if(widget.type == NotificationInfoType.Requested){
-              ret.add(widget.lift.passengersInfo[name]["startAddress"]);
-              ret.add(widget.lift.passengersInfo[name]["dist"]~/ 1000);
-              ret.add(widget.lift.passengersInfo[name]["bigTrunk"]);
-              ret.add(widget.lift.passengersInfo[name]["backSeatNotFull"]);
-              ret.add(widget.lift.passengersInfo[name]["note"]);
-              ret.add(widget.lift.passengersInfo[name]["destAddress"]);
+            if(widget.type == NotificationInfoType.Accepted){
+              // ret.add(widget.lift.passengersInfo[name]["startAddress"]);//1
+              // ret.add(widget.lift.passengersInfo[name]["dist"]~/ 1000);//3
+              // //ret.add(widget.lift.passengersInfo[name]["bigTrunk"]);
+              // //ret.add(widget.lift.passengersInfo[name]["backSeatNotFull"]);//4
+              // ret.add(widget.lift.passengersInfo[name]["note"]);//6
+              // ret.add(widget.lift.passengersInfo[name]["destAddress"]);//7
+              ret.add(widget.lift.passengersInfo[name]["startAddress"]);//2
+              ret.add(widget.lift.passengersInfo[name]["dist"]/ 1000);//3
+              ret.add(widget.lift.passengersInfo[name]["bigBag"]);//4
+              ret.add(widget.lift.passengersInfo[name]["note"]);//5
+              ret.add(widget.lift.passengersInfo[name]["destAddress"]);//6
             }
             return ret;
           });
         });
         //  return null;
       }
-      Widget allInfoText(int dist) {
+      Widget allInfoText(double dist) {
         return Container(
             child: Row(
               children: [
-                Text(dist.toString() + "km"),
+                //Text(dist.toString() + "km"),
+                Text(dist.toStringAsFixed(1) + "km"),
                 SizedBox(width: MediaQuery.of(context).size.height * 0.01),
               ],
             ));
@@ -123,7 +129,8 @@ class _NotificationInfoState extends State<NotificationInfo> {
                               MediaQuery.of(context).size.height * 0.016 * 4,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: Colors.teal,
+                                color: secondColor,
+                                //Colors.teal,
                                 image: DecorationImage(
                                     fit: BoxFit.fill,
                                     image: NetworkImage(snapshot.data[0])),
@@ -137,7 +144,7 @@ class _NotificationInfoState extends State<NotificationInfo> {
                             children: [
                               infoText(snapshot.data[1]),
                               placesText(lift.startAddress),
-                              allInfoText(lift.passengersInfo[userRep.user.email]["dist"] ~/ 1000),
+                              allInfoText(widget.type == NotificationInfoType.Requested ? widget.lift.dist / 1000 : lift.passengersInfo[userRep.user.email]["dist"] / 1000),
                             ],
                           )),
                       Spacer(),
@@ -187,7 +194,7 @@ class _NotificationInfoState extends State<NotificationInfo> {
                                   MediaQuery.of(context).size.height * 0.016 * 4,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    color: Colors.teal,
+                                    color: secondColor,
                                     image: DecorationImage(
                                         fit: BoxFit.fill,
                                         image: NetworkImage(snapshot.data[0])),
@@ -200,7 +207,7 @@ class _NotificationInfoState extends State<NotificationInfo> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   infoText(snapshot.data[1]),
-                                  ...(widget.type == NotificationInfoType.Requested ? ([placesText(snapshot.data[2]),
+                                  ...(widget.type == CalendarEventType.Drive ? ([placesText(snapshot.data[2]),
                                     allInfoText(snapshot.data[3])]) : [])
                                 ],
                               )),
@@ -210,24 +217,16 @@ class _NotificationInfoState extends State<NotificationInfo> {
                           )
                         ],
                       ),
-                      ...(widget.type == NotificationInfoType.Requested ? ([Row(children: [
-                        labelText(text: "Backseat not full?: "),
+                      ...(widget.type == NotificationInfoType.Accepted ? ([Row(children: [
+                        labelText(text: "Big Bag: "),
                         snapshot.data[4]
-                            ? Icon(Icons.check_circle_outline, color: Colors.teal)
+                            ? Icon(Icons.check_circle_outline, color: secondColor)
                             : Icon(Icons.cancel_outlined, color: Colors.pink)
-                      ]),
-                        Row(children: [
-                        labelText(text: "Big Trunk: "),
-                        snapshot.data[5]
-                            ? Icon(Icons.check_circle_outline, color: Colors.teal)
-                            : Icon(Icons.cancel_outlined, color: Colors.pink)
-                      ]),
-                        Row(children: [
+                      ]),Row(children: [
                         labelText(text: "Destination: "),
-                        Expanded(child: infoText(snapshot.data[7]))
-                      ]),
-                        Row(children: [
-                        labelText(text: "Note: "), Expanded(child: infoText(snapshot.data[6]))
+                        Expanded(child: infoText(snapshot.data[6]))
+                      ]),Row(children: [
+                        labelText(text: "Note: "), Expanded(child: infoText(snapshot.data[5]))
                       ]),Divider(thickness: 1)]) : [])],
                   ),
                 );
@@ -302,32 +301,50 @@ class _NotificationInfoState extends State<NotificationInfo> {
             ],
           ));
 
-      final searchLift =
+      final AcceptOrReject =
 
       Consumer<UserRepository>(builder: (context, userRep, child) {
         return Container(
             padding: EdgeInsets.only(
-                left: sizeFrameWidth * 0.2,
-                right: sizeFrameWidth * 0.2,
+                left: sizeFrameWidth * 0.16,
+                right: sizeFrameWidth * 0.16,
                 bottom: defaultSpace * 2),
             height: defaultSpace * 6,
-            child: RaisedButton.icon(
-                color: Colors.red[800],
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18),
-                    side: BorderSide(color: Colors.black)),
-                icon: Icon(Icons.delete, color: Colors.white,),
-                label: Text("Cancel ${widget.type == NotificationInfoType.Requested
-                    ? "Drive"
-                    : "Lift"}",
-                    style: TextStyle(color: Colors.white, fontSize: 17)),
-                onPressed:  () async{
-                  if(widget.type == NotificationInfoType.Accepted){
-                    showAlertDialog(context, "Cancel Lift", "Are you sure you want to cancel?\nThere is no going back", userRep);
-                  }
-                  // _errorSnack.currentState.showSnackBar(SnackBar(content: Text("The lift couldn't be deleted, it could have been canceled", style: TextStyle(fontSize: 19,color: Colors.red),)));
-                  //await  cancelRequest(userRep);
-                }));
+            child: Row(
+              children: [
+                RaisedButton.icon(
+                    color: Colors.green,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
+                        side: BorderSide(color: Colors.black)),
+                    icon: Icon(Icons.check, color: Colors.white,),
+                    label: Text("Accept",
+                        style: TextStyle(color: Colors.white, fontSize: 17)),
+                    onPressed:  () async{
+                      /*if(widget.type == NotificationInfoType.Accepted){
+                        showAlertDialog(context, "Cancel Lift", "Are you sure you want to cancel?\nThere is no going back", userRep);
+                      }*/
+                      // _errorSnack.currentState.showSnackBar(SnackBar(content: Text("The lift couldn't be deleted, it could have been canceled", style: TextStyle(fontSize: 19,color: Colors.red),)));
+                      //await  cancelRequest(userRep);
+                    }),
+                SizedBox(width: defaultSpacewidth),
+                RaisedButton.icon(
+                    color: Colors.red[800],
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
+                        side: BorderSide(color: Colors.black)),
+                    icon: Icon(Icons.close, color: Colors.white,),
+                    label: Text("Reject",
+                        style: TextStyle(color: Colors.white, fontSize: 17)),
+                    onPressed:  () async{
+                      if(widget.type == NotificationInfoType.Requested){
+                        showAlertDialog(context, "Reject Passenger", "Are you sure you want to reject this passenger?", userRep);
+                      }
+                      // _errorSnack.currentState.showSnackBar(SnackBar(content: Text("The lift couldn't be deleted, it could have been canceled", style: TextStyle(fontSize: 19,color: Colors.red),)));
+                      //await  cancelRequest(userRep);
+                    })
+              ],
+            ));
       });
 
       final allInfo = Container(
@@ -371,18 +388,20 @@ class _NotificationInfoState extends State<NotificationInfo> {
                 Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Expanded(child: infoText(widget.type == NotificationInfoType.Requested ? widget.lift.destAddress : widget.lift.passengersInfo[userRep.user.email]["destAddress"]))
                 ]),
-                SizedBox(height: defaultSpace),
+                widget.type == NotificationInfoType.Accepted ? SizedBox(height: defaultSpace) : Container(),
                 widget.type == NotificationInfoType.Accepted ? Row(children: [
                   labelText(text: "Big Trunk: "),
                   widget.lift.bigTrunk
                       ? Icon(Icons.check_circle_outline, color: Colors.teal)
                       : Icon(Icons.cancel_outlined, color: Colors.pink)
-                ]) : Row(children: [
+                ]) : Container(),
+                widget.type == NotificationInfoType.Requested ? SizedBox(height: defaultSpace) : Container(),
+                widget.type == NotificationInfoType.Requested ? Row(children: [
                   labelText(text: "Big Bag: "),
-                  bigBag
+                  widget.notification.bigBag
                       ? Icon(Icons.check_circle_outline, color: Colors.teal)
                       : Icon(Icons.cancel_outlined, color: Colors.pink)
-                ]),
+                ]) : Container(),
                 //Backseat,
                 widget.type == NotificationInfoType.Accepted ? SizedBox(height: defaultSpace) : Container(),
                 widget.type == NotificationInfoType.Accepted ? Row(children: [
@@ -391,6 +410,11 @@ class _NotificationInfoState extends State<NotificationInfo> {
                       ? Icon(Icons.check_circle_outline, color: Colors.teal)
                       : Icon(Icons.cancel_outlined, color: Colors.pink)
                 ]) : Container(),
+                SizedBox(height: defaultSpace),
+                Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
+                  labelText(text: "Distance: "),
+                  Expanded(child: infoText((widget.notification.distance / 1000).toString()+"km"))
+                ]),
                 SizedBox(height: defaultSpace),
                 Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
                   labelText(text: "Price: "),
@@ -419,7 +443,7 @@ class _NotificationInfoState extends State<NotificationInfo> {
                 ),
                 ...(widget.type == NotificationInfoType.Accepted ? ([Text("Driver:",
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                  _buildTile(widget.lift),
+                  //_buildTile(widget.lift),
                   SizedBox(height: defaultSpace),
                   Divider(
                     thickness: 3,
@@ -447,7 +471,7 @@ class _NotificationInfoState extends State<NotificationInfo> {
             margin: pageContainerMargin,
             //padding: EdgeInsets.only(left: defaultSpacewidth, right: defaultSpacewidth),
             child: Column(
-              children: [Expanded(child: allInfo),searchLift],
+              children: [Expanded(child: allInfo),widget.type == NotificationInfoType.Requested ? AcceptOrReject : Container()],
             )),
         backgroundColor: mainColor,
       );

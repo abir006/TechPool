@@ -76,6 +76,23 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
                 "type": "RequestedLift",
               }
           );
+           transaction.set(firestore.collection("Notifications").doc(userRep.user.email).collection("Pending").doc(),
+               {
+                 "destCity": widget.resLift.destAddress.locality,
+                 "destAddress": widget.resLift.destAddress.addressLine,
+                 "startCity": widget.resLift.startAddress.locality,
+                 "startAddress": widget.resLift.startAddress.addressLine,
+                 "distance": widget.lift.dist,
+                 "driveId": widget.lift.liftId,
+                 "driverId": widget.lift.driver,
+                 "liftTime": widget.lift.time,
+                 "timeStamp": DateTime.now(),
+                 "price": widget.lift.price,
+                 "passengerId": userRep.user.email,
+                 "passengerNote": myNoteController.text,
+                 "bigBag":bigBag,
+               }
+           );
           return  _errorsRequest.isOK;
         });
       });
@@ -315,7 +332,26 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
               Divider(
                 thickness: 3,
               ),
-              passengers,
+             Container(
+                 alignment: Alignment.bottomLeft,
+                 color: Colors.white,
+                 child: ConfigurableExpansionTile(
+                   header: Container(
+                       alignment: Alignment.bottomLeft,
+                       child: Text("Passengers info",
+                           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17))),
+                   animatedWidgetFollowingHeader: const Icon(
+                     Icons.expand_more,
+                     color: const Color(0xFF707070),
+                   ),
+                   //tilePadding: EdgeInsets.symmetric(horizontal: 0),
+                   // backgroundColor: Colors.white,
+                   // trailing: Icon(Icons.arrow_drop_down,color: Colors.black,),
+                   //title: Text("Passenger info"),
+                   children: [
+                     ..._buildPassengersList(),
+                   ],
+                 )),
           Divider(
             thickness: 3,
           ),
@@ -509,7 +545,7 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
                         children: [
                           infoText(snapshot.data[1]),
                           //placesText(lift.startAddress),
-                          allInfoText(lift.dist ~/ 1000),
+                          allInfoText(lift.dist / 1000),
                           //SizedBox(height:MediaQuery.of(context).size.height * 0.016 ,)
                         ],
                       )),
@@ -528,13 +564,13 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
         });
   }
 
-  Widget allInfoText(int dist) {
+  Widget allInfoText(double dist) {
     return Container(
         child: Row(
       children: [
         Container(child:Image.asset("assets/images/tl-.png",scale: 0.9)),
         SizedBox(width: MediaQuery.of(context).size.height * 0.01),
-        Text(dist.toString() + "km"),
+        Text(dist.toStringAsFixed(1) + "km"),
       ],
     ));
   }

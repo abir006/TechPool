@@ -9,6 +9,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geocoder/geocoder.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
+import 'package:rxdart/streams.dart';
 import 'package:tech_pool/Utils.dart';
 import 'package:intl/intl.dart';
 import 'package:tech_pool/pages/LiftInfoPage.dart';
@@ -42,6 +43,7 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
   DocumentSnapshot docProfile;
   String imageUrl ="";
   QuerySnapshot q;
+  QuerySnapshot q1;
 
   Future<List<String>> initNames(String name) {
     List<String> ret = [];
@@ -59,8 +61,9 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
     //  return null;
   }
 
-  void filter(QuerySnapshot value,UserRepository userRep){
-    q = value;
+  void filter(List<QuerySnapshot> value,UserRepository userRep){
+    q = value[0];
+    q1 = value[1];
     liftList.clear();
     q.docs.forEach(
             (element) async {
@@ -93,6 +96,10 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
       toRemove = element.driver == userRep.user.email || toRemove;
       toRemove = element.passengers.contains(userRep.user.email) || toRemove;
       toRemove = element.passengers.length>=element.numberOfSeats || toRemove;
+      q1.docs.forEach((element1) {
+        toRemove = element1.data()["driveId"]==element.liftId || toRemove;
+
+      });
       double distToStart = clacDis(element.startPoint, startPointing);
       double distToEnd = clacDis(element.destPoint, destPointing);
       element.stops.forEach((key) {
@@ -321,11 +328,14 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
 
 
     final _futureBuildLists = Consumer<UserRepository>(
-      builder: (context, userRep, _) =>  StreamBuilder<QuerySnapshot>(
-      stream:firestore.collection("Drives")
+      builder: (context, userRep, _) =>  StreamBuilder<List<QuerySnapshot>>(
+      stream: CombineLatestStream([firestore.collection("Drives")
           .where('TimeStamp', isLessThanOrEqualTo: Timestamp.fromDate(widget.toTime),isGreaterThanOrEqualTo: Timestamp.fromDate(widget.fromTime))
-          .snapshots(), // a previously-obtained Future<String> or null
-      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot){
+          .snapshots(),
+        firestore
+          .collection("Notifications")
+          .doc(userRep.user.email).collection("Pending").snapshots()],(vals) => [vals[0],vals[1]]), // a previously-obtained Future<String> or null
+      builder: (BuildContext context, AsyncSnapshot<List<QuerySnapshot>> snapshot){
         if(snapshot.hasData) {
           filter(snapshot.data, userRep);
           if(liftList.length>0){
@@ -342,7 +352,7 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
           }
           
         }else if(snapshot.hasError){
-          return Center(child: Text("Error Loading the Lifts", style: TextStyle(fontSize: 30),),);
+          return Center(child: Text("Error loading the lifts", style: TextStyle(fontSize: 30),),);
         }else{
           return Center(child: CircularProgressIndicator(),);
         }
@@ -469,7 +479,7 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
                         children: [
                           infoText(snapshot.data[1]),
                           placesText(lift.startCity, lift.destCity),
-                          allInfoText(lift.time, lift.dist ~/ 1000, lift.price,
+                          allInfoText(lift.time, lift.dist/1000, lift.price,
                               lift.numberOfSeats, lift.passengers.length),
                         ],
                       )),
@@ -484,7 +494,7 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
             ));
           }else {
             if(snapshot.hasError){
-              return Center(child: Text("Error Loading Lift", style: TextStyle(fontSize: 20),),);
+              return Center(child: Text("Error loading lift", style: TextStyle(fontSize: 20),),);
             } else{
               return Center(
                 child: CircularProgressIndicator(),);
@@ -492,7 +502,7 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
           }
         });
   }
-  Widget allInfoText(DateTime time,int dist, int price,int avaliable,int taken){
+  Widget allInfoText(DateTime time,double dist, int price,int avaliable,int taken){
    return Container(
        child:Row(
      children: [
@@ -501,7 +511,7 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
        SizedBox(width: MediaQuery.of(context).size.height * 0.01),
        Container(child:Image.asset("assets/images/tl-.png",scale: 0.9)),
        SizedBox(width: MediaQuery.of(context).size.height * 0.005),
-       Text(dist.toString()+"km"),
+       Text(dist.toStringAsFixed(1)+"km"),
        SizedBox(width: MediaQuery.of(context).size.height * 0.01),
        Icon(Icons.person),
        Text(taken.toString()+"/"+avaliable.toString()),
@@ -530,8 +540,8 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
       width: MediaQuery.of(context).size.height * 0.016*20,
         child: Text(from+" \u{2192} "+to,
           style: TextStyle(fontSize: fontTextsSize, color: Colors.black),
-            overflow: TextOverflow.ellipsis,
-          maxLines: 2,
+           // overflow: TextOverflow.ellipsis,
+          maxLines: null,
         )
     );
   }

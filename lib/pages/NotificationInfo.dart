@@ -286,7 +286,7 @@ class _NotificationInfoState extends State<NotificationInfo> {
           child: ConfigurableExpansionTile(
             header: Container(
                 alignment: Alignment.bottomLeft,
-                child: Text("Other Passengers Info",
+                child: Text("Passengers Info",
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17))),
             animatedWidgetFollowingHeader: const Icon(
               Icons.expand_more,
@@ -443,7 +443,7 @@ class _NotificationInfoState extends State<NotificationInfo> {
                 ),
                 ...(widget.type == NotificationInfoType.Accepted ? ([Text("Driver:",
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                  //_buildTile(widget.lift),
+                  _buildTile(widget.lift),
                   SizedBox(height: defaultSpace),
                   Divider(
                     thickness: 3,

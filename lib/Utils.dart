@@ -295,6 +295,9 @@ Widget notificationSwitcher2(dynamic notification,BuildContext context){
 
 
 
+enum NotificationInfoType { Accepted, Requested }
+
+
 class MyLift{
   String destCity;
   String startCity;

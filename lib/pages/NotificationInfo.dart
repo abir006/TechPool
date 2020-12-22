@@ -381,7 +381,7 @@ class _NotificationInfoState extends State<NotificationInfo> {
                 ]),
                 SizedBox(height: defaultSpace),
                 Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  labelText(text: "Pickup Point: "),
+                  labelText(text: "Pick Up Point: "),
                   Expanded(child: infoText(widget.type == NotificationInfoType.Requested ? widget.notification.startAddress : widget.lift.passengersInfo[userRep.user.email]["startAddress"]))
                 ]),
                 /*SizedBox(height: defaultSpace/3),
@@ -391,7 +391,7 @@ class _NotificationInfoState extends State<NotificationInfo> {
                 SizedBox(height: defaultSpace),
                 _buildStopRows(context),
                 Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
-                  labelText(text: "${widget.type == NotificationInfoType.Requested ? "Requested Destination" : "Drop off point"}: "),
+                  labelText(text: "${widget.type == NotificationInfoType.Requested ? "Drop Off" : "Drop Off"} Point: "),
                   Expanded(child: infoText(widget.type == NotificationInfoType.Requested ? widget.notification.destAddress : widget.lift.passengersInfo[userRep.user.email]["destAddress"]))
                 ]),
                 /*SizedBox(height: defaultSpace/3),
@@ -403,6 +403,12 @@ class _NotificationInfoState extends State<NotificationInfo> {
                   labelText(text: "Destination: "),
                   Expanded(child: infoText(widget.lift.destAddress))
                 ]),
+                SizedBox(height: defaultSpace),
+                Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
+                  labelText(text: "Distance: "),
+                  Expanded(child: infoText((widget.notification.distance / 1000).toString()+"km"))
+                ]),
+
                 widget.type == NotificationInfoType.Accepted ? SizedBox(height: defaultSpace) : Container(),
                 widget.type == NotificationInfoType.Accepted ? Row(children: [
                   labelText(text: "Big Trunk: "),
@@ -431,16 +437,12 @@ class _NotificationInfoState extends State<NotificationInfo> {
                       ? Icon(Icons.check_circle_outline, color: Colors.teal)
                       : Icon(Icons.cancel_outlined, color: Colors.pink)
                 ]) : Container(),
-                SizedBox(height: defaultSpace),
-                Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
-                  labelText(text: "Distance: "),
-                  Expanded(child: infoText((widget.notification.distance / 1000).toString()+"km"))
-                ]),
-                SizedBox(height: defaultSpace),
-                Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
+
+                widget.type == NotificationInfoType.Accepted ? SizedBox(height: defaultSpace) : Container(),
+                widget.type == NotificationInfoType.Accepted ?Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
                   labelText(text: "Price: "),
                   Expanded(child: infoText(widget.lift.price.toString()))
-                ]),
+                ]) : Container(),
                 SizedBox(height: defaultSpace),
                 Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
                   labelText(text: "${widget.type==NotificationInfoType.Requested? "Passenger":"Driver"} note: "),
@@ -460,6 +462,16 @@ class _NotificationInfoState extends State<NotificationInfo> {
                   labelText(text: "${widget.type==NotificationInfoType.Requested? "Passenger":"Driver"} Payment methods: "),
                   Expanded(child: infoText(widget.lift.payments))
                 ]),
+                widget.type == NotificationInfoType.Requested ? SizedBox(height: defaultSpace) : Container(),
+                widget.type == NotificationInfoType.Requested ? Row(
+                  children: [
+                    labelText(text: "Current Capacity: "),
+                    Icon(Icons.person),
+                    labelText(text: widget.lift.passengersInfo.length.toString()+"/"+widget.lift.numberOfSeats.toString()),
+                    //Text(widget.lift.passengersInfo.length.toString()+"/"+widget.lift.numberOfSeats.toString()),
+                    SizedBox(width: MediaQuery.of(context).size.height * 0.01),
+                  ],
+                ) : Container(),
                 Divider(
                   thickness: 3,
                 ),

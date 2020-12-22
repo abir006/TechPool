@@ -50,6 +50,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 String type = elementData["type"];
                 String startAddress = elementData["startAddress"];
                 String destAddress = elementData["destAddress"];
+
                 var notification;
                 switch(type) {
                   case "RequestedLift" :
@@ -57,6 +58,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       String passengerId = elementData["passengerId"];
                       String passengerNote = elementData["passengerNote"];
                       bool bigBag = elementData["bigBag"];
+                      int price = elementData["price"];
+                      // int NumberSeats = elementData["NumberSeats"];
+                      // int numberOfPassengers = ;
                       notification = LiftNotification.requested(
                           driveId,
                           driverId,
@@ -69,6 +73,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
                           type,
                           startAddress,
                           destAddress,
+                          // NumberSeats,
+                          // numberOfPassengers,
                           passengerId,
                           passengerNote,
                           bigBag
@@ -89,7 +95,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
                           type,
                           startAddress,
                           destAddress);
-
                       break;
                     }
                 }

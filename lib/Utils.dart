@@ -178,19 +178,28 @@ class LiftNotification {
   DateTime liftTime;
   DateTime notificationTime;
   String type;
-  String passengerId;
-  String passengerNote;
-  bool bigBag;
   String startAddress;
   String destAddress;
   // int numberOfSeats;
   // int numberOfPassengers;
+  String passengerId;
+  String passengerNote;
+  bool bigBag;
+
   LiftNotification(this.driveId, this.driverId, this.startCity, this.destCity,
   this.price, this.distance, this.liftTime, this.notificationTime,
   this.type, this.startAddress, this.destAddress, [this.passengerId, this.passengerNote, this.bigBag]);//optional
   LiftNotification.requested(this.driveId, this.driverId, this.startCity, this.destCity,
       this.price, this.distance, this.liftTime, this.notificationTime,
       this.type, this.startAddress, this.destAddress, this.passengerId, this.passengerNote, this.bigBag);
+  // LiftNotification(this.driveId, this.driverId, this.startCity, this.destCity,
+  //     this.price, this.distance, this.liftTime, this.notificationTime,
+  //     this.type, this.startAddress, this.destAddress, [this.numberOfSeats, this.numberOfPassengers, this.passengerId, this.passengerNote, this.bigBag]);//optional
+  // LiftNotification.requested(this.driveId, this.driverId, this.startCity, this.destCity,
+  //     this.price, this.distance, this.liftTime, this.notificationTime,
+  //     this.type, this.startAddress, this.destAddress, this.numberOfSeats,
+  //     this.numberOfPassengers, this.passengerId, this.passengerNote, this.bigBag);
+
 }
 
 class MyLift{

@@ -129,55 +129,57 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
             future: initNames(lift.driver),
             builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
               if (snapshot.hasData) {
-                return Container(
-                  child: Row(
-                    children: [
-                      InkWell(
-                          onTap: () async {
-                            await Navigator.of(context)
-                                .push(MaterialPageRoute<liftRes>(
-                                builder: (BuildContext context) {
-                                  return ProfilePage(
-                                    email: lift.driver,
-                                    fromProfile: false,
-                                  );
-                                },
-                                fullscreenDialog: true));
-                            setState(() {});
-                          },
-                          child: Container(
-                              margin: EdgeInsets.only(
-                                  left: MediaQuery.of(context).size.height * 0.016,
-                                  top: MediaQuery.of(context).size.height * 0.016),
-                              width: MediaQuery.of(context).size.height * 0.016 * 4,
-                              height:
-                              MediaQuery.of(context).size.height * 0.016 * 4,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: secondColor,
-                                image: DecorationImage(
-                                    fit: BoxFit.fill,
-                                    image: NetworkImage(snapshot.data[0])),
-                              ))),
-                      Container(
-                          margin: EdgeInsets.only(
-                              left: MediaQuery.of(context).size.height * 0.016,
-                              top: MediaQuery.of(context).size.height * 0.016),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              infoText(snapshot.data[1]),
-                              placesText(lift.startAddress),
-                              allInfoText(widget.type == CalendarEventType.PendingLift ? widget.lift.dist / 1000 : lift.passengersInfo[userRep.user.email]["dist"] / 1000),
-                            ],
-                          )),
-                      Spacer(),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.height * 0.016,
-                      )
-                    ],
-                  ),
-                );
+        return Container(
+        child: Row(
+        children: [
+        InkWell(
+        onTap: () async {
+        await Navigator.of(context)
+            .push(MaterialPageRoute<liftRes>(
+        builder: (BuildContext context) {
+        return ProfilePage(
+        email: lift.driver,
+        fromProfile: false,
+        );
+        },
+        fullscreenDialog: true));
+        setState(() {});
+        },
+        child: Container(
+        margin: EdgeInsets.only(
+        left: MediaQuery.of(context).size.height * 0.016,
+        top: MediaQuery.of(context).size.height * 0.016),
+        width: MediaQuery.of(context).size.height * 0.016 * 4,
+        height:
+        MediaQuery.of(context).size.height * 0.016 * 4,
+        decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: secondColor,
+        image: DecorationImage(
+        fit: BoxFit.fill,
+        image: NetworkImage(snapshot.data[0])),
+        ))),
+        Container(
+        margin: EdgeInsets.only(
+        left: MediaQuery.of(context).size.height * 0.016,
+        top: MediaQuery.of(context).size.height * 0.016),
+        child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+        infoText(snapshot.data[1]),
+        placesText(lift.startAddress),
+        allInfoText(widget.type == CalendarEventType.PendingLift ? widget.lift.dist / 1000 : lift.passengersInfo[userRep.user.email]["dist"] / 1000),
+        ],
+        )),
+        Spacer(),
+        SizedBox(
+        width: MediaQuery.of(context).size.height * 0.016,
+        )
+        ],
+        ),
+        );
+        }else if (snapshot.hasError){
+                return Center(child: Text("Error loading info", style: TextStyle(fontSize: 15),),);
               } else {
                 return Center(
                   child: CircularProgressIndicator(),
@@ -254,6 +256,8 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                       ]),Divider(thickness: 1)]) : [])],
                   ),
                 );
+              }else if (snapshot.hasError){
+                return Center(child: Text("Error loading passenger info", style: TextStyle(fontSize: 15),),);
               } else {
                 return Center(
                   child: CircularProgressIndicator(),
@@ -353,7 +357,30 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                  }));
        });
 
-    final allInfo = Container(
+    final allInfo = StreamBuilder<DocumentSnapshot>(
+        stream:firestore.collection("Drives").doc(widget.lift.liftId).snapshots(), // a previously-obtained Future<String> or null
+        builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot){
+          try{
+          if(snapshot.hasData) {
+            snapshot.data.data().forEach((key, value) {
+              if (value != null) {
+                widget.lift.setProperty(key, value);
+              }
+            });
+            if(widget.type == CalendarEventType.Lift) {
+              widget.lift.stops = [];
+            }
+            if(widget.type == CalendarEventType.PendingLift){
+
+            }
+            else{
+              widget.lift.dist = 0;
+            }
+            widget.lift.passengersInfo = Map<String, Map<String, dynamic>>.from(snapshot.data.data()["PassengersInfo"]?? {}) ;
+            if(widget.lift.numberOfSeats<=widget.lift.passengers.length){
+              return Center(child: Text("Lift not available", style: TextStyle(fontSize: 30),),);
+            }
+           return Container(
         child: ListView(
             shrinkWrap: true,
             padding: EdgeInsets.only(
@@ -424,14 +451,43 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
           Divider(
             thickness: 3,
           )]) : []),
-          passengers,
+          Container(
+          alignment: Alignment.bottomLeft,
+          color: Colors.white,
+          child: ConfigurableExpansionTile(
+          header: Container(
+          alignment: Alignment.bottomLeft,
+          child: Text("Passengers info",
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17))),
+          animatedWidgetFollowingHeader: const Icon(
+          Icons.expand_more,
+          color: const Color(0xFF707070),
+          ),
+          //tilePadding: EdgeInsets.symmetric(horizontal: 0),
+          // backgroundColor: Colors.white,
+          // trailing: Icon(Icons.arrow_drop_down,color: Colors.black,),
+          //title: Text("Passenger info"),
+          children: [
+          ..._buildPassengersList(),
+          ],
+          )),
           Divider(
             thickness: 3,
           ),
           SizedBox(height: defaultSpace),
          Container(
          ),
-            ]));
+            ]));} else{
+    if(snapshot.hasError){
+    return Center(child: Text("Error loading passenger info", style: TextStyle(fontSize: 15),),);
+    }else{
+    return Center(child: CircularProgressIndicator(),);
+    }
+    }}catch(e) {
+            return Center(child: Text(
+              "Error loadinginfo", style: TextStyle(fontSize: 15),),);
+          }
+  });
 
     return Scaffold(
       key: _errorSnack,

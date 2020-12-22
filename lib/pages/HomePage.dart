@@ -52,58 +52,91 @@ class _HomePageState extends State<HomePage> {
               stream: CombineLatestStream([
               firestore.collection("Drives").where("Passengers", arrayContains: userRep.user?.email).snapshots(),firestore
                     .collection("Drives")
-                    .where('Driver', isEqualTo: userRep.user?.email).snapshots()],(vals) => [vals[0],vals[1]]),
+                    .where('Driver', isEqualTo: userRep.user?.email).snapshots(),firestore.collection("Notifications").doc(userRep.user?.email).collection("Pending").snapshots()],(vals) => [vals[0],vals[1],vals[2]]),
               builder: (context, snapshot) {
                 _events = {};
                 _dailyEvents = [];
                 if (snapshot.hasData) {
                   snapshot.data[1].docs.forEach((element) {
-                    var elementData = element.data();
-                    DateTime elementTime = elementData["TimeStamp"].toDate();
-                    var drive = Drive(element.id,
-                        elementData["StartCity"] +
-                            " \u{2192} " +
-                            elementData["DestCity"],
-                        elementData["NumberSeats"],
-                        elementData["Passengers"].length,
-                        elementTime);
-                    _events[Jiffy(elementTime)
-                        .startOf(Units.DAY)
-                        .add(Duration(hours: 12))] = (_events[Jiffy(elementTime)
-                        .startOf(Units.DAY)
-                        .add(Duration(hours: 12))] ??
-                        []) +
-                        [drive];
-                    if (elementTime
-                        .isAfter(Jiffy(selectedDay).startOf(Units.DAY)) &&
-                        elementTime
-                            .isBefore(Jiffy(selectedDay).endOf(Units.DAY))) {
-                      _dailyEvents.add(drive);
+                    try {
+                      var elementData = element.data();
+                      DateTime elementTime = elementData["TimeStamp"].toDate();
+                      var drive = Drive(element.id,
+                          elementData["StartCity"] +
+                              " \u{2192} " +
+                              elementData["DestCity"],
+                          elementData["NumberSeats"],
+                          elementData["Passengers"].length,
+                          elementTime);
+                      _events[Jiffy(elementTime)
+                          .startOf(Units.DAY)
+                          .add(Duration(hours: 12))] =
+                          (_events[Jiffy(elementTime)
+                              .startOf(Units.DAY)
+                              .add(Duration(hours: 12))] ??
+                              []) +
+                              [drive];
+                      if (elementTime
+                          .isAfter(Jiffy(selectedDay).startOf(Units.DAY)) &&
+                          elementTime
+                              .isBefore(Jiffy(selectedDay).endOf(Units.DAY))) {
+                        _dailyEvents.add(drive);
+                      }
+                    }catch(e){
                     }
                   });
                   snapshot.data[0].docs.forEach((element) {
-                    var elementData = element.data();
-                    DateTime elementTime = elementData["TimeStamp"].toDate();
-                    var lift = Lift(element.id,
-                        elementData["StartCity"] +
-                            " \u{2192} " +
-                            elementData["DestCity"],
-                        elementData["NumberSeats"],
-                        elementData["Passengers"].length,
-                        elementTime);
-                    _events[Jiffy(elementTime)
-                        .startOf(Units.DAY)
-                        .add(Duration(hours: 12))] = (_events[Jiffy(
-                        elementTime)
-                        .startOf(Units.DAY)
-                        .add(Duration(hours: 12))] ??
-                        []) +
-                        [lift];
-                    if (elementTime
-                        .isAfter(Jiffy(selectedDay).startOf(Units.DAY)) &&
-                        elementTime
-                            .isBefore(Jiffy(selectedDay).endOf(Units.DAY))) {
-                      _dailyEvents.add(lift);
+                    try {
+                      var elementData = element.data();
+                      DateTime elementTime = elementData["TimeStamp"].toDate();
+                      var lift = Lift(element.id,
+                          elementData["StartCity"] +
+                              " \u{2192} " +
+                              elementData["DestCity"],
+                          elementData["NumberSeats"],
+                          elementData["Passengers"].length,
+                          elementTime);
+                      _events[Jiffy(elementTime)
+                          .startOf(Units.DAY)
+                          .add(Duration(hours: 12))] = (_events[Jiffy(
+                          elementTime)
+                          .startOf(Units.DAY)
+                          .add(Duration(hours: 12))] ??
+                          []) +
+                          [lift];
+                      if (elementTime
+                          .isAfter(Jiffy(selectedDay).startOf(Units.DAY)) &&
+                          elementTime
+                              .isBefore(Jiffy(selectedDay).endOf(Units.DAY))) {
+                        _dailyEvents.add(lift);
+                      }
+                    }catch(e){
+                    }
+                  });
+                  snapshot.data[2].docs.forEach((element) {
+                    try {
+                      var elementData = element.data();
+                      DateTime elementTime = elementData["liftTime"].toDate();
+                      var lift = PendingLift(elementData["driveId"],
+                          elementData["startCity"] +
+                              " \u{2192} " +
+                              elementData["destCity"],
+                          elementTime,elementData["distance"]);
+                      _events[Jiffy(elementTime)
+                          .startOf(Units.DAY)
+                          .add(Duration(hours: 12))] = (_events[Jiffy(
+                          elementTime)
+                          .startOf(Units.DAY)
+                          .add(Duration(hours: 12))] ??
+                          []) +
+                          [lift];
+                      if (elementTime
+                          .isAfter(Jiffy(selectedDay).startOf(Units.DAY)) &&
+                          elementTime
+                              .isBefore(Jiffy(selectedDay).endOf(Units.DAY))) {
+                        _dailyEvents.add(lift);
+                      }
+                    }catch(e){
                     }
                   });
                   _dailyEvents.sort((a, b) {
@@ -157,7 +190,7 @@ class _HomePageState extends State<HomePage> {
           children: [
             FloatingActionButton(
               heroTag: "drive",
-              backgroundColor: Colors.black,
+              backgroundColor: mainColor,
               child: Icon(
                 Icons.directions_car,
                 size: 35,

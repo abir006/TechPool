@@ -72,6 +72,14 @@ class Lift{
   Lift(this.driveId,this.info,this.numberOfSeats,this.numberOfPassengers,this.dateTime);
 }
 
+class PendingLift{
+  String driveId;
+  String info;
+  DateTime dateTime;
+  int dist;
+  PendingLift(this.driveId,this.info,this.dateTime,this.dist);
+}
+
 /*
 /// A container class for DesiredLift event.
 class DesiredLift{
@@ -93,7 +101,7 @@ class LocationsResult{
   LocationsResult(this.fromAddress, this.toAddress,this.stopAddresses,this.numberOfStops);
 }
 
-enum CalendarEventType { Drive, Lift }
+enum CalendarEventType { Drive, Lift , PendingLift }
 /// A util function for the calendar, returns the desired event container to
 /// display under the calendar, according to the type of event received.
 Widget transformEvent(dynamic event, BuildContext context){
@@ -101,6 +109,8 @@ Widget transformEvent(dynamic event, BuildContext context){
     return calendarListTile(event, Icon(Icons.directions_car,size: 30, color: mainColor),context,CalendarEventType.Drive);
   } else if (event is Lift) {
     return calendarListTile(event, Transform.rotate(angle: 0.8,child: Icon(Icons.thumb_up_rounded,size: 30, color: mainColor)),context,CalendarEventType.Lift);
+  } else if (event is PendingLift) {
+    return calendarListTile(event, Transform.rotate(angle: 0.8,child: Icon(Icons.thumb_up_rounded,size: 30, color: mainColor)),context,CalendarEventType.PendingLift);
   }
   else{
     return Container();
@@ -114,7 +124,7 @@ Container calendarListTile(dynamic event,Widget leadingWidget,BuildContext conte
       color: Colors.white,
       boxShadow: [BoxShadow(color: Colors.black,blurRadius: 2.0,
         spreadRadius: 0.0,offset: Offset(2.0, 2.0))],
-      border: Border.all(color: Colors.green, width: 0.8),
+      border: Border.all(color: eventType == CalendarEventType.PendingLift ? Colors.orange : Colors.green, width: 0.8),
       borderRadius: BorderRadius.circular(12.0),
     ),
     margin:
@@ -133,6 +143,9 @@ Container calendarListTile(dynamic event,Widget leadingWidget,BuildContext conte
         if(eventType == CalendarEventType.Lift) {
           docLift.stops = [];
         }
+        if(eventType == CalendarEventType.PendingLift){
+          docLift.dist = event.dist;
+        }
         else{
           docLift.dist = 0;
         }
@@ -145,7 +158,7 @@ Container calendarListTile(dynamic event,Widget leadingWidget,BuildContext conte
             fullscreenDialog: true
         ));
       },
-    subtitle: Row(mainAxisAlignment: MainAxisAlignment.start,children: [Text("${(DateFormat.Hm().format(event.dateTime)).toString()}"),Spacer(),Icon(Icons.person,color: Colors.black,),Text(": ${event.numberOfPassengers} / ${event.numberOfSeats}",style: TextStyle(color: Colors.black),)],),
+    subtitle: Row(mainAxisAlignment: MainAxisAlignment.start,children: [Text("${(DateFormat.Hm().format(event.dateTime)).toString()}"),...(eventType != CalendarEventType.PendingLift ? [Spacer(),Icon(Icons.person,color: Colors.black,),Text(" ${event.numberOfPassengers} / ${event.numberOfSeats}",style: TextStyle(color: Colors.black),)] : [])]),
     trailing: Icon(Icons.chevron_right_sharp,color: Colors.black,size:30,)),
   );
 }
@@ -295,40 +308,44 @@ SafeArea techDrawer(UserRepository userRep, BuildContext context,
             color: mainColor,
             height: 180,
             child: Padding(
-              padding: const EdgeInsets.only(top: 50, left: 10),
+              padding: const EdgeInsets.only(top: 40, left: 10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CircleAvatar(
-                    backgroundColor: secondColor,
-                    radius: 40,
-                    backgroundImage: userRep.profilePicture.image,
+                  Expanded(
+                    child: CircleAvatar(
+                      backgroundColor: secondColor,
+                      radius: 40,
+                      backgroundImage: userRep.profilePicture.image,
+                    ),
                   ),
-                  Spacer(),
-                  Row(mainAxisSize: MainAxisSize.max,mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                    Flexible(flex: 5,child: Text("Hello, ${userRep.user?.displayName}.",
-                        style: TextStyle(color: Colors.white, fontSize: 20))),
-                    Flexible(flex: 1,child: IconButton(
-                      icon: Icon(
-                        Icons.logout,
-                        color: Colors.white,
-                        size: 25,
-                      ),
-                      onPressed: () async => await (userRep.auth
-                          .signOut()
-                          .then((_) {
-                        final EncryptedSharedPreferences encryptedSharedPreferences = EncryptedSharedPreferences();
-                            encryptedSharedPreferences.clear();
-                             Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) {
-                                      var size = MediaQuery.of(context).size;
-                                      return Scaffold(body: Container(height: size.height, width: size.width,color: mainColor,
+                  //Spacer(),
+                  Expanded(
+                    child: Row(mainAxisSize: MainAxisSize.max,mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                      Flexible(flex: 5,child: Text("Hello, ${userRep.user?.displayName}.",
+                          style: TextStyle(color: Colors.white, fontSize: 20))),
+                      Flexible(flex: 1,child: IconButton(
+                        icon: Icon(
+                          Icons.logout,
+                          color: Colors.white,
+                          size: 25,
+                        ),
+                        onPressed: () async => await (userRep.auth
+                            .signOut()
+                            .then((_) {
+                          final EncryptedSharedPreferences encryptedSharedPreferences = EncryptedSharedPreferences();
+                              encryptedSharedPreferences.clear();
+                               Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) {
+                                        var size = MediaQuery.of(context).size;
+                                        return Scaffold(body: Container(height: size.height, width: size.width,color: mainColor,
   child: Stack(alignment: Alignment.center,children: [Image.asset("assets/images/TechPoolWelcomeBackground.png"), TransparentSignInButton(), TransparentSignUnButton()],)));}));
-                      })),
-                    ))
-                  ])
+                        })),
+                      ))
+                    ]),
+                  )
                 ],
               ),
             ),

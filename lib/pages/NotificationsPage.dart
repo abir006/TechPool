@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:tech_pool/Utils.dart';
-import 'LiftInfoPage.dart';
+//import 'LiftInfoPage.dart';
 import 'ProfilePage.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'NotificationInfo.dart';
 
 class NotificationsPage extends StatefulWidget {
   @override
@@ -151,7 +152,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 }
                 else if(_notifications[index].type == "RequestedLift") {
                   tileToDisplay = _buildRequestedTile(_notifications[index]);
-                  return _buildRequestedTile(_notifications[index]);
+                  return tileToDisplay;
                 }
                 /*else {
                   tileToDisplay = null;
@@ -168,9 +169,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   onDismissed: (direction) {
 
                     /*setState(() {*/
-                    _notifications.removeAt(index);
-                    //Here will come the query to delete notification from db.
                     // Remove the item from the data source.
+                    _notifications.removeAt(index);
+
+                    //Here will come the query to delete notification from db.
+                    // I will probably need to save the notification docID, or I can do where?
+
                     /*});*/
 
                     // Then show a snackbar.
@@ -598,8 +602,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   Widget _buildRequestedTile(LiftNotification liftNotification) {
     return FutureBuilder<List<String>>(
-        //future: initNames(liftNotification.passengerId),
-        future: initNames("ofir.asulin@campus.technion.ac.il"),
+        future: initNames(liftNotification.passengerId),
+        //future: initNames("ofir.asulin@campus.technion.ac.il"),
         builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
           if (snapshot.hasData) {
             return Container(
@@ -691,8 +695,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
                         ],
                       ),
                     ),
-                    onTap: () {
-                      /*Navigator.of(context).push(new MaterialPageRoute<Null>(
+                    /*onTap: () {
+                      Navigator.of(context).push(new MaterialPageRoute<Null>(
                           builder: (BuildContext context) {
                             return LiftInfoPage(lift: lift, resLift: liftRes(
                               fromTime: widget.fromTime,
@@ -704,8 +708,48 @@ class _NotificationsPageState extends State<NotificationsPage> {
                               backSeat: widget.backSeat,));
                           },
                           fullscreenDialog: true
-                      )*/
-                    },
+                      )
+                    },*/
+                      onTap: () async {
+                        var drive = await firestore.collection("Drives").doc(
+                            liftNotification.driveId).get();
+                        MyLift liftToShow = new MyLift(
+                            "driver", "destAddress", "stopAddress", 5);
+                        drive.data().forEach((key, value) {
+                          if (value != null) {
+                            liftToShow.setProperty(key, value);
+                          }
+                        });
+                        //TODO: Add BigBag support
+                        //TODO: Add Distance support
+                        //TODO: Delete BigTrunk from requested?
+                        //TODO: Support Start Address and Dest Address
+
+                        liftToShow.note = liftNotification.passengerNote;//TODO in accepted: No need in accepted?
+                        liftToShow.liftId = liftNotification.driveId;
+                        //if (eventType == CalendarEventType.Lift) {
+                        //TODO in accepted: Will happen in accepted? Or I want to show stops..
+                          //liftToShow.stops = [];
+                        //}
+                        //else {
+                          liftToShow.dist = liftNotification.distance;
+                        //}
+                        liftToShow.passengersInfo =
+                        Map<String, Map<String, dynamic>>.from(
+                            drive.data()["PassengersInfo"] ?? {});
+                        liftToShow.payments = (await firestore.collection(
+                            "Profiles").doc(liftNotification.passengerId).get())
+                            .data()["allowedPayments"].join(", ");
+                        //TODO in accepted, show driver payments here (driverId instead of passengerID)
+
+                        Navigator.of(context).push(new MaterialPageRoute<Null>(
+                            builder: (BuildContext context) {
+                              return NotificationInfo(
+                                  lift: liftToShow, notification: liftNotification, type: NotificationInfoType.Requested);
+                            },
+                            fullscreenDialog: true
+                        ));
+                      },
                   ),
                   SizedBox(width: MediaQuery
                       .of(context)

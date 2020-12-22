@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:tech_pool/Utils.dart';
-//import 'LiftInfoPage.dart';
 import 'ProfilePage.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:intl/intl.dart';
@@ -49,6 +48,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 DateTime liftTime = elementData["liftTime"].toDate();
                 DateTime notificationTime = elementData["notificationTime"].toDate();
                 String type = elementData["type"];
+                String startAddress = elementData["startAddress"];
+                String destAddress = elementData["destAddress"];
                 var notification;
                 switch(type) {
                   case "RequestedLift" :
@@ -56,9 +57,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       String passengerId = elementData["passengerId"];
                       String passengerNote = elementData["passengerNote"];
                       bool bigBag = elementData["bigBag"];
-                      String startAddress = elementData["startAddress"];
-                      String destAddress = elementData["destAddress"];
-                      //bool backSeat = elementData["backSeat"];
                       notification = LiftNotification.requested(
                           driveId,
                           driverId,
@@ -69,11 +67,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
                           liftTime,
                           notificationTime,
                           type,
+                          startAddress,
+                          destAddress,
                           passengerId,
                           passengerNote,
-                          bigBag,
-                          startAddress,
-                          destAddress
+                          bigBag
                       );
                       break;
                     }
@@ -88,7 +86,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
                           distance,
                           liftTime,
                           notificationTime,
-                          type);
+                          type,
+                          startAddress,
+                          destAddress);
 
                       break;
                     }
@@ -459,11 +459,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
                           liftToShow.setProperty(key, value);
                         }
                       });
-                      //TODO: Support Start Address and Dest Address in accept too
-
                       //liftToShow.note = liftNotification.; //No need in accepted? will put driver note instead
                       liftToShow.liftId = liftNotification.driveId;
-                      liftToShow.stops = [];
+                      //liftToShow.stops = [];
                       //else {
                       liftToShow.dist = liftNotification.distance;
                       //}
@@ -473,7 +471,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       liftToShow.payments = (await firestore.collection(
                           "Profiles").doc(liftNotification.driverId).get())
                           .data()["allowedPayments"].join(", ");
-
                       Navigator.of(context).push(new MaterialPageRoute<Null>(
                           builder: (BuildContext context) {
                             return NotificationInfo(

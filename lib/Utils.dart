@@ -187,10 +187,10 @@ class LiftNotification {
   // int numberOfPassengers;
   LiftNotification(this.driveId, this.driverId, this.startCity, this.destCity,
   this.price, this.distance, this.liftTime, this.notificationTime,
-  this.type, [this.passengerId, this.passengerNote, this.bigBag, this.startAddress, this.destAddress]);//optional
+  this.type, this.startAddress, this.destAddress, [this.passengerId, this.passengerNote, this.bigBag]);//optional
   LiftNotification.requested(this.driveId, this.driverId, this.startCity, this.destCity,
       this.price, this.distance, this.liftTime, this.notificationTime,
-      this.type, this.passengerId, this.passengerNote, this.bigBag, this.startAddress, this.destAddress);
+      this.type, this.startAddress, this.destAddress, this.passengerId, this.passengerNote, this.bigBag);
 }
 
 class MyLift{

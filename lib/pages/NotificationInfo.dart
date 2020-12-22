@@ -143,8 +143,10 @@ class _NotificationInfoState extends State<NotificationInfo> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               infoText(snapshot.data[1]),
-                              placesText(lift.startAddress),
-                              allInfoText(widget.type == NotificationInfoType.Requested ? widget.lift.dist / 1000 : lift.passengersInfo[userRep.user.email]["dist"] / 1000),
+                              //placesText(lift.startAddress),
+                              //allInfoText(widget.type == NotificationInfoType.Requested ? widget.lift.dist / 1000 : lift.passengersInfo[userRep.user.email]["dist"] / 1000),
+                              //allInfoText(widget.lift.dist / 1000),
+
                             ],
                           )),
                       Spacer(),
@@ -207,8 +209,8 @@ class _NotificationInfoState extends State<NotificationInfo> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   infoText(snapshot.data[1]),
-                                  ...(widget.type == CalendarEventType.Drive ? ([placesText(snapshot.data[2]),
-                                    allInfoText(snapshot.data[3])]) : [])
+                                  /*...(widget.type == NotificationInfoType.Accepted ? ([placesText(snapshot.data[2]),
+                                    allInfoText(snapshot.data[3])]) : [])*/
                                 ],
                               )),
                           Spacer(),
@@ -217,12 +219,18 @@ class _NotificationInfoState extends State<NotificationInfo> {
                           )
                         ],
                       ),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.004,
+                      ),
                       ...(widget.type == NotificationInfoType.Accepted ? ([Row(children: [
                         labelText(text: "Big Bag: "),
                         snapshot.data[4]
                             ? Icon(Icons.check_circle_outline, color: secondColor)
                             : Icon(Icons.cancel_outlined, color: Colors.pink)
                       ]),Row(children: [
+                        labelText(text: "Start: "),
+                        Expanded(child: infoText(snapshot.data[2]))
+                      ]), Row(children: [
                         labelText(text: "Destination: "),
                         Expanded(child: infoText(snapshot.data[6]))
                       ]),Row(children: [
@@ -241,7 +249,7 @@ class _NotificationInfoState extends State<NotificationInfo> {
       var sizeFrameWidth = MediaQuery.of(context).size.width;
       double defaultSpace = MediaQuery.of(context).size.height * 0.013;
       double defaultSpacewidth = MediaQuery.of(context).size.height * 0.016;
-      List<Widget> _buildRowList() {
+      List<Widget> _buildStopRowList() {
         List<Widget> stops = [];
         int i = 1;
         widget.lift.stops.forEach((key) {
@@ -269,11 +277,11 @@ class _NotificationInfoState extends State<NotificationInfo> {
         return passengers;
       }
 
-      Widget _buildRow(BuildContext context) {
+      Widget _buildStopRows(BuildContext context) {
         return Container(
           child: Column(
             // As you expect multiple lines you need a column not a row
-            children: _buildRowList(),
+            children: _buildStopRowList(),
           ),
         );
       }
@@ -373,32 +381,45 @@ class _NotificationInfoState extends State<NotificationInfo> {
                 ]),
                 SizedBox(height: defaultSpace),
                 Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  labelText(text: "${widget.type == NotificationInfoType.Requested ? "Requested Pickup Point" : "Pickup Point"}: "),
-                ]),
-                SizedBox(height: defaultSpace/3),
-                Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  labelText(text: "Pickup Point: "),
                   Expanded(child: infoText(widget.type == NotificationInfoType.Requested ? widget.notification.startAddress : widget.lift.passengersInfo[userRep.user.email]["startAddress"]))
                 ]),
-                SizedBox(height: defaultSpace),
-                _buildRow(context),
-                Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
-                  labelText(text: "${widget.type == NotificationInfoType.Requested ? "Requested Destination" : "Accepted Destination"}: "),
-                ]),
-                SizedBox(height: defaultSpace/3),
+                /*SizedBox(height: defaultSpace/3),
                 Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Expanded(child: infoText(widget.type == NotificationInfoType.Requested ? widget.lift.destAddress : widget.lift.passengersInfo[userRep.user.email]["destAddress"]))
+                  Expanded(child: infoText(widget.type == NotificationInfoType.Requested ? widget.notification.startAddress : widget.lift.passengersInfo[userRep.user.email]["startAddress"]))
+                ]),*/
+                SizedBox(height: defaultSpace),
+                _buildStopRows(context),
+                Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
+                  labelText(text: "${widget.type == NotificationInfoType.Requested ? "Requested Destination" : "Drop off point"}: "),
+                  Expanded(child: infoText(widget.type == NotificationInfoType.Requested ? widget.notification.destAddress : widget.lift.passengersInfo[userRep.user.email]["destAddress"]))
+                ]),
+                /*SizedBox(height: defaultSpace/3),
+                Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Expanded(child: infoText(widget.type == NotificationInfoType.Requested ? widget.notification.destAddress : widget.lift.passengersInfo[userRep.user.email]["destAddress"]))
+                ]),*/
+                SizedBox(height: defaultSpace),
+                Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  labelText(text: "Destination: "),
+                  Expanded(child: infoText(widget.lift.destAddress))
                 ]),
                 widget.type == NotificationInfoType.Accepted ? SizedBox(height: defaultSpace) : Container(),
                 widget.type == NotificationInfoType.Accepted ? Row(children: [
                   labelText(text: "Big Trunk: "),
                   widget.lift.bigTrunk
                       ? Icon(Icons.check_circle_outline, color: Colors.teal)
-                      : Icon(Icons.cancel_outlined, color: Colors.pink)
+                      : Icon(Icons.cancel_outlined, color: Colors.pink),
                 ]) : Container(),
-                widget.type == NotificationInfoType.Requested ? SizedBox(height: defaultSpace) : Container(),
+                SizedBox(height: defaultSpace),
                 widget.type == NotificationInfoType.Requested ? Row(children: [
                   labelText(text: "Big Bag: "),
                   widget.notification.bigBag
+                      ? Icon(Icons.check_circle_outline, color: Colors.teal)
+                      : Icon(Icons.cancel_outlined, color: Colors.pink)
+                ]) : Container(),
+                widget.type == NotificationInfoType.Accepted ? Row(children: [
+                  labelText(text: "Big Bag: "),
+                  widget.lift.passengersInfo[userRep.user.email]["bigBag"]
                       ? Icon(Icons.check_circle_outline, color: Colors.teal)
                       : Icon(Icons.cancel_outlined, color: Colors.pink)
                 ]) : Container(),
@@ -423,14 +444,15 @@ class _NotificationInfoState extends State<NotificationInfo> {
                 SizedBox(height: defaultSpace),
                 Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
                   labelText(text: "${widget.type==NotificationInfoType.Requested? "Passenger":"Driver"} note: "),
-                ]),
-                SizedBox(height: defaultSpace/3),
-                Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Expanded(child: infoText(widget.lift.note))
                 ]),
+                /*SizedBox(height: defaultSpace/3),
+                Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Expanded(child: infoText(widget.lift.note))
+                ]),*/
                 ...(widget.type == NotificationInfoType.Accepted ? ([SizedBox(height: defaultSpace),
                   Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
-                    labelText(text: "Passenger note: "),
+                    labelText(text: "${widget.type == NotificationInfoType.Requested ? "Passenger" : "My"} note: "),
                     Expanded(child: infoText(widget.lift.passengersInfo[userRep.user.email]["note"]))
                   ])]) : []),
                 SizedBox(height: defaultSpace),

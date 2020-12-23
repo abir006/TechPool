@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:tech_pool/Utils.dart';
+import '../appValidator.dart';
 import 'ProfilePage.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:intl/intl.dart';
@@ -18,11 +19,15 @@ class _NotificationsPageState extends State<NotificationsPage> {
   FirebaseFirestore firestore = FirebaseFirestore.instance;
   DateTime selectedDay = DateTime.now();
   List<LiftNotification> _notifications;
+  appValidator appValid;
 
   @override
   void initState() {
     super.initState();
     _notifications = [];
+    appValid = appValidator();
+    appValid.checkConnection(context);
+    appValid.checkVersion(context);
   }
 
   @override
@@ -426,6 +431,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
   @override
   void dispose() {
     super.dispose();
+    appValid.listener.cancel();
+    appValid.versionListener.cancel();
   }
 
 

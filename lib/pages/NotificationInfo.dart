@@ -118,7 +118,7 @@ class _NotificationInfoState extends State<NotificationInfo> {
               /*transaction.delete(firestore.collection("Notifications").
           doc("testing@campus.technion.ac.il").collection("UserNotifications").
               doc(widget.notification.notificationId));*/
-             return  true;
+             return true;
         });
       });
       //});

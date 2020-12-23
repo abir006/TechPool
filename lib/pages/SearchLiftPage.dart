@@ -83,7 +83,6 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
     _toControler = TextEditingController(text: "");
     _startPointControler = TextEditingController(text: "");
     _destPointControler = TextEditingController(text: "");
-    appValidator().checkConnection(context);
   }
 
   @override
@@ -773,7 +772,6 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
     _toControler.dispose();
     _startPointControler.dispose();
     _destPointControler.dispose();
-    appValidator().listener.cancel();
     super.dispose();
   }
 }

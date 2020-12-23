@@ -9,6 +9,7 @@ import 'package:dropdown_formfield/dropdown_formfield.dart';
 import 'package:dropdown_customizable/dropdown_customizable.dart';
 import 'package:f_datetimerangepicker/f_datetimerangepicker.dart';
 import 'package:intl/intl.dart';
+import 'package:tech_pool/appValidator.dart';
 import 'package:tech_pool/pages/LocationSearch.dart';
 import 'package:tech_pool/widgets/TextBoxField.dart';
 import 'package:tech_pool/pages/LiftSearchReasultsPage.dart';
@@ -81,6 +82,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
     _toControler = TextEditingController(text: "");
     _startPointControler = TextEditingController(text: "");
     _destPointControler = TextEditingController(text: "");
+    appValidator().checkConnection(context);
   }
 
   @override
@@ -769,6 +771,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
     _toControler.dispose();
     _startPointControler.dispose();
     _destPointControler.dispose();
+    appValidator().listener.cancel();
     super.dispose();
   }
 }

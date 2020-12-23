@@ -13,6 +13,7 @@ import 'package:intl/intl.dart';
 import 'package:tech_pool/widgets/WelcomeSignInButton.dart';
 import 'package:tech_pool/widgets/WelcomeSignUpButton.dart';
 
+
 /// Apps default settings
 MaterialColor mainColor =  Colors.cyan;
 Color secondColor = Color(0xff308ea1);

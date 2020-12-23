@@ -57,6 +57,8 @@ dependencies:
   path_provider: ^1.6.24
   encrypted_shared_preferences: ^1.0.7
   firebase_database: ^4.4.0
+  data_connection_checker: ^0.3.4
+  connectivity: ^2.0.2
 
 dev_dependencies:
   flutter_launcher_icons: "^0.8.0"

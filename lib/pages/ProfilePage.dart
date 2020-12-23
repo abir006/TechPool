@@ -1,6 +1,4 @@
 import 'dart:io';
-import 'dart:math';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -11,10 +9,8 @@ import 'package:tech_pool/Utils.dart';
 import 'package:tech_pool/widgets/TextBoxField.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:multiselect_formfield/multiselect_formfield.dart';
-import 'package:flutter_multiselect/flutter_multiselect.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
-
+import 'package:tech_pool/appValidator.dart';
 
 class ProfilePage extends StatefulWidget {
   String email;
@@ -47,6 +43,7 @@ class _ProfilePageState extends State<ProfilePage> {
   List<String> payments2=[];
   List<String> paymentsItems=["Cash","PayPal","Bit","PayBox"];
   ScrollController scrollCon;
+  appValidator appValid;
 /*
   Future<String> initInfo2(String email) async {
     isUser = (widget.email == email)&&widget.fromProfile;
@@ -133,6 +130,9 @@ class _ProfilePageState extends State<ProfilePage> {
     _phoneNumberController = TextEditingController();
     _hobbiesController = TextEditingController();
     _aboutSelf = TextEditingController();
+    appValid = appValidator();
+    appValid.checkConnection(context);
+    appValid.checkVersion(context);
   }
   void saveAll(){
     saveAllFields.setPropertyEnum(userInfoKeyEnum.firstName, _firstNameController.text);
@@ -370,6 +370,8 @@ class _ProfilePageState extends State<ProfilePage> {
     _phoneNumberController.dispose();
     _hobbiesController.dispose();
     _aboutSelf.dispose();
+    appValid.listener.cancel();
+    appValid.versionListener.cancel();
     super.dispose();
   }
 }

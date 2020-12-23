@@ -5,6 +5,7 @@ import 'package:jiffy/jiffy.dart';
 import 'package:provider/provider.dart';
 import 'package:tech_pool/Utils.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:tech_pool/appValidator.dart';
 import 'package:tech_pool/pages/NotificationsPage.dart';
 import 'package:tech_pool/pages/SearchLiftPage.dart';
 import 'package:rxdart/rxdart.dart';
@@ -22,6 +23,7 @@ class _HomePageState extends State<HomePage> {
   Map<DateTime, List> _events;
   List _dailyEvents;
   bool firstLoad = true;
+  appValidator appValid;
 
   @override
   void initState() {
@@ -29,6 +31,9 @@ class _HomePageState extends State<HomePage> {
     _calendarController = CalendarController();
     _events = {};
     _dailyEvents = [];
+    appValid = appValidator();
+    appValid.checkConnection(context);
+    appValid.checkVersion(context);
   }
 
   void _onDaySelected(DateTime day, List events, List holidays) {
@@ -281,6 +286,8 @@ class _HomePageState extends State<HomePage> {
   @override
   void dispose() {
     _calendarController.dispose();
+    appValid.listener.cancel();
+    appValid.versionListener.cancel();
     super.dispose();
   }
 }

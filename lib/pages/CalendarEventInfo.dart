@@ -457,9 +457,7 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                    else if(widget.type == CalendarEventType.Drive){
                      showAlertDialog(context, "Cancel Lift", "Are you sure you want to cancel?\nThere is no going back", userRep, "CanceledDrive");
                    }
-                   /*if(widget.type == CalendarEventType.Drive || widget.type == CalendarEventType.PendingLift){
-                     showAlertDialog(context, "Cancel Lift", "Are you sure you want to cancel?\nThere is no going back", userRep);
-                   }*/
+
                   // _errorSnack.currentState.showSnackBar(SnackBar(content: Text("The lift couldn't be deleted, it could have been canceled", style: TextStyle(fontSize: 19,color: Colors.red),)));
                  //await  cancelRequest(userRep);
                  }));
@@ -501,7 +499,7 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
               labelText(text: "Date and time: "),
               Expanded(
                   child: infoText(
-                      DateFormat('dd-MM - kk:mm').format(widget.lift.time)))
+                      DateFormat('dd/MM - kk:mm').format(widget.lift.time)))
             ],
           ),
           SizedBox(height: defaultSpace),
@@ -634,6 +632,10 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
         if(retval){
           Navigator.pop(context);
         }
+        else{
+          //Navigator.pop(context);
+          showErrorDialog(context, "Error", "An error occured.\nPlease try again.", usrRep);
+        }
       },
     );
 
@@ -650,6 +652,42 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
       content: Text(info,style:TextStyle(fontSize: 17)),
       actions: [
         cancelButton,
+        okButton,
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
+  showErrorDialog(BuildContext context,String title,String info,UserRepository usrRep) {
+
+    Widget okButton = FlatButton(
+      textColor: mainColor,
+      child: Text("OK"),
+      onPressed: () {
+          Navigator.pop(context);
+        }
+    );
+
+    // Widget cancelButton = FlatButton(
+    //   child: Text("Cancel"),
+    //   textColor: mainColor,
+    //   onPressed:  () {
+    //     Navigator.pop(context);
+    //   },
+    // );
+
+    AlertDialog alert = AlertDialog(
+      title: Text(title),
+      content: Text(info,style:TextStyle(fontSize: 17)),
+      actions: [
+        //cancelButton,
         okButton,
       ],
     );

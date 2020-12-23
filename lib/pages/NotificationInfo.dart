@@ -436,10 +436,10 @@ class _NotificationInfoState extends State<NotificationInfo> {
                     label: Text("Accept",
                         style: TextStyle(color: Colors.white, fontSize: 17)),
                     onPressed:  () async{
-                      if(widget.lift.passengersInfo.length == widget.lift.numberOfSeats){
-                        _errorSnack.currentState.showSnackBar(SnackBar(content: Text("This drive is already full. Please press on Reject", style: TextStyle(fontSize: 19,color: Colors.red),)));
-                      }
-                      else {
+                      if(widget.lift.passengersInfo.length != widget.lift.numberOfSeats){
+                        //_errorSnack.currentState.showSnackBar(SnackBar(content: Text("This drive is already full. Please press on Reject", style: TextStyle(fontSize: 19,color: Colors.red),)));
+                        showErrorDialog(context, "No space left", "This drive is already full.\nPlease press on Reject.", userRep);
+                      } else {
                         bool returnValue = await _acceptRequest(userRep);
                         if (returnValue == true) {
                           Navigator.pop(context);
@@ -661,6 +661,42 @@ class _NotificationInfoState extends State<NotificationInfo> {
       content: Text(info,style:TextStyle(fontSize: 17)),
       actions: [
         cancelButton,
+        okButton,
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
+  showErrorDialog(BuildContext context,String title,String info,UserRepository usrRep) {
+
+    Widget okButton = FlatButton(
+        textColor: mainColor,
+        child: Text("OK"),
+        onPressed: () {
+          Navigator.pop(context);
+        }
+    );
+
+    // Widget cancelButton = FlatButton(
+    //   child: Text("Cancel"),
+    //   textColor: mainColor,
+    //   onPressed:  () {
+    //     Navigator.pop(context);
+    //   },
+    // );
+
+    AlertDialog alert = AlertDialog(
+      title: Text(title),
+      content: Text(info,style:TextStyle(fontSize: 17)),
+      actions: [
+        //cancelButton,
         okButton,
       ],
     );

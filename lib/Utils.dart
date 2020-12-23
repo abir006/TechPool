@@ -60,6 +60,7 @@ class Drive{
   int numberOfSeats;
   int numberOfPassengers;
   DateTime dateTime;
+  final String title = "Drive";
   Drive(this.driveId,this.info,this.numberOfSeats,this.numberOfPassengers,this.dateTime);
 }
 
@@ -70,6 +71,7 @@ class Lift{
   int numberOfSeats;
   int numberOfPassengers;
   DateTime dateTime;
+  final String title = "Lift";
   Lift(this.driveId,this.info,this.numberOfSeats,this.numberOfPassengers,this.dateTime);
 }
 
@@ -78,6 +80,7 @@ class PendingLift{
   String info;
   DateTime dateTime;
   int dist;
+  final String title = "Pending lift";
   PendingLift(this.driveId,this.info,this.dateTime,this.dist);
 }
 
@@ -111,7 +114,7 @@ Widget transformEvent(dynamic event, BuildContext context){
   } else if (event is Lift) {
     return calendarListTile(event, Transform.rotate(angle: 0.8,child: Icon(Icons.thumb_up_rounded,size: 30, color: mainColor)),context,CalendarEventType.Lift);
   } else if (event is PendingLift) {
-    return calendarListTile(event, Transform.rotate(angle: 0.8,child: Icon(Icons.thumb_up_rounded,size: 30, color: mainColor)),context,CalendarEventType.PendingLift);
+    return calendarListTile(event, Icon(Icons.access_time,size: 30, color: mainColor),context,CalendarEventType.PendingLift);
   }
   else{
     return Container();
@@ -131,7 +134,7 @@ Container calendarListTile(dynamic event,Widget leadingWidget,BuildContext conte
     margin:
     const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
     child: ListTile(leading: leadingWidget,
-      title: Text(event?.info),
+      title: Text("${event?.title} \n${event?.info}"),
       onTap: () async {
         var drive = await firestore.collection("Drives").doc(event.driveId).get();
         MyLift docLift = new MyLift("driver", "destAddress", "stopAddress", 5);
@@ -356,9 +359,9 @@ SafeArea techDrawer(UserRepository userRep, BuildContext context,
           drawerListTile("Home",Icons.home_rounded,DrawerSections.home,currentSection, context, userRep,_key),
           drawerListTile("Profile",Icons.person,DrawerSections.profile,currentSection, context, userRep,_key),
           drawerListTile("Notifications",Icons.notifications,DrawerSections.notifications,currentSection, context, userRep,_key),
-          drawerListTile("Favorite Locations",Icons.favorite,DrawerSections.favorites,currentSection, context, userRep,_key),
+        /*  drawerListTile("Favorite Locations",Icons.favorite,DrawerSections.favorites,currentSection, context, userRep,_key),
           drawerListTile("Chats",Icons.chat,DrawerSections.chats,currentSection, context, userRep,_key),
-          drawerListTile("Settings",Icons.settings,DrawerSections.settings,currentSection, context, userRep,_key)
+          drawerListTile("Settings",Icons.settings,DrawerSections.settings,currentSection, context, userRep,_key)*/
         ])),
       ))));
 }

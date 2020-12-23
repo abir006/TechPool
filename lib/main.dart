@@ -187,7 +187,7 @@ class _MyAppState extends State<MyApp> {
                                                 padding:
                                                     const EdgeInsets.all(8.0),
                                                 child: Text(
-                                                    "Youre app is not update. \nPlease update your app from the play store.",
+                                                    "Youre app is not updated. \nPlease update your app from the play store.",
                                                     style: TextStyle(
                                                         fontWeight:
                                                             FontWeight.bold,

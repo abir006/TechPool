@@ -169,12 +169,12 @@ class _SignUpPageState extends State<SignUpPage>
                                     size: size,
                                     hintText: "First name",
                                     textFieldController: _firstName,
-                                    validator: validateNotEmpty("first name")),
+                                    validator: (value) {if (value.isEmpty) {return 'Please enter first name';} else if(value.length>20) {return 'first name cant be more than 20 characters';}return null;}),
                                 textBoxField(
                                     size: size,
                                     hintText: "Last name",
                                     textFieldController: _lastName,
-                                    validator: validateNotEmpty("last name")),
+                                    validator: (value) {if (value.isEmpty) {return 'Please enter last name';} else if(value.length>20) {return 'last name cant be more than 20 characters';}return null;}),
                                 textBoxField(
                                     textCap: TextCapitalization.none,
                                     size: size,
@@ -184,10 +184,7 @@ class _SignUpPageState extends State<SignUpPage>
                                       if (value.isEmpty) {
                                         return 'Please enter email';
                                       } else if (!value.toLowerCase().endsWith(
-                                              "@campus.technion.ac.il") &&
-                                          !value
-                                              .toLowerCase()
-                                              .endsWith("@technion.ac.il")) {
+                                              "technion.ac.il") ) {
                                         return 'Must use technion email';
                                       }
                                       return null;

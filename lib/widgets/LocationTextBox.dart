@@ -90,7 +90,7 @@ class _LocationTextBoxes2State extends State<LocationTextBoxes2> {
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              Container(width: 46,
+              Container(width: 50,
                 child: Text(
                       widget.leadingText + ":",
                       style:
@@ -115,44 +115,45 @@ class _LocationTextBoxes2State extends State<LocationTextBoxes2> {
                       decoration: InputDecoration(
                           border: InputBorder.none,
                           hintText: "Street\\place"))),
-                  TextButton(
-                      onPressed: () async {
-                        FocusScope.of(context).unfocus();
-                        setState(() {
-                          _pressed = true;
-                        });
-                        try {
-                          var _streetError = await validateLegalCity(city.text);
-                          var _cityError =
-                          await validateLegalStreet(city.text, street.text);
-                          if (!_streetError && !_cityError) {
-                            widget.updateAddress(address.first);
-                            await widget.performOnPress(
-                                address: address.first,
-                                locationNumber: widget.locationNumber,
-                                stopText: "\"" + widget.leadingText + "\"");
-                          } else {
+                  Container(
+                    width: 100,
+                    child: TextButton(
+                        onPressed: () async {
+                          FocusScope.of(context).unfocus();
+                          setState(() {
+                            _pressed = true;
+                          });
+                          try {
+                            var _streetError = await validateLegalCity(city.text);
+                            var _cityError =
+                            await validateLegalStreet(city.text, street.text);
+                            if (!_streetError && !_cityError) {
+                              widget.updateAddress(address.first);
+                              await widget.performOnPress(
+                                  address: address.first,
+                                  locationNumber: widget.locationNumber,
+                                  stopText: "\"" + widget.leadingText + "\"");
+                            } else {
+                              widget._key.currentState.showSnackBar(SnackBar(
+                                content: Text("Address not found"),
+                              ));
+                            }
+                          } catch (e) {
                             widget._key.currentState.showSnackBar(SnackBar(
                               content: Text("Address not found"),
                             ));
                           }
-                        } catch (e) {
-                          widget._key.currentState.showSnackBar(SnackBar(
-                            content: Text("Address not found"),
-                          ));
-                        }
-                        setState(() {
-                          _pressed = false;
-                        });
-                      },
-                      child: Container(
-                          width: 80,
-                          child: !_pressed ? Row(mainAxisAlignment: MainAxisAlignment.center,children: [Flexible(child: Icon(Icons.add_location_alt,color: secondColor,)),Flexible(
-                            child: Text(
-                              "Select",
-                              style: TextStyle(fontSize: 14, color: secondColor),
-                            ),
-                          ),]) : Center(child: CircularProgressIndicator())))
+                          setState(() {
+                            _pressed = false;
+                          });
+                        },
+                        child: !_pressed ? Row(mainAxisAlignment: MainAxisAlignment.center,children: [Flexible(child: Icon(Icons.add_location_alt,color: secondColor,)),Flexible(
+                          child: Text(
+                            "Select",
+                            style: TextStyle(fontSize: 14, color: secondColor),
+                          ),
+                        ),]) : Center(child: CircularProgressIndicator())),
+                  )
             ]));
   }
 

@@ -113,8 +113,10 @@ class _SignUpPageState extends State<SignUpPage>
                                             child: Text("Cancel")),
                                         FlatButton(
                                             onPressed: () async {
-                                              await userRep.auth.currentUser
-                                                  .delete();
+                                              var temp = userRep.auth.currentUser;
+                                              if(temp != null) {
+                                                await temp.delete();
+                                              }
                                               await userRep.auth.signOut();
                                               Navigator.of(context).pop();
                                               Navigator.of(context).pop();

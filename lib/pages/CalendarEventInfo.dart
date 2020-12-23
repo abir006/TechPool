@@ -545,57 +545,88 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
             labelText(text: "Destination: "),
             Expanded(child: infoText((widget.type == CalendarEventType.Drive || widget.type == CalendarEventType.PendingLift) ? widget.lift.destAddress : widget.lift.passengersInfo[userRep.user.email]["destAddress"]))
           ]),
-          SizedBox(height: defaultSpace),
-          Row(children: [
-            labelText(text: "Big Trunk: "),
-            widget.lift.bigTrunk
-                ? Icon(Icons.check_circle_outline, color: secondColor)
-                : Icon(Icons.cancel_outlined, color: Colors.pink)
-          ]),
-          SizedBox(height: defaultSpace),
-          Row(children: [
-            labelText(text: "Backseat not full?: "),
-            widget.lift.backSeat
-                ? Icon(Icons.check_circle_outline, color: secondColor)
-                : Icon(Icons.cancel_outlined, color: Colors.pink)
-          ]),
-          SizedBox(height: defaultSpace),
-          Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
-            labelText(text: "${widget.type==CalendarEventType.Drive? "My":"Drivers"} note: "),
-            Expanded(child: infoText(widget.lift.note))
-          ]),
-              ...(widget.type == CalendarEventType.Lift ? ([SizedBox(height: defaultSpace),
-          Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
-                labelText(text: "My note: "),
-                Expanded(child: infoText(widget.lift.passengersInfo[userRep.user.email]["note"]))
-          ])]) : []),
-          SizedBox(height: defaultSpace),
-          Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
-            labelText(text: "Price: "),
-            Expanded(child: infoText(widget.lift.price.toString()))
-          ]),
               SizedBox(height: defaultSpace),
-              Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
-                labelText(text: "Payment methods: "),
-                Expanded(child: infoText(widget.lift.payments))
+              Row(mainAxisSize: MainAxisSize.min,children: [
+                labelText(text: "Price: "),
+                Image.asset("assets/images/shekel.png",scale: 0.9),
+                Expanded(child: infoText(widget.lift.price.toString()))
               ]),
+          SizedBox(height: defaultSpace),
+              ...(widget.type == CalendarEventType.Lift || widget.type == CalendarEventType.PendingLift ? ([Text("Driver:",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                _buildTile(widget.lift),
+                SizedBox(height: defaultSpace),
+               ]) : []),
+              Divider(
+                thickness: 3,
+              ),
+               Container(
+                   alignment: Alignment.bottomLeft,
+                   color: Colors.white,
+                   child: ConfigurableExpansionTile(
+                     header: Container(
+                         alignment: Alignment.bottomLeft,
+                         child: Text("Additional info",
+                             style: TextStyle(
+                                 fontWeight: FontWeight.bold, fontSize: 17))),
+                     animatedWidgetFollowingHeader: const Icon(
+                       Icons.expand_more,
+                       color: const Color(0xFF707070),
+                     ),
+                     //tilePadding: EdgeInsets.symmetric(horizontal: 0),
+                     // backgroundColor: Colors.white,
+                     // trailing: Icon(Icons.arrow_drop_down,color: Colors.black,),
+                     //title: Text("Passenger info"),
+                     children: [
+                       Row(children: [
+                         labelText(text: "Big Trunk: "),
+                         widget.lift.bigTrunk
+                             ? Icon(Icons.check_circle_outline, color: secondColor)
+                             : Icon(Icons.cancel_outlined, color: Colors.pink)
+                       ]),
+                       SizedBox(height: defaultSpace),
+                       Row(children: [
+                         labelText(text: "Backseat not full?: "),
+                         widget.lift.backSeat
+                             ? Icon(Icons.check_circle_outline, color: secondColor)
+                             : Icon(Icons.cancel_outlined, color: Colors.pink)
+                       ]),
+                       SizedBox(height: defaultSpace),
+                       _buildRow(context),
+                       widget.lift.note.isEmpty?SizedBox(height: 0,) :SizedBox(height: defaultSpace),
+                       widget.lift.note.isEmpty? SizedBox(height: 0,) : Row(
+                           crossAxisAlignment: CrossAxisAlignment.start,
+                           children: [
+                             labelText(text: "Drivers note: "),
+                             Expanded(child: infoText(widget.lift.note))
+                           ]),
+                       widget.lift.note.isEmpty?SizedBox(height: 0,) : SizedBox(height: defaultSpace),
+                       Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
+                         labelText(text: "${widget.type==CalendarEventType.Drive? "My":"Drivers"} note: "),
+                         Expanded(child: infoText(widget.lift.note)),
+                       ]),
+                       ...(widget.type == CalendarEventType.Lift ? ([SizedBox(height: defaultSpace),
+                         Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
+                           labelText(text: "My note: "),
+                           Expanded(child: infoText(widget.lift.passengersInfo[userRep.user.email]["note"]))
+                         ])]) : []),
+                       SizedBox(height: defaultSpace),
+                       Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
+                         labelText(text: "Payment methods: "),
+                         Expanded(child: infoText(widget.lift.payments))
+                       ]),
+                     ],
+                   )),
           Divider(
             thickness: 3,
           ),
-              ...(widget.type == CalendarEventType.Lift || widget.type == CalendarEventType.PendingLift ? ([Text("Driver:",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-          _buildTile(widget.lift),
-          SizedBox(height: defaultSpace),
-          Divider(
-            thickness: 3,
-          )]) : []),
           Container(
           alignment: Alignment.bottomLeft,
           color: Colors.white,
           child: ConfigurableExpansionTile(
           header: Container(
           alignment: Alignment.bottomLeft,
-          child: Text("Passengers info",
+          child: Text("Passengers ${widget.lift.passengers.length}/${widget.lift.numberOfSeats}",
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17))),
           animatedWidgetFollowingHeader: const Icon(
           Icons.expand_more,

@@ -259,11 +259,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 }
                 else if(_notifications[index].type == "CanceledLift") {
                   tileToDisplay = _buildCanceledTile(_notifications[index]);
-                  return tileToDisplay;
+                  //return tileToDisplay;
                 }
                 else if(_notifications[index].type == "CanceledDrive") {
                   tileToDisplay = _buildCanceledTile(_notifications[index]);
-                  return tileToDisplay;
+                  //return tileToDisplay;
                 }
                 /*else {
                   tileToDisplay = null;
@@ -278,19 +278,14 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   // Provide a function that tells the app
                   // what to do after an item has been swiped away.
                   onDismissed: (direction) async {
-
-                    /*setState(() {*/
-                    // Remove the item from the data source.
-                    //userRep.user?.email
+                    //Here will come the query to delete notification from db.
                     await firestore.collection("Notifications").
                     doc(userRep.user?.email).collection("UserNotifications").
                     doc(_notifications[index].notificationId).delete();
+                    setState(() {
+                    // Remove the item from the data source.
                     _notifications.removeAt(index);
-
-                    //Here will come the query to delete notification from db.
-                    // I will probably need to save the notification docID, or I can do where?
-
-                    /*});*/
+                    });
 
                     // Then show a snackbar.
                     Scaffold.of(context)

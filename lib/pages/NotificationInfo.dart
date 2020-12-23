@@ -436,7 +436,7 @@ class _NotificationInfoState extends State<NotificationInfo> {
                     label: Text("Accept",
                         style: TextStyle(color: Colors.white, fontSize: 17)),
                     onPressed:  () async{
-                      if(widget.lift.passengersInfo.length != widget.lift.numberOfSeats){
+                      if(widget.lift.passengersInfo.length == widget.lift.numberOfSeats){
                         //_errorSnack.currentState.showSnackBar(SnackBar(content: Text("This drive is already full. Please press on Reject", style: TextStyle(fontSize: 19,color: Colors.red),)));
                         showErrorDialog(context, "No space left", "This drive is already full.\nPlease press on Reject.", userRep);
                       } else {

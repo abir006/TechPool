@@ -601,10 +601,6 @@ class _SetDrivePageState extends State<SetDrivePage> {
                                   right: defaultSpaceWidth,
                                   bottom: 10),
                               children: [
-                                SizedBox(height: 1.5 * defaultSpace),
-                                chooseStartAndDestination,
-                                startPointText,
-
 
                                 //       ...returnFromMapResult.stopAddresses.asMap().map((i, stop){
                                 //       if(stop!=null){
@@ -628,7 +624,12 @@ class _SetDrivePageState extends State<SetDrivePage> {
                                 //         return MapEntry(i, Container());
                                 //     }
                                 // ).values.toList(),
+
+                                SizedBox(height: 1.5 * defaultSpace),
+                                chooseStartAndDestination,
                                 SizedBox(height: 1 * defaultSpace),
+                                startPointText,
+                                SizedBox(height: 2 * defaultSpace),
 
                                 _numberOfStops > 0
                                     ? stopPoint1text

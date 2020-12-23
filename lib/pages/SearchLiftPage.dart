@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:configurable_expansion_tile/configurable_expansion_tile.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:dropdownfield/dropdownfield.dart';
 import 'package:geocoder/model.dart';
@@ -395,6 +396,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
               )),
         ),
         body: TabBarView(
+          dragStartBehavior: DragStartBehavior.down,
           children: [
             fromTimePicker,
             toTimePicker,

@@ -515,9 +515,6 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
               widget.lift.dist = 0;
             }
             widget.lift.passengersInfo = Map<String, Map<String, dynamic>>.from(snapshot.data.data()["PassengersInfo"]?? {}) ;
-            if(widget.lift.numberOfSeats<=widget.lift.passengers.length){
-              return Center(child: Text("Lift not available", style: TextStyle(fontSize: 30),),);
-            }
            return Container(
         child: ListView(
             shrinkWrap: true,

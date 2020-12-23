@@ -31,8 +31,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
     return Consumer<UserRepository>(builder: (context, userRep, child) {
       return StreamBuilder<List<QuerySnapshot>>(
           stream: CombineLatestStream([
-            //firestore.collection("Notifications").doc(userRep.user?.email).collection("UserNotifications").snapshots()],
-              firestore.collection("Notifications").doc("testing@campus.technion.ac.il").collection("UserNotifications").snapshots()],
+            firestore.collection("Notifications").doc(userRep.user?.email).collection("UserNotifications").snapshots()],
+              //firestore.collection("Notifications").doc("testing@campus.technion.ac.il").collection("UserNotifications").snapshots()],
                   (values) => [values[0]]),
           builder: (context, snapshot) {
             _notifications = [];

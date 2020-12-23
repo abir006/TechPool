@@ -504,7 +504,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: secondColor,
-                            image: DecorationImage(//fit: BoxFit.fill,
+                            image: DecorationImage(fit: BoxFit.fill,
                                 image: NetworkImage(snapshot.data[0])),
 
                           ))),
@@ -662,7 +662,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: secondColor,
-                            image: DecorationImage(//fit: BoxFit.fill,
+                            image: DecorationImage(fit: BoxFit.fill,
                                 image: NetworkImage(snapshot.data[0])),
 
                           ))),
@@ -774,7 +774,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: secondColor,
-                            image: DecorationImage(//fit: BoxFit.fill,
+                            image: DecorationImage(fit: BoxFit.fill,
                                 image: NetworkImage(snapshot.data[0])),
 
                           ))),
@@ -887,7 +887,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: secondColor,
-                            image: DecorationImage(//fit: BoxFit.fill,
+                            image: DecorationImage(fit: BoxFit.fill,
                                 image: NetworkImage(snapshot.data[0])),
 
                           ))),

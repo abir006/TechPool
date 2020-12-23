@@ -41,6 +41,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
   TextEditingController _stopPoint1Controller;
   TextEditingController _stopPoint2Controller;
   TextEditingController _stopPoint3Controller;
+  bool _validateLocations = true;
 
   LocationsResult returnFromMapResult;
   Address startAddress;
@@ -62,6 +63,13 @@ class _SetDrivePageState extends State<SetDrivePage> {
 
   @override
   Widget build(BuildContext context) {
+
+    void check_locations(){
+      _validateLocations = true;
+      if (_startPointController.text == "") {
+        _validateLocations = false;
+      }
+    }
     var sizeFrameWidth = MediaQuery.of(context).size.width;
     double defaultSpace = MediaQuery.of(context).size.height * 0.013;
     double defaultSpaceWidth = MediaQuery.of(context).size.height * 0.016;
@@ -113,7 +121,38 @@ class _SetDrivePageState extends State<SetDrivePage> {
       ),
     );
 
-    final startPointText = Container(
+    final startPointText = Stack(children: [
+      Container(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            searchLableText(
+              text: "Start: ",
+            ),
+            Expanded(child: generalInfoText(text: _startPointController.text)),
+          ],
+        ),
+      ),
+      //  InkWell(
+      //  onTap: (){},
+      //Container(color:Colors.transparent,child:SizedBox(width: defaultSpace*8,height:defaultSpace*9,)),
+    ]);
+
+    final destinationText = Stack(children: [
+      Container(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              searchLableText(
+                text: "Destination: ",
+              ),
+              Expanded(child: generalInfoText(text: _destPointController.text)),
+            ],
+          )),
+      // Container(color:Colors.transparent,child:SizedBox(width: defaultSpace*8,height:defaultSpace*10,)),
+    ]);
+
+    final startPointText2 = Container(
       child: Row(
         children: [
           textBoxFieldDisable(
@@ -132,7 +171,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
       ),
     );
 
-    final destinationText = Container(
+    final destinationText2 = Container(
       child: Row(
         children: [
           textBoxFieldDisable(
@@ -200,7 +239,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
                                       'stopCity' : returnFromMapResult.stopAddresses[i].locality};
                       stopAddressesList.add(mapToAdd);
                     }
-
+                    check_locations();
                   }
                 });
               },
@@ -368,8 +407,8 @@ class _SetDrivePageState extends State<SetDrivePage> {
     );
 
     final priceText = Container(
-      margin: const EdgeInsets.only(right: 40),
-      width: defaultSpaceWidth * 5,
+      margin: EdgeInsets.only(right: defaultSpaceWidth * 18),
+      width: defaultSpaceWidth * 8,
       child: TextFormField(
           //maxLengthEnforced: true,
           maxLength: 3,
@@ -392,12 +431,12 @@ class _SetDrivePageState extends State<SetDrivePage> {
           }),
     );
 
-    final priceAndBackSeatRowText = Container(
+    final backSeatRowText = Container(
       width: MediaQuery.of(context).size.width,
-      height: 8 * defaultSpace,
+      height: 7 * defaultSpace,
       child: Row(
         children: [
-          priceText,
+          //priceText,
           Text(
             'Number of seats: ',
             style: TextStyle(
@@ -448,7 +487,10 @@ class _SetDrivePageState extends State<SetDrivePage> {
               label: Text("  Set Drive  ",
                   style: TextStyle(color: Colors.white, fontSize: 17)),
               onPressed: () async {
-                if (_formKey2.currentState.validate()) {
+                //setState(() {
+                  check_locations();
+                //});
+                if (_formKey2.currentState.validate() && _validateLocations) {
                   try {
 
                     //Random random = new Random();
@@ -563,6 +605,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
                                 chooseStartAndDestination,
                                 startPointText,
 
+
                                 //       ...returnFromMapResult.stopAddresses.asMap().map((i, stop){
                                 //       if(stop!=null){
                                 //         return MapEntry(i, Container(
@@ -585,6 +628,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
                                 //         return MapEntry(i, Container());
                                 //     }
                                 // ).values.toList(),
+                                SizedBox(height: 1 * defaultSpace),
 
                                 _numberOfStops > 0
                                     ? stopPoint1text
@@ -596,7 +640,19 @@ class _SetDrivePageState extends State<SetDrivePage> {
                                     ? stopPoint3text
                                     : Container(),
 
+
                                 destinationText,
+
+                                _validateLocations
+                                    ? Container() :
+                                SizedBox(height: 1 * defaultSpace),
+                                _validateLocations
+                                ? SizedBox(height: 0 * defaultSpace)
+                                    : Center(
+                                child: Text(
+                                "Choose start and destination",
+                                style: TextStyle(color: Colors.red))),
+
                                 SizedBox(height: 1 * defaultSpace),
                                 Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
@@ -604,10 +660,11 @@ class _SetDrivePageState extends State<SetDrivePage> {
                                   children: [
                                     departureTimeButton,
                                     timeText1,
-                                    priceAndBackSeatRowText,
                                   ],
                                 ),
-                                SizedBox(height: defaultSpace),
+                                priceText,
+                                backSeatRowText,
+                                //SizedBox(height: defaultSpace),
                                 Divider(thickness: 3),
                                 preferences,
                                 Divider(thickness: 3),
@@ -639,4 +696,15 @@ class _SetDrivePageState extends State<SetDrivePage> {
     _noteController.dispose();
     super.dispose();
   }
+}
+
+Widget searchLableText({@required String text}) {
+  return Container(
+    child: Text(
+      text,
+      style: TextStyle(fontSize: 17, color: Colors.black.withOpacity(0.6)),
+      overflow: TextOverflow.ellipsis,
+      maxLines: 2,
+    ),
+  );
 }

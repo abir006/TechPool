@@ -48,7 +48,7 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                 "destAddress": widget.lift.destAddress,
                 "startCity": widget.lift.startCity,
                 "startAddress": widget.lift.startAddress,
-                "distance": (widget.lift.passengersInfo[userRep.user.email]["dist"]/ 1000),
+                "distance": (widget.lift.passengersInfo[userRep.user.email]["dist"]),
                 "driveId": widget.lift.liftId,
                 "driverId": widget.lift.driver,
                 "liftTime": widget.lift.time,
@@ -58,6 +58,47 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                 "type": "CanceledLift",
               }
           );
+          return  true;
+        });
+      });
+    }catch(e){
+      return  false;
+    }
+  }
+
+  Future<bool> _cancelDrive(UserRepository userRep) async {
+    try{
+      return await firestore.runTransaction((transaction) async {
+        return transaction.get(firestore.collection("Drives")
+            .doc(widget.lift.liftId))
+            .then((value) async {
+          List<String> tempPassengers = List.from(value.data()["Passengers"]);
+          //tempPassengers.remove((userRep.user.email));
+          value.data()["Passengers"] = tempPassengers;
+          Map<String,Map<String, dynamic>> tempPassengersInfo  = Map<String, Map<String, dynamic>>.from(value.data()["PassengersInfo"]);
+          //tempPassengersInfo.remove(userRep.user.email).remove(userRep.user.email);
+          //transaction.update((firestore.collection("Drives").doc(widget.lift.liftId)),{"Passengers":tempPassengers,"PassengersInfo":tempPassengersInfo});
+          tempPassengers.forEach((element) {
+
+            transaction.set(firestore.collection("Notifications").doc(widget.lift.driver).collection("UserNotifications").doc(),
+                {
+                  "destCity": widget.lift.destCity,
+                  "destAddress": widget.lift.passengersInfo[element.toString()]["destAddress"],
+                  "startCity": widget.lift.startCity,
+                  "startAddress": widget.lift.passengersInfo[element.toString()]["startAddress"],
+                  "distance": (widget.lift.passengersInfo[element.toString()]["dist"]),
+                  "driveId": widget.lift.liftId,
+                  "driverId": widget.lift.driver,
+                  "liftTime": widget.lift.time,
+                  "notificationTime": DateTime.now(),
+                  "price": widget.lift.price,
+                  "passengerId": element.toString(),
+                  "type": "CanceledDrive",
+                }
+            );
+
+          });
+
           return  true;
         });
       });
@@ -350,8 +391,14 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                      style: TextStyle(color: Colors.white, fontSize: 17)),
                  onPressed:  () async{
                    if(widget.type == CalendarEventType.Lift || widget.type == CalendarEventType.PendingLift){
-                     showAlertDialog(context, "Cancel Lift", "Are you sure you want to cancel?\nThere is no going back", userRep);
+                     showAlertDialog(context, "Cancel Lift", "Are you sure you want to cancel?\nThere is no going back", userRep, "CanceledLift");
                    }
+                   else if(widget.type == CalendarEventType.Drive){
+                     showAlertDialog(context, "Cancel Lift", "Are you sure you want to cancel?\nThere is no going back", userRep, "CanceledDrive");
+                   }
+                   /*if(widget.type == CalendarEventType.Drive || widget.type == CalendarEventType.PendingLift){
+                     showAlertDialog(context, "Cancel Lift", "Are you sure you want to cancel?\nThere is no going back", userRep);
+                   }*/
                   // _errorSnack.currentState.showSnackBar(SnackBar(content: Text("The lift couldn't be deleted, it could have been canceled", style: TextStyle(fontSize: 19,color: Colors.red),)));
                  //await  cancelRequest(userRep);
                  }));
@@ -510,12 +557,17 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
   });
   }
 
-  showAlertDialog(BuildContext context,String title,String info,UserRepository usrRep) {
+  showAlertDialog(BuildContext context,String title,String info,UserRepository usrRep, String cancelType) {
     Widget okButton = FlatButton(
       textColor: mainColor,
       child: Text("Yes"),
       onPressed: () async {
-        bool retval =await _cancelRequest(usrRep);
+        if(cancelType == "CanceledLift") {
+          bool retval = await _cancelRequest(usrRep);
+        }
+        else{
+          bool retval = await _cancelDrive(usrRep);
+        }
         Navigator.pop(context);
         Navigator.pop(context);
 

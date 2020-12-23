@@ -66,6 +66,36 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
     }
   }
 
+  Future<bool> _cancelPending(UserRepository userRep) async {
+    try{
+      return await firestore.runTransaction((transaction) async {
+        return transaction.get(firestore.collection("Drives")
+            .doc(widget.lift.liftId))
+            .then((value) async {
+
+          QuerySnapshot q2 = await firestore.collection("Notifications").
+          doc(widget.lift.driver).collection("UserNotifications").
+          where("driveId",isEqualTo: widget.lift.liftId).where("type",isEqualTo: "RequestedLift").get();
+
+          q2.docs.forEach((element) {
+            transaction.delete(element.reference);
+          });
+
+          QuerySnapshot q3 = await firestore.collection("Notifications").
+          doc(userRep.user.email).collection("Pending").
+          where("driveId",isEqualTo: widget.lift.liftId).get();
+          q3.docs.forEach((element) {
+            transaction.delete(element.reference);
+          });
+
+          return true;
+        });
+      });
+    }catch(e){
+      return false;
+    }
+  }
+
   Future<bool> _cancelDrive(UserRepository userRep) async {
     try{
       return await firestore.runTransaction((transaction) async {
@@ -451,11 +481,13 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                      : "Lift"}",
                      style: TextStyle(color: Colors.white, fontSize: 17)),
                  onPressed:  () async{
-                   if(widget.type == CalendarEventType.Lift || widget.type == CalendarEventType.PendingLift){
+                   if(widget.type == CalendarEventType.Lift){
                      showAlertDialog(context, "Cancel Lift", "Are you sure you want to cancel?\nThere is no going back", userRep, "CanceledLift");
                    }
                    else if(widget.type == CalendarEventType.Drive){
                      showAlertDialog(context, "Cancel Lift", "Are you sure you want to cancel?\nThere is no going back", userRep, "CanceledDrive");
+                   }else if(widget.type == CalendarEventType.PendingLift){
+                     showAlertDialog(context, "Cancel Pending", "Are you sure you want to cancel?\nThere is no going back", userRep, "CanceledPending");
                    }
                    /*if(widget.type == CalendarEventType.Drive || widget.type == CalendarEventType.PendingLift){
                      showAlertDialog(context, "Cancel Lift", "Are you sure you want to cancel?\nThere is no going back", userRep);
@@ -628,7 +660,11 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
           retval = await _cancelRequest(usrRep);
         }
         else{
-          retval = await _cancelDrive(usrRep);
+          if(cancelType == "CanceledPending"){
+            retval = await _cancelPending(usrRep);
+          }else {
+            retval = await _cancelDrive(usrRep);
+          }
         }
         Navigator.pop(context);
         if(retval){

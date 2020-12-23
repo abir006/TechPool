@@ -348,8 +348,15 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
               return _buildTile(liftList[index]);
             },
           );}else{
-            return Center(child: Text("No lifts found", style: TextStyle(fontSize: 30),),);
-          }
+            return Center(child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Icon(Icons.update, size: 30),
+                  SizedBox(width: MediaQuery.of(context).size.width * 0.02),
+                  Text("No lifts found",style: TextStyle(fontSize: 30, color: Colors.black))
+                ]));
+                }
           
         }else if(snapshot.hasError){
           return Center(child: Text("Error loading the lifts", style: TextStyle(fontSize: 30),),);

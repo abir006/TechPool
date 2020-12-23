@@ -83,7 +83,65 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       );
                       break;
                     }
-                  default:
+                  case "RejectedLift" :
+                    {
+                      notification = LiftNotification(
+                          notificationId,
+                          driveId,
+                          driverId,
+                          startCity,
+                          destCity,
+                          price,
+                          distance,
+                          liftTime,
+                          notificationTime,
+                          type,
+                          startAddress,
+                          destAddress);
+                      break;
+                    }
+
+                  case "AcceptedLift" :
+                    {
+                      notification = LiftNotification(
+                          notificationId,
+                          driveId,
+                          driverId,
+                          startCity,
+                          destCity,
+                          price,
+                          distance,
+                          liftTime,
+                          notificationTime,
+                          type,
+                          startAddress,
+                          destAddress
+                      );
+                      break;
+                    }
+                    //in case a hitchhiker canceled a lift - notify driver
+                  case "CanceledLift" :
+                    {
+                      String passengerId = elementData["passengerId"];
+                      notification = LiftNotification(
+                          notificationId,
+                          driveId,
+                          driverId,
+                          startCity,
+                          destCity,
+                          price,
+                          distance,
+                          liftTime,
+                          notificationTime,
+                          type,
+                          startAddress,
+                          destAddress,
+                          passengerId
+                      );
+                      break;
+                    }
+                //in case a driver canceled a drive- notify hitchhikers
+                  case "CanceledDrive" :
                     {
                       notification = LiftNotification(
                           notificationId,
@@ -197,6 +255,14 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 }
                 else if(_notifications[index].type == "RequestedLift") {
                   tileToDisplay = _buildRequestedTile(_notifications[index]);
+                  return tileToDisplay;
+                }
+                else if(_notifications[index].type == "CanceledLift") {
+                  tileToDisplay = _buildCanceledTile(_notifications[index]);
+                  return tileToDisplay;
+                }
+                else if(_notifications[index].type == "CanceledDrive") {
+                  tileToDisplay = _buildCanceledTile(_notifications[index]);
                   return tileToDisplay;
                 }
                 /*else {
@@ -361,24 +427,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
         )*/
     );
   }
-
-  /*Widget notificationSwitcher(dynamic notification,BuildContext context){
-    if (notification is LiftNotification) {
-      return acceptedLiftNotificationListTile(notification, Icon(Icons.directions_car,size: 30, color: mainColor), Transform.rotate(angle: 0.8,
-          child: Icon(Icons.thumb_up_rounded, size: 30, color: Colors.green)), context);
-    } /*else if (notification is RejectedLiftNotification) {
-    return notificationListTile(notification, Transform.rotate(angle: 0.8,
-        child: Icon(Icons.thumb_up_rounded, size: 30, color: mainColor)),
-        Icon(Icons.directions_car, size: 30, color: mainColor), context);
-  } else if (notification is RequestedLiftNotification) {
-    return notificationListTile(notification, Transform.rotate(angle: 0.8,
-        child: Icon(Icons.thumb_up_rounded, size: 30, color: mainColor)),
-        Icon(Icons.directions_car, size: 30, color: mainColor), context);
-  }*/
-    else{
-      return null;
-    }
-  }*/
 
   @override
   void dispose() {
@@ -557,6 +605,120 @@ class _NotificationsPageState extends State<NotificationsPage> {
           }
         });
   }
+
+  Widget _buildCanceledTile(LiftNotification liftNotification) {
+    return FutureBuilder<List<String>>(
+      //case "CanceledLift" : in case a hitchhiker canceled a lift - notify driver
+      //case "CanceledDrive" : in case a driver canceled a drive- notify hitchhikers
+        future: initNames(liftNotification.type == "CanceledLift" ? liftNotification.passengerId : liftNotification.driverId),
+        builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
+          if (snapshot.hasData) {
+            return Container(
+              margin: EdgeInsets.only(
+                  top: MediaQuery
+                      .of(context)
+                      .size
+                      .height * 0.006,
+                  bottom: MediaQuery
+                      .of(context)
+                      .size
+                      .height * 0.006),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [BoxShadow(color: Colors.black, blurRadius: 2.0,
+                    spreadRadius: 0.0, offset: Offset(2.0, 2.0))
+                ],
+                border: Border.all(color: secondColor, width: 0.65),
+                borderRadius: BorderRadius.circular(12.0),),
+              child:
+              Row(
+                children: [
+                  InkWell(
+                      onTap: () async {
+                        await Navigator.of(context).push(
+                            MaterialPageRoute<liftRes>(
+                                builder: (BuildContext context) {
+                                  return ProfilePage(
+                                    email: liftNotification.type == "CanceledLift" ? liftNotification.passengerId : liftNotification.driverId, fromProfile: false,);
+                                },
+                                fullscreenDialog: true
+                            ));
+                        setState(() {
+
+                        });
+                      },
+                      child: Container(
+                          margin: EdgeInsets.only(
+                              left: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .height * 0.016, top: MediaQuery
+                              .of(context)
+                              .size
+                              .height * 0.004),
+                          width: MediaQuery
+                              .of(context)
+                              .size
+                              .height * 0.016 * 4,
+                          height: MediaQuery
+                              .of(context)
+                              .size
+                              .height * 0.016 * 4,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: secondColor,
+                            image: DecorationImage(//fit: BoxFit.fill,
+                                image: NetworkImage(snapshot.data[0])),
+
+                          ))),
+                  Container(
+                      margin: EdgeInsets.only(
+                          left: MediaQuery
+                              .of(context)
+                              .size
+                              .height * 0.016,
+                          top: MediaQuery
+                              .of(context)
+                              .size
+                              .height * 0.008),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          liftNotification.type == "CanceledLift" ? infoText(snapshot.data[1]) : infoTextHitchhiker(snapshot.data[1]),
+                          placesText(liftNotification.startCity, liftNotification.destCity),
+                          allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000),
+                        ],
+                      )),
+                  InkWell(
+                    child: Container(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Icon(Icons.cancel_outlined, size: 30, color: Colors.red),
+                          Text("Canceled", style: TextStyle(fontSize: 15, color: Colors.red),
+                          )
+                        ],
+                      ),
+                    ),
+                    onTap: () {
+
+                    },
+                  ),
+                  SizedBox(width: MediaQuery
+                      .of(context)
+                      .size
+                      .height * 0.008),
+                ],
+              ),
+            );
+          }else {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+        });
+  }
+
 
   Widget _buildRejectedTile(LiftNotification liftNotification) {
     return FutureBuilder<List<String>>(
@@ -747,7 +909,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          infoTextRequested(snapshot.data[1]),
+                          infoTextHitchhiker(snapshot.data[1]),
                           placesText(liftNotification.startCity, liftNotification.destCity),
                           allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000),
                         ],
@@ -871,7 +1033,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
     );
   }
 
-  Widget infoTextRequested(String info) {
+  Widget infoTextHitchhiker(String info) {
     return  Container(
         width: MediaQuery.of(context).size.height * 0.016*17.5,
         child: Text("Hitchhiker: " + info,

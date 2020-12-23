@@ -169,6 +169,7 @@ double clacDis(GeoPoint from,Coordinates to){
 enum NotificationInfoType {Accepted, Requested}
 
 class LiftNotification {
+  String notificationId;
   String driveId;
   String driverId;//email
   String startCity;
@@ -186,20 +187,12 @@ class LiftNotification {
   String passengerNote;
   bool bigBag;
 
-  LiftNotification(this.driveId, this.driverId, this.startCity, this.destCity,
+  LiftNotification(this.notificationId, this.driveId, this.driverId, this.startCity, this.destCity,
   this.price, this.distance, this.liftTime, this.notificationTime,
   this.type, this.startAddress, this.destAddress, [this.passengerId, this.passengerNote, this.bigBag]);//optional
-  LiftNotification.requested(this.driveId, this.driverId, this.startCity, this.destCity,
+  LiftNotification.requested(this.notificationId, this.driveId, this.driverId, this.startCity, this.destCity,
       this.price, this.distance, this.liftTime, this.notificationTime,
       this.type, this.startAddress, this.destAddress, this.passengerId, this.passengerNote, this.bigBag);
-  // LiftNotification(this.driveId, this.driverId, this.startCity, this.destCity,
-  //     this.price, this.distance, this.liftTime, this.notificationTime,
-  //     this.type, this.startAddress, this.destAddress, [this.numberOfSeats, this.numberOfPassengers, this.passengerId, this.passengerNote, this.bigBag]);//optional
-  // LiftNotification.requested(this.driveId, this.driverId, this.startCity, this.destCity,
-  //     this.price, this.distance, this.liftTime, this.notificationTime,
-  //     this.type, this.startAddress, this.destAddress, this.numberOfSeats,
-  //     this.numberOfPassengers, this.passengerId, this.passengerNote, this.bigBag);
-
 }
 
 class MyLift{

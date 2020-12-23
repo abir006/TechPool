@@ -31,13 +31,14 @@ class _NotificationsPageState extends State<NotificationsPage> {
     return Consumer<UserRepository>(builder: (context, userRep, child) {
       return StreamBuilder<List<QuerySnapshot>>(
           stream: CombineLatestStream([
-            firestore.collection("Notifications").doc(userRep.user?.email).collection("UserNotifications").snapshots()],
-              //firestore.collection("Notifications").doc("abir@campus.technion.ac.il").collection("UserNotifications").snapshots()],
+            //firestore.collection("Notifications").doc(userRep.user?.email).collection("UserNotifications").snapshots()],
+              firestore.collection("Notifications").doc("testing@campus.technion.ac.il").collection("UserNotifications").snapshots()],
                   (values) => [values[0]]),
           builder: (context, snapshot) {
             _notifications = [];
               if (snapshot.hasData) {
               snapshot.data[0].docs.forEach((element) {
+                String notificationId = element.id;
                 var elementData = element.data();
                 String driveId = elementData["driveId"];
                 String driverId = elementData["driverId"];//email
@@ -62,6 +63,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       // int NumberSeats = elementData["NumberSeats"];
                       // int numberOfPassengers = ;
                       notification = LiftNotification.requested(
+                          notificationId,
                           driveId,
                           driverId,
                           startCity,
@@ -84,6 +86,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   default:
                     {
                       notification = LiftNotification(
+                          notificationId,
                           driveId,
                           driverId,
                           startCity,
@@ -208,10 +211,14 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   //Key(notification.notificationTime.toString()),
                   // Provide a function that tells the app
                   // what to do after an item has been swiped away.
-                  onDismissed: (direction) {
+                  onDismissed: (direction) async {
 
                     /*setState(() {*/
                     // Remove the item from the data source.
+                    //userRep.user?.email
+                    await firestore.collection("Notifications").
+                    doc(userRep.user?.email).collection("UserNotifications").
+                    doc(_notifications[index].notificationId).delete();
                     _notifications.removeAt(index);
 
                     //Here will come the query to delete notification from db.

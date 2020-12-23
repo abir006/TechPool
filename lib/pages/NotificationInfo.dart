@@ -31,6 +31,50 @@ class _NotificationInfoState extends State<NotificationInfo> {
     super.initState();
   }
 
+  Future<bool> _rejectRequest(UserRepository userRep) async {
+    try{
+        return await firestore.runTransaction((transaction) async {
+
+         //firestore.collection("Notifications").doc(userRep.user?.email).collection("UserNotifications").doc(widget.notification.notificationId).delete();
+
+
+         // return transaction.get(firestore.collection("Drives")
+         //    .doc(widget.lift.liftId))
+         //    .then((value) async {
+         //  //List<String> tempPassengers = List.from(value.data()["Passengers"]);
+          //tempPassengers.remove((userRep.user.email));
+          //value.data()["Passengers"] = tempPassengers;
+          //Map<String,Map<String, dynamic>> tempPassengersInfo  = Map<String, Map<String, dynamic>>.from(value.data()["PassengersInfo"]);
+          //tempPassengersInfo.remove(userRep.user.email).remove(userRep.user.email);
+          //transaction.update((firestore.collection("Drives").doc(widget.lift.liftId)),{"Passengers":tempPassengers,"PassengersInfo":tempPassengersInfo});
+          //transaction.set(firestore.collection("Notifications").doc(widget.notification.passengerId).collection("UserNotifications").doc(),
+          transaction.set(firestore.collection("Notifications").doc("testing@campus.technion.ac.il").collection("UserNotifications2").doc(),
+              {
+                "startCity": widget.notification.startCity,
+                "destCity": widget.notification.destCity,
+                "distance": widget.notification.distance,
+                "driveId": widget.notification.driveId,
+                "driverId": widget.notification.driverId,
+                "liftTime": widget.notification.liftTime,
+                "notificationTime": DateTime.now(),
+                "price": widget.notification.price,
+                "type": "RejectedLift",
+                //"destAddress": widget.lift.destAddress,
+                //"startAddress": widget.lift.startAddress,
+                //"passengerId": userRep.user.email,
+              }
+          );
+          transaction.delete(firestore.collection("Notifications").
+          doc(userRep.user?.email).collection("UserNotifications").
+          doc(widget.notification.notificationId));
+          return  true;
+        });
+      //});
+    }catch(e){
+      return  false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     //bool bigBag = widget.notification.bigBag;
@@ -345,8 +389,13 @@ class _NotificationInfoState extends State<NotificationInfo> {
                     label: Text("Reject",
                         style: TextStyle(color: Colors.white, fontSize: 17)),
                     onPressed:  () async{
-                      if(widget.type == NotificationInfoType.Requested){
+                      /*if(widget.type == NotificationInfoType.Requested){
                         showAlertDialog(context, "Reject Passenger", "Are you sure you want to reject this passenger?", userRep);
+                      }*/
+                      bool retval = await _rejectRequest(userRep);
+                      if(retval == true){
+                        Navigator.pop(context);
+                        //Navigator.pop(context);
                       }
                       // _errorSnack.currentState.showSnackBar(SnackBar(content: Text("The lift couldn't be deleted, it could have been canceled", style: TextStyle(fontSize: 19,color: Colors.red),)));
                       //await  cancelRequest(userRep);
@@ -517,6 +566,9 @@ class _NotificationInfoState extends State<NotificationInfo> {
       textColor: mainColor,
       child: Text("Yes"),
       onPressed: () async {
+        //bool retval =await _cancelRequest(usrRep);
+        //Navigator.pop(context);
+        //Navigator.pop(context);
         //bool retval =await _cancelRequest(usrRep);
         //Navigator.pop(context);
         //Navigator.pop(context);

@@ -3,6 +3,7 @@ import 'package:encrypted_shared_preferences/encrypted_shared_preferences.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:tech_pool/pages/HomePage.dart';
 import 'package:tech_pool/pages/LandingPage.dart';
@@ -25,7 +26,11 @@ class App extends StatelessWidget {
                       textDirection: TextDirection.ltr)));
         }
         if (snapshot.connectionState == ConnectionState.done) {
-          return MyApp();
+          WidgetsFlutterBinding.ensureInitialized();
+          SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
+              .then((_) {
+            runApp(new MyApp());
+          });
         }
         return Center(child: CircularProgressIndicator());
       },

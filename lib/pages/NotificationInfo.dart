@@ -34,11 +34,9 @@ class _NotificationInfoState extends State<NotificationInfo> {
   Future<bool> _rejectRequest(UserRepository userRep) async {
     try{
         return await firestore.runTransaction((transaction) async {
-
          //firestore.collection("Notifications").doc(userRep.user?.email).collection("UserNotifications").doc(widget.notification.notificationId).delete();
 
-
-         // return transaction.get(firestore.collection("Drives")
+          // return transaction.get(firestore.collection("Drives")
          //    .doc(widget.lift.liftId))
          //    .then((value) async {
          //  //List<String> tempPassengers = List.from(value.data()["Passengers"]);
@@ -47,8 +45,8 @@ class _NotificationInfoState extends State<NotificationInfo> {
           //Map<String,Map<String, dynamic>> tempPassengersInfo  = Map<String, Map<String, dynamic>>.from(value.data()["PassengersInfo"]);
           //tempPassengersInfo.remove(userRep.user.email).remove(userRep.user.email);
           //transaction.update((firestore.collection("Drives").doc(widget.lift.liftId)),{"Passengers":tempPassengers,"PassengersInfo":tempPassengersInfo});
-          //transaction.set(firestore.collection("Notifications").doc(widget.notification.passengerId).collection("UserNotifications").doc(),
-          transaction.set(firestore.collection("Notifications").doc("testing@campus.technion.ac.il").collection("UserNotifications2").doc(),
+          //transaction.set(firestore.collection("Notifications").doc("testing@campus.technion.ac.il").collection("UserNotifications2").doc(),
+          transaction.set(firestore.collection("Notifications").doc(widget.notification.passengerId).collection("UserNotifications").doc(),
               {
                 "startCity": widget.notification.startCity,
                 "destCity": widget.notification.destCity,
@@ -67,11 +65,11 @@ class _NotificationInfoState extends State<NotificationInfo> {
           transaction.delete(firestore.collection("Notifications").
           doc(userRep.user?.email).collection("UserNotifications").
           doc(widget.notification.notificationId));
-          return  true;
+          return true;
         });
       //});
     }catch(e){
-      return  false;
+      return false;
     }
   }
 
@@ -97,8 +95,8 @@ class _NotificationInfoState extends State<NotificationInfo> {
              };
           tempPassengersInfo.addAll(passengerInfoToAdd);/*.remove(userRep.user.email);*/
           transaction.update((firestore.collection("Drives").doc(widget.notification.driveId)),{"Passengers":tempPassengers,"PassengersInfo":tempPassengersInfo});
-          //transaction.set(firestore.collection("Notifications").doc(widget.notification.passengerId).collection("UserNotifications").doc(),
-              transaction.set(firestore.collection("Notifications").doc("testing").collection("UserNotifications").doc(),
+          transaction.set(firestore.collection("Notifications").doc(widget.notification.passengerId).collection("UserNotifications").doc(),
+              //transaction.set(firestore.collection("Notifications").doc("testing").collection("UserNotifications").doc(),
                   {
                     "destAddress": widget.notification.destAddress,
                     "startAddress": widget.notification.startAddress,
@@ -115,9 +113,10 @@ class _NotificationInfoState extends State<NotificationInfo> {
                   }
               );
               //userRep.user?.email
-              /*transaction.delete(firestore.collection("Notifications").
-          doc("testing@campus.technion.ac.il").collection("UserNotifications").
-              doc(widget.notification.notificationId));*/
+             //"testing@campus.technion.ac.il"
+              transaction.delete(firestore.collection("Notifications").
+          doc(userRep.user?.email).collection("UserNotifications").
+              doc(widget.notification.notificationId));
              return true;
         });
       });

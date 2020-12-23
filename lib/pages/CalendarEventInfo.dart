@@ -58,11 +58,11 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                 "type": "CanceledLift",
               }
           );
-          return  true;
+          return true;
         });
       });
     }catch(e){
-      return  false;
+      return false;
     }
   }
 
@@ -78,8 +78,9 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
           Map<String,Map<String, dynamic>> tempPassengersInfo  = Map<String, Map<String, dynamic>>.from(value.data()["PassengersInfo"]);
           //tempPassengersInfo.remove(userRep.user.email).remove(userRep.user.email);
           //transaction.update((firestore.collection("Drives").doc(widget.lift.liftId)),{"Passengers":tempPassengers,"PassengersInfo":tempPassengersInfo});
-          tempPassengers.forEach((element) {
+          tempPassengers.forEach((element) async {
             String currentPassengerId = element.toString();
+
             transaction.set(firestore.collection("Notifications").doc(currentPassengerId).collection("UserNotifications").doc(),
                 {
                   "destCity": widget.lift.destCity,
@@ -96,15 +97,74 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                   "type": "CanceledDrive",
                 }
             );
+
             transaction.delete(firestore.collection("Drives").doc(widget.lift.liftId));
 
           });
 
-          return  true;
+          // QuerySnapshot q1 = await firestore.collection("Notifications").
+          // doc(currentPassengerId).collection("Pending").
+          // where("driveId",isEqualTo: widget.lift.liftId).get();
+          // q1.docs.forEach((element) {
+          //   transaction.set(firestore.collection("Notifications").doc(currentPassengerId).collection("UserNotifications").doc(),
+          //       {
+          //         "destCity": widget.lift.destCity,
+          //         //"destAddress": widget.lift.passengersInfo[currentPassengerId]["destAddress"],
+          //         "startCity": widget.lift.startCity,
+          //         //"startAddress": widget.lift.passengersInfo[currentPassengerId]["startAddress"],
+          //         "distance": (widget.lift.passengersInfo[currentPassengerId]["dist"]),
+          //         "driveId": widget.lift.liftId,
+          //         "driverId": widget.lift.driver,
+          //         "liftTime": widget.lift.time,
+          //         "notificationTime": DateTime.now(),
+          //         "price": widget.lift.price,
+          //         //"passengerId": currentPassengerId,
+          //         "type": "RejectedLift",
+          //       }
+          //   );
+          //
+          //   transaction.delete(element.reference);
+          // });
+
+          // await transaction.get(firestore.collection("Drives")
+          //     .doc(widget.lift.liftId))
+          //     .then((value) async {
+          //
+          // });
+
+          QuerySnapshot q2 = await firestore.collection("Notifications").
+          doc(userRep.user?.email).collection("UserNotifications").
+          where("driveId",isEqualTo: widget.lift.liftId).where("type",isEqualTo: "RequestedLift").get();
+          q2.docs.forEach((element) {
+            String currentPassengerId = element["passengerId"];
+            transaction.set(firestore.collection("Notifications").doc(currentPassengerId).collection("UserNotifications").doc(),
+                {
+                  "destCity": widget.lift.destCity,
+                  //"destAddress": widget.lift.passengersInfo[currentPassengerId]["destAddress"],
+                  "startCity": widget.lift.startCity,
+                  //"startAddress": widget.lift.passengersInfo[currentPassengerId]["startAddress"],
+                  "distance": (widget.lift.passengersInfo[currentPassengerId]["dist"]),
+                  "driveId": widget.lift.liftId,
+                  "driverId": widget.lift.driver,
+                  "liftTime": widget.lift.time,
+                  "notificationTime": DateTime.now(),
+                  "price": widget.lift.price,
+                  //"passengerId": currentPassengerId,
+                  "type": "RejectedLift",
+                }
+            );
+            transaction.delete(element.reference);
+          });
+
+          // transaction.delete(firestore.collection("Notifications").
+          // doc(userRep.user?.email).collection("UserNotifications").
+          // doc(widget.notification.notificationId));
+
+          return true;
         });
       });
     }catch(e){
-      return  false;
+      return false;
     }
   }
 
@@ -563,15 +623,17 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
       textColor: mainColor,
       child: Text("Yes"),
       onPressed: () async {
+        bool retval = false;
         if(cancelType == "CanceledLift") {
-          bool retval = await _cancelRequest(usrRep);
+          retval = await _cancelRequest(usrRep);
         }
         else{
-          bool retval = await _cancelDrive(usrRep);
+          retval = await _cancelDrive(usrRep);
         }
         Navigator.pop(context);
-        Navigator.pop(context);
-
+        if(retval){
+          Navigator.pop(context);
+        }
       },
     );
 

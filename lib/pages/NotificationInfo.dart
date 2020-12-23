@@ -36,16 +36,7 @@ class _NotificationInfoState extends State<NotificationInfo> {
         return await firestore.runTransaction((transaction) async {
          //firestore.collection("Notifications").doc(userRep.user?.email).collection("UserNotifications").doc(widget.notification.notificationId).delete();
 
-          // return transaction.get(firestore.collection("Drives")
-         //    .doc(widget.lift.liftId))
-         //    .then((value) async {
-         //  //List<String> tempPassengers = List.from(value.data()["Passengers"]);
-          //tempPassengers.remove((userRep.user.email));
-          //value.data()["Passengers"] = tempPassengers;
-          //Map<String,Map<String, dynamic>> tempPassengersInfo  = Map<String, Map<String, dynamic>>.from(value.data()["PassengersInfo"]);
-          //tempPassengersInfo.remove(userRep.user.email).remove(userRep.user.email);
-          //transaction.update((firestore.collection("Drives").doc(widget.lift.liftId)),{"Passengers":tempPassengers,"PassengersInfo":tempPassengersInfo});
-          //transaction.set(firestore.collection("Notifications").doc("testing@campus.technion.ac.il").collection("UserNotifications2").doc(),
+           //transaction.set(firestore.collection("Notifications").doc("testing@campus.technion.ac.il").collection("UserNotifications2").doc(),
           transaction.set(firestore.collection("Notifications").doc(widget.notification.passengerId).collection("UserNotifications").doc(),
               {
                 "startCity": widget.notification.startCity,
@@ -62,6 +53,14 @@ class _NotificationInfoState extends State<NotificationInfo> {
                 //"passengerId": userRep.user.email,
               }
           );
+
+          QuerySnapshot q = await firestore.collection("Notifications").
+          doc(widget.notification.passengerId).collection("Pending").
+          where("driveId",isEqualTo: widget.lift.liftId).get();
+          q.docs.forEach((element) {
+            transaction.delete(element.reference);
+          });
+
           transaction.delete(firestore.collection("Notifications").
           doc(userRep.user?.email).collection("UserNotifications").
           doc(widget.notification.notificationId));
@@ -114,9 +113,22 @@ class _NotificationInfoState extends State<NotificationInfo> {
               );
               //userRep.user?.email
              //"testing@campus.technion.ac.il"
+
+             // transaction.delete(firestore.collection("Notifications").
+             // doc(widget.notification.passengerId).collection("Pending").
+             // where("driveId",isEqualTo: widget.notification.driveId).get());
+
+             QuerySnapshot q = await firestore.collection("Notifications").
+             doc(widget.notification.passengerId).collection("Pending").
+             where("driveId",isEqualTo: widget.notification.driveId).get();
+             q.docs.forEach((element) {
+               transaction.delete(element.reference);
+             });
+
               transaction.delete(firestore.collection("Notifications").
           doc(userRep.user?.email).collection("UserNotifications").
               doc(widget.notification.notificationId));
+
              return true;
         });
       });

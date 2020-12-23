@@ -79,23 +79,24 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
           //tempPassengersInfo.remove(userRep.user.email).remove(userRep.user.email);
           //transaction.update((firestore.collection("Drives").doc(widget.lift.liftId)),{"Passengers":tempPassengers,"PassengersInfo":tempPassengersInfo});
           tempPassengers.forEach((element) {
-
-            transaction.set(firestore.collection("Notifications").doc(widget.lift.driver).collection("UserNotifications").doc(),
+            String currentPassengerId = element.toString();
+            transaction.set(firestore.collection("Notifications").doc(currentPassengerId).collection("UserNotifications").doc(),
                 {
                   "destCity": widget.lift.destCity,
-                  "destAddress": widget.lift.passengersInfo[element.toString()]["destAddress"],
+                  "destAddress": widget.lift.passengersInfo[currentPassengerId]["destAddress"],
                   "startCity": widget.lift.startCity,
-                  "startAddress": widget.lift.passengersInfo[element.toString()]["startAddress"],
-                  "distance": (widget.lift.passengersInfo[element.toString()]["dist"]),
+                  "startAddress": widget.lift.passengersInfo[currentPassengerId]["startAddress"],
+                  "distance": (widget.lift.passengersInfo[currentPassengerId]["dist"]),
                   "driveId": widget.lift.liftId,
                   "driverId": widget.lift.driver,
                   "liftTime": widget.lift.time,
                   "notificationTime": DateTime.now(),
                   "price": widget.lift.price,
-                  "passengerId": element.toString(),
+                  "passengerId": currentPassengerId,
                   "type": "CanceledDrive",
                 }
             );
+            transaction.delete(firestore.collection("Drives").doc(widget.lift.liftId));
 
           });
 

@@ -315,7 +315,7 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       labelText(text: "Passengers: "),
-                      infoText(widget.lift.passengers.length.toString()+"/"+widget.lift.numberOfSeats.toString()),
+                      Expanded(child:infoText(widget.lift.passengers.length.toString()+"/"+widget.lift.numberOfSeats.toString())),
                     ]),
                 SizedBox(height: defaultSpace),
                 Row(

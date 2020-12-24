@@ -195,6 +195,35 @@ class _NotificationInfoState extends State<NotificationInfo> {
         });
         //  return null;
       }
+
+      Future<List<dynamic>> initDriverName(String name) {
+        List<dynamic> ret = [];
+        return FirebaseStorage.instance
+            .ref('uploads')
+            .child(name)
+            .getDownloadURL()
+            .then((value) {
+          ret.add(value);
+          return firestore.collection("Profiles").doc(name).get().then((value) {
+            ret.add(value.data()["firstName"] + " " + value.data()["lastName"]);
+            /*if(widget.type == NotificationInfoType.Accepted){
+              // ret.add(widget.lift.passengersInfo[name]["startAddress"]);//1
+              // ret.add(widget.lift.passengersInfo[name]["dist"]~/ 1000);//3
+              // //ret.add(widget.lift.passengersInfo[name]["bigTrunk"]);
+              // //ret.add(widget.lift.passengersInfo[name]["backSeatNotFull"]);//4
+              // ret.add(widget.lift.passengersInfo[name]["note"]);//6
+              // ret.add(widget.lift.passengersInfo[name]["destAddress"]);//7
+              ret.add(widget.lift.passengersInfo[name]["startAddress"]);//2
+              ret.add(widget.lift.passengersInfo[name]["dist"]/ 1000);//3
+              ret.add(widget.lift.passengersInfo[name]["bigBag"]);//4
+              ret.add(widget.lift.passengersInfo[name]["note"]);//5
+              ret.add(widget.lift.passengersInfo[name]["destAddress"]);//6
+            }*/
+            return ret;
+          });
+        });
+        //  return null;
+      }
       Widget allInfoText(double dist) {
         return Container(
             child: Row(
@@ -206,9 +235,9 @@ class _NotificationInfoState extends State<NotificationInfo> {
             ));
       }
 
-      Widget _buildTile(MyLift lift) {
+      Widget _buildDriverTile(MyLift lift) {
         return FutureBuilder<List<dynamic>>(
-            future: initNames(lift.driver),
+            future: initDriverName(widget.lift.driver),
             builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
               if (snapshot.hasData) {
                 return Container(
@@ -220,7 +249,7 @@ class _NotificationInfoState extends State<NotificationInfo> {
                                 .push(MaterialPageRoute<liftRes>(
                                 builder: (BuildContext context) {
                                   return ProfilePage(
-                                    email: lift.driver,
+                                    email: widget.lift.driver,
                                     fromProfile: false,
                                   );
                                 },
@@ -340,9 +369,9 @@ class _NotificationInfoState extends State<NotificationInfo> {
                       ]), Row(children: [
                         labelText(text: "Destination: "),
                         Expanded(child: infoText(snapshot.data[6]))
-                      ]),Row(children: [
+                      ]),/*Row(children: [
                         labelText(text: "Note: "), Expanded(child: infoText(snapshot.data[5]))
-                      ]),Divider(thickness: 1)]) : [])],
+                      ]),*/Divider(thickness: 1)]) : [])],
                   ),
                 );
               } else {
@@ -598,7 +627,7 @@ class _NotificationInfoState extends State<NotificationInfo> {
                 ),
                 ...(widget.type == NotificationInfoType.Accepted ? ([Text("Driver:",
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                  _buildTile(widget.lift),
+                  _buildDriverTile(widget.lift),
                   SizedBox(height: defaultSpace),
                   Divider(
                     thickness: 3,

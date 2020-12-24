@@ -601,9 +601,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
               ),
             );
           }else {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
+            return Container();
+            // return Center(
+            //   child: CircularProgressIndicator(),
+            // );
           }
         });
   }
@@ -714,9 +715,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
               ),
             );
           }else {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
+            return Container();
+            // return Center(
+            //   child: CircularProgressIndicator(),
+            // );
           }
         });
   }
@@ -827,9 +829,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
               ),
             );
           }else {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
+            return Container();
+            // return Center(
+            //   child: CircularProgressIndicator(),
+            // );
           }
         });
   }
@@ -985,9 +988,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
               ),
             );
           }else {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
+            return Container();
+            // return Center(
+            //   child: CircularProgressIndicator(),
+            // );
           }
         });
   }

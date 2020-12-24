@@ -96,9 +96,51 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
     }
   }
 
+
+  Future<bool> _cancelDriveQueryAux(UserRepository userRep) async {
+    try {
+      //delete all requested notifications related to this canceled drive
+      QuerySnapshot q2 = await firestore.collection("Notifications").
+      doc(userRep.user?.email).collection("UserNotifications").
+      where("driveId", isEqualTo: widget.lift.liftId).where(
+          "type", isEqualTo: "RequestedLift").get();
+      q2.docs.forEach((element) async {
+        String currentHitchhikerRequesterId = element["passengerId"];
+        firestore.collection("Notifications")
+            .doc(currentHitchhikerRequesterId)
+            .collection("UserNotifications")
+            .add(
+            {
+              "destCity": element["destCity"],
+              "startCity": element["startCity"],
+              "distance": element["distance"],
+              "driveId": widget.lift.liftId,
+              "driverId": widget.lift.driver,
+              "liftTime": widget.lift.time,
+              "notificationTime": DateTime.now(),
+              "price": widget.lift.price,
+              "type": "RejectedLift",
+            }
+        );
+        element.reference.delete();
+
+        firestore.collection("Notifications").doc(currentHitchhikerRequesterId).collection("Pending")
+            .where("driveId",isEqualTo: widget.lift.liftId).get().then((snapshot) {
+          for (DocumentSnapshot doc in snapshot.docs) {
+            doc.reference.delete();
+          }
+        });
+      });
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   Future<bool> _cancelDrive(UserRepository userRep) async {
     try{
       return await firestore.runTransaction((transaction) async {
+
         return transaction.get(firestore.collection("Drives")
             .doc(widget.lift.liftId))
             .then((value) async {
@@ -127,68 +169,8 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                   "type": "CanceledDrive",
                 }
             );
-
             transaction.delete(firestore.collection("Drives").doc(widget.lift.liftId));
-
           });
-
-          // QuerySnapshot q1 = await firestore.collection("Notifications").
-          // doc(currentPassengerId).collection("Pending").
-          // where("driveId",isEqualTo: widget.lift.liftId).get();
-          // q1.docs.forEach((element) {
-          //   transaction.set(firestore.collection("Notifications").doc(currentPassengerId).collection("UserNotifications").doc(),
-          //       {
-          //         "destCity": widget.lift.destCity,
-          //         //"destAddress": widget.lift.passengersInfo[currentPassengerId]["destAddress"],
-          //         "startCity": widget.lift.startCity,
-          //         //"startAddress": widget.lift.passengersInfo[currentPassengerId]["startAddress"],
-          //         "distance": (widget.lift.passengersInfo[currentPassengerId]["dist"]),
-          //         "driveId": widget.lift.liftId,
-          //         "driverId": widget.lift.driver,
-          //         "liftTime": widget.lift.time,
-          //         "notificationTime": DateTime.now(),
-          //         "price": widget.lift.price,
-          //         //"passengerId": currentPassengerId,
-          //         "type": "RejectedLift",
-          //       }
-          //   );
-          //
-          //   transaction.delete(element.reference);
-          // });
-
-          // await transaction.get(firestore.collection("Drives")
-          //     .doc(widget.lift.liftId))
-          //     .then((value) async {
-          //
-          // });
-
-          QuerySnapshot q2 = await firestore.collection("Notifications").
-          doc(userRep.user?.email).collection("UserNotifications").
-          where("driveId",isEqualTo: widget.lift.liftId).where("type",isEqualTo: "RequestedLift").get();
-          q2.docs.forEach((element) {
-            String currentPassengerId = element["passengerId"];
-            transaction.set(firestore.collection("Notifications").doc(currentPassengerId).collection("UserNotifications").doc(),
-                {
-                  "destCity": widget.lift.destCity,
-                  //"destAddress": widget.lift.passengersInfo[currentPassengerId]["destAddress"],
-                  "startCity": widget.lift.startCity,
-                  //"startAddress": widget.lift.passengersInfo[currentPassengerId]["startAddress"],
-                  "distance": (widget.lift.passengersInfo[currentPassengerId]["dist"]),
-                  "driveId": widget.lift.liftId,
-                  "driverId": widget.lift.driver,
-                  "liftTime": widget.lift.time,
-                  "notificationTime": DateTime.now(),
-                  "price": widget.lift.price,
-                  //"passengerId": currentPassengerId,
-                  "type": "RejectedLift",
-                }
-            );
-            transaction.delete(element.reference);
-          });
-
-          // transaction.delete(firestore.collection("Notifications").
-          // doc(userRep.user?.email).collection("UserNotifications").
-          // doc(widget.notification.notificationId));
 
           return true;
         });
@@ -485,7 +467,7 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                      showAlertDialog(context, "Cancel Lift", "Are you sure you want to cancel?\nThere is no going back", userRep, "CanceledLift");
                    }
                    else if(widget.type == CalendarEventType.Drive){
-                     showAlertDialog(context, "Cancel Lift", "Are you sure you want to cancel?\nThere is no going back", userRep, "CanceledDrive");
+                     showAlertDialog(context, "Cancel Drive", "Are you sure you want to cancel?\nThere is no going back", userRep, "CanceledDrive");
                    }else if(widget.type == CalendarEventType.PendingLift){
                      showAlertDialog(context, "Cancel Pending", "Are you sure you want to cancel?\nThere is no going back", userRep, "CanceledPending");
                    }
@@ -690,6 +672,9 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
             retval = await _cancelPending(usrRep);
           }else {
             retval = await _cancelDrive(usrRep);
+            if(retval){
+              retval = await _cancelDriveQueryAux(usrRep);
+            }
           }
         }
         Navigator.pop(context);

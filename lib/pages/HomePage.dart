@@ -195,43 +195,59 @@ class _HomePageState extends State<HomePage> {
           children: [
             FloatingActionButton(
               heroTag: "drive",
-              backgroundColor: mainColor,
+              backgroundColor: selectedDay.isBefore(Jiffy(DateTime.now()).startOf(Units.DAY)) ? Colors.grey : mainColor,
               child: Icon(
                 Icons.directions_car,
                 size: 35,
                 color: Colors.white,
               ),
               onPressed: () async {
-                Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (BuildContext context) {
-                      return SetDrivePage(currentDate: selectedDay);
-                    },
-                  ),
-                );
-              },
+                if (selectedDay.isBefore(Jiffy(DateTime.now()).startOf(Units.DAY))) {
+                  showDialog(context: context,child: AlertDialog(title: Text("Drive error"),content: Text("Cant set a drive for a date that has already passed."),actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text("Dismiss"))],));
+                } else {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (BuildContext context) {
+                        return SetDrivePage(currentDate: selectedDay);
+                      },
+                    ),
+                  );
+                }
+              }
             ),
             Transform.rotate(
                 angle: 0.8,
                 child: FloatingActionButton(
                   heroTag: "lift",
-                  backgroundColor: Colors.black,
+                  backgroundColor: selectedDay.isBefore(Jiffy(DateTime.now()).startOf(Units.DAY)) ? Colors.grey : Colors.black,
                   child: Icon(
                     Icons.thumb_up_rounded,
                     size: 30,
                   ),
                   onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (BuildContext context) {
-                          return SearchLiftPage(
-                            currentdate: selectedDay,
-                            popOrNot: false,
-                          );
-                        },
-                      ),
-                    );
-                  },
+                    if (selectedDay.isBefore(
+                        Jiffy(DateTime.now()).startOf(Units.DAY))) {
+                      showDialog(context: context,
+                          child: AlertDialog(title: Text("Lift error"),
+                            content: Text(
+                                "Cant search a lift for a date that has already passed."),
+                            actions: [TextButton(onPressed: () =>
+                                Navigator.pop(context),
+                                child: Text("Dismiss"))
+                            ],));
+                    } else {
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (BuildContext context) {
+                            return SearchLiftPage(
+                              currentdate: selectedDay,
+                              popOrNot: false,
+                            );
+                          },
+                        ),
+                      );
+                    }
+                  }
                 ))
           ],
         ),

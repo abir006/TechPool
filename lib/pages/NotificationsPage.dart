@@ -539,7 +539,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                         width: MediaQuery
                             .of(context)
                             .size
-                            .width * 0.016*15,
+                            .width * 0.016*16,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
@@ -599,17 +599,18 @@ class _NotificationsPageState extends State<NotificationsPage> {
                         )*/
                     ),
                   ),
-                  /*SizedBox(width: MediaQuery
+                  SizedBox(width: MediaQuery
                       .of(context)
                       .size
-                      .height * 0.008),*/
+                      .width * 0.002),
                 ],
               ),
             );
           }else {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
+            return Container();
+            // return Center(
+            //   child: CircularProgressIndicator(),
+            // );
           }
         });
   }
@@ -641,7 +642,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
               child:
               Row(
                 children: [
-                  Flexible(flex: 6,
+                  //flexs: 6,17,8
+                  Flexible(flex: 3,
                     child: InkWell(
                         onTap: () async {
                           await Navigator.of(context).push(
@@ -681,7 +683,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
                             ))),
                   ),
-                  Flexible(flex: 17,
+                  Flexible(flex: 8,
                     child: Container(
                         margin: EdgeInsets.only(
                             left: MediaQuery
@@ -702,13 +704,13 @@ class _NotificationsPageState extends State<NotificationsPage> {
                         )),
                   ),
                   //Spacer(),
-                  Flexible(flex: 8,
+                  Flexible(flex: 3,
                     child: InkWell(
                       child: Container(
                         width: MediaQuery
                             .of(context)
                             .size
-                            .width * 0.016*18,
+                            .width * 0.016*16,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
@@ -726,14 +728,15 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   SizedBox(width: MediaQuery
                       .of(context)
                       .size
-                      .height * 0.008),
+                      .width * 0.002),
                 ],
               ),
             );
           }else {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
+            return Container();
+            // return Center(
+            //   child: CircularProgressIndicator(),
+            // );
           }
         });
   }
@@ -827,6 +830,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   Flexible( flex: 3,
                     child: InkWell(
                       child: Container(
+                        width: MediaQuery
+                            .of(context)
+                            .size
+                            .width * 0.016*16,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
@@ -845,14 +852,15 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   SizedBox(width: MediaQuery
                       .of(context)
                       .size
-                      .height * 0.008),
+                      .width * 0.003),
                 ],
               ),
             );
           }else {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
+            return Container();
+            // return Center(
+            //   child: CircularProgressIndicator(),
+            // );
           }
         });
   }
@@ -946,6 +954,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   Flexible( flex: 3,
                     child: InkWell(
                       child: Container(
+                        width: MediaQuery
+                            .of(context)
+                            .size
+                            .width * 0.016*16,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
@@ -1009,14 +1021,15 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   SizedBox(width: MediaQuery
                       .of(context)
                       .size
-                      .height * 0.008),
+                      .width * 0.02),
                 ],
               ),
             );
           }else {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
+            return Container();
+            // return Center(
+            //   child: CircularProgressIndicator(),
+            // );
           }
         });
   }

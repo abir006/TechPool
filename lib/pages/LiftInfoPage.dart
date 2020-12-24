@@ -181,7 +181,6 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
                           : Icon(Icons.cancel_outlined, color: Colors.pink)
                     ]),
                     SizedBox(height: defaultSpace),
-                    _buildRow(context),
                     widget.lift.note.isEmpty?SizedBox(height: 0,) :SizedBox(height: defaultSpace),
                     widget.lift.note.isEmpty? SizedBox(height: 0,) : Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -302,7 +301,7 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
             Expanded(child: infoText(widget.lift.startAddress))
           ]),
           SizedBox(height: defaultSpace),
-         // _buildRow(context),
+          _buildRow(context),
               SizedBox(height: defaultSpace),
           Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -314,8 +313,8 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
                 Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      labelText(text: "Passengers: "),
-                      Expanded(child:infoText(widget.lift.passengers.length.toString()+"/"+widget.lift.numberOfSeats.toString())),
+                      //labelText(text: "Passengers: "),
+                      //Expanded(child:infoText(widget.lift.passengers.length.toString()+"/"+widget.lift.numberOfSeats.toString())),
                     ]),
                 SizedBox(height: defaultSpace),
                 Row(
@@ -338,7 +337,7 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
                  child: ConfigurableExpansionTile(
                    header: Container(
                        alignment: Alignment.bottomLeft,
-                       child: Text("Passengers info",
+                       child: Text("Passengers info "+widget.lift.passengers.length.toString()+"/"+widget.lift.numberOfSeats.toString(),
                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17))),
                    animatedWidgetFollowingHeader: const Icon(
                      Icons.expand_more,
@@ -606,10 +605,18 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
       },
     );
 
+    Widget cancelButton = FlatButton(
+      textColor: mainColor,
+      child: Text("Dismiss"),
+      onPressed: () {
+        Navigator.pop(context);
+      },
+    );
     AlertDialog alert = AlertDialog(
       title: Text(title),
       content: Text(info,style:TextStyle(fontSize: 17)),
       actions: [
+        cancelButton,
         okButton,
       ],
     );

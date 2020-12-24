@@ -66,139 +66,47 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
     }
   }
 
-  Future<bool> _cancelDriveAux(UserRepository userRep) async {
-    QuerySnapshot q2 = await firestore.collection("Notifications").
-    doc(userRep.user?.email).collection("UserNotifications").
-    where("driveId",isEqualTo: widget.lift.liftId).where("type",isEqualTo: "RequestedLift").get();
-    q2.docs.forEach((element) async {
-      String currentPassengerId = element["passengerId"];
-      await firestore.collection("Notifications").doc(currentPassengerId)
-          .collection("UserNotifications").doc().set(
-          "destCity": widget.lift.destCity,
-          //"destAddress": widget.lift.passengersInfo[currentPassengerId]["destAddress"],
-          "startCity": widget.lift.startCity,
-          //"startAddress": widget.lift.passengersInfo[currentPassengerId]["startAddress"],
-          "distance": (widget.lift.passengersInfo[currentPassengerId]["dist"]),
-      "driveId": widget.lift.liftId,
-      "driverId": widget.lift.driver,
-      "liftTime": widget.lift.time,
-      "notificationTime": DateTime.now(),
-      "price": widget.lift.price,
-      //"passengerId": currentPassengerId,
-      "type": "RejectedLift",
-      ),
-    }
-      );
-      transaction.delete(element.reference);
-     }
-     //   );
-  //
-  // }
+  Future<bool> _cancelDriveQueryAux(UserRepository userRep) async {
+    try {
+      //delete all requested notifications related to this canceled drive
+      QuerySnapshot q2 = await firestore.collection("Notifications").
+      doc(userRep.user?.email).collection("UserNotifications").
+      where("driveId", isEqualTo: widget.lift.liftId).where(
+          "type", isEqualTo: "RequestedLift").get();
+      q2.docs.forEach((element) async {
+        String currentHitchhikerRequesterId = element["passengerId"];
+        firestore.collection("Notifications")
+            .doc(currentHitchhikerRequesterId)
+            .collection("UserNotifications")
+            .add(
+            {
+              "destCity": element["destCity"],
+              "startCity": element["startCity"],
+              "distance": element["distance"],
+              "driveId": widget.lift.liftId,
+              "driverId": widget.lift.driver,
+              "liftTime": widget.lift.time,
+              "notificationTime": DateTime.now(),
+              "price": widget.lift.price,
+              "type": "RejectedLift",
+            }
+        );
+        element.reference.delete();
 
-  Future<bool> _cancelDrive(UserRepository userRep) async {
-    try{
-      return await firestore.runTransaction((transaction) async {
-
-        return transaction.get(firestore.collection("Drives")
-            .doc(widget.lift.liftId))
-            .then((value) async {
-          List<String> tempPassengers = List.from(value.data()["Passengers"]);
-          //tempPassengers.remove((userRep.user.email));
-          value.data()["Passengers"] = tempPassengers;
-          Map<String,Map<String, dynamic>> tempPassengersInfo  = Map<String, Map<String, dynamic>>.from(value.data()["PassengersInfo"]);
-          //tempPassengersInfo.remove(userRep.user.email).remove(userRep.user.email);
-          //transaction.update((firestore.collection("Drives").doc(widget.lift.liftId)),{"Passengers":tempPassengers,"PassengersInfo":tempPassengersInfo});
-          tempPassengers.forEach((element) async {
-            String currentPassengerId = element.toString();
-
-            transaction.set(firestore.collection("Notifications").doc(currentPassengerId).collection("UserNotifications").doc(),
-                {
-                  "destCity": widget.lift.destCity,
-                  "destAddress": widget.lift.passengersInfo[currentPassengerId]["destAddress"],
-                  "startCity": widget.lift.startCity,
-                  "startAddress": widget.lift.passengersInfo[currentPassengerId]["startAddress"],
-                  "distance": (widget.lift.passengersInfo[currentPassengerId]["dist"]),
-                  "driveId": widget.lift.liftId,
-                  "driverId": widget.lift.driver,
-                  "liftTime": widget.lift.time,
-                  "notificationTime": DateTime.now(),
-                  "price": widget.lift.price,
-                  "passengerId": currentPassengerId,
-                  "type": "CanceledDrive",
-                }
-            );
-
-            transaction.delete(firestore.collection("Drives").doc(widget.lift.liftId));
-
-          });
-
-          // QuerySnapshot q1 = await firestore.collection("Notifications").
-          // doc(currentPassengerId).collection("Pending").
-          // where("driveId",isEqualTo: widget.lift.liftId).get();
-          // q1.docs.forEach((element) {
-          //   transaction.set(firestore.collection("Notifications").doc(currentPassengerId).collection("UserNotifications").doc(),
-          //       {
-          //         "destCity": widget.lift.destCity,
-          //         //"destAddress": widget.lift.passengersInfo[currentPassengerId]["destAddress"],
-          //         "startCity": widget.lift.startCity,
-          //         //"startAddress": widget.lift.passengersInfo[currentPassengerId]["startAddress"],
-          //         "distance": (widget.lift.passengersInfo[currentPassengerId]["dist"]),
-          //         "driveId": widget.lift.liftId,
-          //         "driverId": widget.lift.driver,
-          //         "liftTime": widget.lift.time,
-          //         "notificationTime": DateTime.now(),
-          //         "price": widget.lift.price,
-          //         //"passengerId": currentPassengerId,
-          //         "type": "RejectedLift",
-          //       }
-          //   );
-          //
-          //   transaction.delete(element.reference);
-          // });
-
-          // await transaction.get(firestore.collection("Drives")
-          //     .doc(widget.lift.liftId))
-          //     .then((value) async {
-          //
-          // });
-
-          // QuerySnapshot q2 = await firestore.collection("Notifications").
-          // doc(userRep.user?.email).collection("UserNotifications").
-          // where("driveId",isEqualTo: widget.lift.liftId).where("type",isEqualTo: "RequestedLift").get();
-          // q2.docs.forEach((element) {
-          //   String currentPassengerId = element["passengerId"];
-          //   transaction.set(firestore.collection("Notifications").doc(currentPassengerId).collection("UserNotifications").doc(),
-          //       {
-          //         "destCity": widget.lift.destCity,
-          //         //"destAddress": widget.lift.passengersInfo[currentPassengerId]["destAddress"],
-          //         "startCity": widget.lift.startCity,
-          //         //"startAddress": widget.lift.passengersInfo[currentPassengerId]["startAddress"],
-          //         "distance": (widget.lift.passengersInfo[currentPassengerId]["dist"]),
-          //         "driveId": widget.lift.liftId,
-          //         "driverId": widget.lift.driver,
-          //         "liftTime": widget.lift.time,
-          //         "notificationTime": DateTime.now(),
-          //         "price": widget.lift.price,
-          //         //"passengerId": currentPassengerId,
-          //         "type": "RejectedLift",
-          //       }
-          //   );
-          //   transaction.delete(element.reference);
-          // });
-
-          // transaction.delete(firestore.collection("Notifications").
-          // doc(userRep.user?.email).collection("UserNotifications").
-          // doc(widget.notification.notificationId));
-
-          return true;
+        firestore.collection("Notifications").doc(currentHitchhikerRequesterId).collection("Pending")
+        .where("driveId",isEqualTo: widget.lift.liftId).get().then((snapshot) {
+          for (DocumentSnapshot doc in snapshot.docs) {
+            doc.reference.delete();
+          }
         });
       });
-    }catch(e){
+      return true;
+    } catch (e) {
       return false;
     }
   }
 
-  Future<bool> _cancelDrive(UserRepository userRep) async {
+Future<bool> _cancelDrive(UserRepository userRep) async {
     try{
       return await firestore.runTransaction((transaction) async {
 
@@ -230,64 +138,8 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                   "type": "CanceledDrive",
                 }
             );
-
             transaction.delete(firestore.collection("Drives").doc(widget.lift.liftId));
-
           });
-
-          // QuerySnapshot q1 = await firestore.collection("Notifications").
-          // doc(currentPassengerId).collection("Pending").
-          // where("driveId",isEqualTo: widget.lift.liftId).get();
-          // q1.docs.forEach((element) {
-          //   transaction.set(firestore.collection("Notifications").doc(currentPassengerId).collection("UserNotifications").doc(),
-          //       {
-          //         "destCity": widget.lift.destCity,
-          //         //"destAddress": widget.lift.passengersInfo[currentPassengerId]["destAddress"],
-          //         "startCity": widget.lift.startCity,
-          //         //"startAddress": widget.lift.passengersInfo[currentPassengerId]["startAddress"],
-          //         "distance": (widget.lift.passengersInfo[currentPassengerId]["dist"]),
-          //         "driveId": widget.lift.liftId,
-          //         "driverId": widget.lift.driver,
-          //         "liftTime": widget.lift.time,
-          //         "notificationTime": DateTime.now(),
-          //         "price": widget.lift.price,
-          //         //"passengerId": currentPassengerId,
-          //         "type": "RejectedLift",
-          //       }
-          //   );
-          //
-          //   transaction.delete(element.reference);
-          // });
-
-          // await transaction.get(firestore.collection("Drives")
-          //     .doc(widget.lift.liftId))
-          //     .then((value) async {
-          //
-          // });
-
-          // QuerySnapshot q2 = await firestore.collection("Notifications").
-          // doc(userRep.user?.email).collection("UserNotifications").
-          // where("driveId",isEqualTo: widget.lift.liftId).where("type",isEqualTo: "RequestedLift").get();
-          // q2.docs.forEach((element) {
-          //   String currentPassengerId = element["passengerId"];
-          //   transaction.set(firestore.collection("Notifications").doc(currentPassengerId).collection("UserNotifications").doc(),
-          //       {
-          //         "destCity": widget.lift.destCity,
-          //         //"destAddress": widget.lift.passengersInfo[currentPassengerId]["destAddress"],
-          //         "startCity": widget.lift.startCity,
-          //         //"startAddress": widget.lift.passengersInfo[currentPassengerId]["startAddress"],
-          //         "distance": (widget.lift.passengersInfo[currentPassengerId]["dist"]),
-          //         "driveId": widget.lift.liftId,
-          //         "driverId": widget.lift.driver,
-          //         "liftTime": widget.lift.time,
-          //         "notificationTime": DateTime.now(),
-          //         "price": widget.lift.price,
-          //         //"passengerId": currentPassengerId,
-          //         "type": "RejectedLift",
-          //       }
-          //   );
-          //   transaction.delete(element.reference);
-          // });
 
           return true;
         });
@@ -757,7 +609,9 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
         }
         else{
           retval = await _cancelDrive(usrRep);
-          retval = await _cancelDriveAux(usrRep)
+          if(retval){
+            retval = await _cancelDriveQueryAux(usrRep);
+          }
         }
         Navigator.pop(context);
         if(retval){

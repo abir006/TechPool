@@ -168,9 +168,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
               });
               _notifications.sort((a, b) {
                 if (a.notificationTime.isAfter(b.notificationTime)) {
-                  return 1;
-                } else {
                   return -1;
+                } else {
+                  return 1;
                 }
               });
               if(_notifications.length == 0){

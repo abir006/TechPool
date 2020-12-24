@@ -80,8 +80,10 @@ class PendingLift{
   String info;
   DateTime dateTime;
   int dist;
+  String from;
+  String to;
   final String title = "Pending lift";
-  PendingLift(this.driveId,this.info,this.dateTime,this.dist);
+  PendingLift(this.from,this.to,this.driveId,this.info,this.dateTime,this.dist);
 }
 
 /*
@@ -149,6 +151,8 @@ Container calendarListTile(dynamic event,Widget leadingWidget,BuildContext conte
         }
         if(eventType == CalendarEventType.PendingLift){
           docLift.dist = event.dist;
+          docLift.startAddress = event.from;
+          docLift.destAddress = event.to;
         }
         else{
           docLift.dist = 0;

@@ -122,7 +122,7 @@ class _HomePageState extends State<HomePage> {
                     try {
                       var elementData = element.data();
                       DateTime elementTime = elementData["liftTime"].toDate();
-                      var lift = PendingLift(elementData["driveId"],
+                      var lift = PendingLift(elementData["startAddress"],elementData["destAddress"],elementData["driveId"],
                           elementData["startCity"] +
                               " \u{2192} " +
                               elementData["destCity"],

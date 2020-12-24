@@ -262,125 +262,152 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
         stream:firestore.collection("Drives").doc(widget.lift.liftId).snapshots(), // a previously-obtained Future<String> or null
         builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot){
        if(snapshot.hasData) {
-         snapshot.data.data().forEach((key, value) {
-                 if (value != null) {
-                   widget.lift.setProperty(key, value);
-                 }
-               });
-         if(widget.lift.numberOfSeats<=widget.lift.passengers.length){
-           return Center(child: Text("Lift not available", style: TextStyle(fontSize: 30),),);
-         }
-         return Container(
-          child: ListView(
-              shrinkWrap: true,
-              padding: EdgeInsets.only(
-                  left: defaultSpacewidth, right: defaultSpacewidth),
-              children: [
-              SizedBox(height: defaultSpace),
-          Text("Driver:",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-          _buildTile(widget.lift),
-          Divider(
-            thickness: 3,
-          ),
-          SizedBox(height: defaultSpace),
-          Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-              labelText(text: "Date and time: "),
-              Expanded(
-                  child: infoText(
-                      DateFormat('dd/MM - kk:mm').format(widget.lift.time)))
-            ],
-          ),
-          SizedBox(height: defaultSpace),
-          Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-            labelText(text: "Start: "),
-            Expanded(child: infoText(widget.lift.startAddress))
-          ]),
-          SizedBox(height: defaultSpace),
-          _buildRow(context),
-              SizedBox(height: defaultSpace),
-          Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-            labelText(text: "Destination: "),
-            Expanded(child: infoText(widget.lift.destAddress))
-          ]),
-          SizedBox(height: defaultSpace),
-                Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      //labelText(text: "Passengers: "),
-                      //Expanded(child:infoText(widget.lift.passengers.length.toString()+"/"+widget.lift.numberOfSeats.toString())),
-                    ]),
-                SizedBox(height: defaultSpace),
-                Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-          labelText(text: "Price: "),
-                Image.asset("assets/images/shekel.png",scale: 0.9),
-                infoText(widget.lift.price.toString()),
-          ]),
-          Divider(
-            thickness: 3,
-          ),
-              additionInfo(),
-              Divider(
-                thickness: 3,
-              ),
-             Container(
-                 alignment: Alignment.bottomLeft,
-                 color: Colors.white,
-                 child: ConfigurableExpansionTile(
-                   header: Container(
-                       alignment: Alignment.bottomLeft,
-                       child: Text("Passengers info "+widget.lift.passengers.length.toString()+"/"+widget.lift.numberOfSeats.toString(),
-                           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17))),
-                   animatedWidgetFollowingHeader: const Icon(
-                     Icons.expand_more,
-                     color: const Color(0xFF707070),
-                   ),
-                   //tilePadding: EdgeInsets.symmetric(horizontal: 0),
-                   // backgroundColor: Colors.white,
-                   // trailing: Icon(Icons.arrow_drop_down,color: Colors.black,),
-                   //title: Text("Passenger info"),
+         if (snapshot.data.exists) {
+           snapshot.data.data().forEach((key, value) {
+             if (value != null) {
+               widget.lift.setProperty(key, value);
+             }
+           });
+           if (widget.lift.numberOfSeats <= widget.lift.passengers.length) {
+             return Center(child: Text(
+               "Lift not available", style: TextStyle(fontSize: 30),),);
+           }
+           return Container(
+               child: ListView(
+                   shrinkWrap: true,
+                   padding: EdgeInsets.only(
+                       left: defaultSpacewidth, right: defaultSpacewidth),
                    children: [
-                     ..._buildPassengersList(),
-                   ],
-                 )),
-          Divider(
-            thickness: 3,
-          ),
-          SizedBox(height: defaultSpace),
-              Container(
-               // width:300*defaultSpacewidth,
-               // color: Colors.red,
-               // decoration: BoxDecoration(
-              //    color: Colors.white,//Color(0xFFF5F5F5),
-                 // boxShadow: [
-                  //  BoxShadow(color: Colors.black, blurRadius: 2.0,
-                  //    spreadRadius: 0.0, offset: Offset(2.0, 2.0))
-                 // ],
-                //  border: Border.all(color: secondColor, width: 0.8),
-                  //borderRadius: BorderRadius.circular(15.0),
-                  //padding: const EdgeInsets.all(4),
-                  child: Column(
-                  children:[generalInfoBoxTextField(controllerText: myNoteController, enabled: true,maxLines:null,nameLabel: "Request note to driver:",maxLenth: 150),
-                      Row(
-            //    mainAxisAlignment: MainAxisAlignment.start,
-            //    crossAxisAlignment: CrossAxisAlignment.start,
-             //   mainAxisSize: MainAxisSize.min,
-                    children: [
-                      labelText(text: "Big Bag: "),
-                      Container(alignment:Alignment.topLeft,child: Theme(data: ThemeData(unselectedWidgetColor: secondColor), child:Checkbox(value: bigBag,
-                        onChanged: (bool value){setState(() {bigBag = value;});}))),
-                    ],)]),
-                ),
-              SizedBox(height: defaultSpace*2),
-            ]));}
+                     SizedBox(height: defaultSpace),
+                     Text("Driver:",
+                         style: TextStyle(
+                             fontWeight: FontWeight.bold, fontSize: 18)),
+                     _buildTile(widget.lift),
+                     Divider(
+                       thickness: 3,
+                     ),
+                     SizedBox(height: defaultSpace),
+                     Row(
+                       crossAxisAlignment: CrossAxisAlignment.start,
+                       children: [
+                         labelText(text: "Date and time: "),
+                         Expanded(
+                             child: infoText(
+                                 DateFormat('dd/MM - kk:mm').format(widget.lift
+                                     .time)))
+                       ],
+                     ),
+                     SizedBox(height: defaultSpace),
+                     Row(
+                         crossAxisAlignment: CrossAxisAlignment.start,
+                         children: [
+                           labelText(text: "Start: "),
+                           Expanded(child: infoText(widget.lift.startAddress))
+                         ]),
+                     SizedBox(height: defaultSpace),
+                     _buildRow(context),
+                     SizedBox(height: defaultSpace),
+                     Row(
+                         crossAxisAlignment: CrossAxisAlignment.start,
+                         children: [
+                           labelText(text: "Destination: "),
+                           Expanded(child: infoText(widget.lift.destAddress))
+                         ]),
+                     SizedBox(height: defaultSpace),
+                     Row(
+                         mainAxisSize: MainAxisSize.min,
+                         children: [
+                           //labelText(text: "Passengers: "),
+                           //Expanded(child:infoText(widget.lift.passengers.length.toString()+"/"+widget.lift.numberOfSeats.toString())),
+                         ]),
+                     SizedBox(height: defaultSpace),
+                     Row(
+                         mainAxisSize: MainAxisSize.min,
+                         children: [
+                           labelText(text: "Price: "),
+                           Image.asset("assets/images/shekel.png", scale: 0.9),
+                           infoText(widget.lift.price.toString()),
+                         ]),
+                     Divider(
+                       thickness: 3,
+                     ),
+                     additionInfo(),
+                     Divider(
+                       thickness: 3,
+                     ),
+                     Container(
+                         alignment: Alignment.bottomLeft,
+                         color: Colors.white,
+                         child: ConfigurableExpansionTile(
+                           header: Container(
+                               alignment: Alignment.bottomLeft,
+                               child: Text("Passengers info " +
+                                   widget.lift.passengers.length.toString() +
+                                   "/" + widget.lift.numberOfSeats.toString(),
+                                   style: TextStyle(fontWeight: FontWeight.bold,
+                                       fontSize: 17))),
+                           animatedWidgetFollowingHeader: const Icon(
+                             Icons.expand_more,
+                             color: const Color(0xFF707070),
+                           ),
+                           //tilePadding: EdgeInsets.symmetric(horizontal: 0),
+                           // backgroundColor: Colors.white,
+                           // trailing: Icon(Icons.arrow_drop_down,color: Colors.black,),
+                           //title: Text("Passenger info"),
+                           children: [
+                             ..._buildPassengersList(),
+                           ],
+                         )),
+                     Divider(
+                       thickness: 3,
+                     ),
+                     SizedBox(height: defaultSpace),
+                     Container(
+                       // width:300*defaultSpacewidth,
+                       // color: Colors.red,
+                       // decoration: BoxDecoration(
+                       //    color: Colors.white,//Color(0xFFF5F5F5),
+                       // boxShadow: [
+                       //  BoxShadow(color: Colors.black, blurRadius: 2.0,
+                       //    spreadRadius: 0.0, offset: Offset(2.0, 2.0))
+                       // ],
+                       //  border: Border.all(color: secondColor, width: 0.8),
+                       //borderRadius: BorderRadius.circular(15.0),
+                       //padding: const EdgeInsets.all(4),
+                       child: Column(
+                           children: [
+                             generalInfoBoxTextField(
+                                 controllerText: myNoteController,
+                                 enabled: true,
+                                 maxLines: null,
+                                 nameLabel: "Request note to driver:",
+                                 maxLenth: 150),
+                             Row(
+                               //    mainAxisAlignment: MainAxisAlignment.start,
+                               //    crossAxisAlignment: CrossAxisAlignment.start,
+                               //   mainAxisSize: MainAxisSize.min,
+                               children: [
+                                 labelText(text: "Big Bag: "),
+                                 Container(alignment: Alignment.topLeft,
+                                     child: Theme(data: ThemeData(
+                                         unselectedWidgetColor: secondColor),
+                                         child: Checkbox(value: bigBag,
+                                             onChanged: (bool value) {
+                                               setState(() {
+                                                 bigBag = value;
+                                               });
+                                             }))),
+                               ],)
+                           ]),
+                     ),
+                     SizedBox(height: defaultSpace * 2),
+                   ]));
+         }
+         else {
+           return Center(child: Text(
+             "Lift not available", style: TextStyle(fontSize: 30),),);
+         }
+       }
        else{
           if(snapshot.hasError){
           return Center(child: Text("Lift not available", style: TextStyle(fontSize: 30),),);

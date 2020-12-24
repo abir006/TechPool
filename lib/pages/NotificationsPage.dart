@@ -681,7 +681,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
                             ))),
                   ),
-                  Flexible(flex: 21,
+                  Flexible(flex: 17,
                     child: Container(
                         margin: EdgeInsets.only(
                             left: MediaQuery
@@ -1018,7 +1018,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
             SizedBox(width: MediaQuery.of(context).size.height * 0.01),
             Container(child:Image.asset("assets/images/tl-.png",scale: 0.9)),
             SizedBox(width: MediaQuery.of(context).size.height * 0.005),
-            Text(dist.toString()+"km"),
+            Text(dist.toStringAsFixed(1)+"km"),
             SizedBox(width: MediaQuery.of(context).size.height * 0.01),
             //Icon(Icons.person),
             //Text(taken.toString()+"/"+avaliable.toString()),
@@ -1056,7 +1056,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
     return  Container(
         width: MediaQuery.of(context).size.height * 0.016*17.5,
         child: Text("Hitchhiker: " + info,
-          style: TextStyle(fontSize: fontTextsSize, color: Colors.black),
+          style: TextStyle(fontSize: 15, color: Colors.black),
           overflow: TextOverflow.ellipsis,
           maxLines: 2,
         )

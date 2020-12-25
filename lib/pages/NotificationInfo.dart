@@ -243,48 +243,52 @@ class _NotificationInfoState extends State<NotificationInfo> {
                 return Container(
                   child: Row(
                     children: [
-                      InkWell(
-                          onTap: () async {
-                            await Navigator.of(context)
-                                .push(MaterialPageRoute<liftRes>(
-                                builder: (BuildContext context) {
-                                  return ProfilePage(
-                                    email: type == "Accepted" ? widget.lift.driver : widget.notification.passengerId,
-                                    fromProfile: false,
-                                  );
-                                },
-                                fullscreenDialog: true));
-                            setState(() {});
-                          },
-                          child: Container(
-                              margin: EdgeInsets.only(
-                                  left: MediaQuery.of(context).size.height * 0.016,
-                                  top: MediaQuery.of(context).size.height * 0.016),
-                              width: MediaQuery.of(context).size.height * 0.016 * 4,
-                              height:
-                              MediaQuery.of(context).size.height * 0.016 * 4,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: secondColor,
-                                //Colors.teal,
-                                image: DecorationImage(
-                                    fit: BoxFit.fill,
-                                    image: NetworkImage(snapshot.data[0])),
-                              ))),
-                      Container(
-                          margin: EdgeInsets.only(
-                              left: MediaQuery.of(context).size.height * 0.016,
-                              top: MediaQuery.of(context).size.height * 0.016),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              infoText(snapshot.data[1]),
-                              //placesText(lift.startAddress),
-                              //allInfoText(widget.type == NotificationInfoType.Requested ? widget.lift.dist / 1000 : lift.passengersInfo[userRep.user.email]["dist"] / 1000),
-                              //allInfoText(widget.lift.dist / 1000),
+                      Flexible( flex: 3,
+                        child: InkWell(
+                            onTap: () async {
+                              await Navigator.of(context)
+                                  .push(MaterialPageRoute<liftRes>(
+                                  builder: (BuildContext context) {
+                                    return ProfilePage(
+                                      email: type == "Accepted" ? widget.lift.driver : widget.notification.passengerId,
+                                      fromProfile: false,
+                                    );
+                                  },
+                                  fullscreenDialog: true));
+                              setState(() {});
+                            },
+                            child: Container(
+                                margin: EdgeInsets.only(
+                                    left: MediaQuery.of(context).size.height * 0.016,
+                                    top: MediaQuery.of(context).size.height * 0.016),
+                                width: MediaQuery.of(context).size.height * 0.016 * 4,
+                                height:
+                                MediaQuery.of(context).size.height * 0.016 * 4,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: secondColor,
+                                  //Colors.teal,
+                                  image: DecorationImage(
+                                      fit: BoxFit.fill,
+                                      image: NetworkImage(snapshot.data[0])),
+                                ))),
+                      ),
+                      Flexible( flex: 4,
+                        child: Container(
+                            margin: EdgeInsets.only(
+                                left: MediaQuery.of(context).size.height * 0.016,
+                                top: MediaQuery.of(context).size.height * 0.016),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                infoText(snapshot.data[1]),
+                                //placesText(lift.startAddress),
+                                //allInfoText(widget.type == NotificationInfoType.Requested ? widget.lift.dist / 1000 : lift.passengersInfo[userRep.user.email]["dist"] / 1000),
+                                //allInfoText(widget.lift.dist / 1000),
 
-                            ],
-                          )),
+                              ],
+                            )),
+                      ),
                       Spacer(),
                       SizedBox(
                         width: MediaQuery.of(context).size.height * 0.016,
@@ -454,13 +458,13 @@ class _NotificationInfoState extends State<NotificationInfo> {
       Consumer<UserRepository>(builder: (context, userRep, child) {
         return Container(
             padding: EdgeInsets.only(
-                left: sizeFrameWidth * 0.16,
-                right: sizeFrameWidth * 0.16,
+                left: sizeFrameWidth * 0.14,
+                right: sizeFrameWidth * 0.12,
                 bottom: defaultSpace * 2),
             height: defaultSpace * 6,
             child: Row(
               children: [
-                Flexible(
+                Flexible( flex: 4,
                   child: RaisedButton.icon(
                       color: Colors.green,
                       shape: RoundedRectangleBorder(
@@ -486,8 +490,8 @@ class _NotificationInfoState extends State<NotificationInfo> {
                         //await  cancelRequest(userRep);
                       }),
                 ),
-                SizedBox(width: defaultSpacewidth),
-                Flexible(
+                SizedBox(width: 1.5*defaultSpacewidth),
+                Flexible( flex: 4,
                   child: RaisedButton.icon(
                       color: Colors.red[800],
                       shape: RoundedRectangleBorder(

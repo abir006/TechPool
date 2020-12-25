@@ -16,6 +16,7 @@ class NotificationsPage extends StatefulWidget {
 }
 
 class _NotificationsPageState extends State<NotificationsPage> {
+  final _key = GlobalKey<ScaffoldState>();
   FirebaseFirestore firestore = FirebaseFirestore.instance;
   DateTime selectedDay = DateTime.now();
   List<LiftNotification> _notifications;
@@ -177,6 +178,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 double defaultSpacewidth = MediaQuery.of(context).size.width * 0.016;
 
                 return Scaffold(
+                  key: _key,
                   backgroundColor: mainColor,
                   appBar: AppBar(
                     elevation: 0,
@@ -288,8 +290,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     });
 
                     // Then show a snackbar.
-                    Scaffold.of(context)
-                        .showSnackBar(SnackBar(content: Text(/*$notification*/"Notification Deleted", style: TextStyle(fontSize: 20))));
+                    //Scaffold.of(context)
+                    //_key.currentState.showSnackBar(SnackBar(content: Text(/*$notification*/"Notification Deleted", style: TextStyle(fontSize: 20))));
                   },
                   // Show a red background as the item is swiped away.
                   background: //Container(color: mainColor),

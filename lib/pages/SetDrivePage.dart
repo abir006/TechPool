@@ -79,6 +79,14 @@ class _SetDrivePageState extends State<SetDrivePage> {
       widget.time=null;
     }*/
 
+
+    // if(_chosenTime !=null) {
+    //   _chosenTime = widget.currentDate
+    //       .subtract(new Duration(hours: widget.currentDate.hour))
+    //       .add(new Duration(hours: DateTime.now().hour))
+    //       .add(new Duration(minutes: DateTime.now().minutes));
+    // }
+
     /*if(widget.numberOfSeatsIndex!=null){
       _numberOfPassengers =_passengers[widget.numberOfSeatsIndex];
       widget.numberOfSeatsIndex = null;
@@ -263,7 +271,8 @@ class _SetDrivePageState extends State<SetDrivePage> {
               onPressed: () {
                 DateTime fixedTime = widget.currentDate
                     .subtract(new Duration(hours: widget.currentDate.hour))
-                    .add(new Duration(hours: DateTime.now().hour));
+                    .add(new Duration(hours: DateTime.now().hour))
+                    .add(new Duration(minutes: DateTime.now().minute));
 
                 showDialog(
                     context: context,

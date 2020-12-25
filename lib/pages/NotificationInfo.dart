@@ -368,14 +368,14 @@ class _NotificationInfoState extends State<NotificationInfo> {
                             ? Icon(Icons.check_circle_outline, color: secondColor)
                             : Icon(Icons.cancel_outlined, color: Colors.pink)
                       ]),Row(children: [
-                        labelText(text: "Starting point: "),
+                        labelText(text: "Pick Up: "),
                         Expanded(child: infoText(snapshot.data[2]))
                       ]), Row(children: [
-                        labelText(text: "Destination: "),
+                        labelText(text: "Drop Off: "),
                         Expanded(child: infoText(snapshot.data[6]))
-                      ]),/*Row(children: [
+                      ]),widget.type == NotificationInfoType.Requested ? Row(children: [
                         labelText(text: "Note: "), Expanded(child: infoText(snapshot.data[5]))
-                      ]),*/Divider(thickness: 1)]) : [])],
+                      ]) : Container(),Divider(thickness: 1)]) : [])],
                   ),
                 );
               } else {
@@ -506,11 +506,7 @@ class _NotificationInfoState extends State<NotificationInfo> {
                         if(returnValue == true){
                           Navigator.pop(context);
                         }
-                        /*if(widget.type == NotificationInfoType.Requested){
-                          showAlertDialog(context, "Reject Passenger", "Are you sure you want to reject this passenger?", userRep);
-                        }*/
-                        // _errorSnack.currentState.showSnackBar(SnackBar(content: Text("The lift couldn't be deleted, it could have been canceled", style: TextStyle(fontSize: 19,color: Colors.red),)));
-                        //await  cancelRequest(userRep);
+
                       }),
                 )
               ],

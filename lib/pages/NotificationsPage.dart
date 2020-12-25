@@ -1040,8 +1040,14 @@ class _NotificationsPageState extends State<NotificationsPage> {
     return Container(
         child:Row(
           children: [
+            Icon(Icons.date_range),
+            //Text(DateFormat('dd/MM kk:mm').format(time), style: TextStyle(fontSize: 13.5)),
+            //SizedBox(width: MediaQuery.of(context).size.width * 0.01),
+            Text(DateFormat('dd/MM').format(time), style: TextStyle(fontSize: 13.5)),
+            SizedBox(width: MediaQuery.of(context).size.width * 0.01),
             Icon(Icons.timer),
-            Text(DateFormat('dd/MM kk:mm').format(time), style: TextStyle(fontSize: 13.5)),
+            //SizedBox(width: MediaQuery.of(context).size.width * 0.01),
+            Text(DateFormat('kk:mm').format(time), style: TextStyle(fontSize: 13.5)),
             SizedBox(width: MediaQuery.of(context).size.width * 0.01),
             Container(child:Image.asset("assets/images/tl-.png",scale: 0.9)),
             SizedBox(width: MediaQuery.of(context).size.width * 0.005),

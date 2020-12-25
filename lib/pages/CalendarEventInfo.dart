@@ -503,14 +503,22 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
       final allInfo = StreamBuilder<DocumentSnapshot>(
           stream:firestore.collection("Drives").doc(widget.lift.liftId).snapshots(), // a previously-obtained Future<String> or null
           builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot){
-            try{
-              if(snapshot.hasData) {
-                snapshot.data.data().forEach((key, value) {
+            try {
+              if (snapshot.hasData) {
+                if (snapshot.data.exists) {
+                  snapshot.data.data().forEach((key, value) {
                     if (value != null) {
                       widget.lift.setProperty(key, value);
                     }
-                });
-                widget.lift.passengersInfo = Map<String, Map<String, dynamic>>.from(snapshot.data.data()["PassengersInfo"]?? {}) ;
+                  });
+                widget.lift.passengersInfo =
+                Map<String, Map<String, dynamic>>.from(
+                    snapshot.data.data()["PassengersInfo"] ?? {});
+                  if(widget.type == CalendarEventType.PendingLift) {
+                    if(widget.lift.passengersInfo.containsKey(userRep.user.email)){
+                      return Center(child: Text("You have been accepted to this lift", style: TextStyle(fontSize: 15),),);
+                    }
+                  }
                 return Container(
                     child: ListView(
                         shrinkWrap: true,
@@ -518,8 +526,11 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                             left: defaultSpacewidth, right: defaultSpacewidth),
                         children: [
                           SizedBox(height: defaultSpace),
-                          ...(widget.type == CalendarEventType.Lift || widget.type == CalendarEventType.PendingLift ? ([Text("Driver:",
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                          ...(widget.type == CalendarEventType.Lift ||
+                              widget.type == CalendarEventType.PendingLift ? ([
+                            Text("Driver:",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 18)),
                             _buildTile(widget.lift),
                             SizedBox(height: defaultSpace),
                           ]) : []),
@@ -529,29 +540,50 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                               labelText(text: "Date and time: "),
                               Expanded(
                                   child: infoText(
-                                      DateFormat('dd/MM - kk:mm').format(widget.lift.time)))
+                                      DateFormat('dd/MM - kk:mm').format(
+                                          widget.lift.time)))
                             ],
                           ),
                           SizedBox(height: defaultSpace),
-                          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                            labelText(text: "${(widget.type == CalendarEventType.Drive) ? "Starting Point" : "Pickup from"}: "),
-                            Expanded(child: infoText(widget.type == CalendarEventType.Drive ? widget.lift.startAddress : (
-                                (widget.type == CalendarEventType.Lift ?
-                            widget.lift.passengersInfo[userRep.user.email]["startAddress"] : widget.lift.pendingStartAddress))))
-                          ]),
+                          Row(crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                labelText(text: "${(widget.type ==
+                                    CalendarEventType.Drive)
+                                    ? "Starting Point"
+                                    : "Pickup from"}: "),
+                                Expanded(child: infoText(
+                                    widget.type == CalendarEventType.Drive
+                                        ? widget.lift.startAddress
+                                        : (
+                                        (widget.type == CalendarEventType.Lift ?
+                                        widget.lift.passengersInfo[userRep.user
+                                            .email]["startAddress"] : widget
+                                            .lift.pendingStartAddress))))
+                              ]),
                           SizedBox(height: defaultSpace),
-                          widget.type == CalendarEventType.Drive ? _buildRow(context) : SizedBox(height: 0,),
-                          Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
-                            labelText(text: (widget.type == CalendarEventType.Drive) ? "Destination: " : "Drop-off at: "),
-                            Expanded(child: infoText(widget.type == CalendarEventType.Drive ? widget.lift.destAddress : (
-                                (widget.type == CalendarEventType.Lift ?
-                                widget.lift.passengersInfo[userRep.user.email]["destAddress"] : widget.lift.pendingDestAddress))))
-                          ]),
+                          widget.type == CalendarEventType.Drive ? _buildRow(
+                              context) : SizedBox(height: 0,),
+                          Row(crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                labelText(text: (widget.type ==
+                                    CalendarEventType.Drive)
+                                    ? "Destination: "
+                                    : "Drop-off at: "),
+                                Expanded(child: infoText(
+                                    widget.type == CalendarEventType.Drive
+                                        ? widget.lift.destAddress
+                                        : (
+                                        (widget.type == CalendarEventType.Lift ?
+                                        widget.lift.passengersInfo[userRep.user
+                                            .email]["destAddress"] : widget.lift
+                                            .pendingDestAddress))))
+                              ]),
                           SizedBox(height: defaultSpace),
-                          Row(mainAxisSize: MainAxisSize.min,children: [
+                          Row(mainAxisSize: MainAxisSize.min, children: [
                             labelText(text: "Price: "),
-                            Image.asset("assets/images/shekel.png",scale: 0.9),
-                            Expanded(child: infoText(widget.lift.price.toString()))
+                            Image.asset("assets/images/shekel.png", scale: 0.9),
+                            Expanded(
+                                child: infoText(widget.lift.price.toString()))
                           ]),
                           SizedBox(height: defaultSpace),
                           Divider(
@@ -565,7 +597,8 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                                     alignment: Alignment.bottomLeft,
                                     child: Text("Additional info",
                                         style: TextStyle(
-                                            fontWeight: FontWeight.bold, fontSize: 17))),
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 17))),
                                 animatedWidgetFollowingHeader: const Icon(
                                   Icons.expand_more,
                                   color: const Color(0xFF707070),
@@ -576,46 +609,80 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                                 //title: Text("Passenger info"),
                                 children: [
                                   SizedBox(height: defaultSpace),
-                                  ...(widget.type == CalendarEventType.Drive ? [] :
-                                  [Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                    labelText(text: "Starting Point: "),
-                                    Expanded(child: infoText(widget.lift.startAddress))
+                                  ...(widget.type == CalendarEventType.Drive ? [
+                                  ] :
+                                  [
+                                    Row(crossAxisAlignment: CrossAxisAlignment
+                                        .start, children: [
+                                      labelText(text: "Starting Point: "),
+                                      Expanded(child: infoText(
+                                          widget.lift.startAddress))
+                                    ]),
+                                    SizedBox(height: defaultSpace),
+                                    _buildRow(context),
+                                    Row(crossAxisAlignment: CrossAxisAlignment
+                                        .start, children: [
+                                      labelText(text: "Destination: "),
+                                      Expanded(child: infoText(
+                                          widget.lift.destAddress))
+                                    ])
                                   ]),
-                                  SizedBox(height: defaultSpace),
-                                  _buildRow(context),
-                                  Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
-                                    labelText(text: "Destination: "),
-                                    Expanded(child: infoText(widget.lift.destAddress))
-                                  ])]),
                                   Row(children: [
                                     labelText(text: "Big Trunk: "),
                                     widget.lift.bigTrunk
-                                        ? Icon(Icons.check_circle_outline, color: secondColor)
-                                        : Icon(Icons.cancel_outlined, color: Colors.pink)
+                                        ? Icon(Icons.check_circle_outline,
+                                        color: secondColor)
+                                        : Icon(Icons.cancel_outlined,
+                                        color: Colors.pink)
                                   ]),
                                   SizedBox(height: defaultSpace),
                                   Row(children: [
                                     labelText(text: "Backseat not full?: "),
                                     widget.lift.backSeat
-                                        ? Icon(Icons.check_circle_outline, color: secondColor)
-                                        : Icon(Icons.cancel_outlined, color: Colors.pink)
+                                        ? Icon(Icons.check_circle_outline,
+                                        color: secondColor)
+                                        : Icon(Icons.cancel_outlined,
+                                        color: Colors.pink)
                                   ]),
                                   SizedBox(height: defaultSpace),
                                   // _buildRow(context),
-                                  widget.lift.note.isEmpty?SizedBox(height: 0,) : SizedBox(height: defaultSpace),
-                                  widget.lift.note.isEmpty? SizedBox(height: 0,) : Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
-                                    labelText(text: "${widget.type==CalendarEventType.Drive ? "My":"Drivers"} note: "),
+                                  widget.lift.note.isEmpty ? SizedBox(
+                                    height: 0,) : SizedBox(
+                                      height: defaultSpace),
+                                  widget.lift.note.isEmpty ? SizedBox(
+                                    height: 0,) : Row(
+                                      crossAxisAlignment: CrossAxisAlignment
+                                          .start, children: [
+                                    labelText(text: "${widget.type ==
+                                        CalendarEventType.Drive
+                                        ? "My"
+                                        : "Drivers"} note: "),
                                     Expanded(child: infoText(widget.lift.note)),
                                   ]),
-                                  ...(widget.type == CalendarEventType.Lift ? ([widget.lift.passengersInfo[userRep.user.email]["note"].isEmpty?SizedBox(height: 0,) : SizedBox(height: defaultSpace),
-                                    widget.lift.passengersInfo[userRep.user.email]["note"].isEmpty?SizedBox(height: 0,) : Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
+                                  ...(widget.type == CalendarEventType.Lift ? ([
+                                    widget.lift.passengersInfo[userRep.user
+                                        .email]["note"].isEmpty ? SizedBox(
+                                      height: 0,) : SizedBox(
+                                        height: defaultSpace),
+                                    widget.lift.passengersInfo[userRep.user
+                                        .email]["note"].isEmpty ? SizedBox(
+                                      height: 0,) : Row(
+                                        crossAxisAlignment: CrossAxisAlignment
+                                            .start, children: [
                                       labelText(text: "My note: "),
-                                      Expanded(child: infoText(widget.lift.passengersInfo[userRep.user.email]["note"]))
-                                    ])]) : []),
+                                      Expanded(child: infoText(
+                                          widget.lift.passengersInfo[userRep
+                                              .user.email]["note"]))
+                                    ])
+                                  ]) : []),
                                   SizedBox(height: defaultSpace),
-                                  Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
+                                  Row(crossAxisAlignment: CrossAxisAlignment
+                                      .start, children: [
                                     labelText(text: "Payment methods: "),
-                                    Expanded(child: infoText(widget.lift.payments.isEmpty? "Please contact the driver" : widget.lift.payments))
+                                    Expanded(child: infoText(
+                                        widget.lift.payments.isEmpty
+                                            ? "Please contact the driver"
+                                            : widget.lift.payments))
                                   ]),
                                 ],
                               )),
@@ -628,8 +695,13 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                               child: ConfigurableExpansionTile(
                                 header: Container(
                                     alignment: Alignment.bottomLeft,
-                                    child: Text("Passengers ${widget.lift.passengers.length}/${widget.lift.numberOfSeats}",
-                                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17))),
+                                    child: Text(
+                                        "Passengers ${widget.lift.passengers
+                                            .length}/${widget.lift
+                                            .numberOfSeats}",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 17))),
                                 animatedWidgetFollowingHeader: const Icon(
                                   Icons.expand_more,
                                   color: const Color(0xFF707070),
@@ -648,7 +720,11 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                           SizedBox(height: defaultSpace),
                           Container(
                           ),
-                        ]));} else{
+                        ]));
+              }else{
+                  return Center(child: Text("${widget.type == CalendarEventType.Drive? "Drive" : "Lift"} canceled", style: TextStyle(fontSize: 15),),);
+                }
+            }else{
                 if(snapshot.hasError){
                   return Center(child: Text("Error loading passenger info", style: TextStyle(fontSize: 15),),);
                 }else{

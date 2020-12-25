@@ -254,6 +254,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
                         fullscreenDialog: true));
                 setState(() {
                   if (returnFromMapResult != null) {
+                    stopAddressesList = [];
                     startAddress = returnFromMapResult.fromAddress;
                     destAddress = returnFromMapResult.toAddress;
                     _startPointController.text =

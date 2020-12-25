@@ -163,8 +163,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
             _validateTime = false;
             _indexError = 1;
           }
-          else if (_fromTime.hour < DateTime
-              .now().hour) {
+          else if ((currentDate.compareTo(DateTime.now())<=0) && (_fromTime.hour<DateTime.now().hour || (_fromTime.hour==DateTime.now().hour && _fromTime.minute<DateTime.now().minute)) ) {
             _validateTime = false;
             _indexError = 3;
           }

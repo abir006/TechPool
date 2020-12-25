@@ -146,13 +146,10 @@ Container calendarListTile(dynamic event,Widget leadingWidget,BuildContext conte
           }
         });
         docLift.liftId = event.driveId;
-        if(eventType == CalendarEventType.Lift) {
-          docLift.stops = [];
-        }
         if(eventType == CalendarEventType.PendingLift){
           docLift.dist = event.dist;
-          docLift.startAddress = event.from;
-          docLift.destAddress = event.to;
+          docLift.pendingStartAddress = event.from;
+          docLift.pendingDestAddress = event.to;
         }
         else{
           docLift.dist = 0;
@@ -225,6 +222,8 @@ class MyLift{
   String liftId;
   Map<String,Map<String, dynamic>> passengersInfo;
   String payments;
+  String pendingStartAddress;
+  String pendingDestAddress;
   var stops = new List<dynamic>();
 
   void setProperty(String key,var property){

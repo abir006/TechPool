@@ -357,6 +357,7 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                           )
                         ],
                       ),
+                      SizedBox(height: MediaQuery.of(context).size.height * 0.013),
                       ...(widget.type == CalendarEventType.Drive ? ([
                         Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
                           labelText(text: "Starting Point: "),
@@ -489,21 +490,10 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
             try{
               if(snapshot.hasData) {
                 snapshot.data.data().forEach((key, value) {
-                  if(key != "StartAddress" && key != "DestAddress") {
                     if (value != null) {
                       widget.lift.setProperty(key, value);
                     }
-                  }
                 });
-                if(widget.type == CalendarEventType.Lift) {
-                  widget.lift.stops = [];
-                }
-                if(widget.type == CalendarEventType.PendingLift){
-
-                }
-                else{
-                  widget.lift.dist = 0;
-                }
                 widget.lift.passengersInfo = Map<String, Map<String, dynamic>>.from(snapshot.data.data()["PassengersInfo"]?? {}) ;
                 return Container(
                     child: ListView(
@@ -512,6 +502,11 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                             left: defaultSpacewidth, right: defaultSpacewidth),
                         children: [
                           SizedBox(height: defaultSpace),
+                          ...(widget.type == CalendarEventType.Lift || widget.type == CalendarEventType.PendingLift ? ([Text("Driver:",
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                            _buildTile(widget.lift),
+                            SizedBox(height: defaultSpace),
+                          ]) : []),
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -524,13 +519,17 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                           SizedBox(height: defaultSpace),
                           Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                             labelText(text: "${(widget.type == CalendarEventType.Drive) ? "Starting Point" : "Pickup from"}: "),
-                            Expanded(child: infoText((widget.type == CalendarEventType.Drive || widget.type == CalendarEventType.PendingLift) ? widget.lift.startAddress : widget.lift.passengersInfo[userRep.user.email]["startAddress"]))
+                            Expanded(child: infoText(widget.type == CalendarEventType.Drive ? widget.lift.startAddress : (
+                                (widget.type == CalendarEventType.Lift ?
+                            widget.lift.passengersInfo[userRep.user.email]["startAddress"] : widget.lift.pendingStartAddress))))
                           ]),
                           SizedBox(height: defaultSpace),
                           widget.type == CalendarEventType.Drive ? _buildRow(context) : SizedBox(height: 0,),
                           Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
                             labelText(text: (widget.type == CalendarEventType.Drive) ? "Destination: " : "Drop-off at: "),
-                            Expanded(child: infoText((widget.type == CalendarEventType.Drive || widget.type == CalendarEventType.PendingLift) ? widget.lift.destAddress : widget.lift.passengersInfo[userRep.user.email]["destAddress"]))
+                            Expanded(child: infoText(widget.type == CalendarEventType.Drive ? widget.lift.destAddress : (
+                                (widget.type == CalendarEventType.Lift ?
+                                widget.lift.passengersInfo[userRep.user.email]["destAddress"] : widget.lift.pendingDestAddress))))
                           ]),
                           SizedBox(height: defaultSpace),
                           Row(mainAxisSize: MainAxisSize.min,children: [
@@ -539,11 +538,6 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                             Expanded(child: infoText(widget.lift.price.toString()))
                           ]),
                           SizedBox(height: defaultSpace),
-                          ...(widget.type == CalendarEventType.Lift || widget.type == CalendarEventType.PendingLift ? ([Text("Driver:",
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                            _buildTile(widget.lift),
-                            SizedBox(height: defaultSpace),
-                          ]) : []),
                           Divider(
                             thickness: 3,
                           ),
@@ -565,6 +559,18 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                                 // trailing: Icon(Icons.arrow_drop_down,color: Colors.black,),
                                 //title: Text("Passenger info"),
                                 children: [
+                                  SizedBox(height: defaultSpace),
+                                  ...(widget.type == CalendarEventType.Drive ? [] :
+                                  [Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                    labelText(text: "Starting Point: "),
+                                    Expanded(child: infoText(widget.lift.startAddress))
+                                  ]),
+                                  SizedBox(height: defaultSpace),
+                                  _buildRow(context),
+                                  Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
+                                    labelText(text: "Destination: "),
+                                    Expanded(child: infoText(widget.lift.destAddress))
+                                  ])]),
                                   Row(children: [
                                     labelText(text: "Big Trunk: "),
                                     widget.lift.bigTrunk
@@ -593,7 +599,7 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                                   SizedBox(height: defaultSpace),
                                   Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
                                     labelText(text: "Payment methods: "),
-                                    Expanded(child: infoText(widget.lift.payments))
+                                    Expanded(child: infoText(widget.lift.payments.isEmpty? "Please contact the driver" : widget.lift.payments))
                                   ]),
                                 ],
                               )),

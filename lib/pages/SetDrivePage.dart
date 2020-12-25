@@ -271,6 +271,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
               onPressed: () {
                 DateTime fixedTime = widget.currentDate
                     .subtract(new Duration(hours: widget.currentDate.hour))
+                    .subtract(new Duration(hours: widget.currentDate.minute))
                     .add(new Duration(hours: DateTime.now().hour))
                     .add(new Duration(minutes: DateTime.now().minute));
 

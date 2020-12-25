@@ -460,51 +460,55 @@ class _NotificationInfoState extends State<NotificationInfo> {
             height: defaultSpace * 6,
             child: Row(
               children: [
-                RaisedButton.icon(
-                    color: Colors.green,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18),
-                        side: BorderSide(color: Colors.black)),
-                    icon: Icon(Icons.check, color: Colors.white,),
-                    label: Text("Accept",
-                        style: TextStyle(color: Colors.white, fontSize: 17)),
-                    onPressed:  () async{
-                      if(widget.lift.passengersInfo.length == widget.lift.numberOfSeats){
-                        //_errorSnack.currentState.showSnackBar(SnackBar(content: Text("This drive is already full. Please press on Reject", style: TextStyle(fontSize: 19,color: Colors.red),)));
-                        showErrorDialog(context, "No space left", "This drive is already full.\nPlease press on Reject.", userRep);
-                      } else {
-                        bool returnValue = await _acceptRequest(userRep);
-                        if (returnValue == true) {
+                Flexible(
+                  child: RaisedButton.icon(
+                      color: Colors.green,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18),
+                          side: BorderSide(color: Colors.black)),
+                      icon: Icon(Icons.check, color: Colors.white,),
+                      label: Text("Accept",
+                          style: TextStyle(color: Colors.white, fontSize: 17)),
+                      onPressed:  () async{
+                        if(widget.lift.passengersInfo.length == widget.lift.numberOfSeats){
+                          //_errorSnack.currentState.showSnackBar(SnackBar(content: Text("This drive is already full. Please press on Reject", style: TextStyle(fontSize: 19,color: Colors.red),)));
+                          showErrorDialog(context, "No space left", "This drive is already full.\nPlease press on Reject.", userRep);
+                        } else {
+                          bool returnValue = await _acceptRequest(userRep);
+                          if (returnValue == true) {
+                            Navigator.pop(context);
+                          }
+                        }
+                        /*if(widget.type == NotificationInfoType.Accepted){
+                          showAlertDialog(context, "Cancel Lift", "Are you sure you want to cancel?\nThere is no going back", userRep);
+                        }*/
+                        // _errorSnack.currentState.showSnackBar(SnackBar(content: Text("The lift couldn't be deleted, it could have been canceled", style: TextStyle(fontSize: 19,color: Colors.red),)));
+                        //await  cancelRequest(userRep);
+                      }),
+                ),
+                SizedBox(width: defaultSpacewidth),
+                Flexible(
+                  child: RaisedButton.icon(
+                      color: Colors.red[800],
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18),
+                          side: BorderSide(color: Colors.black)),
+                      icon: Icon(Icons.close, color: Colors.white,),
+                      label: Text("Reject",
+                          style: TextStyle(color: Colors.white, fontSize: 17)),
+                      onPressed:  () async{
+
+                        bool returnValue = await _rejectRequest(userRep);
+                        if(returnValue == true){
                           Navigator.pop(context);
                         }
-                      }
-                      /*if(widget.type == NotificationInfoType.Accepted){
-                        showAlertDialog(context, "Cancel Lift", "Are you sure you want to cancel?\nThere is no going back", userRep);
-                      }*/
-                      // _errorSnack.currentState.showSnackBar(SnackBar(content: Text("The lift couldn't be deleted, it could have been canceled", style: TextStyle(fontSize: 19,color: Colors.red),)));
-                      //await  cancelRequest(userRep);
-                    }),
-                SizedBox(width: defaultSpacewidth),
-                RaisedButton.icon(
-                    color: Colors.red[800],
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18),
-                        side: BorderSide(color: Colors.black)),
-                    icon: Icon(Icons.close, color: Colors.white,),
-                    label: Text("Reject",
-                        style: TextStyle(color: Colors.white, fontSize: 17)),
-                    onPressed:  () async{
-
-                      bool returnValue = await _rejectRequest(userRep);
-                      if(returnValue == true){
-                        Navigator.pop(context);
-                      }
-                      /*if(widget.type == NotificationInfoType.Requested){
-                        showAlertDialog(context, "Reject Passenger", "Are you sure you want to reject this passenger?", userRep);
-                      }*/
-                      // _errorSnack.currentState.showSnackBar(SnackBar(content: Text("The lift couldn't be deleted, it could have been canceled", style: TextStyle(fontSize: 19,color: Colors.red),)));
-                      //await  cancelRequest(userRep);
-                    })
+                        /*if(widget.type == NotificationInfoType.Requested){
+                          showAlertDialog(context, "Reject Passenger", "Are you sure you want to reject this passenger?", userRep);
+                        }*/
+                        // _errorSnack.currentState.showSnackBar(SnackBar(content: Text("The lift couldn't be deleted, it could have been canceled", style: TextStyle(fontSize: 19,color: Colors.red),)));
+                        //await  cancelRequest(userRep);
+                      }),
+                )
               ],
             ));
       });

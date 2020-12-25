@@ -64,7 +64,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
   @override
   Widget build(BuildContext context) {
 
-    void check_locations(){
+    void checkLocations(){
       _validateLocations = true;
       if (_startPointController.text == "") {
         _validateLocations = false;
@@ -84,58 +84,102 @@ class _SetDrivePageState extends State<SetDrivePage> {
       widget.numberOfSeatsIndex = null;
     }*/
 
-    final stopPoint1text = Container(
-      child: Row(
-        children: [
-          textBoxFieldDisable(
-            nameLabel: "Stop 1:",
-            size: MediaQuery.of(context).size,
-            hintText: "",
-            textFieldController: _stopPoint1Controller,
-          ),
-        ],
+
+
+    // final stopPoint1text_2 = Container(
+    //   child: Row(
+    //     children: [
+    //       textBoxFieldDisable(
+    //         nameLabel: "Stop 1:",
+    //         size: MediaQuery.of(context).size,
+    //         hintText: "",
+    //         textFieldController: _stopPoint1Controller,
+    //       ),
+    //     ],
+    //   ),
+    // );
+    // final stopPoint2text_2 = Container(
+    //   child: Row(
+    //     children: [
+    //       textBoxFieldDisable(
+    //         nameLabel: "Stop 2:",
+    //         size: MediaQuery.of(context).size,
+    //         hintText: "",
+    //         textFieldController: _stopPoint2Controller,
+    //       ),
+    //     ],
+    //   ),
+    // );
+    // final stopPoint3text_2 = Container(
+    //   child: Row(
+    //     children: [
+    //       textBoxFieldDisable(
+    //         nameLabel: "Stop 3:",
+    //         size: MediaQuery.of(context).size,
+    //         hintText: "",
+    //         textFieldController: _stopPoint3Controller,
+    //       ),
+    //     ],
+    //   ),
+    // );
+
+
+    final stopPoint1text = Stack(children: [
+      Container(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            searchLabelText(
+              text: "Stop 1: ",
+            ),
+            Expanded(child: generalInfoText(text: _stopPoint1Controller.text)),
+            //SizedBox(height: 0.5 * defaultSpace),
+          ],
+        ),
       ),
-    );
-    final stopPoint2text = Container(
-      child: Row(
-        children: [
-          textBoxFieldDisable(
-            nameLabel: "Stop 2:",
-            size: MediaQuery.of(context).size,
-            hintText: "",
-            textFieldController: _stopPoint2Controller,
-          ),
-        ],
+    ]);
+
+    final stopPoint2text = Stack(children: [
+      Container(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            searchLabelText(
+              text: "Stop 2: ",
+            ),
+            Expanded(child: generalInfoText(text: _stopPoint2Controller.text)),
+          ],
+        ),
       ),
-    );
-    final stopPoint3text = Container(
-      child: Row(
-        children: [
-          textBoxFieldDisable(
-            nameLabel: "Stop 3:",
-            size: MediaQuery.of(context).size,
-            hintText: "",
-            textFieldController: _stopPoint3Controller,
-          ),
-        ],
+    ]);
+
+    final stopPoint3text = Stack(children: [
+      Container(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            searchLabelText(
+              text: "Stop 3: ",
+            ),
+            Expanded(child: generalInfoText(text: _stopPoint3Controller.text)),
+          ],
+        ),
       ),
-    );
+    ]);
+
 
     final startPointText = Stack(children: [
       Container(
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            searchLableText(
+            searchLabelText(
               text: "Start: ",
             ),
             Expanded(child: generalInfoText(text: _startPointController.text)),
           ],
         ),
       ),
-      //  InkWell(
-      //  onTap: (){},
-      //Container(color:Colors.transparent,child:SizedBox(width: defaultSpace*8,height:defaultSpace*9,)),
     ]);
 
     final destinationText = Stack(children: [
@@ -143,52 +187,51 @@ class _SetDrivePageState extends State<SetDrivePage> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              searchLableText(
+              searchLabelText(
                 text: "Destination: ",
               ),
               Expanded(child: generalInfoText(text: _destPointController.text)),
             ],
           )),
-      // Container(color:Colors.transparent,child:SizedBox(width: defaultSpace*8,height:defaultSpace*10,)),
     ]);
 
-    final startPointText2 = Container(
-      child: Row(
-        children: [
-          textBoxFieldDisable(
-              nameLabel: "Start:",
-              size: MediaQuery.of(context).size,
-              hintText: "",
-              textFieldController: _startPointController,
-              validator: (value) {
-                if (_startPointController == null ||
-                    _startPointController.text == "") {
-                  return "No start point chosen";
-                } else
-                  return null;
-              }),
-        ],
-      ),
-    );
+    // final startPointText2 = Container(
+    //   child: Row(
+    //     children: [
+    //       textBoxFieldDisable(
+    //           nameLabel: "Start:",
+    //           size: MediaQuery.of(context).size,
+    //           hintText: "",
+    //           textFieldController: _startPointController,
+    //           validator: (value) {
+    //             if (_startPointController == null ||
+    //                 _startPointController.text == "") {
+    //               return "No start point chosen";
+    //             } else
+    //               return null;
+    //           }),
+    //     ],
+    //   ),
+    // );
 
-    final destinationText2 = Container(
-      child: Row(
-        children: [
-          textBoxFieldDisable(
-              nameLabel: "Destination:",
-              size: MediaQuery.of(context).size,
-              hintText: "",
-              textFieldController: _destPointController,
-              validator: (value) {
-                if (_destPointController == null ||
-                    _destPointController.text == "") {
-                  return "No destination chosen";
-                } else
-                  return null;
-              }),
-        ],
-      ),
-    );
+    // final destinationText2 = Container(
+    //   child: Row(
+    //     children: [
+    //       textBoxFieldDisable(
+    //           nameLabel: "Destination:",
+    //           size: MediaQuery.of(context).size,
+    //           hintText: "",
+    //           textFieldController: _destPointController,
+    //           validator: (value) {
+    //             if (_destPointController == null ||
+    //                 _destPointController.text == "") {
+    //               return "No destination chosen";
+    //             } else
+    //               return null;
+    //           }),
+    //     ],
+    //   ),
+    // );
 
     final chooseStartAndDestination = Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -239,7 +282,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
                                       'stopCity' : returnFromMapResult.stopAddresses[i].locality};
                       stopAddressesList.add(mapToAdd);
                     }
-                    check_locations();
+                    checkLocations();
                   }
                 });
               },
@@ -336,11 +379,29 @@ class _SetDrivePageState extends State<SetDrivePage> {
           textFieldController: _hourController,
           validator: (value) {
             if (_chosenTime == null)
-              return '                               Time not chosen';
+              return '                             Time not chosen';
+             else if (_chosenTime.isBefore(DateTime.now())){
+              _hourController.text = "";
+              return '                             Time already passed';
+            }
             else
               return null;
           }),
     );
+
+    // child: textBoxFieldDisableCentered(
+    //     size: MediaQuery.of(context).size,
+    //     hintText: "",
+    //     textFieldController: _hourController,
+    //     validator: (value) {
+    //       // return '                               Time not chosen';
+    //       if (_chosenTime == null)
+    //         return 'Time not chosen';
+    //       // else if (_chosenTime.isBefore(DateTime.now()))
+    //       //   return 'Time already passed';
+    //       else
+    //         return null;
+    //     }),
 
     final bigTrunkText = Container(
       height: 4 * defaultSpace,
@@ -488,7 +549,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
                   style: TextStyle(color: Colors.white, fontSize: 17)),
               onPressed: () async {
                 //setState(() {
-                  check_locations();
+                  checkLocations();
                 //});
                 if (_formKey2.currentState.validate() && _validateLocations) {
                   try {
@@ -629,7 +690,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
                                 chooseStartAndDestination,
                                 SizedBox(height: 1 * defaultSpace),
                                 startPointText,
-                                SizedBox(height: 2 * defaultSpace),
+                                SizedBox(height: 1 * defaultSpace),
 
                                 _numberOfStops > 0
                                     ? stopPoint1text
@@ -640,7 +701,9 @@ class _SetDrivePageState extends State<SetDrivePage> {
                                 _numberOfStops > 2
                                     ? stopPoint3text
                                     : Container(),
-
+                                _numberOfStops > 0 ?
+                                SizedBox(height: 1 * defaultSpace)
+                                    : Container(),
 
                                 destinationText,
 
@@ -699,7 +762,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
   }
 }
 
-Widget searchLableText({@required String text}) {
+Widget searchLabelText({@required String text}) {
   return Container(
     child: Text(
       text,

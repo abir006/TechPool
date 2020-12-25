@@ -379,11 +379,29 @@ class _SetDrivePageState extends State<SetDrivePage> {
           textFieldController: _hourController,
           validator: (value) {
             if (_chosenTime == null)
-              return '                               Time not chosen';
+              return '                             Time not chosen';
+             else if (_chosenTime.isBefore(DateTime.now())){
+              _hourController.text = "";
+              return '                             Time already passed';
+            }
             else
               return null;
           }),
     );
+
+    // child: textBoxFieldDisableCentered(
+    //     size: MediaQuery.of(context).size,
+    //     hintText: "",
+    //     textFieldController: _hourController,
+    //     validator: (value) {
+    //       // return '                               Time not chosen';
+    //       if (_chosenTime == null)
+    //         return 'Time not chosen';
+    //       // else if (_chosenTime.isBefore(DateTime.now()))
+    //       //   return 'Time already passed';
+    //       else
+    //         return null;
+    //     }),
 
     final bigTrunkText = Container(
       height: 4 * defaultSpace,

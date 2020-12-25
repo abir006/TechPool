@@ -178,7 +178,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 double defaultSpacewidth = MediaQuery.of(context).size.width * 0.016;
 
                 return Scaffold(
-                  key: _key,
                   backgroundColor: mainColor,
                   appBar: AppBar(
                     elevation: 0,
@@ -230,7 +229,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
   Scaffold _buildPage(BuildContext context, UserRepository userRep) {
     double defaultSpacewidth = MediaQuery.of(context).size.height * 0.016;
     return Scaffold(
-        backgroundColor: mainColor,
+      key: _key,
+      backgroundColor: mainColor,
         appBar: AppBar(
           elevation: 0,
           title: Text(
@@ -291,7 +291,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
                     // Then show a snackbar.
                     //Scaffold.of(context)
-                    //_key.currentState.showSnackBar(SnackBar(content: Text(/*$notification*/"Notification Deleted", style: TextStyle(fontSize: 20))));
+                    _key.currentState.showSnackBar(SnackBar(content: Text(/*$notification*/"Notification Deleted", style: TextStyle(fontSize: 20))));
                   },
                   // Show a red background as the item is swiped away.
                   background: //Container(color: mainColor),

@@ -561,20 +561,22 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
                                 fit: BoxFit.fill,
                                 image: NetworkImage(snapshot.data[0])),
                           ))),
-                  Container(
-                      margin: EdgeInsets.only(
-                          left: MediaQuery.of(context).size.height * 0.016,
-                          top: MediaQuery.of(context).size.height * 0.016),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          infoText(snapshot.data[1]),
-                          //placesText(lift.startAddress),
-                          allInfoText(lift.dist / 1000),
-                          //SizedBox(height:MediaQuery.of(context).size.height * 0.016 ,)
-                        ],
-                      )),
+                  Expanded(
+                    child: Container(
+                        margin: EdgeInsets.only(
+                            left: MediaQuery.of(context).size.height * 0.016,
+                            top: MediaQuery.of(context).size.height * 0.016),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            infoText(snapshot.data[1]),
+                            //placesText(lift.startAddress),
+                            allInfoText(lift.dist / 1000),
+                            //SizedBox(height:MediaQuery.of(context).size.height * 0.016 ,)
+                          ],
+                        )),
+                  ),
                   Spacer(),
                   SizedBox(
                     width: MediaQuery.of(context).size.height * 0.016,

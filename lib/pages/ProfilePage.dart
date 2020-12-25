@@ -211,8 +211,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
     final updateProfile = Container(
         padding: EdgeInsets.only(
-            left: sizeFrameWidth * 0.2,
-            right: sizeFrameWidth * 0.2,
+          //  left: sizeFrameWidth * 0.2,
+          //  right: sizeFrameWidth * 0.2,
             bottom: defaultSpace * 2),
         height: defaultSpace * 6,
         child: RaisedButton.icon(
@@ -249,11 +249,11 @@ class _ProfilePageState extends State<ProfilePage> {
     },
     );
 
-    final buttons =Container(margin: EdgeInsets.only(left: defaultSpacewidth),
+    final buttons =Container(
         child: Center(child: Row(
             mainAxisAlignment:MainAxisAlignment.start,
             crossAxisAlignment:CrossAxisAlignment.start,
-            children: [SizedBox(width: defaultSpacewidth*3),Expanded(child:DiscardUpdate),SizedBox(width: defaultSpacewidth*2),Expanded(child:acceptUpdate),SizedBox(width: defaultSpacewidth*3)])));
+            children: [SizedBox(width: defaultSpacewidth*3),Expanded(child:DiscardUpdate),SizedBox(width: defaultSpacewidth*1),Expanded(child:acceptUpdate),SizedBox(width: defaultSpacewidth*3)])));
     Widget allInfo (UserRepository userRep) {return FutureBuilder<void>(
         future: initInfo(userRep.user.email), // a previously-obtained Future<String> or null
         builder: (BuildContext context, AsyncSnapshot<void> snapshot) {

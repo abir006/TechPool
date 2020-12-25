@@ -453,7 +453,7 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
                               left: MediaQuery
                                   .of(context)
                                   .size
-                                  .height * 0.016, top: MediaQuery
+                                  .width * 0.016, top: MediaQuery
                               .of(context)
                               .size
                               .height * 0.016),
@@ -477,7 +477,7 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
                           left: MediaQuery
                               .of(context)
                               .size
-                              .height * 0.016, top: MediaQuery
+                              .width * 0.016, top: MediaQuery
                           .of(context)
                           .size
                           .height * 0.016),
@@ -491,11 +491,11 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
                         ],
                       )),
                   Spacer(),
-                  Icon(Icons.arrow_forward_ios_outlined),
+                  Expanded(child: Container(child: Icon(Icons.arrow_forward_ios_outlined),)),
                   SizedBox(width: MediaQuery
                       .of(context)
                       .size
-                      .height * 0.016,)
+                      .width * 0.06)
                 ],
               ),
             ));

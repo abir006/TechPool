@@ -16,6 +16,7 @@ class NotificationsPage extends StatefulWidget {
 }
 
 class _NotificationsPageState extends State<NotificationsPage> {
+  final _key = GlobalKey<ScaffoldState>();
   FirebaseFirestore firestore = FirebaseFirestore.instance;
   DateTime selectedDay = DateTime.now();
   List<LiftNotification> _notifications;
@@ -228,7 +229,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
   Scaffold _buildPage(BuildContext context, UserRepository userRep) {
     double defaultSpacewidth = MediaQuery.of(context).size.height * 0.016;
     return Scaffold(
-        backgroundColor: mainColor,
+      key: _key,
+      backgroundColor: mainColor,
         appBar: AppBar(
           elevation: 0,
           title: Text(
@@ -288,8 +290,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     });
 
                     // Then show a snackbar.
-                    Scaffold.of(context)
-                        .showSnackBar(SnackBar(content: Text(/*$notification*/"Notification Deleted", style: TextStyle(fontSize: 20))));
+                    //Scaffold.of(context)
+                    _key.currentState.showSnackBar(SnackBar(content: Text(/*$notification*/"Notification Deleted", style: TextStyle(fontSize: 20))));
                   },
                   // Show a red background as the item is swiped away.
                   background: //Container(color: mainColor),
@@ -1038,8 +1040,14 @@ class _NotificationsPageState extends State<NotificationsPage> {
     return Container(
         child:Row(
           children: [
+            Icon(Icons.date_range),
+            //Text(DateFormat('dd/MM kk:mm').format(time), style: TextStyle(fontSize: 13.5)),
+            //SizedBox(width: MediaQuery.of(context).size.width * 0.01),
+            Text(DateFormat('dd/MM').format(time), style: TextStyle(fontSize: 13.5)),
+            SizedBox(width: MediaQuery.of(context).size.width * 0.01),
             Icon(Icons.timer),
-            Text(DateFormat('dd/MM kk:mm').format(time), style: TextStyle(fontSize: 13.5)),
+            //SizedBox(width: MediaQuery.of(context).size.width * 0.01),
+            Text(DateFormat('kk:mm').format(time), style: TextStyle(fontSize: 13.5)),
             SizedBox(width: MediaQuery.of(context).size.width * 0.01),
             Container(child:Image.asset("assets/images/tl-.png",scale: 0.9)),
             SizedBox(width: MediaQuery.of(context).size.width * 0.005),

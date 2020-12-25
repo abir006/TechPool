@@ -302,7 +302,7 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
             });
       }
 
-      Widget _buildPassengerTile(String name) {
+      Widget _buildPassengerTile(String name,bool isLastPassenger) {
         return FutureBuilder<List<dynamic>>(
             future: initNames(name), // a previously-obtained Future<String> or null
             builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
@@ -374,7 +374,7 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                               : Icon(Icons.cancel_outlined, color: Colors.pink)
                         ]),snapshot.data[5].isEmpty? SizedBox(height: 0,) : Row(children: [
                           labelText(text: "Note: "), Expanded(child: infoText(snapshot.data[5]))
-                        ]),Divider(thickness: 1)]) : [])],
+                        ]),!isLastPassenger? Divider(thickness: 1) : SizedBox(height:0)]) : [])],
                   ),
                 );
               }else if (snapshot.hasError){
@@ -412,9 +412,11 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
 
       List<Widget> _buildPassengersList() {
         List<Widget> passengers = [];
-        for (int i = 0; i < widget.lift.passengers.length; i++) {
-          passengers.add(_buildPassengerTile(widget.lift.passengers[i]));
+        int i = 0;
+        for (; i < widget.lift.passengers.length-1; i++) {
+          passengers.add(_buildPassengerTile(widget.lift.passengers[i],false));
         }
+        passengers.add(_buildPassengerTile(widget.lift.passengers[i],true));
         return passengers;
       }
 

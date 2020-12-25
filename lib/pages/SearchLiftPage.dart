@@ -70,7 +70,8 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
   List<String> _errors = [
     "Choose from and to time",
     "From time equal to to time",
-    "The from time is after the to time"
+    "The from time is after the to time",
+    "The from time is before current time"
   ];
   int _indexError = 0;
 
@@ -144,22 +145,29 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
         _validateLocations = false;
       }
     }
-    void checktimes(){
+    void checktimes() {
       _validateTime = true;
       if (_fromTime == null || _toTime == null) {
         _validateTime = false;
         _indexError = 0;
-      }else {
+      } else {
         if ((_fromTime.hour > _toTime.hour) ||
             (_toTime.hour == _fromTime.hour &&
                 _toTime.minute < _fromTime.minute)) {
           _validateTime = false;
           _indexError = 2;
         }
-        if (_fromTime.hour == _toTime.hour &&
-            _toTime.minute == _fromTime.minute) {
-          _validateTime = false;
-          _indexError = 1;
+        else {
+          if (_fromTime.hour == _toTime.hour &&
+              _toTime.minute == _fromTime.minute) {
+            _validateTime = false;
+            _indexError = 1;
+          }
+          else if (_fromTime.hour < DateTime
+              .now().hour) {
+            _validateTime = false;
+            _indexError = 3;
+          }
         }
       }
     }
@@ -197,7 +205,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             searchLableText(
-              text: "Start: ",
+              text: "Starting point:",
             ),
             Expanded(child: generalInfoText(text: _startPointControler.text)),
             /*Expanded(child: textBoxFieldDisable(

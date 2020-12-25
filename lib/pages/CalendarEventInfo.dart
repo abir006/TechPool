@@ -433,10 +433,20 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
           alignment: Alignment.bottomLeft,
           color: Colors.white,
           child: ConfigurableExpansionTile(
-            header: Container(
-                alignment: Alignment.bottomLeft,
-                child: Text("Passengers info",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17))),
+            header:  Row(
+                children: [Container(
+                    alignment: Alignment.bottomLeft,
+                    child: Text("Passengers info " , style: TextStyle(fontWeight: FontWeight.bold,
+                        fontSize: 17))),
+                  Icon(Icons.person),
+                  Container(
+                      alignment: Alignment.bottomLeft,
+                      child: Text(
+                          widget.lift.passengers.length.toString() +
+                              "/" + widget.lift.numberOfSeats.toString(),
+                          style: TextStyle(fontWeight: FontWeight.bold,
+                              fontSize: 17))),
+                ]),
             animatedWidgetFollowingHeader: const Icon(
               Icons.expand_more,
               color: const Color(0xFF707070),

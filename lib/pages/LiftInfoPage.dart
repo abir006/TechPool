@@ -110,6 +110,7 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
       List<Widget> stops = [];
       int i = 1;
       widget.lift.stops.forEach((key) {
+        stops.add(SizedBox(height: defaultSpace));
         (key as Map).forEach((key, value) {
           if(key=="stopAddress")
           stops.add(Row(
@@ -283,9 +284,9 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
                          style: TextStyle(
                              fontWeight: FontWeight.bold, fontSize: 18)),
                      _buildTile(widget.lift),
-                     Divider(
-                       thickness: 3,
-                     ),
+                  //   Divider(
+                  //     thickness: 3,
+                  //   ),
                      SizedBox(height: defaultSpace),
                      Row(
                        crossAxisAlignment: CrossAxisAlignment.start,
@@ -301,10 +302,10 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
                      Row(
                          crossAxisAlignment: CrossAxisAlignment.start,
                          children: [
-                           labelText(text: "Start: "),
+                           labelText(text: "Starting point: "),
                            Expanded(child: infoText(widget.lift.startAddress))
                          ]),
-                     SizedBox(height: defaultSpace),
+                    // SizedBox(height: defaultSpace),
                      _buildRow(context),
                      SizedBox(height: defaultSpace),
                      Row(
@@ -339,13 +340,20 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
                          alignment: Alignment.bottomLeft,
                          color: Colors.white,
                          child: ConfigurableExpansionTile(
-                           header: Container(
-                               alignment: Alignment.bottomLeft,
-                               child: Text("Passengers info " +
-                                   widget.lift.passengers.length.toString() +
-                                   "/" + widget.lift.numberOfSeats.toString(),
-                                   style: TextStyle(fontWeight: FontWeight.bold,
-                                       fontSize: 17))),
+                           header: Row(
+                             children: [Container(
+                                 alignment: Alignment.bottomLeft,
+                                 child: Text("Passengers info " , style: TextStyle(fontWeight: FontWeight.bold,
+                               fontSize: 17))),
+                               Icon(Icons.person),
+                               Container(
+                                   alignment: Alignment.bottomLeft,
+                                   child: Text(
+                                       widget.lift.passengers.length.toString() +
+                                       "/" + widget.lift.numberOfSeats.toString(),
+                                       style: TextStyle(fontWeight: FontWeight.bold,
+                                           fontSize: 17))),
+                           ]),
                            animatedWidgetFollowingHeader: const Icon(
                              Icons.expand_more,
                              color: const Color(0xFF707070),
@@ -362,9 +370,12 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
                        thickness: 3,
                      ),
                      SizedBox(height: defaultSpace),
+                     Text("My requests:",
+                         style: TextStyle(
+                             fontWeight: FontWeight.bold, fontSize: 18)),
                      Container(
                        // width:300*defaultSpacewidth,
-                       // color: Colors.red,
+                       // color: mainColor.withOpacity(0.05),
                        // decoration: BoxDecoration(
                        //    color: Colors.white,//Color(0xFFF5F5F5),
                        // boxShadow: [
@@ -373,7 +384,7 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
                        // ],
                        //  border: Border.all(color: secondColor, width: 0.8),
                        //borderRadius: BorderRadius.circular(15.0),
-                       //padding: const EdgeInsets.all(4),
+                      // padding: const EdgeInsets.all(4),
                        child: Column(
                            children: [
                              generalInfoBoxTextField(
@@ -383,20 +394,30 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
                                  nameLabel: "Request note to driver:",
                                  maxLenth: 150),
                              Row(
-                               //    mainAxisAlignment: MainAxisAlignment.start,
-                               //    crossAxisAlignment: CrossAxisAlignment.start,
-                               //   mainAxisSize: MainAxisSize.min,
+                                   mainAxisAlignment: MainAxisAlignment.start,
+                                     //crossAxisAlignment: CrossAxisAlignment.start,
+                                 // mainAxisSize: MainAxisSize.min,
                                children: [
-                                 labelText(text: "Big Bag: "),
+                               Text(
+                               "Big Bag:",
+                               style:
+                               TextStyle( fontSize: 17, color: Colors.black.withOpacity(0.6)),
+                               overflow: TextOverflow.ellipsis,
+                               maxLines: 2,
+                             ),
                                  Container(alignment: Alignment.topLeft,
                                      child: Theme(data: ThemeData(
                                          unselectedWidgetColor: secondColor),
-                                         child: Checkbox(value: bigBag,
-                                             onChanged: (bool value) {
-                                               setState(() {
-                                                 bigBag = value;
-                                               });
-                                             }))),
+                                         child: SizedBox(
+                                           height: defaultSpace,
+                                           //width: defaultSpacewidth,
+                                           child: Checkbox(value: bigBag,
+                                               onChanged: (bool value) {
+                                                 setState(() {
+                                                   bigBag = value;
+                                                 });
+                                               }),
+                                         ))),
                                ],)
                            ]),
                      ),

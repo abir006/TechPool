@@ -413,11 +413,15 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
       List<Widget> _buildPassengersList() {
         List<Widget> passengers = [];
         int i = 0;
-        for (; i < widget.lift.passengers.length-1; i++) {
-          passengers.add(_buildPassengerTile(widget.lift.passengers[i],false));
+        if(widget.lift.passengers.length > 0) {
+          for (; i < widget.lift.passengers.length - 1; i++) {
+            passengers.add(
+                _buildPassengerTile(widget.lift.passengers[i], false));
+          }
+          passengers.add(_buildPassengerTile(widget.lift.passengers[i], true));
         }
-        passengers.add(_buildPassengerTile(widget.lift.passengers[i],true));
-        return passengers;
+          return passengers;
+
       }
 
       Widget _buildRow(BuildContext context) {

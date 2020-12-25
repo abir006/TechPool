@@ -138,7 +138,7 @@ class _SignUpPageState extends State<SignUpPage>
                     child: Stack(alignment: Alignment.topCenter, children: [
                       Container(
                           decoration: BoxDecoration(
-                              image: DecorationImage(
+                              image: DecorationImage(fit: BoxFit.fill,
                                   image: Image.asset(
                             "assets/images/AuthPageBackground.png",
                             height: size.height,
@@ -149,7 +149,6 @@ class _SignUpPageState extends State<SignUpPage>
                           width: size.width),
                       Positioned(
                           top: animation.value,
-                          left: size.width * 0.38,
                           child: Image(
                               alignment: Alignment.center,
                               height: 100,
@@ -218,7 +217,7 @@ class _SignUpPageState extends State<SignUpPage>
                                       return null;
                                     }),
                                 Container(
-                                  width: size.width * 0.70,
+                                  width: size.width * 0.8,
                                   child: Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.start,
@@ -246,7 +245,7 @@ class _SignUpPageState extends State<SignUpPage>
                                                 color: Colors.black,
                                                 borderRadius: BorderRadius.all(
                                                     Radius.circular(8))),
-                                            width: size.width * 0.7,
+                                            width: size.width * 0.8,
                                             height: size.height * 0.06,
                                             child: Row(
                                                 mainAxisAlignment:
@@ -402,7 +401,7 @@ class _SignUpPageState extends State<SignUpPage>
                                         },
                                       )
                                     : Container(
-                                        width: size.width * 0.7,
+                                        width: size.width * 0.8,
                                         child: Wrap(
                                             direction: Axis.horizontal,
                                             children: [

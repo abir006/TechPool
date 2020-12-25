@@ -63,7 +63,7 @@ class _SignInPageState extends State<SignInPage>
                     child: Stack(alignment: Alignment.topCenter, children: [
                       Container(
                           decoration: BoxDecoration(
-                              image: DecorationImage(
+                              image: DecorationImage(fit: BoxFit.fill,
                                   image: Image.asset(
                             "assets/images/AuthPageBackground.png",
                             height: size.height,
@@ -74,7 +74,6 @@ class _SignInPageState extends State<SignInPage>
                           width: size.width),
                       Positioned(
                           top: animation.value,
-                          left: size.width * 0.38,
                           child: Image(
                               alignment: Alignment.center,
                               height: 100,
@@ -123,7 +122,7 @@ class _SignInPageState extends State<SignInPage>
                                       return null;
                                     }),
                                 Container(
-                                  width: size.width * 0.70,
+                                  width: size.width * 0.80,
                                   child: Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.start,
@@ -168,7 +167,7 @@ class _SignInPageState extends State<SignInPage>
                                                 color: Colors.black,
                                                 borderRadius: BorderRadius.all(
                                                     Radius.circular(8))),
-                                            width: size.width * 0.7,
+                                            width: size.width * 0.8,
                                             height: size.height * 0.06,
                                             child: Row(
                                                 mainAxisAlignment:

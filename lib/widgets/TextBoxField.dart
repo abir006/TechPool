@@ -7,7 +7,7 @@ Widget textBoxField({AutovalidateMode validateMode = AutovalidateMode.disabled,@
   return Container(decoration: BoxDecoration(
       color: Colors.white, borderRadius: containerBorderRadius),
       padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-      width: size.width * 0.7,
+      width: size.width * 0.8,
       child: TextFormField(textCapitalization: textCap,maxLines: 1,autovalidateMode: validateMode,validator: validator,obscureText: obscureText,controller: textFieldController,
           textAlign: TextAlign.left,
           maxLength: maxChars,

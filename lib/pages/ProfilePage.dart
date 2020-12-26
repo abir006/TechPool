@@ -314,7 +314,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       editMode ? generalInfoBoxTextField(nameLabel:"Faculty: ",controllerText: _facultyController, enabled: true, maxLines: 1 , maxLenth: 50) : generalInfoText(text: _facultyController.text),
                       editMode ? SizedBox(height: 0):SizedBox(height: defaultSpace),
                       editMode ? SizedBox(height: 0):labelText(text: "Phone number: ") ,
-                      editMode ? generalInfoBoxTextField(nameLabel:"Phone number: ",controllerText: _phoneNumberController, enabled: true, maxLines: null, maxLenth: 20) : generalInfoText(text: _phoneNumberController.text),
+                      editMode ? generalInfoBoxTextFieldNumbers(nameLabel:"Phone number: ",controllerText: _phoneNumberController, enabled: true, maxLines: null, maxLenth: 20) : generalInfoText(text: _phoneNumberController.text),
                       editMode ? SizedBox(height: 0):SizedBox(height: defaultSpace),
                       editMode ? SizedBox(height: 0):labelText(text: "Hobbies: ") ,
                       editMode ? generalInfoBoxTextField(nameLabel:"Hobbies: ",controllerText: _hobbiesController, enabled: true, maxLines: null, scrollAddable: true) : generalInfoText(text: _hobbiesController.text),

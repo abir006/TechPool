@@ -114,3 +114,22 @@ Widget generalInfoBoxTextField({@required TextEditingController controllerText,@
     ),
   );
 }
+
+Widget generalInfoBoxTextFieldNumbers({@required TextEditingController controllerText,@required bool enabled,@required String nameLabel,int maxLines,int maxLenth, bool scrollAddable}){
+  return Container(
+    child: TextField(
+      decoration:  InputDecoration(
+        labelText: nameLabel,
+        labelStyle: TextStyle(fontSize: 17),
+      ),
+      textCapitalization: TextCapitalization.sentences,
+      maxLength: maxLenth==null?120:maxLenth,
+      controller: controllerText,
+      textInputAction: scrollAddable == null? TextInputAction.done : scrollAddable?TextInputAction.newline : TextInputAction.done ,
+      keyboardType: TextInputType.number,
+
+      //  maxLines: maxLines,
+      enabled: enabled,
+    ),
+  );
+}

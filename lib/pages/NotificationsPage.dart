@@ -454,158 +454,174 @@ class _NotificationsPageState extends State<NotificationsPage> {
         future: initNames(liftNotification.driverId),
         builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
           if (snapshot.hasData) {
-            return Container(
-              margin: EdgeInsets.only(
-            top: MediaQuery
+            return InkWell(
+                onTap:  () async {
+                  var drive = await firestore.collection("Drives").doc(
+                      liftNotification.driveId).get();
+                  MyLift liftToShow = new MyLift(
+                      "driver", "destAddress", "stopAddress", 5);
+                  drive.data().forEach((key, value) {
+                    if (value != null) {
+                      liftToShow.setProperty(key, value);
+                    }
+                  });
+                  //liftToShow.note = liftNotification.; //No need in accepted? will put driver note instead
+                  liftToShow.liftId = liftNotification.driveId;
+                  //liftToShow.stops = [];
+                  //else {
+                  liftToShow.dist = liftNotification.distance;
+                  //}
+                  liftToShow.passengersInfo =
+                  Map<String, Map<String, dynamic>>.from(
+                      drive.data()["PassengersInfo"] ?? {});
+                  liftToShow.payments = (await firestore.collection(
+                      "Profiles").doc(liftNotification.driverId).get())
+                      .data()["allowedPayments"].join(", ");
+                  Navigator.of(context).push(new MaterialPageRoute<Null>(
+                      builder: (BuildContext context) {
+                        return NotificationInfo(
+                            lift: liftToShow,
+                            notification: liftNotification,
+                            type: NotificationInfoType.Accepted);
+                      },
+                      fullscreenDialog: true
+                  ));
+                },
+              child: Container(
+                margin: EdgeInsets.only(
+              top: MediaQuery
+                  .of(context)
+                  .size
+                  .height * 0.006,
+          bottom: MediaQuery
                 .of(context)
                 .size
-                .height * 0.006,
-          bottom: MediaQuery
-              .of(context)
-              .size
-              .height * 0.006),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [BoxShadow(color: Colors.black, blurRadius: 2.0,
-                    spreadRadius: 0.0, offset: Offset(2.0, 2.0))
-                ],
-                border: Border.all(color: secondColor, width: 0.65),
-                borderRadius: BorderRadius.circular(12.0),),
-              child:
-              Row(
-                children: [
-                  Flexible(flex: 3,
-                    child: InkWell(
-                        onTap: () async {
-                          await Navigator.of(context).push(
-                              MaterialPageRoute<liftRes>(
-                                  builder: (BuildContext context) {
-                                    return ProfilePage(
-                                      email: liftNotification.driverId, fromProfile: false,);
-                                  },
-                                  fullscreenDialog: true
-                              ));
-                          setState(() {
+                .height * 0.006),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [BoxShadow(color: Colors.black, blurRadius: 2.0,
+                      spreadRadius: 0.0, offset: Offset(2.0, 2.0))
+                  ],
+                  border: Border.all(color: secondColor, width: 0.65),
+                  borderRadius: BorderRadius.circular(12.0),),
+                child:
+                Row(
+                  children: [
+                    Flexible(flex: 3,
+                      child: InkWell(
+                          onTap: () async {
+                            await Navigator.of(context).push(
+                                MaterialPageRoute<liftRes>(
+                                    builder: (BuildContext context) {
+                                      return ProfilePage(
+                                        email: liftNotification.driverId, fromProfile: false,);
+                                    },
+                                    fullscreenDialog: true
+                                ));
+                            setState(() {
 
-                          });
-                        },
-                        child: Container(
-                            margin: EdgeInsets.only(
-                                left: MediaQuery
-                                    .of(context)
-                                    .size
-                                    .height * 0.016, top: MediaQuery
-                                .of(context)
-                                .size
-                                .height * 0.004),
-                            width: MediaQuery
-                                .of(context)
-                                .size
-                                .height * 0.016 * 4,
-                            height: MediaQuery
-                                .of(context)
-                                .size
-                                .height * 0.016 * 4,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: secondColor,
-                              image: DecorationImage(fit: BoxFit.fill,
-                                  image: NetworkImage(snapshot.data[0])),
+                            });
+                          },
+                          child: Container(
+                              margin: EdgeInsets.only(
+                                  left: MediaQuery
+                                      .of(context)
+                                      .size
+                                      .height * 0.016, top: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .height * 0.004),
+                              width: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .height * 0.016 * 4,
+                              height: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .height * 0.016 * 4,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: secondColor,
+                                image: DecorationImage(fit: BoxFit.fill,
+                                    image: NetworkImage(snapshot.data[0])),
 
-                            ))),
-                  ),
-                  Flexible(
-                    flex: 8,
-                    child: Container(
-                        margin: EdgeInsets.only(
-                            left: MediaQuery
-                                .of(context)
-                                .size
-                                .height * 0.016,
-                            top: MediaQuery
-                            .of(context)
-                            .size
-                            .height * 0.008),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            infoText(snapshot.data[1]),
-                            placesText(liftNotification.startCity, liftNotification.destCity),
-                            allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000),
-                          ],
-                        )),
-                  ),
-                  Flexible(flex:3,
-                    child: InkWell(
-                      child: Container(
-                        width: MediaQuery
-                            .of(context)
-                            .size
-                            .width * 0.016*16,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Transform.rotate(angle: 0.8,
-                                child: Icon(Icons.thumb_up_rounded, size: 30, color: Colors.green)),
-                            Text("Accepted", style: TextStyle(fontSize: 15, color: Colors.green),
-                            )
-                          ],
-                        ),
-                      ),
-
-                      //AcceptedInfoPage
-                      onTap:  () async {
-                        var drive = await firestore.collection("Drives").doc(
-                            liftNotification.driveId).get();
-                        MyLift liftToShow = new MyLift(
-                            "driver", "destAddress", "stopAddress", 5);
-                        drive.data().forEach((key, value) {
-                          if (value != null) {
-                            liftToShow.setProperty(key, value);
-                          }
-                        });
-                        //liftToShow.note = liftNotification.; //No need in accepted? will put driver note instead
-                        liftToShow.liftId = liftNotification.driveId;
-                        //liftToShow.stops = [];
-                        //else {
-                        liftToShow.dist = liftNotification.distance;
-                        //}
-                        liftToShow.passengersInfo =
-                        Map<String, Map<String, dynamic>>.from(
-                            drive.data()["PassengersInfo"] ?? {});
-                        liftToShow.payments = (await firestore.collection(
-                            "Profiles").doc(liftNotification.driverId).get())
-                            .data()["allowedPayments"].join(", ");
-                        Navigator.of(context).push(new MaterialPageRoute<Null>(
-                            builder: (BuildContext context) {
-                              return NotificationInfo(
-                                  lift: liftToShow,
-                                  notification: liftNotification,
-                                  type: NotificationInfoType.Accepted);
-                            },
-                            fullscreenDialog: true
-                        ));
-                      },
-                        /*Navigator.of(context).push(new MaterialPageRoute<Null>(
-                            builder: (BuildContext context) {
-                              return LiftInfoPage(lift: lift, resLift: liftRes(
-                                fromTime: widget.fromTime,
-                                toTime: widget.toTime,
-                                indexDist: 2,
-                                startAddress: widget.startAddress,
-                                destAddress: widget.destAddress,
-                                bigTrunk: widget.bigTrunk,
-                                backSeat: widget.backSeat,));
-                            },
-                            fullscreenDialog: true
-                        )*/
+                              ))),
                     ),
-                  ),
-                  SizedBox(width: MediaQuery
-                      .of(context)
-                      .size
-                      .width * 0.002),
-                ],
+                    Flexible(
+                      flex: 14,
+                      child: Container(
+                          margin: EdgeInsets.only(
+                              left: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .height * 0.016,
+                              top: MediaQuery
+                              .of(context)
+                              .size
+                              .height * 0.008),
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Flexible(flex:8,
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        infoText(snapshot.data[1]),
+                                        placesText(liftNotification.startCity, liftNotification.destCity),
+                                        //allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000),
+                                      ],
+                                    ),
+                                  ),
+                                  //here the icon:
+                                  //Spacer(),
+                                  Flexible(flex:4,
+                                    child: Container(
+                                      width: MediaQuery
+                                          .of(context)
+                                          .size
+                                          .width * 0.016*16,
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: [
+                                          Transform.rotate(angle: 0.8,
+                                              child: Icon(Icons.thumb_up_rounded, size: 30, color: Colors.green)),
+                                          Text("Accepted", style: TextStyle(fontSize: 15, color: Colors.green),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+
+                                ],
+                              ),
+                              allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000),
+                            ],
+                          )),
+                    ),
+                    // Flexible(flex:3,
+                    //   child: Container(
+                    //     width: MediaQuery
+                    //         .of(context)
+                    //         .size
+                    //         .width * 0.016*16,
+                    //     child: Column(
+                    //       crossAxisAlignment: CrossAxisAlignment.center,
+                    //       children: [
+                    //         Transform.rotate(angle: 0.8,
+                    //             child: Icon(Icons.thumb_up_rounded, size: 30, color: Colors.green)),
+                    //         Text("Accepted", style: TextStyle(fontSize: 15, color: Colors.green),
+                    //         )
+                    //       ],
+                    //     ),
+                    //   ),
+                    // ),
+                    SizedBox(width: MediaQuery
+                        .of(context)
+                        .size
+                        .width * 0.002),
+                  ],
+                ),
               ),
             );
           }else {
@@ -685,7 +701,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
                             ))),
                   ),
-                  Flexible(flex: 8,
+                  Flexible(flex: 14,
                     child: Container(
                         margin: EdgeInsets.only(
                             left: MediaQuery
@@ -697,36 +713,50 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                 .size
                                 .height * 0.008),
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            liftNotification.type == "CanceledLift" ? infoText(snapshot.data[1]) : infoTextHitchhiker(snapshot.data[1]),
-                            placesText(liftNotification.startCity, liftNotification.destCity),
+                            Row(
+                              children: [
+                                Flexible(flex:8,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      liftNotification.type == "CanceledLift" ? infoText(snapshot.data[1]) : infoTextHitchhiker(snapshot.data[1]),
+                                      placesText(liftNotification.startCity, liftNotification.destCity),
+                                      //allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000),
+                                    ],
+                                  ),
+                                ),
+                                Flexible(flex: 4,
+                                  child: InkWell(
+                                    child: Container(
+                                      width: MediaQuery
+                                          .of(context)
+                                          .size
+                                          .width * 0.016*16,
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: [
+                                          Icon(Icons.cancel_outlined, size: 30, color: Colors.red),
+                                          Text("Canceled", style: TextStyle(fontSize: 15, color: Colors.red),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                    onTap: () {
+
+                                    },
+                                  ),
+                                ),
+
+                              ],
+                            ),
                             allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000),
                           ],
-                        )),
-                  ),
-                  //Spacer(),
-                  Flexible(flex: 3,
-                    child: InkWell(
-                      child: Container(
-                        width: MediaQuery
-                            .of(context)
-                            .size
-                            .width * 0.016*16,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Icon(Icons.cancel_outlined, size: 30, color: Colors.red),
-                            Text("Canceled", style: TextStyle(fontSize: 15, color: Colors.red),
-                            )
-                          ],
-                        ),
-                      ),
-                      onTap: () {
-
-                      },
+                        )
                     ),
                   ),
+                  //Spacer(),
+
                   SizedBox(width: MediaQuery
                       .of(context)
                       .size
@@ -809,7 +839,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
                             ))),
                   ),
-                  Flexible( flex: 8,
+                  Flexible( flex: 14,
                     child: Container(
                         margin: EdgeInsets.only(
                             left: MediaQuery
@@ -821,36 +851,50 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                 .size
                                 .height * 0.008),
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            infoText(snapshot.data[1]),
-                            placesText(liftNotification.startCity, liftNotification.destCity),
+                            Row(
+                              children: [
+                                Flexible(flex:8,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      infoText(snapshot.data[1]),
+                                      placesText(liftNotification.startCity, liftNotification.destCity),
+                                      //allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000),
+                                    ],
+                                  ),
+                                ),
+
+                                Flexible( flex: 4,
+                                  child: InkWell(
+                                    child: Container(
+                                      width: MediaQuery
+                                          .of(context)
+                                          .size
+                                          .width * 0.016*16,
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: [
+                                          Transform.rotate(angle: 0.8,
+                                              child: Icon(Icons.thumb_up_rounded, size: 30, color: Colors.red)),
+                                          Text("Rejected", style: TextStyle(fontSize: 15, color: Colors.red),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                    onTap: () {
+
+                                    },
+                                  ),
+                                ),
+
+                              ],
+                            ),
                             allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000),
                           ],
                         )),
                   ),
-                  Flexible( flex: 3,
-                    child: InkWell(
-                      child: Container(
-                        width: MediaQuery
-                            .of(context)
-                            .size
-                            .width * 0.016*16,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Transform.rotate(angle: 0.8,
-                                child: Icon(Icons.thumb_up_rounded, size: 30, color: Colors.red)),
-                            Text("Rejected", style: TextStyle(fontSize: 15, color: Colors.red),
-                            )
-                          ],
-                        ),
-                      ),
-                      onTap: () {
 
-                      },
-                    ),
-                  ),
                   SizedBox(width: MediaQuery
                       .of(context)
                       .size
@@ -873,158 +917,155 @@ class _NotificationsPageState extends State<NotificationsPage> {
         //future: initNames("ofir.asulin@campus.technion.ac.il"),
         builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
           if (snapshot.hasData) {
-            return Container(
-              margin: EdgeInsets.only(
-                  top: MediaQuery
-                      .of(context)
-                      .size
-                      .height * 0.006,
-                  bottom: MediaQuery
-                      .of(context)
-                      .size
-                      .height * 0.006),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [BoxShadow(color: Colors.black, blurRadius: 2.0,
-                    spreadRadius: 0.0, offset: Offset(2.0, 2.0))
-                ],
-                border: Border.all(color: secondColor, width: 0.65),
-                borderRadius: BorderRadius.circular(12.0),),
-              child:
-              Row(
-                children: [
-                  Flexible( flex: 3,
-                    child: InkWell(
-                        onTap: () async {
-                          await Navigator.of(context).push(
-                              MaterialPageRoute<liftRes>(
-                                  builder: (BuildContext context) {
-                                    return ProfilePage(
-                                      email: liftNotification.passengerId, fromProfile: false,);
-                                  },
-                                  fullscreenDialog: true
-                              ));
-                          setState(() {
+            return InkWell(
+              onTap: () async {
+                var drive = await firestore.collection("Drives").doc(
+                    liftNotification.driveId).get();
+                MyLift liftToShow = new MyLift(
+                    "driver", "destAddress", "stopAddress", 5);
+                drive.data().forEach((key, value) {
+                  if (value != null) {
+                    liftToShow.setProperty(key, value);
+                  }
+                });
 
-                          });
-                        },
-                        child: Container(
-                            margin: EdgeInsets.only(
-                                left: MediaQuery
-                                    .of(context)
-                                    .size
-                                    .height * 0.016, top: MediaQuery
-                                .of(context)
-                                .size
-                                .height * 0.004),
-                            width: MediaQuery
-                                .of(context)
-                                .size
-                                .height * 0.016 * 4,
-                            height: MediaQuery
-                                .of(context)
-                                .size
-                                .height * 0.016 * 4,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: secondColor,
-                              image: DecorationImage(fit: BoxFit.fill,
-                                  image: NetworkImage(snapshot.data[0])),
+                liftToShow.note = liftNotification.passengerNote;
+                liftToShow.liftId = liftNotification.driveId;
+                liftToShow.dist = liftNotification.distance;
 
-                            ))),
-                  ),
-                  Flexible( flex: 9,
-                    child: Container(
-                        margin: EdgeInsets.only(
-                            left: MediaQuery
-                                .of(context)
-                                .size
-                                .height * 0.016,
-                            top: MediaQuery
-                                .of(context)
-                                .size
-                                .height * 0.008),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            infoTextHitchhiker(snapshot.data[1]),
-                            placesText(liftNotification.startCity, liftNotification.destCity),
-                            allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000),
-                          ],
-                        )),
-                  ),
-                  Flexible( flex: 3,
-                    child: InkWell(
-                      child: Container(
-                        width: MediaQuery
-                            .of(context)
-                            .size
-                            .width * 0.016*16,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Icon(Icons.more_horiz, size: 30, color: Colors.orange),
-                            /*Transform.rotate(angle: 0.8,
-                                child: Icon(Icons.thumb_up_rounded, size: 30, color: Colors.orange)),*/
-                            Text("Respond", style: TextStyle(fontSize: 15, color: Colors.orange),
-                            )
-                          ],
-                        ),
-                      ),
-                      /*onTap: () {
-                        Navigator.of(context).push(new MaterialPageRoute<Null>(
-                            builder: (BuildContext context) {
-                              return LiftInfoPage(lift: lift, resLift: liftRes(
-                                fromTime: widget.fromTime,
-                                toTime: widget.toTime,
-                                indexDist: 2,
-                                startAddress: widget.startAddress,
-                                destAddress: widget.destAddress,
-                                bigTrunk: widget.bigTrunk,
-                                backSeat: widget.backSeat,));
-                            },
-                            fullscreenDialog: true
-                        )
-                      },*/
+                liftToShow.passengersInfo =
+                Map<String, Map<String, dynamic>>.from(
+                    drive.data()["PassengersInfo"] ?? {});
+                liftToShow.payments = (await firestore.collection(
+                    "Profiles").doc(liftNotification.passengerId).get())
+                    .data()["allowedPayments"].join(", ");
 
-                      //RequestedInfoPage
-                        onTap: () async {
-                          var drive = await firestore.collection("Drives").doc(
-                              liftNotification.driveId).get();
-                          MyLift liftToShow = new MyLift(
-                              "driver", "destAddress", "stopAddress", 5);
-                          drive.data().forEach((key, value) {
-                            if (value != null) {
-                              liftToShow.setProperty(key, value);
-                            }
-                          });
+                Navigator.of(context).push(new MaterialPageRoute<Null>(
+                    builder: (BuildContext context) {
+                      return NotificationInfo(
+                          lift: liftToShow, notification: liftNotification, type: NotificationInfoType.Requested);
+                    },
+                    fullscreenDialog: true
+                ));
+              },
+              child: Container(
+                margin: EdgeInsets.only(
+                    top: MediaQuery
+                        .of(context)
+                        .size
+                        .height * 0.006,
+                    bottom: MediaQuery
+                        .of(context)
+                        .size
+                        .height * 0.006),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [BoxShadow(color: Colors.black, blurRadius: 2.0,
+                      spreadRadius: 0.0, offset: Offset(2.0, 2.0))
+                  ],
+                  border: Border.all(color: secondColor, width: 0.65),
+                  borderRadius: BorderRadius.circular(12.0),),
+                child:
+                Row(
+                  children: [
+                    Flexible( flex: 3,
+                      child: InkWell(
+                          onTap: () async {
+                            await Navigator.of(context).push(
+                                MaterialPageRoute<liftRes>(
+                                    builder: (BuildContext context) {
+                                      return ProfilePage(
+                                        email: liftNotification.passengerId, fromProfile: false,);
+                                    },
+                                    fullscreenDialog: true
+                                ));
+                            setState(() {
 
-                          liftToShow.note = liftNotification.passengerNote;
-                          liftToShow.liftId = liftNotification.driveId;
-                          liftToShow.dist = liftNotification.distance;
+                            });
+                          },
+                          child: Container(
+                              margin: EdgeInsets.only(
+                                  left: MediaQuery
+                                      .of(context)
+                                      .size
+                                      .height * 0.016, top: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .height * 0.004),
+                              width: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .height * 0.016 * 4,
+                              height: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .height * 0.016 * 4,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: secondColor,
+                                image: DecorationImage(fit: BoxFit.fill,
+                                    image: NetworkImage(snapshot.data[0])),
 
-                          liftToShow.passengersInfo =
-                          Map<String, Map<String, dynamic>>.from(
-                              drive.data()["PassengersInfo"] ?? {});
-                          liftToShow.payments = (await firestore.collection(
-                              "Profiles").doc(liftNotification.passengerId).get())
-                              .data()["allowedPayments"].join(", ");
-
-                          Navigator.of(context).push(new MaterialPageRoute<Null>(
-                              builder: (BuildContext context) {
-                                return NotificationInfo(
-                                    lift: liftToShow, notification: liftNotification, type: NotificationInfoType.Requested);
-                              },
-                              fullscreenDialog: true
-                          ));
-                        },
+                              ))),
                     ),
-                  ),
-                  SizedBox(width: MediaQuery
-                      .of(context)
-                      .size
-                      .width * 0.02),
-                ],
+                    Flexible( flex: 14,
+                      child: Container(
+                          margin: EdgeInsets.only(
+                              left: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .height * 0.016,
+                              top: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .height * 0.008),
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Flexible(flex:8,
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        infoTextHitchhiker(snapshot.data[1]),
+                                        placesText(liftNotification.startCity, liftNotification.destCity),
+                                        //allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000),
+                                      ],
+                                    ),
+                                  ),
+                                  Flexible( flex: 3,
+                                    child: Container(
+                                      width: MediaQuery
+                                          .of(context)
+                                          .size
+                                          .width * 0.016*16,
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: [
+                                          Icon(Icons.more_horiz, size: 30, color: Colors.orange),
+                                          /*Transform.rotate(angle: 0.8,
+                                child: Icon(Icons.thumb_up_rounded, size: 30, color: Colors.orange)),*/
+                                          Text("Respond", style: TextStyle(fontSize: 15, color: Colors.orange),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+
+                                ],
+                              ),
+                              allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000),
+
+                            ],
+                          )),
+                    ),
+
+                    SizedBox(width: MediaQuery
+                        .of(context)
+                        .size
+                        .width * 0.02),
+                  ],
+                ),
               ),
             );
           }else {

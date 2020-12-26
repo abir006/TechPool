@@ -347,11 +347,11 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                       SizedBox(height: MediaQuery.of(context).size.height * 0.013),
                       ...(widget.type == CalendarEventType.Drive ? ([
                         Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
-                          labelText(text: "Starting Point: "),
+                          labelText(text: "Pickup from: "),
                           Expanded(child:  infoText(snapshot.data[2]))
                         ]),
                         Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
-                          labelText(text: "Destination: "),
+                          labelText(text: "Drop-off at: "),
                           Expanded(child: infoText(snapshot.data[6]))
                         ]),
                         Row(children: [

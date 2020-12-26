@@ -460,7 +460,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
     );
 
     final noteToPassengersText = Container(
-      height: 7.5 * defaultSpace,
+      height: 8.5 * defaultSpace,
       child: TextFormField(
         maxLength: 150,
         //150 characters for test purposes:

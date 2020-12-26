@@ -306,7 +306,7 @@ SafeArea techDrawer(UserRepository userRep, BuildContext context,
       borderRadius: BorderRadius.only(topRight: Radius.circular(20.0),bottomRight:Radius.circular(20.0)),child: Container(width: MediaQuery.of(context).size.width*0.7,
         child: Scaffold(key: _key,
           body: Drawer(
-          child: ListView(children: [
+          child: Column(children: [
             /*  UserAccountsDrawerHeader(
                 accountName: Text("Hello, ${userRep.user.displayName}.",style: TextStyle(color: Colors.white,fontSize: 18),),
                 accountEmail: Container(height: 20,child: Row(crossAxisAlignment: CrossAxisAlignment.end,mainAxisAlignment: MainAxisAlignment.spaceBetween,children: [
@@ -362,6 +362,18 @@ SafeArea techDrawer(UserRepository userRep, BuildContext context,
           drawerListTile("Home",Icons.home_rounded,DrawerSections.home,currentSection, context, userRep,_key),
           drawerListTile("Profile",Icons.person,DrawerSections.profile,currentSection, context, userRep,_key),
           drawerListTile("Notifications",Icons.notifications,DrawerSections.notifications,currentSection, context, userRep,_key),
+            Spacer(),
+            AboutListTile(
+              icon: Icon(
+                Icons.info,
+                //color: mainColor,
+                size: 30,
+              ),
+              applicationIcon: FlutterLogo(),
+              applicationName: 'TechPool',
+              applicationVersion: 'December 2020',
+              applicationLegalese: '\u{a9} 2020 Abir Shaked,Ori Mazor and Ofir Asulin',
+            ),
         /*  drawerListTile("Favorite Locations",Icons.favorite,DrawerSections.favorites,currentSection, context, userRep,_key),
           drawerListTile("Chats",Icons.chat,DrawerSections.chats,currentSection, context, userRep,_key),
           drawerListTile("Settings",Icons.settings,DrawerSections.settings,currentSection, context, userRep,_key)*/

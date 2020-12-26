@@ -559,9 +559,9 @@ class _SetDrivePageState extends State<SetDrivePage> {
               label: Text("  Set Drive  ",
                   style: TextStyle(color: Colors.white, fontSize: 17)),
               onPressed: () async {
-                //setState(() {
+                setState(() {
                   checkLocations();
-                //});
+                });
                 if (_formKey2.currentState.validate() && _validateLocations) {
                   try {
 
@@ -602,7 +602,8 @@ class _SetDrivePageState extends State<SetDrivePage> {
                       //'Driver': "testing@technion.co.il",
                     });
 
-                    Navigator.pop(context);
+                    FocusManager.instance.primaryFocus.unfocus();
+                    Navigator.of(context).pop();
                     // .then((value) => Navigator.pop(context))
                     // .catchError((error) => print("Something went wrong. Please try again"));
                   }

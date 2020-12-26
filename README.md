@@ -17,3 +17,7 @@ For many students who study at the Technion, getting and providing lifts is not 
 4. Using my current location to get or set drives and lifts.
 5. Saving favorite locations and using them in getting or setting drives and lifts.
 6. Getting notifications from the app to my phone.
+
+## Table of Contents
+1. [Setup](docs/setup.md)
+2. [Data models](docs/data-models.md)

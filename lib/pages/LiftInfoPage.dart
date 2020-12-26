@@ -464,7 +464,7 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
             return Container(
               child: Row(
                 children: [
-                  InkWell(
+              InkWell(
                       onTap: () async {
                         await Navigator.of(context)
                             .push(MaterialPageRoute<liftRes>(
@@ -493,7 +493,7 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
                                 fit: BoxFit.fill,
                                 image: NetworkImage(snapshot.data[0])),
                           ))),
-                  Container(
+          Expanded(child: Container(
                       margin: EdgeInsets.only(
                           left: MediaQuery.of(context).size.height * 0.016,
                           top: MediaQuery.of(context).size.height * 0.016),
@@ -502,11 +502,7 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
                         children: [
                           infoText(snapshot.data[1]),
                         ],
-                      )),
-                  Spacer(),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.height * 0.016,
-                  )
+                      ))),
                 ],
               ),
             );

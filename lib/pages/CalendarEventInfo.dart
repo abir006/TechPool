@@ -273,7 +273,7 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                                     fit: BoxFit.fill,
                                     image: NetworkImage(snapshot.data[0])),
                               ))),
-                      Container(
+              Expanded(child: Container(
                           margin: EdgeInsets.only(
                               left: MediaQuery.of(context).size.height * 0.016,
                               top: MediaQuery.of(context).size.height * 0.016),
@@ -284,11 +284,7 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                               //placesText(lift.startAddress),
                               allInfoText(widget.type == CalendarEventType.PendingLift ? widget.lift.dist / 1000 : lift.passengersInfo[userRep.user.email]["dist"] / 1000),
                             ],
-                          )),
-                      Spacer(),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.height * 0.016,
-                      )
+                          ))),
                     ],
                   ),
                 );
@@ -339,7 +335,7 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                                         fit: BoxFit.fill,
                                         image: NetworkImage(snapshot.data[0])),
                                   ))),
-                          Container(
+              Expanded(child: Container(
                               margin: EdgeInsets.only(
                                   left: MediaQuery.of(context).size.height * 0.016,
                                   top: MediaQuery.of(context).size.height * 0.016),
@@ -350,11 +346,7 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                                   ...(widget.type == CalendarEventType.Drive ? ([
                                     allInfoText(snapshot.data[3])]) : [])
                                 ],
-                              )),
-                          Spacer(),
-                          SizedBox(
-                            width: MediaQuery.of(context).size.height * 0.016,
-                          )
+                              ))),
                         ],
                       ),
                       ...(widget.type == CalendarEventType.Drive ? ([

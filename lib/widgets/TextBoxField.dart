@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import '../Utils.dart';
 
+/// generic text box to be shown at authentication pages.
 Widget textBoxField({AutovalidateMode validateMode = AutovalidateMode.disabled,@required Size size,@required String hintText,@required TextEditingController textFieldController,bool obscureText = false,Function validator,InputBorder inputBorder=InputBorder.none,TextCapitalization textCap = TextCapitalization.sentences,int maxChars}) {
   return Container(decoration: BoxDecoration(
       color: Colors.white, borderRadius: containerBorderRadius),
@@ -17,6 +18,7 @@ Widget textBoxField({AutovalidateMode validateMode = AutovalidateMode.disabled,@
               border: inputBorder, hintText: hintText)));
 }
 
+/// generic validator for empty textoformfields.
 Function validateNotEmpty(String missingString){
   return ((value) {if (value.isEmpty) {return 'Please enter $missingString';}return null;});
 }

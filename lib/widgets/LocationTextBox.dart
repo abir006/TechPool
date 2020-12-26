@@ -35,6 +35,7 @@ class _LocationTextBoxes2State extends State<LocationTextBoxes2> {
     _pressed = false;
   }
 
+  /// validates the city input is legal.
   Future<bool> validateLegalCity(String city) async {
     try {
       var cc = await locationFromAddress(city,localeIdentifier: "en");
@@ -45,34 +46,72 @@ class _LocationTextBoxes2State extends State<LocationTextBoxes2> {
         return true;
       }
     } catch (e) {
+      if(city.toLowerCase().contains("haifa") || city.contains("חיפה")){
+        return false;
+      }
       return true;
     }
   }
 
+  /// validates the "city, street" input is legal.
   Future<bool> validateLegalStreet(String city, String street) async {
     try {
-      var cc = await locationFromAddress(city,localeIdentifier: "en");
-      var cityAddress = await placemarkFromCoordinates(cc[0].latitude, cc[0].longitude,localeIdentifier: "en");
-      var cc2 = await locationFromAddress(city+ ", " + street);
-      var ccA = await placemarkFromCoordinates(cc2[0].latitude, cc2[0].longitude,localeIdentifier: "en");
-      address = [Address(coordinates: Coordinates(cc2[0].latitude,cc2[0].longitude),addressLine: (ccA[0].locality+", "+ccA[0].street),
-          countryName: ccA[0].country,countryCode: ccA[0].isoCountryCode, featureName: ccA[0].name,postalCode: ccA[0].postalCode, adminArea: ccA[0].administrativeArea,
-          subAdminArea: ccA[0].subAdministrativeArea, locality: ccA[0].locality, subLocality: ccA[0].subLocality, thoroughfare: ccA[0].thoroughfare, subThoroughfare: ccA[0].subThoroughfare )];
-      if (address.first.countryName.toLowerCase() == "israel") {
-        if ((cc2.first.latitude !=
-            cc.first.latitude ||
-            cc2.first.longitude !=
-                cc.first.longitude) &&
-            ((address.first.locality == cityAddress.first.locality) ||
-                (address.first.locality == cityAddress.first.subLocality))) {
+        if (city.toLowerCase().contains("haifa") || city.contains("חיפה")) {
+          var cc2 = await locationFromAddress(city + ", " + street);
+          var ccA = await placemarkFromCoordinates(
+              cc2[0].latitude, cc2[0].longitude, localeIdentifier: "en");
+          address = [
+            Address(coordinates: Coordinates(cc2[0].latitude, cc2[0].longitude),
+                addressLine: (ccA[0].locality + ", " + ccA[0].street),
+                countryName: ccA[0].country,
+                countryCode: ccA[0].isoCountryCode,
+                featureName: ccA[0].name,
+                postalCode: ccA[0].postalCode,
+                adminArea: ccA[0].administrativeArea,
+                subAdminArea: ccA[0].subAdministrativeArea,
+                locality: ccA[0].locality,
+                subLocality: ccA[0].subLocality,
+                thoroughfare: ccA[0].thoroughfare,
+                subThoroughfare: ccA[0].subThoroughfare)
+          ];
           return false;
+      } else {
+        var cc = await locationFromAddress(city, localeIdentifier: "en");
+        var cityAddress = await placemarkFromCoordinates(
+            cc[0].latitude, cc[0].longitude, localeIdentifier: "en");
+        var cc2 = await locationFromAddress(city + ", " + street);
+        var ccA = await placemarkFromCoordinates(
+            cc2[0].latitude, cc2[0].longitude, localeIdentifier: "en");
+        address = [
+          Address(coordinates: Coordinates(cc2[0].latitude, cc2[0].longitude),
+              addressLine: (ccA[0].locality + ", " + ccA[0].street),
+              countryName: ccA[0].country,
+              countryCode: ccA[0].isoCountryCode,
+              featureName: ccA[0].name,
+              postalCode: ccA[0].postalCode,
+              adminArea: ccA[0].administrativeArea,
+              subAdminArea: ccA[0].subAdministrativeArea,
+              locality: ccA[0].locality,
+              subLocality: ccA[0].subLocality,
+              thoroughfare: ccA[0].thoroughfare,
+              subThoroughfare: ccA[0].subThoroughfare)
+        ];
+        if (address.first.countryName.toLowerCase() == "israel") {
+          if ((cc2.first.latitude !=
+              cc.first.latitude ||
+              cc2.first.longitude !=
+                  cc.first.longitude) &&
+              ((address.first.locality == cityAddress.first.locality) ||
+                  (address.first.locality == cityAddress.first.subLocality))) {
+            return false;
+          } else {
+            return true;
+          }
         } else {
           return true;
         }
-      } else {
-        return true;
       }
-    } catch (e) {
+      } catch (e) {
       return true;
     }
   }

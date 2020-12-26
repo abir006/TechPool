@@ -85,6 +85,7 @@ class _MyAppState extends State<MyApp> {
                 unselectedWidgetColor: Colors.white,
               ),
               home: FutureBuilder<DocumentSnapshot>(
+                ///getting the version number.
                   future: firestore
                       .collection("Version")
                       .doc("VersionControl")
@@ -92,12 +93,14 @@ class _MyAppState extends State<MyApp> {
                   builder: (context, snapshot) {
                     final size = MediaQuery.of(context).size;
                     if (snapshot.hasData) {
+                      ///checking if version number is correct.
                       if (snapshot.data["version"] == versionNumber) {
                         return Builder(
                           builder: (context) {
                             var userRep = Provider.of<UserRepository>(context,
                                 listen: false);
                             return FutureBuilder<Object>(
+                              ///checking if user saved credentials to sign in.
                               future: (encryptedSharedPreferences
                                   .getString("email")
                                   .then((value) {
@@ -115,6 +118,7 @@ class _MyAppState extends State<MyApp> {
                                               .signInWithEmailAndPassword(
                                                   email: email, password: pass);
                                         } else {
+                                          /// if failed to sign in, throw to go to homepage.
                                           throw Exception("bad info");
                                         }
                                       }))
@@ -132,12 +136,16 @@ class _MyAppState extends State<MyApp> {
                               builder: (context, snapshot) {
                                 if (snapshot.hasData) {
                                   if (!snapshot.data) {
+                                    /// if failed to auto sign in got to landing page.
                                     return LandingPage();
                                   } else {
+                                    /// if succeed to auto sign in go to home page.
                                     return HomePage();
                                   }
                                 } else if (snapshot.hasError) {
                                   return Center(child: Text(snapshot.error));
+                                  /// while trying verifying credentials and version number
+                                  /// show the background image and circular progress.
                                 } else {
                                   return Scaffold(
                                       body: Container(
@@ -161,6 +169,8 @@ class _MyAppState extends State<MyApp> {
                           },
                         );
                       } else {
+                        /// if version number is bad, dont allow further progress,
+                        /// and tell the user to update the app.
                         return Scaffold(
                             body: Container(
                                 color: mainColor,
@@ -201,6 +211,8 @@ class _MyAppState extends State<MyApp> {
                                 )));
                       }
                     } else if (snapshot.hasError) {
+                      /// if version number is bad, dont allow further progress,
+                      /// and tell the user to update the app.
                       return Scaffold(
                           body: Container(
                               color: mainColor,
@@ -238,6 +250,7 @@ class _MyAppState extends State<MyApp> {
                                 ],
                               )));
                     } else {
+                      /// while loading.
                       return Scaffold(
                           body: Container(
                               color: mainColor,

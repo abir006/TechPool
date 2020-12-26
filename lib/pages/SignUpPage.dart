@@ -68,7 +68,6 @@ class _SignUpPageState extends State<SignUpPage>
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
-
     return AnimatedBuilder(
         animation: animation,
         builder: (BuildContext ctx, Widget child) {

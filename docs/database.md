@@ -3,6 +3,7 @@
 ## Overview:
 The database is designed in a convenient way for easy handling lifts\drives and easily extracting data about them by maintaining one collection that stores them all.
 To identify users we used their email and for identifying different docs we used random unique id that is generated when creating them.
+We also used Firebase storage to store the user's selected profile picture indexed by his id.
 
 ### Drives:
 The Collections stores all information about a drive\lift(timestamp,destination address,start address, driverId...) with an unique random id. The collection is indexed by driverId and timestamp to receive information faster when querying it.
@@ -20,5 +21,3 @@ Stores the app version.
 
 ### Visual Representation:
 ![TechPool_DataBase](https://user-images.githubusercontent.com/39681215/103154478-31c0f200-47a0-11eb-8de9-b3188661921b.png)
-
-We also used Firebase storage to store the user's selected profile picture indexed by his id.

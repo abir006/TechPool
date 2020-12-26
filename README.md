@@ -21,3 +21,4 @@ For many students who study at the Technion, getting and providing lifts is not 
 ## Table of Contents
 1. [Setup](docs/setup.md)
 2. [Data models](docs/data-models.md)
+3. [Database](docs/database.md)

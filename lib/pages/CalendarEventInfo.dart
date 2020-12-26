@@ -614,6 +614,7 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                                           widget.lift.destAddress))
                                     ])
                                   ]),
+                                  SizedBox(height: defaultSpace),
                                   Row(children: [
                                     labelText(text: "Big Trunk: "),
                                     widget.lift.bigTrunk

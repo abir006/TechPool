@@ -204,7 +204,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             searchLableText(
-              text: "Starting point:",
+              text: "Starting point: ",
             ),
             Expanded(child: generalInfoText(text: _startPointControler.text)),
             /*Expanded(child: textBoxFieldDisable(

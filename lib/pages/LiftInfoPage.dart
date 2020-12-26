@@ -227,12 +227,18 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
           ],
         ));
     final searchLift =
-    Consumer<UserRepository>(builder: (context, userRep, _) { return Container(
+    Consumer<UserRepository>(builder: (context, userRep, _) {
+      return StreamBuilder<DocumentSnapshot>(
+          stream:firestore.collection("Drives").doc(widget.lift.liftId).snapshots(), // a previously-obtained Future<String> or null
+          builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot){
+            if(snapshot.hasData && snapshot.data.exists) {
+      return Container(
         padding: EdgeInsets.only(
+            top: defaultSpace*2,
             left: sizeFrameWidth * 0.2,
             right: sizeFrameWidth * 0.2,
             bottom: defaultSpace * 2),
-        height: defaultSpace * 6,
+        //height: defaultSpace * 6,
         child: RaisedButton.icon(
             color: Colors.black,
             shape: RoundedRectangleBorder(
@@ -256,7 +262,10 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
                   showAlertDialog(context,"You already requested this lift","Press ok to return to results");
                 }
               }
-            }));
+            }));}
+            else{
+              return Container();
+            }});
     });
 
     final allInfo = StreamBuilder<DocumentSnapshot>(
@@ -450,7 +459,7 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
           decoration: pageContainerDecoration,
           margin: pageContainerMargin,
           child: Column(
-            children: [Expanded(child: allInfo), searchLift,],
+            children: [Expanded(child: allInfo) , searchLift,],
           )),
       backgroundColor: mainColor,
     );
@@ -598,10 +607,10 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
                           ],
                         )),
                   ),
-                  Spacer(),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.height * 0.016,
-                  )
+                //  Spacer(),
+                 // SizedBox(
+                //    width: MediaQuery.of(context).size.height * 0.016,
+                //  )
                 ],
               ),
             );

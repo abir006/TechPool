@@ -144,13 +144,8 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
         return transaction.get(firestore.collection("Drives")
             .doc(widget.lift.liftId))
             .then((value) async {
-          List<String> tempPassengers = List.from(value.data()["Passengers"]);
-          //tempPassengers.remove((userRep.user.email));
-          value.data()["Passengers"] = tempPassengers;
-          Map<String,Map<String, dynamic>> tempPassengersInfo  = Map<String, Map<String, dynamic>>.from(value.data()["PassengersInfo"]);
-          //tempPassengersInfo.remove(userRep.user.email).remove(userRep.user.email);
-          //transaction.update((firestore.collection("Drives").doc(widget.lift.liftId)),{"Passengers":tempPassengers,"PassengersInfo":tempPassengersInfo});
-          tempPassengers.forEach((element) async {
+           List<String> tempPassengers = List.from(value.data()["Passengers"]);
+           tempPassengers.forEach((element) async {
             String currentPassengerId = element.toString();
 
             transaction.set(firestore.collection("Notifications").doc(currentPassengerId).collection("UserNotifications").doc(),
@@ -169,9 +164,9 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                   "type": "CanceledDrive",
                 }
             );
-            transaction.delete(firestore.collection("Drives").doc(widget.lift.liftId));
           });
 
+          transaction.delete(firestore.collection("Drives").doc(widget.lift.liftId));
           return true;
         });
       });

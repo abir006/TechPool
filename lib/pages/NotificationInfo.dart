@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:tech_pool/Utils.dart';
 import 'package:intl/intl.dart';
 import 'package:tech_pool/widgets/TextBoxField.dart';
@@ -23,9 +24,8 @@ class NotificationInfo extends StatefulWidget {
 
 class _NotificationInfoState extends State<NotificationInfo> {
   FirebaseFirestore firestore = FirebaseFirestore.instance;
-  //bool bigBag = false;
   final _errorSnack = GlobalKey<ScaffoldState>();
-
+  bool checkButtons = true;
   @override
   void initState() {
     super.initState();
@@ -456,299 +456,371 @@ class _NotificationInfoState extends State<NotificationInfo> {
       final AcceptOrReject =
 
       Consumer<UserRepository>(builder: (context, userRep, child) {
-        return Container(
-            padding: EdgeInsets.only(
-                left: sizeFrameWidth * 0.14,
-                right: sizeFrameWidth * 0.12,
-                bottom: defaultSpace * 2),
-            height: defaultSpace * 6,
-            child: Row(
-              children: [
-                Flexible( flex: 4,
-                  child: RaisedButton.icon(
-                      color: Colors.green,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18),
-                          side: BorderSide(color: Colors.black)),
-                      icon: Icon(Icons.check, color: Colors.white,),
-                      label: Text("Accept",
-                          style: TextStyle(color: Colors.white, fontSize: 17)),
-                      onPressed:  () async{
-                        if(widget.lift.passengersInfo.length == widget.lift.numberOfSeats){
-                          //_errorSnack.currentState.showSnackBar(SnackBar(content: Text("This drive is already full. Please press on Reject", style: TextStyle(fontSize: 19,color: Colors.red),)));
-                          showErrorDialog(context, "No space left", "This drive is already full.\nPlease press on Reject.", userRep);
-                        } else {
-                          bool returnValue = await _acceptRequest(userRep);
-                          if (returnValue == true) {
-                            Navigator.pop(context);
-                          }
-                        }
-                        /*if(widget.type == NotificationInfoType.Accepted){
-                          showAlertDialog(context, "Cancel Lift", "Are you sure you want to cancel?\nThere is no going back", userRep);
-                        }*/
-                        // _errorSnack.currentState.showSnackBar(SnackBar(content: Text("The lift couldn't be deleted, it could have been canceled", style: TextStyle(fontSize: 19,color: Colors.red),)));
-                        //await  cancelRequest(userRep);
-                      }),
-                ),
-                SizedBox(width: 1.5*defaultSpacewidth),
-                Flexible( flex: 4,
-                  child: RaisedButton.icon(
-                      color: Colors.red[800],
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18),
-                          side: BorderSide(color: Colors.black)),
-                      icon: Icon(Icons.close, color: Colors.white,),
-                      label: Text("Reject",
-                          style: TextStyle(color: Colors.white, fontSize: 17)),
-                      onPressed:  () async{
-
-                        bool returnValue = await _rejectRequest(userRep);
-                        if(returnValue == true){
+       return StreamBuilder<DocumentSnapshot>(
+           stream:firestore
+               .collection("Notifications")
+               .doc(userRep.user.email).collection("UserNotifications").doc(widget.notification.notificationId).snapshots(), // a previously-obtained Future<String> or null
+            builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot){
+    if(snapshot.hasData && snapshot.data.exists) {
+      return Container(
+          padding: EdgeInsets.only(
+              left: sizeFrameWidth * 0.14,
+              right: sizeFrameWidth * 0.12,
+              bottom: defaultSpace * 2),
+          height: defaultSpace * 6,
+          child: Row(
+            children: [
+              Flexible(flex: 4,
+                child: RaisedButton.icon(
+                    color: Colors.green,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
+                        side: BorderSide(color: Colors.black)),
+                    icon: Icon(Icons.check, color: Colors.white,),
+                    label: Text("Accept",
+                        style: TextStyle(color: Colors.white, fontSize: 17)),
+                    onPressed: () async {
+                      if (widget.lift.passengersInfo.length ==
+                          widget.lift.numberOfSeats) {
+                        //_errorSnack.currentState.showSnackBar(SnackBar(content: Text("This drive is already full. Please press on Reject", style: TextStyle(fontSize: 19,color: Colors.red),)));
+                        showErrorDialog(context, "No space left",
+                            "This drive is already full.\nPlease press on Reject.",
+                            userRep);
+                      } else {
+                        bool returnValue = await _acceptRequest(userRep);
+                        if (returnValue == true) {
                           Navigator.pop(context);
                         }
+                      }
+                      /*if(widget.type == NotificationInfoType.Accepted){
+                          showAlertDialog(context, "Cancel Lift", "Are you sure you want to cancel?\nThere is no going back", userRep);
+                        }*/
+                      // _errorSnack.currentState.showSnackBar(SnackBar(content: Text("The lift couldn't be deleted, it could have been canceled", style: TextStyle(fontSize: 19,color: Colors.red),)));
+                      //await  cancelRequest(userRep);
+                    }),
+              ),
+              SizedBox(width: 1.5 * defaultSpacewidth),
+              Flexible(flex: 4,
+                child: RaisedButton.icon(
+                    color: Colors.red[800],
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
+                        side: BorderSide(color: Colors.black)),
+                    icon: Icon(Icons.close, color: Colors.white,),
+                    label: Text("Reject",
+                        style: TextStyle(color: Colors.white, fontSize: 17)),
+                    onPressed: () async {
+                      bool returnValue = await _rejectRequest(userRep);
+                      if (returnValue == true) {
+                        Navigator.pop(context);
+                      }
+                    }),
+              )
+            ],
+          ));
+    }else{
+      return Container();
+    }
+     });
+    });
 
-                      }),
-                )
-              ],
-            ));
-      });
-
-      final allInfo = Container(
-          child: ListView(
-              shrinkWrap: true,
-              padding: EdgeInsets.only(
-                  left: defaultSpacewidth, right: defaultSpacewidth),
-              children: [
-                SizedBox(height: defaultSpace),
-                /*Text("${widget.type == NotificationInfoType.Accepted ? "Lift" : "Drive"} Info",
+      final allInfo =
+          StreamBuilder<List<DocumentSnapshot>>(
+          stream: CombineLatestStream([firestore.collection("Drives").doc(widget.lift.liftId).snapshots(),
+          firestore
+          .collection("Notifications")
+          .doc(userRep.user.email).collection("UserNotifications").doc(widget.notification.notificationId).snapshots()],(vals) => [vals[0],vals[1]]),  // a previously-obtained Future<String> or null
+          builder: (BuildContext context, AsyncSnapshot<List<DocumentSnapshot>> snapshot){
+            if(snapshot.hasData) {
+              if (snapshot.data[0].exists && snapshot.data[1].exists) {
+            snapshot.data[0].data().forEach((key, value) {
+              if (value != null) {
+                widget.lift.setProperty(key, value);
+              }
+            });
+            widget.lift.passengersInfo = Map<String, Map<String, dynamic>>.from(snapshot.data[0].data()["PassengersInfo"]);
+            return Container(
+                child: ListView(
+                    shrinkWrap: true,
+                    padding: EdgeInsets.only(
+                        left: defaultSpacewidth, right: defaultSpacewidth),
+                    children: [
+                      SizedBox(height: defaultSpace),
+                      /*Text("${widget.type == NotificationInfoType.Accepted ? "Lift" : "Drive"} Info",
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),*/
-                /*Divider(
+                      /*Divider(
                   thickness: 3,
                 ),*/
-                ...(widget.type == NotificationInfoType.Accepted ? ([Text("Driver:",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                  _buildTile(widget.lift, "Accepted"),
-                  /*Divider(
+                      ...(widget.type == NotificationInfoType.Accepted ? ([Text(
+                          "Driver:",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 18)),
+                        _buildTile(widget.lift, "Accepted"),
+                        /*Divider(
                     thickness: 3,
                   )*/
-                  ]) : []),
+                      ]) : []),
 
-                ...(widget.type == NotificationInfoType.Requested ? ([Text("Passenger:",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                  _buildTile(widget.lift, "Requested"),
-                  /*Divider(
+                      ...(widget.type == NotificationInfoType.Requested ? ([
+                        Text("Passenger:",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 18)),
+                        _buildTile(widget.lift, "Requested"),
+                        /*Divider(
                     thickness: 3,
                   )*/
-                ]) : []),
+                      ]) : []),
 
-                SizedBox(height: 1.5*defaultSpace),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    labelText(text: "Date and time: "),
-                    Expanded(
-                        child: infoText(
-                            DateFormat('dd/MM - kk:mm').format(widget.lift.time)))
-                  ],
-                ),
-                SizedBox(height: defaultSpace),
-                Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  labelText(text: "Pick Up Point: "),
-                  Expanded(child: infoText(widget.type == NotificationInfoType.Requested ? widget.notification.startAddress : widget.lift.passengersInfo[userRep.user.email]["startAddress"]))
-                ]),
-                SizedBox(height: defaultSpace),
-                /*Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Expanded(child: infoText(widget.type == NotificationInfoType.Requested ? widget.notification.startAddress : widget.lift.passengersInfo[userRep.user.email]["startAddress"]))
-                ]),*/
-
-                Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
-                  labelText(text: "${widget.type == NotificationInfoType.Requested ? "Drop Off" : "Drop Off"} Point: "),
-                  Expanded(child: infoText(widget.type == NotificationInfoType.Requested ? widget.notification.destAddress : widget.lift.passengersInfo[userRep.user.email]["destAddress"]))
-                ]),
-                SizedBox(height: defaultSpace),
-                Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  labelText(text: "Starting Point: "),
-                  Expanded(child: infoText(widget.lift.startAddress))
-                ]),
-                SizedBox(height: defaultSpace),
-                _buildStopRows(context),
-                //SizedBox(height: defaultSpace),
-                Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  labelText(text: "Destination: "),
-                  Expanded(child: infoText(widget.lift.destAddress))
-                ]),
-
-                /*SizedBox(height: defaultSpace/3),
-                Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Expanded(child: infoText(widget.type == NotificationInfoType.Requested ? widget.notification.destAddress : widget.lift.passengersInfo[userRep.user.email]["destAddress"]))
-                ]),*/
-
-                SizedBox(height: defaultSpace),
-                Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
-                  labelText(text: "Distance: "),
-                  Expanded(child: infoText((widget.notification.distance / 1000).toStringAsFixed(1)+"km"))
-                ]),
-
-                widget.type == NotificationInfoType.Accepted ? SizedBox(height: defaultSpace) : Container(),
-                widget.type == NotificationInfoType.Accepted ?Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
-                  labelText(text: "Price: "),
-                  Image.asset("assets/images/shekel.png",scale: 0.9),
-                  Expanded(child: infoText(" "+widget.lift.price.toString()))
-                ]) : Container(),
-
-                Divider(
-                  thickness: 3,
-                ),
-                Container(
-                    alignment: Alignment.bottomLeft,
-                    color: Colors.white,
-                    child: ConfigurableExpansionTile(
-                      header: Container(
-                          alignment: Alignment.bottomLeft,
-                          child: Text("Additional info",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 17))),
-                      animatedWidgetFollowingHeader: const Icon(
-                        Icons.expand_more,
-                        color: const Color(0xFF707070),
+                      SizedBox(height: 1.5 * defaultSpace),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          labelText(text: "Date and time: "),
+                          Expanded(
+                              child: infoText(
+                                  DateFormat('dd/MM - kk:mm').format(
+                                      widget.lift.time)))
+                        ],
                       ),
-                      //tilePadding: EdgeInsets.symmetric(horizontal: 0),
-                      // backgroundColor: Colors.white,
-                      // trailing: Icon(Icons.arrow_drop_down,color: Colors.black,),
-                      //title: Text("Passenger info"),
-                      children: [
-                        widget.type == NotificationInfoType.Accepted ? SizedBox(height: defaultSpace) : Container(),
-                        widget.type == NotificationInfoType.Accepted ? Row(children: [
-                          labelText(text: "Big Trunk: "),
-                          widget.lift.bigTrunk
-                              ? Icon(Icons.check_circle_outline, color: Colors.teal)
-                              : Icon(Icons.cancel_outlined, color: Colors.pink),
-                        ]) : Container(),
-                        SizedBox(height: defaultSpace),
-                        widget.type == NotificationInfoType.Requested ? Row(children: [
-                          labelText(text: "Big Bag: "),
-                          widget.notification.bigBag
-                              ? Icon(Icons.check_circle_outline, color: Colors.teal)
-                              : Icon(Icons.cancel_outlined, color: Colors.pink)
-                        ]) : Container(),
-                        widget.type == NotificationInfoType.Accepted ? Row(children: [
-                          labelText(text: "Big Bag: "),
-                          widget.lift.passengersInfo[userRep.user.email]["bigBag"]
-                              ? Icon(Icons.check_circle_outline, color: Colors.teal)
-                              : Icon(Icons.cancel_outlined, color: Colors.pink)
-                        ]) : Container(),
-                        //Backseat,
-                        widget.type == NotificationInfoType.Accepted ? SizedBox(height: defaultSpace) : Container(),
-                        widget.type == NotificationInfoType.Accepted ? Row(children: [
-                          labelText(text: "Backseat not full?: "),
-                          widget.lift.backSeat
-                              ? Icon(Icons.check_circle_outline, color: Colors.teal)
-                              : Icon(Icons.cancel_outlined, color: Colors.pink)
-                        ]) : Container(),
+                      SizedBox(height: defaultSpace),
+                      Row(crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            labelText(text: "Pick Up Point: "),
+                            Expanded(child: infoText(
+                                widget.type == NotificationInfoType.Requested
+                                    ? widget.notification.startAddress
+                                    : widget.lift.passengersInfo[userRep.user
+                                    .email]["startAddress"]))
+                          ]),
+                      SizedBox(height: defaultSpace),
+                      /*Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Expanded(child: infoText(widget.type == NotificationInfoType.Requested ? widget.notification.startAddress : widget.lift.passengersInfo[userRep.user.email]["startAddress"]))
+                ]),*/
 
-                        widget.lift.note != "" ? SizedBox(height: defaultSpace) : Container(),
-                        widget.lift.note != "" ? Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
-                          labelText(text: "${widget.type==NotificationInfoType.Requested? "Passenger":"Driver"} note: "),
-                          Expanded(child: infoText(widget.lift.note))
-                        ]) : Container(),
-                        /*SizedBox(height: defaultSpace/3),
+                      Row(crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            labelText(text: "${widget.type ==
+                                NotificationInfoType.Requested
+                                ? "Drop Off"
+                                : "Drop Off"} Point: "),
+                            Expanded(child: infoText(
+                                widget.type == NotificationInfoType.Requested
+                                    ? widget.notification.destAddress
+                                    : widget.lift.passengersInfo[userRep.user
+                                    .email]["destAddress"]))
+                          ]),
+                      SizedBox(height: defaultSpace),
+                      Row(crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            labelText(text: "Starting Point: "),
+                            Expanded(child: infoText(widget.lift.startAddress))
+                          ]),
+                      SizedBox(height: defaultSpace),
+                      _buildStopRows(context),
+                      //SizedBox(height: defaultSpace),
+                      Row(crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            labelText(text: "Destination: "),
+                            Expanded(child: infoText(widget.lift.destAddress))
+                          ]),
+
+                      /*SizedBox(height: defaultSpace/3),
+                Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Expanded(child: infoText(widget.type == NotificationInfoType.Requested ? widget.notification.destAddress : widget.lift.passengersInfo[userRep.user.email]["destAddress"]))
+                ]),*/
+
+                      SizedBox(height: defaultSpace),
+                      Row(crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            labelText(text: "Distance: "),
+                            Expanded(child: infoText(
+                                (widget.notification.distance / 1000)
+                                    .toStringAsFixed(1) + "km"))
+                          ]),
+
+                      widget.type == NotificationInfoType.Accepted ? SizedBox(
+                          height: defaultSpace) : Container(),
+                      widget.type == NotificationInfoType.Accepted ? Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            labelText(text: "Price: "),
+                            Image.asset("assets/images/shekel.png", scale: 0.9),
+                            Expanded(child: infoText(
+                                " " + widget.lift.price.toString()))
+                          ]) : Container(),
+
+                      Divider(
+                        thickness: 3,
+                      ),
+                      Container(
+                          alignment: Alignment.bottomLeft,
+                          color: Colors.white,
+                          child: ConfigurableExpansionTile(
+                            header: Container(
+                                alignment: Alignment.bottomLeft,
+                                child: Text("Additional info",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 17))),
+                            animatedWidgetFollowingHeader: const Icon(
+                              Icons.expand_more,
+                              color: const Color(0xFF707070),
+                            ),
+                            //tilePadding: EdgeInsets.symmetric(horizontal: 0),
+                            // backgroundColor: Colors.white,
+                            // trailing: Icon(Icons.arrow_drop_down,color: Colors.black,),
+                            //title: Text("Passenger info"),
+                            children: [
+                              widget.type == NotificationInfoType.Accepted
+                                  ? SizedBox(height: defaultSpace)
+                                  : Container(),
+                              widget.type == NotificationInfoType.Accepted
+                                  ? Row(children: [
+                                labelText(text: "Big Trunk: "),
+                                widget.lift.bigTrunk
+                                    ? Icon(Icons.check_circle_outline,
+                                    color: Colors.teal)
+                                    : Icon(
+                                    Icons.cancel_outlined, color: Colors.pink),
+                              ])
+                                  : Container(),
+                              SizedBox(height: defaultSpace),
+                              widget.type == NotificationInfoType.Requested
+                                  ? Row(children: [
+                                labelText(text: "Big Bag: "),
+                                widget.notification.bigBag
+                                    ? Icon(Icons.check_circle_outline,
+                                    color: Colors.teal)
+                                    : Icon(
+                                    Icons.cancel_outlined, color: Colors.pink)
+                              ])
+                                  : Container(),
+                              widget.type == NotificationInfoType.Accepted
+                                  ? Row(children: [
+                                labelText(text: "Big Bag: "),
+                                widget.lift.passengersInfo[userRep.user
+                                    .email]["bigBag"]
+                                    ? Icon(Icons.check_circle_outline,
+                                    color: Colors.teal)
+                                    : Icon(
+                                    Icons.cancel_outlined, color: Colors.pink)
+                              ])
+                                  : Container(),
+                              //Backseat,
+                              widget.type == NotificationInfoType.Accepted
+                                  ? SizedBox(height: defaultSpace)
+                                  : Container(),
+                              widget.type == NotificationInfoType.Accepted
+                                  ? Row(children: [
+                                labelText(text: "Backseat not full?: "),
+                                widget.lift.backSeat
+                                    ? Icon(Icons.check_circle_outline,
+                                    color: Colors.teal)
+                                    : Icon(
+                                    Icons.cancel_outlined, color: Colors.pink)
+                              ])
+                                  : Container(),
+
+                              widget.lift.note != "" ? SizedBox(
+                                  height: defaultSpace) : Container(),
+                              widget.lift.note != "" ? Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    labelText(text: "${widget.type ==
+                                        NotificationInfoType.Requested
+                                        ? "Passenger"
+                                        : "Driver"} note: "),
+                                    Expanded(child: infoText(widget.lift.note))
+                                  ]) : Container(),
+                              /*SizedBox(height: defaultSpace/3),
                           Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                           Expanded(child: infoText(widget.lift.note))
                           ]),*/
-                        ...(widget.type == NotificationInfoType.Accepted ? ([
-                          widget.lift.passengersInfo[userRep.user.email]["note"] != "" ? SizedBox(height: defaultSpace) : Container(),
-                          widget.lift.passengersInfo[userRep.user.email]["note"] != "" ? Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
-                            labelText(text: "${widget.type == NotificationInfoType.Requested ? "Passenger" : "My"} note: "),
-                            Expanded(child: infoText(widget.lift.passengersInfo[userRep.user.email]["note"]))
-                          ]) : Container()
-                        ]) : []),
-                        widget.type==NotificationInfoType.Accepted ? SizedBox(height: defaultSpace) : Container(),
-                        widget.type==NotificationInfoType.Accepted ? Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
-                          labelText(text: "Driver Payment methods: "),
-                          Expanded(child: infoText(widget.lift.payments))
-                        ]) : Container(),
-                        SizedBox(height: defaultSpace),
-                      ],
-                    )
-                ),
-                Divider(
-                  thickness: 3,
-                ),
-
-                // widget.type == NotificationInfoType.Accepted ? SizedBox(height: defaultSpace) : Container(),
-                // widget.type == NotificationInfoType.Accepted ? Row(children: [
-                //   labelText(text: "Big Trunk: "),
-                //   widget.lift.bigTrunk
-                //       ? Icon(Icons.check_circle_outline, color: Colors.teal)
-                //       : Icon(Icons.cancel_outlined, color: Colors.pink),
-                // ]) : Container(),
-                // SizedBox(height: defaultSpace),
-                // widget.type == NotificationInfoType.Requested ? Row(children: [
-                //   labelText(text: "Big Bag: "),
-                //   widget.notification.bigBag
-                //       ? Icon(Icons.check_circle_outline, color: Colors.teal)
-                //       : Icon(Icons.cancel_outlined, color: Colors.pink)
-                // ]) : Container(),
-                // widget.type == NotificationInfoType.Accepted ? Row(children: [
-                //   labelText(text: "Big Bag: "),
-                //   widget.lift.passengersInfo[userRep.user.email]["bigBag"]
-                //       ? Icon(Icons.check_circle_outline, color: Colors.teal)
-                //       : Icon(Icons.cancel_outlined, color: Colors.pink)
-                // ]) : Container(),
-                // //Backseat,
-                // widget.type == NotificationInfoType.Accepted ? SizedBox(height: defaultSpace) : Container(),
-                // widget.type == NotificationInfoType.Accepted ? Row(children: [
-                //   labelText(text: "Backseat not full?: "),
-                //   widget.lift.backSeat
-                //       ? Icon(Icons.check_circle_outline, color: Colors.teal)
-                //       : Icon(Icons.cancel_outlined, color: Colors.pink)
-                // ]) : Container(),
-                //
-                // widget.type == NotificationInfoType.Accepted ? SizedBox(height: defaultSpace) : Container(),
-                // widget.type == NotificationInfoType.Accepted ?Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
-                //   labelText(text: "Price: "),
-                //   Image.asset("assets/images/shekel.png",scale: 0.9),
-                //   Expanded(child: infoText(" "+widget.lift.price.toString()))
-                // ]) : Container(),
-                // widget.lift.note != "" ? SizedBox(height: defaultSpace) : Container(),
-                // widget.lift.note != "" ? Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
-                //   labelText(text: "${widget.type==NotificationInfoType.Requested? "Passenger":"Driver"} note: "),
-                //   Expanded(child: infoText(widget.lift.note))
-                // ]) : Container(),
-                // /*SizedBox(height: defaultSpace/3),
-                // Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                //   Expanded(child: infoText(widget.lift.note))
-                // ]),*/
-                // ...(widget.type == NotificationInfoType.Accepted ? ([
-                //   widget.lift.passengersInfo[userRep.user.email]["note"] != "" ? SizedBox(height: defaultSpace) : Container(),
-                //   widget.lift.passengersInfo[userRep.user.email]["note"] != "" ? Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
-                //     labelText(text: "${widget.type == NotificationInfoType.Requested ? "Passenger" : "My"} note: "),
-                //     Expanded(child: infoText(widget.lift.passengersInfo[userRep.user.email]["note"]))
-                //   ]) : Container()
-                // ]) : []),
-                // widget.type==NotificationInfoType.Accepted ? SizedBox(height: defaultSpace) : Container(),
-                // widget.type==NotificationInfoType.Accepted ? Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
-                //   labelText(text: "Driver Payment methods: "),
-                //   Expanded(child: infoText(widget.lift.payments))
-                // ]) : Container(),
-
-                /*Divider(
-                  thickness: 3,
-                ),*/
-                // ...(widget.type == NotificationInfoType.Accepted ? ([Text("Driver:",
-                //     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                //
-                //   Divider(
-                //     thickness: 3,
-                //   )]) : []),
-                passengers,
-                Divider(
-                  thickness: 3,
-                ),
-                SizedBox(height: defaultSpace),
-                Container(
-                ),
-              ]));
+                              ...(widget.type == NotificationInfoType.Accepted
+                                  ? ([
+                                widget.lift.passengersInfo[userRep.user
+                                    .email]["note"] != "" ? SizedBox(
+                                    height: defaultSpace) : Container(),
+                                widget.lift.passengersInfo[userRep.user
+                                    .email]["note"] != "" ? Row(
+                                    crossAxisAlignment: CrossAxisAlignment
+                                        .start, children: [
+                                  labelText(text: "${widget.type ==
+                                      NotificationInfoType.Requested
+                                      ? "Passenger"
+                                      : "My"} note: "),
+                                  Expanded(child: infoText(
+                                      widget.lift.passengersInfo[userRep.user
+                                          .email]["note"]))
+                                ]) : Container()
+                              ])
+                                  : []),
+                              widget.type == NotificationInfoType.Accepted
+                                  ? SizedBox(height: defaultSpace)
+                                  : Container(),
+                              widget.type == NotificationInfoType.Accepted
+                                  ? Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    labelText(text: "Driver Payment methods: "),
+                                    Expanded(
+                                        child: infoText(widget.lift.payments))
+                                  ])
+                                  : Container(),
+                              SizedBox(height: defaultSpace),
+                            ],
+                          )
+                      ),
+                      Divider(
+                        thickness: 3,
+                      ),
+            Container(
+            alignment: Alignment.bottomLeft,
+            color: Colors.white,
+            child: ConfigurableExpansionTile(
+            header: Container(
+            alignment: Alignment.bottomLeft,
+            child: Row(
+            children: [
+            Icon(Icons.person),
+            Text("Passengers "+widget.lift.passengersInfo.length.toString()+"/"+widget.lift.numberOfSeats.toString(),
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
+            ],
+            )),
+            animatedWidgetFollowingHeader: const Icon(
+            Icons.expand_more,
+            color: const Color(0xFF707070),
+            ),
+            //tilePadding: EdgeInsets.symmetric(horizontal: 0),
+            // backgroundColor: Colors.white,
+            // trailing: Icon(Icons.arrow_drop_down,color: Colors.black,),
+            //title: Text("Passenger info"),
+            children: [
+            ..._buildPassengersList(),
+            ],
+            )),
+                      Divider(
+                        thickness: 3,
+                      ),
+                      SizedBox(height: defaultSpace),
+                      Container(
+                      ),
+                    ]));
+          }
+          else {
+              checkButtons = false;
+            return Center(child: Text(
+              "Notification unavailable", style: TextStyle(fontSize: 30),),);
+          }
+          }
+          else{
+            if(snapshot.hasError){
+              return Center(child: Text("Notification unavailable", style: TextStyle(fontSize: 30),),);
+            }else{
+              return Center(child: CircularProgressIndicator(),);
+            }
+          }
+          });
 
       return Scaffold(
         key: _errorSnack,
@@ -764,7 +836,7 @@ class _NotificationInfoState extends State<NotificationInfo> {
             margin: pageContainerMargin,
             //padding: EdgeInsets.only(left: defaultSpacewidth, right: defaultSpacewidth),
             child: Column(
-              children: [Expanded(child: allInfo),widget.type == NotificationInfoType.Requested ? AcceptOrReject : Container()],
+              children: [Expanded(child: allInfo),widget.type == NotificationInfoType.Requested && checkButtons ? AcceptOrReject : Container()],
             )),
         backgroundColor: mainColor,
       );

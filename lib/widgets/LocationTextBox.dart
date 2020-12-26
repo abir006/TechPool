@@ -35,6 +35,7 @@ class _LocationTextBoxes2State extends State<LocationTextBoxes2> {
     _pressed = false;
   }
 
+  /// validates the city input is legal.
   Future<bool> validateLegalCity(String city) async {
     try {
       var cc = await locationFromAddress(city,localeIdentifier: "en");
@@ -45,16 +46,17 @@ class _LocationTextBoxes2State extends State<LocationTextBoxes2> {
         return true;
       }
     } catch (e) {
-      if(city.contains("haifa") || city.contains("חיפה")){
+      if(city.toLowerCase().contains("haifa") || city.contains("חיפה")){
         return false;
       }
       return true;
     }
   }
 
+  /// validates the "city, street" input is legal.
   Future<bool> validateLegalStreet(String city, String street) async {
     try {
-        if (city.contains("haifa") || city.contains("חיפה")) {
+        if (city.toLowerCase().contains("haifa") || city.contains("חיפה")) {
           var cc2 = await locationFromAddress(city + ", " + street);
           var ccA = await placemarkFromCoordinates(
               cc2[0].latitude, cc2[0].longitude, localeIdentifier: "en");

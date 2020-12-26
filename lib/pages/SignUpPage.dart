@@ -405,14 +405,21 @@ class _SignUpPageState extends State<SignUpPage>
                                         child: Wrap(
                                             direction: Axis.horizontal,
                                             children: [
-                                              Text(
-                                                "A verification email sent to: \n${_email.text}, \nplease verify.",
-                                                style: TextStyle(
-                                                    backgroundColor:
-                                                        secondColor,
-                                                    color: Colors.white,
-                                                    fontSize: 20),
-                                              ),
+                                              Container(
+                                                width: size.width * 0.8,
+                                                  decoration:
+                                                  pageContainerDecoration,
+                                                  child: Padding(
+                                                    padding:
+                                                    const EdgeInsets.all(8.0),
+                                                    child: Text(
+                                                        "A verification email sent to: \n${_email.text}, \nplease verify.",
+                                                        style: TextStyle(
+                                                            fontWeight:
+                                                            FontWeight.bold,
+                                                            fontSize: 16,
+                                                            color: Colors.black)),
+                                                  )),
                                               Center(
                                                 child:
                                                     CircularProgressIndicator(),

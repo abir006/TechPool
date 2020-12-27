@@ -11,6 +11,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:tech_pool/appValidator.dart';
+import 'package:tech_pool/pages/NotificationsPage.dart';
+import 'package:tech_pool/pages/NotificationsPage.dart';
 
 class ProfilePage extends StatefulWidget {
   String email;
@@ -335,13 +337,40 @@ class _ProfilePageState extends State<ProfilePage> {
             }
           }
         });}
-    return Scaffold(
+    Consumer<UserRepository>(
+      builder: (context, userRep, _) =>
+     Scaffold(
       appBar: AppBar(
         elevation: 0,
         title: Text(
           "Profile Page",
           style: TextStyle(color: Colors.white),
         ),
+        actions: [
+          IconButton(
+              icon: StreamBuilder(
+                  stream: firestore.collection("Notifications").doc(userRep.user?.email).collection("UserNotifications").snapshots(), // a previously-obtained Future<String> or null
+                  builder: (BuildContext context, snapshot) {
+                    if (snapshot.hasData) {
+                      return BadgeIcon(
+                        icon: Icon(Icons.notifications, size: 25),
+                        badgeCount: snapshot.data.size,
+                      );
+                    }
+                    else{
+                      return BadgeIcon(
+                        icon: Icon(Icons.notifications, size: 25),
+                        badgeCount: 0,
+                      );
+                    }
+                  }
+              ),
+              onPressed: () => Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => NotificationsPage()))
+          )
+        ],
       ),
       body:  Consumer<UserRepository>(
           builder: (context, userRep, _) =>
@@ -358,6 +387,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ))),
       drawer: widget.fromProfile? Consumer<UserRepository>(builder: (context, auth, _) => techDrawer(auth, context, DrawerSections.profile)):null,
       backgroundColor: mainColor,
+    )
     );
   }
 

@@ -19,7 +19,7 @@ class NotificationsPage extends StatefulWidget {
 class _NotificationsPageState extends State<NotificationsPage> {
   final _key = GlobalKey<ScaffoldState>();
   FirebaseFirestore firestore = FirebaseFirestore.instance;
-  DateTime selectedDay = DateTime.now();
+  //DateTime selectedDay = DateTime.now();
   List<LiftNotification> _notifications;
   appValidator appValid;
 
@@ -34,17 +34,22 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   @override
   Widget build(BuildContext context) {
-    double defaultSpacewidth = MediaQuery.of(context).size.height * 0.016;
+    //double defaultSpacewidth = MediaQuery.of(context).size.height * 0.016;
     return Consumer<UserRepository>(builder: (context, userRep, child) {
-      return StreamBuilder<List<QuerySnapshot>>(
-          stream: CombineLatestStream([
-            firestore.collection("Notifications").doc(userRep.user?.email).collection("UserNotifications").snapshots()],
-              //firestore.collection("Notifications").doc("testing@campus.technion.ac.il").collection("UserNotifications").snapshots()],
-                  (values) => [values[0]]),
+      return StreamBuilder<QuerySnapshot>(
+          stream: firestore.collection("Notifications").doc(userRep.user?.email).collection("UserNotifications").snapshots(),
+          //return StreamBuilder<List<QuerySnapshot>>(
+      //firestore.collection("Notifications").doc("testing@campus.technion.ac.il").collection("UserNotifications").snapshots()],
+                  //(values) => [values[0]]),
+          // stream: CombineLatestStream([
+          //   firestore.collection("Notifications").doc(userRep.user?.email).collection("UserNotifications").snapshots()],
+          //     //firestore.collection("Notifications").doc("testing@campus.technion.ac.il").collection("UserNotifications").snapshots()],
+          //         (values) => [values[0]]),
           builder: (context, snapshot) {
             _notifications = [];
               if (snapshot.hasData) {
-              snapshot.data[0].docs.forEach((element) {
+                snapshot.data.docs.forEach((element) {
+                //snapshot.data[0].docs.forEach((element) {
                 String notificationId = element.id;
                 var elementData = element.data();
                 String driveId = elementData["driveId"];
@@ -168,6 +173,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 }
                 _notifications.add(notification);
               });
+                //sorting the notifications to show by time of arrival
               _notifications.sort((a, b) {
                 if (a.notificationTime.isAfter(b.notificationTime)) {
                   return -1;
@@ -176,7 +182,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 }
               });
               if(_notifications.length == 0){
-                double defaultSpacewidth = MediaQuery.of(context).size.width * 0.016;
+                //double defaultSpacewidth = MediaQuery.of(context).size.width * 0.016;
 
                 return Scaffold(
                   backgroundColor: mainColor,
@@ -292,9 +298,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
                     // Then show a snackbar.
                     //Scaffold.of(context)
-                    _key.currentState.showSnackBar(SnackBar(content: Text(/*$notification*/"Notification Deleted", style: TextStyle(fontSize: 20))));
+                    _key.currentState.showSnackBar(SnackBar(content: Text("Notification Deleted", style: TextStyle(fontSize: 20))));
                   },
-                  // Show a red background as the item is swiped away.
+                  // Show a background as the item is swiped away.
                   background: //Container(color: mainColor),
 
                   Container(
@@ -394,35 +400,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
               },
             ))],
           )),
-        /*body: Container(
-            decoration: pageContainerDecoration,
-            margin: pageContainerMargin,
-            child: Column(children: [
-            SizedBox(height: MediaQuery.of(context).size.height * 0.013),
-            //Divider(indent: 5, endIndent: 5, thickness: 2),
-              Flexible(
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 4.0),
-                    child:
-
-                    /*ListView(children: [
-                      ..._notifications.map((notification) => notificationSwitcher(notification, context)).toList()
-                    ]
-                    ),*/
-                    ListView.separated(
-                      shrinkWrap: true,
-                      padding: EdgeInsets.only(left: defaultSpacewidth*0.4, right: defaultSpacewidth*0.4, bottom: defaultSpacewidth*0.4,top:defaultSpacewidth*0.4 ),
-                      itemCount: _notifications.length,
-                      separatorBuilder: (BuildContext context, int index) => Divider(thickness: 4,),
-                      itemBuilder: (BuildContext context, int index) {
-                        return _buildTile(_notifications[index]);
-                      },
-                    )
-
-
-                  )),
-            ])
-        )*/
     );
   }
 
@@ -433,7 +410,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
     appValid.versionListener.cancel();
   }
 
-
+  //getting the photo and full name of a driver/hitchhiker
   Future<List<String>> initNames(String name) {
     List<String> ret = [];
     return FirebaseStorage.instance
@@ -457,6 +434,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
           if (snapshot.hasData) {
             return InkWell(
                 onTap:  () async {
+                  //Preparing and opening the info page
                   var drive = await firestore.collection("Drives").doc(
                       liftNotification.driveId).get();
                   MyLift liftToShow = new MyLift(
@@ -466,12 +444,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       liftToShow.setProperty(key, value);
                     }
                   });
-                  //liftToShow.note = liftNotification.; //No need in accepted? will put driver note instead
                   liftToShow.liftId = liftNotification.driveId;
                   //liftToShow.stops = [];
-                  //else {
                   liftToShow.dist = liftNotification.distance;
-                  //}
                   liftToShow.passengersInfo =
                   Map<String, Map<String, dynamic>>.from(
                       drive.data()["PassengersInfo"] ?? {});
@@ -575,7 +550,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                     ),
                                   ),
                                   //here the icon:
-                                  //Spacer(),
                                   Flexible(flex:4,
                                     child: Container(
                                       width: MediaQuery
@@ -600,23 +574,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
                             ],
                           )),
                     ),
-                    // Flexible(flex:3,
-                    //   child: Container(
-                    //     width: MediaQuery
-                    //         .of(context)
-                    //         .size
-                    //         .width * 0.016*16,
-                    //     child: Column(
-                    //       crossAxisAlignment: CrossAxisAlignment.center,
-                    //       children: [
-                    //         Transform.rotate(angle: 0.8,
-                    //             child: Icon(Icons.thumb_up_rounded, size: 30, color: Colors.green)),
-                    //         Text("Accepted", style: TextStyle(fontSize: 15, color: Colors.green),
-                    //         )
-                    //       ],
-                    //     ),
-                    //   ),
-                    // ),
                     SizedBox(width: MediaQuery
                         .of(context)
                         .size
@@ -636,8 +593,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   Widget _buildCanceledTile(LiftNotification liftNotification) {
     return FutureBuilder<List<String>>(
-      //case "CanceledLift" : in case a hitchhiker canceled a lift - notify driver
-      //case "CanceledDrive" : in case a driver canceled a drive- notify hitchhikers
         future: initNames(liftNotification.type == "CanceledLift" ? liftNotification.passengerId : liftNotification.driverId),
         builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
           if (snapshot.hasData) {
@@ -661,7 +616,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
               child:
               Row(
                 children: [
-                  //flexs: 6,17,8
                   Flexible(flex: 3,
                     child: InkWell(
                         onTap: () async {
@@ -915,7 +869,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
   Widget _buildRequestedTile(LiftNotification liftNotification) {
     return FutureBuilder<List<String>>(
         future: initNames(liftNotification.passengerId),
-        //future: initNames("ofir.asulin@campus.technion.ac.il"),
         builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
           if (snapshot.hasData) {
             return InkWell(
@@ -1044,8 +997,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                         crossAxisAlignment: CrossAxisAlignment.center,
                                         children: [
                                           Icon(Icons.more_horiz, size: 30, color: Colors.orange),
-                                          /*Transform.rotate(angle: 0.8,
-                                child: Icon(Icons.thumb_up_rounded, size: 30, color: Colors.orange)),*/
                                           Text("Respond", style: TextStyle(fontSize: 15, color: Colors.orange),
                                           )
                                         ],
@@ -1138,70 +1089,3 @@ class _NotificationsPageState extends State<NotificationsPage> {
     );
   }
 }
-
-
-//import 'package:flutter/foundation.dart';
-//import 'package:flutter/material.dart';
-
-/*void main() {
-  runApp(MyApp());
-}
-
-// MyApp is a StatefulWidget. This allows updating the state of the
-// widget when an item is removed.
-class MyApp extends StatefulWidget {
-  MyApp({Key key}) : super(key: key);
-
-  @override
-  MyAppState createState() {
-    return MyAppState();
-  }
-}*/
-
-/*class MyAppState extends State<MyApp> {
-  final items = List<String>.generate(20, (i) => "Item ${i + 1}");
-
-  @override
-  Widget build(BuildContext context) {
-    final title = 'Dismissing Items';
-
-    return MaterialApp(
-      title: title,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text(title),
-        ),
-        body: ListView.builder(
-          itemCount: items.length,
-          itemBuilder: (context, index) {
-            final item = items[index];
-
-            return Dismissible(
-              // Each Dismissible must contain a Key. Keys allow Flutter to
-              // uniquely identify widgets.
-              key: Key(item),
-              // Provide a function that tells the app
-              // what to do after an item has been swiped away.
-              onDismissed: (direction) {
-                // Remove the item from the data source.
-                setState(() {
-                  items.removeAt(index);
-                });
-
-                // Then show a snackbar.
-                Scaffold.of(context)
-                    .showSnackBar(SnackBar(content: Text("$item dismissed")));
-              },
-              // Show a red background as the item is swiped away.
-              background: Container(color: Colors.red),
-              child: ListTile(title: Text('$item')),
-            );
-          },
-        ),
-      ),
-    );
-  }
-}*/

@@ -31,12 +31,14 @@ class _NotificationInfoState extends State<NotificationInfo> {
     super.initState();
   }
 
+  //Rejecting a request for a lift
   Future<bool> _rejectRequest(UserRepository userRep) async {
     try{
       return await firestore.runTransaction((transaction) async {
         //firestore.collection("Notifications").doc(userRep.user?.email).collection("UserNotifications").doc(widget.notification.notificationId).delete();
-
         //transaction.set(firestore.collection("Notifications").doc("testing@campus.technion.ac.il").collection("UserNotifications2").doc(),
+
+        //Inserting a rejected notification to the passenger
         transaction.set(firestore.collection("Notifications").doc(widget.notification.passengerId).collection("UserNotifications").doc(),
             {
               "startCity": widget.notification.startCity,
@@ -54,6 +56,7 @@ class _NotificationInfoState extends State<NotificationInfo> {
             }
         );
 
+        //Deleting the relevant pending of the passenger
         QuerySnapshot q = await firestore.collection("Notifications").
         doc(widget.notification.passengerId).collection("Pending").
         where("driveId",isEqualTo: widget.lift.liftId).get();
@@ -61,6 +64,7 @@ class _NotificationInfoState extends State<NotificationInfo> {
           transaction.delete(element.reference);
         });
 
+        //Deleting the request notification from the driver notifications
         transaction.delete(firestore.collection("Notifications").
         doc(userRep.user?.email).collection("UserNotifications").
         doc(widget.notification.notificationId));
@@ -72,6 +76,7 @@ class _NotificationInfoState extends State<NotificationInfo> {
     }
   }
 
+  //Accepting a request for a lift
   Future<bool> _acceptRequest(UserRepository userRep) async {
     try{
       return await firestore.runTransaction((transaction) async {
@@ -93,7 +98,10 @@ class _NotificationInfoState extends State<NotificationInfo> {
           }
           };
           tempPassengersInfo.addAll(passengerInfoToAdd);/*.remove(userRep.user.email);*/
+          //Inserting the relevant passenger to the passengers in the drive
           transaction.update((firestore.collection("Drives").doc(widget.notification.driveId)),{"Passengers":tempPassengers,"PassengersInfo":tempPassengersInfo});
+
+          //Inserting an accepted notification to the passenger
           transaction.set(firestore.collection("Notifications").doc(widget.notification.passengerId).collection("UserNotifications").doc(),
               //transaction.set(firestore.collection("Notifications").doc("testing").collection("UserNotifications").doc(),
               {
@@ -118,6 +126,7 @@ class _NotificationInfoState extends State<NotificationInfo> {
           // doc(widget.notification.passengerId).collection("Pending").
           // where("driveId",isEqualTo: widget.notification.driveId).get());
 
+          //Deleting the relevant pending of the passenger
           QuerySnapshot q = await firestore.collection("Notifications").
           doc(widget.notification.passengerId).collection("Pending").
           where("driveId",isEqualTo: widget.notification.driveId).get();
@@ -125,6 +134,7 @@ class _NotificationInfoState extends State<NotificationInfo> {
             transaction.delete(element.reference);
           });
 
+          //Deleting the request notification from the driver notifications
           transaction.delete(firestore.collection("Notifications").
           doc(userRep.user?.email).collection("UserNotifications").
           doc(widget.notification.notificationId));
@@ -140,7 +150,6 @@ class _NotificationInfoState extends State<NotificationInfo> {
 
   @override
   Widget build(BuildContext context) {
-    //bool bigBag = widget.notification.bigBag;
 
     return Consumer<UserRepository>(builder: (context, userRep, child) {
 
@@ -167,6 +176,7 @@ class _NotificationInfoState extends State<NotificationInfo> {
       }
 
 
+      //Getting the passengers info from the database
       Future<List<dynamic>> initNames(String name) {
         List<dynamic> ret = [];
         return FirebaseStorage.instance
@@ -178,12 +188,6 @@ class _NotificationInfoState extends State<NotificationInfo> {
           return firestore.collection("Profiles").doc(name).get().then((value) {
             ret.add(value.data()["firstName"] + " " + value.data()["lastName"]);
             if(widget.type == NotificationInfoType.Accepted){
-              // ret.add(widget.lift.passengersInfo[name]["startAddress"]);//1
-              // ret.add(widget.lift.passengersInfo[name]["dist"]~/ 1000);//3
-              // //ret.add(widget.lift.passengersInfo[name]["bigTrunk"]);
-              // //ret.add(widget.lift.passengersInfo[name]["backSeatNotFull"]);//4
-              // ret.add(widget.lift.passengersInfo[name]["note"]);//6
-              // ret.add(widget.lift.passengersInfo[name]["destAddress"]);//7
               ret.add(widget.lift.passengersInfo[name]["startAddress"]);//2
               ret.add(widget.lift.passengersInfo[name]["dist"]/ 1000);//3
               ret.add(widget.lift.passengersInfo[name]["bigBag"]);//4
@@ -196,6 +200,7 @@ class _NotificationInfoState extends State<NotificationInfo> {
         //  return null;
       }
 
+      //Getting a passenger or driver picture and full name from the database
       Future<List<dynamic>> initName(String name) {
         List<dynamic> ret = [];
         return FirebaseStorage.instance
@@ -206,34 +211,11 @@ class _NotificationInfoState extends State<NotificationInfo> {
           ret.add(value);
           return firestore.collection("Profiles").doc(name).get().then((value) {
             ret.add(value.data()["firstName"] + " " + value.data()["lastName"]);
-            /*if(widget.type == NotificationInfoType.Accepted){
-              // ret.add(widget.lift.passengersInfo[name]["startAddress"]);//1
-              // ret.add(widget.lift.passengersInfo[name]["dist"]~/ 1000);//3
-              // //ret.add(widget.lift.passengersInfo[name]["bigTrunk"]);
-              // //ret.add(widget.lift.passengersInfo[name]["backSeatNotFull"]);//4
-              // ret.add(widget.lift.passengersInfo[name]["note"]);//6
-              // ret.add(widget.lift.passengersInfo[name]["destAddress"]);//7
-              ret.add(widget.lift.passengersInfo[name]["startAddress"]);//2
-              ret.add(widget.lift.passengersInfo[name]["dist"]/ 1000);//3
-              ret.add(widget.lift.passengersInfo[name]["bigBag"]);//4
-              ret.add(widget.lift.passengersInfo[name]["note"]);//5
-              ret.add(widget.lift.passengersInfo[name]["destAddress"]);//6
-            }*/
             return ret;
           });
         });
-        //  return null;
       }
-      // Widget allInfoText(double dist) {
-      //   return Container(
-      //       child: Row(
-      //         children: [
-      //           //Text(dist.toString() + "km"),
-      //           Text(dist.toStringAsFixed(1) + "km"),
-      //           SizedBox(width: MediaQuery.of(context).size.height * 0.01),
-      //         ],
-      //       ));
-      // }
+
 
       Widget _buildTile(MyLift lift, String type) {
         return FutureBuilder<List<dynamic>>(
@@ -284,8 +266,6 @@ class _NotificationInfoState extends State<NotificationInfo> {
                                 infoText(snapshot.data[1]),
                                 //placesText(lift.startAddress),
                                 //allInfoText(widget.type == NotificationInfoType.Requested ? widget.lift.dist / 1000 : lift.passengersInfo[userRep.user.email]["dist"] / 1000),
-                                //allInfoText(widget.lift.dist / 1000),
-
                               ],
                             )),
                       ),
@@ -396,6 +376,8 @@ class _NotificationInfoState extends State<NotificationInfo> {
       List<Widget> _buildStopRowList() {
         List<Widget> stops = [];
         int i = 1;
+
+        //building the stops map of text labels
         widget.lift.stops.forEach((key) {
           (key as Map).forEach((key, value) {
             if(key=="stopAddress")
@@ -424,7 +406,6 @@ class _NotificationInfoState extends State<NotificationInfo> {
       Widget _buildStopRows(BuildContext context) {
         return Container(
           child: Column(
-            // As you expect multiple lines you need a column not a row
             children: _buildStopRowList(),
           ),
         );
@@ -434,6 +415,7 @@ class _NotificationInfoState extends State<NotificationInfo> {
       final passengers = Container(
           alignment: Alignment.bottomLeft,
           color: Colors.white,
+          //building the passengers info ConfigurableExpansionTile
           child: ConfigurableExpansionTile(
             header: Container(
                 alignment: Alignment.bottomLeft,
@@ -448,15 +430,12 @@ class _NotificationInfoState extends State<NotificationInfo> {
               Icons.expand_more,
               color: const Color(0xFF707070),
             ),
-            //tilePadding: EdgeInsets.symmetric(horizontal: 0),
-            // backgroundColor: Colors.white,
-            // trailing: Icon(Icons.arrow_drop_down,color: Colors.black,),
-            //title: Text("Passenger info"),
             children: [
               ..._buildPassengersList(),
             ],
           ));
 
+      //accept and reject buttons
       final AcceptOrReject =
 
       Consumer<UserRepository>(builder: (context, userRep, child) {
@@ -958,28 +937,3 @@ class _NotificationInfoState extends State<NotificationInfo> {
   }
 
 }
-
-
-/*
- Widget _buildTiles() {
-    return ListView.builder(
-        shrinkWrap: true,
-        padding: const EdgeInsets.all(16),
-        itemBuilder: (BuildContext _context, int i) {
-          if (i.isOdd) {
-            return Divider();
-          }
-          final int index = i ~/ 2;
-          return _buildTile(null);
-        });
-  }
-
-  void _openInfoDialog() {
-    Navigator.of(context).push(new MaterialPageRoute<Null>(
-        builder: (BuildContext context) {
-          return null;
-        },
-        fullscreenDialog: true));
-  }
-
- */

@@ -111,6 +111,7 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
             .collection("UserNotifications")
             .add(
             {
+              //Insert a rejected notification to all those that requested this lift
               "destCity": element["destCity"],
               "startCity": element["startCity"],
               "distance": element["distance"],
@@ -124,6 +125,7 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
         );
         element.reference.delete();
 
+        //delete all pending notifications related to this canceled drive
         firestore.collection("Notifications").doc(currentHitchhikerRequesterId).collection("Pending")
             .where("driveId",isEqualTo: widget.lift.liftId).get().then((snapshot) {
           for (DocumentSnapshot doc in snapshot.docs) {
@@ -147,7 +149,7 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
            List<String> tempPassengers = List.from(value.data()["Passengers"]);
            tempPassengers.forEach((element) async {
             String currentPassengerId = element.toString();
-
+            //Insert a canceled notification to all passengers that were supposed to participate in this drive
             transaction.set(firestore.collection("Notifications").doc(currentPassengerId).collection("UserNotifications").doc(),
                 {
                   "destCity": widget.lift.destCity,
@@ -166,6 +168,7 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
             );
           });
 
+           //delete drive from database
           transaction.delete(firestore.collection("Drives").doc(widget.lift.liftId));
           return true;
         });

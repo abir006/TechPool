@@ -58,6 +58,8 @@ double clacDis(GeoPoint from,Coordinates to){
 }
 enum NotificationInfoType {Accepted, Requested}
 
+// a class for a notification about a lift, that contains relevant data that
+// is needed in order to maintain and show a notification tile and info page
 class LiftNotification {
   String notificationId;
   String driveId;

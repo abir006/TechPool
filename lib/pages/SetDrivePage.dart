@@ -11,9 +11,6 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:configurable_expansion_tile/configurable_expansion_tile.dart';
 
-// mail for testing purposes:
-// ofir.asulin@campus.technion.ac.il
-
 class SetDrivePage extends StatefulWidget {
   DateTime currentDate;
   FirebaseFirestore db = FirebaseFirestore.instance;
@@ -64,6 +61,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
   @override
   Widget build(BuildContext context) {
 
+    //checking if locations were chosen in the map widget
     void checkLocations(){
       _validateLocations = true;
       if (_startPointController.text == "") {
@@ -79,19 +77,12 @@ class _SetDrivePageState extends State<SetDrivePage> {
       widget.time=null;
     }*/
 
-
     // if(_chosenTime !=null) {
     //   _chosenTime = widget.currentDate
     //       .subtract(new Duration(hours: widget.currentDate.hour))
     //       .add(new Duration(hours: DateTime.now().hour))
     //       .add(new Duration(minutes: DateTime.now().minutes));
     // }
-
-    /*if(widget.numberOfSeatsIndex!=null){
-      _numberOfPassengers =_passengers[widget.numberOfSeatsIndex];
-      widget.numberOfSeatsIndex = null;
-    }*/
-
 
 
     // final stopPoint1text_2 = Container(
@@ -130,7 +121,6 @@ class _SetDrivePageState extends State<SetDrivePage> {
     //     ],
     //   ),
     // );
-
 
     final stopPoint1text = Stack(children: [
       Container(
@@ -261,6 +251,9 @@ class _SetDrivePageState extends State<SetDrivePage> {
                         },
                         fullscreenDialog: true));
                 setState(() {
+
+                  //After returning from the map widget,
+                  //update the relevant stop addresses controllers
                   if (returnFromMapResult != null) {
                     stopAddressesList = [];
                     startAddress = returnFromMapResult.fromAddress;
@@ -282,6 +275,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
                         }
                       }
                     }
+                    //Create the stop addresses map, that will later be added to the db
                     for(int i = 0; i<_numberOfStops; i++){
                       //String stopName = "Stop" + (i+1).toString();
                       Map mapToAdd = {'stopPoint' : GeoPoint(
@@ -325,7 +319,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
                           title: Center(
                               child: Text("Choose departure time",
                                   style: TextStyle(fontSize: 21))),
-                          //content: Text("Hey! I'm Coflutter!"),
+                          //content: Text("Hey!"),
                           children: [
                             TimePickerSpinner(
                               is24HourMode: true,
@@ -565,6 +559,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
                 if (_formKey2.currentState.validate() && _validateLocations) {
                   try {
 
+                    //for testing purposes:
                     //Random random = new Random();
                     // final String driveName =
                     //     "0_test_drive" + random.nextInt(1000).toString();

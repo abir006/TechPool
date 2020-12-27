@@ -10,7 +10,6 @@ import 'package:tech_pool/pages/NotificationsPage.dart';
 import 'package:tech_pool/pages/SearchLiftPage.dart';
 import 'package:rxdart/rxdart.dart';
 import 'SetDrivePage.dart';
-import 'package:badges/badges.dart';
 
 class HomePage extends StatefulWidget {
   @override

@@ -12,7 +12,6 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:tech_pool/appValidator.dart';
 import 'package:tech_pool/pages/NotificationsPage.dart';
-import 'package:tech_pool/pages/NotificationsPage.dart';
 
 class ProfilePage extends StatefulWidget {
   String email;
@@ -337,7 +336,7 @@ class _ProfilePageState extends State<ProfilePage> {
             }
           }
         });}
-    Consumer<UserRepository>(
+    return Consumer<UserRepository>(
       builder: (context, userRep, _) =>
      Scaffold(
       appBar: AppBar(

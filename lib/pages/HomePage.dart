@@ -10,6 +10,7 @@ import 'package:tech_pool/pages/NotificationsPage.dart';
 import 'package:tech_pool/pages/SearchLiftPage.dart';
 import 'package:rxdart/rxdart.dart';
 import 'SetDrivePage.dart';
+import 'package:badges/badges.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -169,12 +170,31 @@ class _HomePageState extends State<HomePage> {
                       style: TextStyle(color: Colors.white),
                 ),
                 actions: [
-                IconButton(
-                icon: Icon(Icons.notifications),
-                onPressed: () => Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => NotificationsPage())))
+                  IconButton(
+                      icon: StreamBuilder(
+                          stream: firestore.collection("Notifications").doc(userRep.user?.email).collection("UserNotifications").snapshots(), // a previously-obtained Future<String> or null
+                          builder: (BuildContext context, snapshot) {
+                            if (snapshot.hasData) {
+                              //QuerySnapshot values = snapshot.data;
+                              //builder: (_, snapshot) =>
+                              return BadgeIcon(
+                                icon: Icon(Icons.notifications, size: 25),
+                                badgeCount: snapshot.data.size,
+                              );
+                            }
+                            else{
+                              return BadgeIcon(
+                                icon: Icon(Icons.notifications, size: 25),
+                                badgeCount: 0,
+                              );
+                            }
+                          }
+                      ),
+                      onPressed: () => Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => NotificationsPage()))
+                  )
                 ],
                 ),
                 drawer: techDrawer(userRep, context, DrawerSections.home),
@@ -260,11 +280,37 @@ class _HomePageState extends State<HomePage> {
           ),
           actions: [
             IconButton(
-                icon: Icon(Icons.notifications),
-                onPressed:() => Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-            builder: (context) => NotificationsPage())))
+                icon: StreamBuilder(
+                stream: firestore.collection("Notifications").doc(userRep.user?.email).collection("UserNotifications").snapshots(), // a previously-obtained Future<String> or null
+                builder: (BuildContext context, snapshot) {
+                  if (snapshot.hasData) {
+                    //QuerySnapshot values = snapshot.data;
+                    //builder: (_, snapshot) =>
+                    return BadgeIcon(
+                      icon: Icon(Icons.notifications, size: 25),
+                      badgeCount: snapshot.data.size,
+                    );
+                  }
+                  else{
+                    return BadgeIcon(
+                      icon: Icon(Icons.notifications, size: 25),
+                      badgeCount: 0,
+                    );
+                  }
+                }
+                ),
+                onPressed: () => Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => NotificationsPage()))
+            )
+
+        //     IconButton(
+        //         icon: Icon(Icons.notifications),
+        //         onPressed:() => Navigator.pushReplacement(
+        // context,
+        // MaterialPageRoute(
+        //     builder: (context) => NotificationsPage())))
           ],
         ),
         drawer: techDrawer(userRep, context, DrawerSections.home),

@@ -14,6 +14,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/services.dart';
 
+/// image util class to load image as file.
 class ImageUtils {
   static Future<File> imageToFile({String imageName, String ext}) async {
     var bytes = await rootBundle.load('assets/$imageName.$ext');

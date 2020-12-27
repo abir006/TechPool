@@ -9,6 +9,8 @@ import 'package:tech_pool/appValidator.dart';
 import 'package:tech_pool/pages/NotificationsPage.dart';
 import 'package:tech_pool/pages/SearchLiftPage.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:tech_pool/CalendarEvents.dart';
+import 'package:tech_pool/TechDrawer.dart';
 import 'SetDrivePage.dart';
 
 class HomePage extends StatefulWidget {
@@ -39,14 +41,6 @@ class _HomePageState extends State<HomePage> {
   void _onDaySelected(DateTime day, List events, List holidays) {
     setState(() {
       selectedDay = day;
-      /*_dailyEvents = events;
-      _dailyEvents.sort((a, b) {
-        if (a.dateTime.isAfter(b.dateTime)) {
-          return 1;
-        } else {
-          return -1;
-        }
-      });*/
     });
   }
 
@@ -206,6 +200,7 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  /// the page content that needs to be showed if snapshot has and transformed correctly.
   Scaffold _buildPage(BuildContext context, UserRepository userRep) {
     return Scaffold(
         floatingActionButton: Wrap(

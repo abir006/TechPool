@@ -9,7 +9,7 @@ import 'package:tech_pool/Utils.dart';
 import 'package:intl/intl.dart';
 import 'package:tech_pool/widgets/TextBoxField.dart';
 import 'package:configurable_expansion_tile/configurable_expansion_tile.dart';
-
+import 'package:tech_pool/CalendarEvents.dart';
 import 'ProfilePage.dart';
 
 class CalendarEventInfo extends StatefulWidget {
@@ -189,17 +189,7 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
             ));
       }
 
-      Widget placesText(String from) {
-        return Container(
-            width: MediaQuery.of(context).size.height * 0.016 * 20,
-            child: Text(
-              from,
-              style: TextStyle(fontSize: fontTextsSize, color: Colors.black),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 2,
-            ));
-      }
-
+      /// initializes a list with all the info required about a passenger by his name(email).
       Future<List<dynamic>> initNames(String name) {
         List<dynamic> ret = [];
         return FirebaseStorage.instance
@@ -420,38 +410,6 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
         );
       }
 
-
-
-      final passengers = Container(
-          alignment: Alignment.bottomLeft,
-          color: Colors.white,
-          child: ConfigurableExpansionTile(
-            header:  Row(
-                children: [Container(
-                    alignment: Alignment.bottomLeft,
-                    child: Text("Passengers info " , style: TextStyle(fontWeight: FontWeight.bold,
-                        fontSize: 17))),
-                  Icon(Icons.person),
-                  Container(
-                      alignment: Alignment.bottomLeft,
-                      child: Text(
-                          widget.lift.passengers.length.toString() +
-                              "/" + widget.lift.numberOfSeats.toString(),
-                          style: TextStyle(fontWeight: FontWeight.bold,
-                              fontSize: 17))),
-                ]),
-            animatedWidgetFollowingHeader: const Icon(
-              Icons.expand_more,
-              color: const Color(0xFF707070),
-            ),
-            //tilePadding: EdgeInsets.symmetric(horizontal: 0),
-            // backgroundColor: Colors.white,
-            // trailing: Icon(Icons.arrow_drop_down,color: Colors.black,),
-            //title: Text("Passenger info"),
-            children: [
-              ..._buildPassengersList(),
-            ],
-          ));
 
       final searchLift =
 

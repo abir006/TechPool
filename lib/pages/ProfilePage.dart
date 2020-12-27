@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
+import 'package:tech_pool/TechDrawer.dart';
 import 'package:tech_pool/Utils.dart';
 import 'package:tech_pool/widgets/TextBoxField.dart';
 import 'package:image_picker/image_picker.dart';

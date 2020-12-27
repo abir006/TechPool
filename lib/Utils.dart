@@ -1,17 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:encrypted_shared_preferences/encrypted_shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoder/geocoder.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:tech_pool/pages/CalendarEventInfo.dart';
-import 'package:tech_pool/pages/HomePage.dart';
-import 'package:tech_pool/pages/NotificationsPage.dart';
-import 'package:tech_pool/pages/ProfilePage.dart';
-import 'package:intl/intl.dart';
-import 'package:tech_pool/widgets/WelcomeSignInButton.dart';
-import 'package:tech_pool/widgets/WelcomeSignUpButton.dart';
 
 
 /// Apps default settings
@@ -53,119 +45,12 @@ class UserRepository extends ChangeNotifier {
   Image get profilePicture => _profilePicture ?? defaultPic;
 }
 
-/// A container class for Drive event.
-class Drive{
-  String driveId;
-  String info;
-  int numberOfSeats;
-  int numberOfPassengers;
-  DateTime dateTime;
-  final String title = "Drive";
-  Drive(this.driveId,this.info,this.numberOfSeats,this.numberOfPassengers,this.dateTime);
-}
-
-/// A container class for Lift event.
-class Lift{
-  String driveId;
-  String info;
-  int numberOfSeats;
-  int numberOfPassengers;
-  DateTime dateTime;
-  final String title = "Lift";
-  Lift(this.driveId,this.info,this.numberOfSeats,this.numberOfPassengers,this.dateTime);
-}
-
-class PendingLift{
-  String driveId;
-  String info;
-  DateTime dateTime;
-  int dist;
-  String from;
-  String to;
-  final String title = "Pending lift";
-  PendingLift(this.from,this.to,this.driveId,this.info,this.dateTime,this.dist);
-}
-
-/*
-/// A container class for DesiredLift event.
-class DesiredLift{
-  String info;
-  DesiredLift(this.info);
-}
-
-/// A container class for DesiredDrive event.
-class DesiredDrive{
-  String info;
-  DesiredDrive(this.info);
-}*/
-
 class LocationsResult{
   Address fromAddress;
   Address toAddress;
   List<Address> stopAddresses;
   int numberOfStops;
   LocationsResult(this.fromAddress, this.toAddress,this.stopAddresses,this.numberOfStops);
-}
-
-enum CalendarEventType { Drive, Lift , PendingLift }
-/// A util function for the calendar, returns the desired event container to
-/// display under the calendar, according to the type of event received.
-Widget transformEvent(dynamic event, BuildContext context){
-  if (event is Drive) {
-    return calendarListTile(event, Icon(Icons.directions_car,size: 30, color: mainColor),context,CalendarEventType.Drive);
-  } else if (event is Lift) {
-    return calendarListTile(event, Transform.rotate(angle: 0.8,child: Icon(Icons.thumb_up_rounded,size: 30, color: mainColor)),context,CalendarEventType.Lift);
-  } else if (event is PendingLift) {
-    return calendarListTile(event, Icon(Icons.access_time,size: 30, color: mainColor),context,CalendarEventType.PendingLift);
-  }
-  else{
-    return Container();
-  }
-}
-
-Container calendarListTile(dynamic event,Widget leadingWidget,BuildContext context,CalendarEventType eventType) {
-  FirebaseFirestore firestore = FirebaseFirestore.instance;
-  return Container(
-    decoration: BoxDecoration(
-      color: Colors.white,
-      boxShadow: [BoxShadow(color: Colors.black,blurRadius: 2.0,
-        spreadRadius: 0.0,offset: Offset(2.0, 2.0))],
-      border: Border.all(color: eventType == CalendarEventType.PendingLift ? Colors.orange : Colors.green, width: 0.8),
-      borderRadius: BorderRadius.circular(12.0),
-    ),
-    margin:
-    const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-    child: ListTile(leading: leadingWidget,
-      title: Text("${event?.title} \n${event?.info}"),
-      onTap: () async {
-        var drive = await firestore.collection("Drives").doc(event.driveId).get();
-        MyLift docLift = new MyLift("driver", "destAddress", "stopAddress", 5);
-        drive.data().forEach((key, value) {
-          if(value!=null) {
-            docLift.setProperty(key,value);
-          }
-        });
-        docLift.liftId = event.driveId;
-        if(eventType == CalendarEventType.PendingLift){
-          docLift.dist = event.dist;
-          docLift.pendingStartAddress = event.from;
-          docLift.pendingDestAddress = event.to;
-        }
-        else{
-          docLift.dist = 0;
-        }
-        docLift.passengersInfo = Map<String, Map<String, dynamic>>.from(drive.data()["PassengersInfo"]?? {}) ;
-        docLift.payments = (await firestore.collection("Profiles").doc(docLift.driver).get()).data()["allowedPayments"].join(", ");
-        Navigator.of(context).push(new MaterialPageRoute<Null>(
-            builder: (BuildContext context) {
-              return CalendarEventInfo(lift: docLift,type: eventType);
-            },
-            fullscreenDialog: true
-        ));
-      },
-    subtitle: Row(mainAxisAlignment: MainAxisAlignment.start,children: [Text("${(DateFormat.Hm().format(event.dateTime)).toString()}"),...(eventType != CalendarEventType.PendingLift ? [Spacer(),Icon(Icons.person,color: Colors.black,),Text(" ${event.numberOfPassengers} / ${event.numberOfSeats}",style: TextStyle(color: Colors.black),)] : [])]),
-    trailing: Icon(Icons.chevron_right_sharp,color: Colors.black,size:30,)),
-  );
 }
 
 double clacDis(GeoPoint from,Coordinates to){
@@ -294,159 +179,6 @@ class liftRes{
   liftRes({@required this.fromTime,@required this.toTime,@required this.indexDist,@required this.startAddress,@required this.destAddress, @required this.backSeat, @required this.bigTrunk});
 }
 
-/// enum to specify from which page the drawer is called
-enum DrawerSections { home, profile, notifications, favorites, chats, settings }
-
-/// returns a Drawer, with the user information from userRep, and highlithing
-/// and not rebuilding the current section (page).
-SafeArea techDrawer(UserRepository userRep, BuildContext context,
-    DrawerSections currentSection) {
-  final GlobalKey<ScaffoldState> _key = GlobalKey<ScaffoldState>();
-  return SafeArea(child: ClipRRect(
-      borderRadius: BorderRadius.only(topRight: Radius.circular(20.0),bottomRight:Radius.circular(20.0)),child: Container(width: MediaQuery.of(context).size.width*0.7,
-        child: Scaffold(key: _key,
-          body: Drawer(
-          child: Column(children: [
-            /*  UserAccountsDrawerHeader(
-                accountName: Text("Hello, ${userRep.user.displayName}.",style: TextStyle(color: Colors.white,fontSize: 18),),
-                accountEmail: Container(height: 20,child: Row(crossAxisAlignment: CrossAxisAlignment.end,mainAxisAlignment: MainAxisAlignment.spaceBetween,children: [
-              Text(userRep.user.email,style: TextStyle(color: Colors.white,fontSize: 14)),
-             IconButton(icon: Icon(Icons.logout,color: Colors.white,size: 25,),onPressed: () => {},)]))
-     ,currentAccountPicture: CircleAvatar(backgroundColor: secondColor,))*/
-          Container(
-            color: mainColor,
-            height: 180,
-            child: Padding(
-              padding: const EdgeInsets.only(top: 40, left: 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: CircleAvatar(
-                      backgroundColor: secondColor,
-                      radius: 40,
-                      backgroundImage: userRep.profilePicture.image,
-                    ),
-                  ),
-                  //Spacer(),
-                  Expanded(
-                    child: Row(mainAxisSize: MainAxisSize.max,mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                      Flexible(flex: 5,child: Text("Hello, ${userRep.user?.displayName}.",
-                          style: TextStyle(color: Colors.white, fontSize: 20))),
-                      Flexible(flex: 1,child: IconButton(
-                        icon: Icon(
-                          Icons.logout,
-                          color: Colors.white,
-                          size: 25,
-                        ),
-                        onPressed: () async => await (userRep.auth
-                            .signOut()
-                            .then((_) {
-                          final EncryptedSharedPreferences encryptedSharedPreferences = EncryptedSharedPreferences();
-                              encryptedSharedPreferences.clear();
-                               Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) {
-                                        var size = MediaQuery.of(context).size;
-                                        return Scaffold(body: Container(height: size.height, width: size.width,color: mainColor,
-  child: Stack(alignment: Alignment.center,children: [Image.asset("assets/images/TechPoolWelcomeBackground.png"), TransparentSignInButton(), TransparentSignUnButton()],)));}));
-                        })),
-                      ))
-                    ]),
-                  )
-                ],
-              ),
-            ),
-          ),
-          drawerListTile("Home",Icons.home_rounded,DrawerSections.home,currentSection, context, userRep,_key),
-          drawerListTile("Profile",Icons.person,DrawerSections.profile,currentSection, context, userRep,_key),
-          drawerListTile("Notifications",Icons.notifications,DrawerSections.notifications,currentSection, context, userRep,_key),
-            Spacer(),
-            AboutListTile(
-              icon: Icon(
-                Icons.info,
-                //color: mainColor,
-                size: 30,
-              ),
-              applicationIcon: FlutterLogo(),
-              applicationName: 'TechPool',
-              applicationVersion: 'December 2020',
-              applicationLegalese: '\u{a9} 2020 Abir Shaked,Ori Mazor and Ofir Asulin',
-            ),
-        /*  drawerListTile("Favorite Locations",Icons.favorite,DrawerSections.favorites,currentSection, context, userRep,_key),
-          drawerListTile("Chats",Icons.chat,DrawerSections.chats,currentSection, context, userRep,_key),
-          drawerListTile("Settings",Icons.settings,DrawerSections.settings,currentSection, context, userRep,_key)*/
-        ])),
-      ))));
-}
-
-/// creates a listTile for the drawer, with the relevant pageName,icon,tileSection for the tile.
-/// and the currentSection of the drawer.
-
-ListTile drawerListTile(String pageName,IconData icon,DrawerSections tileSection,DrawerSections currentSection, BuildContext context, UserRepository userRep,GlobalKey<ScaffoldState> key) {
-  return ListTile(
-    selected: currentSection == tileSection,
-    leading: Icon(
-      icon,
-      color: mainColor,
-      size: 30,
-    ),
-    title: Text(
-      pageName,
-      style: TextStyle(fontSize: 12),
-    ),
-    onTap: () {
-      if (currentSection == tileSection) {
-        Navigator.of(context).pop();
-      } else {
-        switch(tileSection) {
-          case DrawerSections.home:
-            {
-              Navigator.pop(context);
-              Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => HomePage()));
-              break;
-            }
-          case DrawerSections.profile: {
-            Navigator.pop(context);
-            Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => ProfilePage(email: userRep.user?.email,fromProfile: true)));
-            break;
-          }
-          case DrawerSections.notifications: {
-            Navigator.pop(context);
-            Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => NotificationsPage()));
-            break;
-          }
-          case DrawerSections.favorites:{
-            //Navigator.of(context).pop();
-            key.currentState.showSnackBar(SnackBar(content: Text("This feature is not yet implemented", style: TextStyle(fontSize: 20),)));
-            break;
-          }
-          case DrawerSections.chats: {
-            //Navigator.of(context).pop();
-            key.currentState.showSnackBar(SnackBar(content: Text("This feature is not yet implemented", style: TextStyle(fontSize: 20),)));
-            break;
-          }
-          case DrawerSections.settings: {
-            //Navigator.of(context).pop();
-            key.currentState.showSnackBar(SnackBar(content: Text("This feature is not yet implemented", style: TextStyle(fontSize: 20,),)));
-            break;
-          }
-        }
-      }
-    },
-  );
-}
-
 var userInfoKey = ["email","firstName","lastName","hobbies","faculty","aboutSelf","allowedPayments","phoneNumber",];
 enum userInfoKeyEnum{
   email,
@@ -476,11 +208,11 @@ class UserInfo{
 }
 
 
-/// the decoration for the container inside the page body.
+/// the decoration for the container inside the page body for main pages.
 final pageContainerDecoration = BoxDecoration(color: Colors.white,borderRadius: BorderRadius.all(Radius.circular(20.0)),
   boxShadow: [BoxShadow(color: Colors.black,blurRadius: 4.0,
       spreadRadius: 0.0,offset: Offset(0.0, 1.0))],);
-/// the margin for the container inside the page body.
+/// the margin for the container inside the page body for main pages.
 final pageContainerMargin = EdgeInsets.fromLTRB(10, 4, 10, 10);
 
 extension StringExtension on String {

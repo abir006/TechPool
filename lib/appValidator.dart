@@ -4,6 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:data_connection_checker/data_connection_checker.dart';
 import 'package:flutter/material.dart';
 
+/// Validates the app's version and internet connection.
+/// Used in main pages init state, with the desired method.
 class appValidator {
   bool fallback = false;
   StreamSubscription<DataConnectionStatus> listener;
@@ -30,6 +32,7 @@ class appValidator {
     );
   }
 
+  /// checks the internet connection, shows a non-dismissible dialog if not valid.
   checkConnection(BuildContext context) async {
     listener = DataConnectionChecker().onStatusChange.listen((status) {
       switch (status) {
@@ -51,6 +54,7 @@ class appValidator {
     return await DataConnectionChecker().connectionStatus;
   }
 
+  /// checks the apps version number, shows a non-dismissible dialog if not valid.
   checkVersion(BuildContext context) async {
     versionListener = firestore.collection("Version").doc("VersionControl").snapshots().listen((event) {
       if(event.data()["version"] != versionNumber){

@@ -184,8 +184,10 @@ class _SignUpPageState extends State<SignUpPage>
                                     validator: (value) {
                                       if (value.isEmpty) {
                                         return 'Please enter email';
-                                      } else if (!value.toLowerCase().endsWith(
-                                              "technion.ac.il") ) {
+                                        ///validating email ends with technion domain.
+                                      } else if (!value
+                                          .toLowerCase()
+                                          .endsWith("technion.ac.il") ) {
                                         return 'Must use technion email';
                                       }
                                       return null;

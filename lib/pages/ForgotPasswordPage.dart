@@ -59,12 +59,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                           validator: (value) {
                             if (value.isEmpty) {
                               return 'Please enter email';
+                              ///validating email ends with technion domain.
                             } else if (!value
                                     .toLowerCase()
-                                    .endsWith("@campus.technion.ac.il") &&
-                                !value
-                                    .toLowerCase()
-                                    .endsWith("@technion.ac.il")) {
+                                    .endsWith("technion.ac.il")) {
                               return 'Must use technion email';
                             }
 

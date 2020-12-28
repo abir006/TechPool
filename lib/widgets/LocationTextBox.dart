@@ -77,11 +77,9 @@ class _LocationTextBoxes2State extends State<LocationTextBoxes2> {
           return false;
       } else {
         var cc = await locationFromAddress(city, localeIdentifier: "en");
-        var cityAddress = await placemarkFromCoordinates(
-            cc[0].latitude, cc[0].longitude, localeIdentifier: "en");
+        var cityAddress = await placemarkFromCoordinates(cc[0].latitude, cc[0].longitude, localeIdentifier: "en");
         var cc2 = await locationFromAddress(city + ", " + street);
-        var ccA = await placemarkFromCoordinates(
-            cc2[0].latitude, cc2[0].longitude, localeIdentifier: "en");
+        var ccA = await placemarkFromCoordinates(cc2[0].latitude, cc2[0].longitude, localeIdentifier: "en");
         address = [
           Address(coordinates: Coordinates(cc2[0].latitude, cc2[0].longitude),
               addressLine: (ccA[0].locality + ", " + ccA[0].street),
@@ -100,9 +98,7 @@ class _LocationTextBoxes2State extends State<LocationTextBoxes2> {
           if ((cc2.first.latitude !=
               cc.first.latitude ||
               cc2.first.longitude !=
-                  cc.first.longitude) &&
-              ((address.first.locality == cityAddress.first.locality) ||
-                  (address.first.locality == cityAddress.first.subLocality))) {
+                  cc.first.longitude)) {
             return false;
           } else {
             return true;

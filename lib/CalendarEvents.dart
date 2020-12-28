@@ -34,8 +34,9 @@ class PendingLift{
   int dist;
   String from;
   String to;
+  String passengerNote;
   final String title = "Pending lift";
-  PendingLift(this.from,this.to,this.driveId,this.info,this.dateTime,this.dist);
+  PendingLift(this.from,this.to,this.driveId,this.info,this.dateTime,this.dist,this.passengerNote);
 }
 
 enum CalendarEventType { Drive, Lift , PendingLift }
@@ -82,6 +83,8 @@ Container calendarListTile(dynamic event,Widget leadingWidget,BuildContext conte
             docLift.dist = event.dist;
             docLift.pendingStartAddress = event.from;
             docLift.pendingDestAddress = event.to;
+            docLift.pendingNote = event.passengerNote;
+
           }
           else{
             docLift.dist = 0;

@@ -624,6 +624,19 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                                               .user.email]["note"]))
                                     ])
                                   ]) : []),
+                                  ...(widget.type == CalendarEventType.PendingLift ? ([
+                                    widget.lift.pendingNote.isEmpty ? SizedBox(
+                                      height: 0,) : SizedBox(
+                                        height: defaultSpace),
+                                    widget.lift.pendingNote.isEmpty ? SizedBox(
+                                      height: 0,) : Row(
+                                        crossAxisAlignment: CrossAxisAlignment
+                                            .start, children: [
+                                      labelText(text: "My note: "),
+                                      Expanded(child: infoText(
+                                          widget.lift.pendingNote))
+                                    ])
+                                  ]) : []),
                                   SizedBox(height: defaultSpace),
                                   Row(crossAxisAlignment: CrossAxisAlignment
                                       .start, children: [

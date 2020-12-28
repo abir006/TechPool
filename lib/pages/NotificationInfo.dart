@@ -345,21 +345,7 @@ class _NotificationInfoState extends State<NotificationInfo> {
                       ),
                       SizedBox(
                         height: MediaQuery.of(context).size.height * 0.004,
-                      ),
-                      ...(widget.type == NotificationInfoType.Accepted ? ([Row(children: [
-                        labelText(text: "Big Bag: "),
-                        snapshot.data[4]
-                            ? Icon(Icons.check_circle_outline, color: secondColor)
-                            : Icon(Icons.cancel_outlined, color: Colors.pink)
-                      ]),Row(children: [
-                        labelText(text: "Pick Up: "),
-                        Expanded(child: infoText(snapshot.data[2]))
-                      ]), Row(children: [
-                        labelText(text: "Drop Off: "),
-                        Expanded(child: infoText(snapshot.data[6]))
-                      ]),widget.type == NotificationInfoType.Requested ? Row(children: [
-                        labelText(text: "Note: "), Expanded(child: infoText(snapshot.data[5]))
-                      ]) : Container(),Divider(thickness: 1)]) : [])],
+                      )],
                   ),
                 );
               } else {
@@ -719,20 +705,29 @@ class _NotificationInfoState extends State<NotificationInfo> {
                                         color: Colors.pink)
                                   ])
                                       : Container(),
-
                                   widget.lift.note != "" ? SizedBox(
                                       height: defaultSpace) : Container(),
                                   widget.lift.note != "" ? Row(
                                       crossAxisAlignment: CrossAxisAlignment
                                           .start,
                                       children: [
-                                        labelText(text: "${widget.type ==
-                                            NotificationInfoType.Requested
-                                            ? "Passenger"
-                                            : "Driver"} note: "),
+                                        labelText(text: "Driver note: "),
                                         Expanded(
                                             child: infoText(widget.lift.note))
                                       ]) : Container(),
+                                  ...(widget.type == NotificationInfoType.Requested
+                                      ?
+                                  [widget.notification.passengerNote != "" ? SizedBox(
+                                      height: defaultSpace) : Container(),
+                                  widget.notification.passengerNote != "" ? Row(
+                                      crossAxisAlignment: CrossAxisAlignment
+                                          .start,
+                                      children: [
+                                        labelText(text: "Passenger note: "),
+                                        Expanded(
+                                            child: infoText(widget.notification.passengerNote))
+                                      ]) : Container()]: [Container()]) ,
+
                                   /*SizedBox(height: defaultSpace/3),
                           Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                           Expanded(child: infoText(widget.lift.note))

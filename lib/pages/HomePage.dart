@@ -120,7 +120,7 @@ class _HomePageState extends State<HomePage> {
                           elementData["startCity"] +
                               " \u{2192} " +
                               elementData["destCity"],
-                          elementTime,elementData["distance"]);
+                          elementTime,elementData["distance"],elementData["passengerNote"]);
                       _events[Jiffy(elementTime)
                           .startOf(Units.DAY)
                           .add(Duration(hours: 12))] = (_events[Jiffy(

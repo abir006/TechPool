@@ -111,6 +111,7 @@ class MyLift{
   String payments;
   String pendingStartAddress;
   String pendingDestAddress;
+  String pendingNote;
   var stops = new List<dynamic>();
 
   void setProperty(String key,var property){

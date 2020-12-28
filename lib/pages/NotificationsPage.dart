@@ -32,6 +32,18 @@ class _NotificationsPageState extends State<NotificationsPage> {
     appValid.checkVersion(context);
   }
 
+  // Future<void> deleteNotification(index, userRep, _key) async {
+  //   //Here will come the query to delete notification from db.
+  //   await firestore.collection("Notifications").
+  //   doc(userRep.user?.email).collection("UserNotifications").
+  //   doc(_notifications[index].notificationId).delete().then((value)
+  //   {
+  //     _key.currentState.showSnackBar(SnackBar(content: Text(/*$notification*/"Notification Deleted", style: TextStyle(fontSize: 20))));
+  //     return value;
+  //   }
+  //   );
+  // }
+
   @override
   Widget build(BuildContext context) {
     //double defaultSpacewidth = MediaQuery.of(context).size.height * 0.016;
@@ -185,7 +197,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 //double defaultSpacewidth = MediaQuery.of(context).size.width * 0.016;
 
                 return Scaffold(
-                  backgroundColor: mainColor,
+                    key: _key,
+                    backgroundColor: mainColor,
                   appBar: AppBar(
                     elevation: 0,
                     title: Text(
@@ -202,7 +215,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                          //Spacer(),
+                          //SizedBox(height: MediaQuery.of(context).size.height * 0.1),
                           Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.center,
@@ -211,7 +225,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                             SizedBox(width: MediaQuery.of(context).size.width * 0.02),
                             Text("No notifications",style: TextStyle(fontSize: 30, color: Colors.black))
                           ]),
-                          Spacer()
+                          //Spacer()
                         ],
                       ),
 
@@ -286,21 +300,29 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   //Key(notification.notificationTime.toString()),
                   // Provide a function that tells the app
                   // what to do after an item has been swiped away.
-                  onDismissed: (direction) async {
+                    onDismissed: (direction) async {
                     //Here will come the query to delete notification from db.
                     await firestore.collection("Notifications").
                     doc(userRep.user?.email).collection("UserNotifications").
-                    doc(_notifications[index].notificationId).delete();
-                    setState(() {
+                    doc(_notifications[index].notificationId).delete().then((value) =>
+                    {
+                      _key.currentState.showSnackBar(SnackBar(content: Text("Notification Deleted", style: TextStyle(fontSize: 20))))
+                      //return value;
+                    }
+                    );
+
+                    //await deleteNotification;
+
+                    /*setState(() {
                     // Remove the item from the data source.
                     _notifications.removeAt(index);
-                    });
+                    });*/
 
                     // Then show a snackbar.
                     //Scaffold.of(context)
-                    _key.currentState.showSnackBar(SnackBar(content: Text("Notification Deleted", style: TextStyle(fontSize: 20))));
+                    //_key.currentState.showSnackBar(SnackBar(content: Text(/*$notification*/"Notification Deleted", style: TextStyle(fontSize: 20))));
                   },
-                  // Show a background as the item is swiped away.
+                  // Show a red background as the item is swiped away.
                   background: //Container(color: mainColor),
 
                   Container(

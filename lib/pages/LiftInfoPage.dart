@@ -127,6 +127,7 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
       return stops;
     }
 
+    /// return the passengers List tiles
     List<Widget> _buildPassengersList() {
       List<Widget> passengers = [];
       for (int i = 0; i < widget.lift.passengers.length; i++) {
@@ -135,6 +136,7 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
       return passengers;
     }
 
+    ///return the route of the driver
     Widget _buildRow(BuildContext context) {
       return Container(
         child: Column(
@@ -143,6 +145,7 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
         ),
       );
     }
+    ///return the addition information on the driver
     Widget additionInfo() {
     return FutureBuilder<DocumentSnapshot>(
         future:  firestore.collection("Profiles").doc(widget.lift.driver).get(), // a previously-obtained Future<String> or null
@@ -163,10 +166,6 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
                     Icons.expand_more,
                     color: const Color(0xFF707070),
                   ),
-                  //tilePadding: EdgeInsets.symmetric(horizontal: 0),
-                  // backgroundColor: Colors.white,
-                  // trailing: Icon(Icons.arrow_drop_down,color: Colors.black,),
-                  //title: Text("Passenger info"),
                   children: [
                     Row(children: [
                       labelText(text: "Big Trunk: "),
@@ -206,26 +205,7 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
           }
     });}
 
-    final passengers = Container(
-        alignment: Alignment.bottomLeft,
-        color: Colors.white,
-        child: ConfigurableExpansionTile(
-          header: Container(
-              alignment: Alignment.bottomLeft,
-              child: Text("Passengers info",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17))),
-          animatedWidgetFollowingHeader: const Icon(
-            Icons.expand_more,
-            color: const Color(0xFF707070),
-          ),
-          //tilePadding: EdgeInsets.symmetric(horizontal: 0),
-          // backgroundColor: Colors.white,
-          // trailing: Icon(Icons.arrow_drop_down,color: Colors.black,),
-          //title: Text("Passenger info"),
-          children: [
-            ..._buildPassengersList(),
-          ],
-        ));
+    ///The button of request lift
     final searchLift =
     Consumer<UserRepository>(builder: (context, userRep, _) {
       return StreamBuilder<DocumentSnapshot>(
@@ -383,17 +363,6 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
                          style: TextStyle(
                              fontWeight: FontWeight.bold, fontSize: 18)),
                      Container(
-                       // width:300*defaultSpacewidth,
-                       // color: mainColor.withOpacity(0.05),
-                       // decoration: BoxDecoration(
-                       //    color: Colors.white,//Color(0xFFF5F5F5),
-                       // boxShadow: [
-                       //  BoxShadow(color: Colors.black, blurRadius: 2.0,
-                       //    spreadRadius: 0.0, offset: Offset(2.0, 2.0))
-                       // ],
-                       //  border: Border.all(color: secondColor, width: 0.8),
-                       //borderRadius: BorderRadius.circular(15.0),
-                      // padding: const EdgeInsets.all(4),
                        child: Column(
                            children: [
                              generalInfoBoxTextField(
@@ -404,8 +373,6 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
                                  maxLenth: 150),
                              Row(
                                    mainAxisAlignment: MainAxisAlignment.start,
-                                     //crossAxisAlignment: CrossAxisAlignment.start,
-                                 // mainAxisSize: MainAxisSize.min,
                                children: [
                                Text(
                                "Big Bag:",
@@ -466,6 +433,7 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
   }
 
 
+  ///Initialize the first,last name and the picture of requested email/name
   Future<List<String>> initNames(String name) {
       List<String> ret = [];
       return FirebaseStorage.instance
@@ -547,6 +515,7 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
         });
   }
 
+  /// returns the driver tile
   Widget _buildTile(MyLift lift) {
     return FutureBuilder<List<String>>(
         future: initNames(lift.driver),
@@ -603,10 +572,6 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
                           ],
                         )),
                   ),
-                //  Spacer(),
-                 // SizedBox(
-                //    width: MediaQuery.of(context).size.height * 0.016,
-                //  )
                 ],
               ),
             );
@@ -650,6 +615,7 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
           maxLines: 2,
         ));
   }
+  ///alert dialog that pops when the user pesses on request lift
   showAlertDialog(BuildContext context,String title,String info) {
     Widget okButton = FlatButton(
       textColor: mainColor,
@@ -690,26 +656,3 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
   }
 }
 
-/*
- Widget _buildTiles() {
-    return ListView.builder(
-        shrinkWrap: true,
-        padding: const EdgeInsets.all(16),
-        itemBuilder: (BuildContext _context, int i) {
-          if (i.isOdd) {
-            return Divider();
-          }
-          final int index = i ~/ 2;
-          return _buildTile(null);
-        });
-  }
-
-  void _openInfoDialog() {
-    Navigator.of(context).push(new MaterialPageRoute<Null>(
-        builder: (BuildContext context) {
-          return null;
-        },
-        fullscreenDialog: true));
-  }
-
- */

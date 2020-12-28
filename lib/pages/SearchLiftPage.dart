@@ -101,6 +101,8 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
         DateTime.now().second,
         DateTime.now().millisecond,
         DateTime.now().microsecond);
+
+    ///update all information from the caller page if there is any
     if (widget.totime != null) {
       _toTime = widget.totime;
       _toControler.text = DateFormat('kk:mm').format(widget.totime);
@@ -171,32 +173,6 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
       }
     }
 
-    final locationText = Center(
-        child: Container(
-      child: Text(
-        'Locations',
-        style:
-            TextStyle(fontSize: _lablesTextsSize, fontWeight: FontWeight.bold),
-      ),
-    ));
-
-    final timeText = Center(
-        child: Container(
-      child: Text(
-        'Times',
-        style:
-            TextStyle(fontSize: _lablesTextsSize, fontWeight: FontWeight.bold),
-      ),
-    ));
-
-    final preferenceTexts = Center(
-        child: Container(
-      child: Text(
-        'Preferences',
-        style:
-            TextStyle(fontSize: _lablesTextsSize, fontWeight: FontWeight.bold),
-      ),
-    ));
 
     final startPointText = Stack(children: [
       Container(
@@ -207,19 +183,9 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
               text: "Starting point: ",
             ),
             Expanded(child: generalInfoText(text: _startPointControler.text)),
-            /*Expanded(child: textBoxFieldDisable(
-              size: MediaQuery.of(context).size,
-              hintText: "",
-              textFieldController: _startPointControler,
-              validator: (value) {
-                if(checkpoints && (_startPointControler==null || _startPointControler.text=="")){checkPointError=true;return "No start point chosen";}
-                else {checkPointError=false;return null;}})),*/
           ],
         ),
       ),
-      //  InkWell(
-      //  onTap: (){},
-      //Container(color:Colors.transparent,child:SizedBox(width: defaultSpace*8,height:defaultSpace*9,)),
     ]);
 
     final destinationText = Stack(children: [
@@ -231,14 +197,6 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
             text: "Destination: ",
           ),
           Expanded(child: generalInfoText(text: _destPointControler.text)),
-          /*child: textBoxFieldDisable(
-              //nameLabel: "Destination point: ",
-              size: MediaQuery.of(context).size,
-              hintText: "",
-              textFieldController: _destPointControler,
-              validator: (value) {
-                if(checkpoints &&(_destPointControler==null || _destPointControler.text=="")){return "No destination chosen";}
-                else return null;})),*/
         ],
       )),
       // Container(color:Colors.transparent,child:SizedBox(width: defaultSpace*8,height:defaultSpace*10,)),
@@ -293,6 +251,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
               }
             }));
 
+///legacy clear button
     final clearButton = Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -382,6 +341,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
       },
     );
 
+    ///Contains the two widgets from and to timer pickers
     final newChooseTime = DefaultTabController(
       length: 2,
       child: Scaffold(
@@ -410,44 +370,8 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
         ),
       ),
     );
-/*
-    final chooseTime2 = showDialog(
-        context: context,
-        builder: (_) => new SimpleDialog(
-          title: Center(
-              child: Text("Choose from and to time",
-                  style: TextStyle(fontSize: 21))),
-         /* children: [//newChooseTime,
-            Row(
-              mainAxisAlignment: MainAxisAlignment
-                  .center, //Center Row contents horizontally,
-              children: [
-                //RaisedButton(
-                FlatButton(
-                  child: Text('CANCEL',
-                      style: TextStyle(
-                          fontSize: 16, color: mainColor)),
-                  onPressed: () {
-                    setState(() {
-                      Navigator.of(context).pop();
-                    });
-                  },
-                ),
-                //SizedBox(width: 2*defaultSpaceWidth),
-                //RaisedButton(
-                FlatButton(
-                  child: Text('CONFIRM',
-                      style: TextStyle(
-                          fontSize: 16, color: mainColor)),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                )
-              ],
-            ),
-          ],*/
-        ));
-*/
+
+    ///the chooseTime button
     final chooseTime = Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -518,32 +442,6 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
                               ),
                             ],
                           ));
-                  /*
-                DateTimeRangePicker(
-                    startText: "From",
-                    endText: "To",
-                    doneText: "Yes",
-                    cancelText: "Cancel",
-                    interval: 5,
-                    initialStartTime: (_fromTime!=null)?_fromTime:widget.currentdate,
-                    initialEndTime: (_fromTime!=null)?_toTime:widget.currentdate.add(Duration(days: 0,hours: 0,minutes: 0,microseconds: 0)),
-                    mode: DateTimeRangePickerMode.time,
-                    minimumTime: DateTime.now().subtract(Duration(days: 2,hours: 1,minutes: 0,microseconds: 0)),
-                    maximumTime: DateTime.now().add(Duration(days: 7)),
-                    use24hFormat: true,
-                    onConfirm: (start, end) {
-                      setState(() {
-                      _fromTime=start;
-                      _fromMinutes =start.minute.toString();
-                      if(_fromTime.minute<10){
-                        _fromMinutes ="0"+start.minute.toString();
-                      }
-                      _toTime=end;
-                      _fromControler.text = DateFormat('dd-MM – kk:mm').format(start);
-                      _toControler.text = DateFormat('dd-MM – kk:mm').format(end);
-                      _formKey.currentState.validate();
-                      });
-                    }).showPicker(context);*/
                 },
               ),
             ),
@@ -557,26 +455,6 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
             ]),
         );
 
-    final toText = Container(
-      child: textBoxFieldDisable(
-          nameLabel: "hi",
-          size: MediaQuery.of(context).size,
-          hintText: "",
-          textFieldController: _toControler,
-          validator: (value) {
-            if (_fromTime == null) {
-              return 'No to time selected';
-            } else if ((_fromTime.hour > _toTime.hour) ||
-                (_toTime.hour == _fromTime.hour &&
-                    _toTime.minute < _fromTime.minute)) {
-              return 'The to time is before the from time ';
-            } else if (_fromTime.hour == _toTime.hour &&
-                _toTime.minute == _fromTime.minute) {
-              return 'To time equal from time ';
-            } else
-              return null;
-          }),
-    );
 
     final bigTruncText = Container(
       height: 4 * defaultSpace,
@@ -661,6 +539,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
         ],
       ),
     );
+    ///The container that contains all the preference of the user
     final prefer = Container(
         alignment: Alignment.bottomLeft,
         color: Colors.transparent,
@@ -689,8 +568,6 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
         title: Text(
           "Search Lift",
           style: TextStyle(color: Colors.white),
@@ -747,12 +624,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
                                   : Center(
                                       child: Text(_errors[_indexError],
                                           style: TextStyle(color: Colors.red))),
-                              //fromText,
-                              //SizedBox(height: defaultSpace),
-                              //toText,
                               SizedBox(height: defaultSpace),
-                              //SizedBox(height: defaultSpace),
-                              //preferenceTexts,
                               SizedBox(height: defaultSpace),
                               Divider(
                                 thickness: 3,
@@ -761,7 +633,6 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
                               Divider(
                                 thickness: 3,
                               ),
-                              //SizedBox(height:2*defaultSpace),
                             ])
                       ])),
                       searchLift,
@@ -809,205 +680,3 @@ Widget searchLableText({@required String text}) {
     ),
   );
 }
-/*
-  Widget dropDownButtonsColumn(List<String> list, String hint){
-    return Padding(
-      padding: const EdgeInsets.only(left: 40, right: 40 , bottom: 24,top:12),
-      child: Container(//gives the height of the dropdown button
-        height: 55,
-        width: MediaQuery.of(context).size.width*0.4, //gives the width of the dropdown button
-        decoration: BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(3)),
-            color: Color(0xFFF2F2F2)
-        ),
-         padding:  const EdgeInsets.only(bottom: 24,top:12), //you can include padding to control the menu items
-        child: Theme(
-            data: Theme.of(context).copyWith(
-                canvasColor: Colors.yellowAccent, // background color for the dropdown items
-                buttonTheme: ButtonTheme.of(context).copyWith(
-                  alignedDropdown: true,  //If false (the default), then the dropdown's menu will be wider than its button.
-                )
-            ),
-            child: DropdownButtonHideUnderline(  // to hide the default underline of the dropdown button
-              child: DropdownButton<String>(
-                isExpanded: true,
-                iconEnabledColor: Color(0xFF595959),  // icon color of the dropdown button
-                items: list.map((String value){
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value,
-                      style: TextStyle(
-                          fontSize: 15
-                      ),
-                    ),
-                  );
-                }).toList(),
-                hint: Text(hint,style: TextStyle(color: Color(0xFF8B8B8B),fontSize: 15),),  // setting hint
-                onChanged: (String value){
-                  setState(() {
-                    _fromTimec = value;  // saving the selected value
-                  });
-                },
-                value: _fromTimec,  // displaying the selected value
-              ),
-            )
-        ),
-      ),
-    );
-  }
-*/
-/*
-class _SearchLiftForm extends StatefulWidget {
-  @override
-  _SearchLiftFormState createState() => _SearchLiftState();
-}
-
-class _MyForm extends State<SearchLift> {
-  final _formKey = GlobalKey<FormState>();
-  static double _fontTextsSize = 17;
-  static double _lablesTextsSize = 19;
-  static String _fromTime = "";
-
-  static List<String> country = [
-    "America",
-    "Brazil",
-    "Canada",
-    "India",
-    "Mongalia",
-    "USA",
-    "China",
-    "Russia",
-    "Germany"
-  ];
-
-  final locationText = Center(
-      child: Container(
-    child: Text(
-      'Locations',
-      style: TextStyle(fontSize: _lablesTextsSize, fontWeight: FontWeight.bold),
-    ),
-  ));
-
-  final timeText = Center(
-      child: Container(
-    child: Text(
-      'Times',
-      style: TextStyle(fontSize: _lablesTextsSize, fontWeight: FontWeight.bold),
-    ),
-  ));
-
-  final startPointText = Container(
-    child: TextFormField(
-      decoration: InputDecoration(
-        labelText: 'Starting point',
-        labelStyle: TextStyle(fontSize: _fontTextsSize),
-      ),
-    ),
-  );
-
-  final destinationText = Container(
-    child: TextFormField(
-      decoration: InputDecoration(
-        labelText: 'Destination point',
-        labelStyle: TextStyle(fontSize: _fontTextsSize),
-      ),
-    ),
-  );
-
-  final fromText = Container(
-    child: Row(
-      children: [
-        Text(
-          'From:',
-          style: TextStyle(
-              fontSize: _fontTextsSize, color: Colors.black.withOpacity(0.6)),
-        ),
-        SizedBox(width: 10),
-        SizedBox(
-          width:150,
-          child:  DropdownButton(
-            value: '_fromTime',
-            onChanged: (String newValue) {
-              setState(() {
-                dropdownValue = newValue;
-              });
-            },
-            required: false,
-            hintText: 'Choose a time',
-            items: country,
-          ),
-          )),
-      ],
-    ),
-  );
-
-  @override
-  Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Builder(
-        builder: (context) => Container(
-            color: Colors.white,
-            margin: EdgeInsets.only(left: 10.0, right: 10.0, bottom: 10),
-            child: ListView(
-                padding: EdgeInsets.only(left: 10.0, right: 10.0, bottom: 10),
-                children: [
-                  SizedBox(height: 10),
-                  locationText,
-                  SizedBox(height: 10),
-                  startPointText,
-                  SizedBox(height: 10),
-                  destinationText,
-                  SizedBox(height: 20),
-                  timeText,
-                  SizedBox(height: 10),
-                  fromText,
-                ])),
-      ),
-    );
-  }
-}
-
-
-*/
-/*
-          CustomDropdownButton<String>(
-            elevation: 0,
-            value: _fromTime,
-            onChanged: (String newValue) {
-              setState(() {
-                _fromTime = newValue;
-              });
-            },
-              items:time.map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-          ),*/
-//  dropDownButtonsColumn(time,"Choose time"),
-/*
-          SizedBox(
-            height: 30,
-            width: 200,
-            child: Container(
-                height: 20,
-                child:ButtonTheme(
-                    alignedDropdown: true,
-                    child: DropdownButton<String>(
-                      elevation: 0,
-                      value: _fromTime,
-                      onChanged: (String newValue) {
-                        setState(() {
-                          _fromTime = newValue;
-                        });
-                      },
-                      items: time.map<DropdownMenuItem<String>>((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        );
-                      }).toList(),
-                    ))),
-          ),*/

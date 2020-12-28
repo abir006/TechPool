@@ -46,45 +46,8 @@ class _ProfilePageState extends State<ProfilePage> {
   List<String> paymentsItems=["Cash","PayPal","Bit","PayBox"];
   ScrollController scrollCon;
   appValidator appValid;
-/*
-  Future<String> initInfo2(String email) async {
-    isUser = (widget.email == email)&&widget.fromProfile;
-      firestore.collection("Profiles").doc(widget.email).get().then(
-              (value) {
-      DocumentSnapshot q = value;
-      q.data().forEach((key, value) {
-        myInfo.setProperty(key, value);
-      });
-      myInfo.setPropertyEnum(userInfoKeyEnum.email, widget.email);
-      if (firstTime) {
-        _firstNameController.text = myInfo.getPropertyEnum(userInfoKeyEnum.firstName);
-        _lastNameController.text =  myInfo.getPropertyEnum(userInfoKeyEnum.lastName);
-        _nameController.text = _firstNameController.text + " " + _lastNameController.text;
-        _facultyController.text =
-            myInfo.getPropertyEnum(userInfoKeyEnum.faculty);
-        _phoneNumberController.text =
-            myInfo.getPropertyEnum(userInfoKeyEnum.phoneNumber);
-        _hobbiesController.text =
-            myInfo.getPropertyEnum(userInfoKeyEnum.hobbies);
-        _aboutSelf.text = myInfo.getPropertyEnum(userInfoKeyEnum.aboutSelf);
-        payments =[];
-        List<dynamic> e = myInfo.getPropertyEnum(
-            userInfoKeyEnum.allowedPayments);
-        e.forEach((element) {
-          payments.add(element.toString());
-        });
-        return FirebaseStorage.instance
-            .ref('uploads')
-            .child(widget.email)
-            .getDownloadURL().then((value) {
-          imageUrl = value;
-          return "ok";
 
-        } );
-      }
-    });
-  }*/
-
+  ///Initialize the information about the user to all fields
   Future<String> initInfo(String email) async {
     isUser = (widget.email == email)&&widget.fromProfile;
     try {
@@ -235,6 +198,7 @@ class _ProfilePageState extends State<ProfilePage> {
               });
             }));
 
+///The multi choice selected field for allowed payments
     final multi2 = MultiSelectChipField<String>(
       initialValue: payments,
        title: Text("Allowed payments"),
@@ -251,6 +215,7 @@ class _ProfilePageState extends State<ProfilePage> {
     },
     );
 
+///The update and discard buttons container
     final buttons =Container(
         child: Center(child: Row(
             mainAxisAlignment:MainAxisAlignment.start,

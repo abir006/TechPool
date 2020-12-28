@@ -180,15 +180,14 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
                           ? Icon(Icons.check_circle_outline, color: secondColor)
                           : Icon(Icons.cancel_outlined, color: Colors.pink)
                     ]),
-                    SizedBox(height: defaultSpace),
-                    widget.lift.note.isEmpty?SizedBox(height: 0,) :SizedBox(height: defaultSpace),
+                    widget.lift.note.isEmpty?SizedBox(height: 0,) : SizedBox(height: defaultSpace),
                     widget.lift.note.isEmpty? SizedBox(height: 0,) : Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                       labelText(text: "Drivers note: "),
                       Expanded(child: infoText(widget.lift.note))
                     ]),
-                    widget.lift.note.isEmpty?SizedBox(height: 0,) : SizedBox(height: defaultSpace),
+                    widget.lift.payments.isEmpty?SizedBox(height: 0,) : SizedBox(height: defaultSpace),
                     Row(children: [
                       labelText(text: "Payment methods: "),
                       Expanded(child: infoText(widget.lift.payments))
@@ -296,7 +295,7 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
                          ]),
                     // SizedBox(height: defaultSpace),
                      _buildRow(context),
-                     SizedBox(height: defaultSpace),
+                     widget.lift.stops.length == 0 ? SizedBox(height: defaultSpace) : SizedBox(height: 0),
                      Row(
                          crossAxisAlignment: CrossAxisAlignment.start,
                          children: [
@@ -310,7 +309,7 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
                            //labelText(text: "Passengers: "),
                            //Expanded(child:infoText(widget.lift.passengers.length.toString()+"/"+widget.lift.numberOfSeats.toString())),
                          ]),
-                     SizedBox(height: defaultSpace),
+                  //   SizedBox(height: defaultSpace),
                      Row(
                          mainAxisSize: MainAxisSize.min,
                          children: [

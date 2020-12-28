@@ -508,9 +508,9 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                                             .email]["startAddress"] : widget
                                             .lift.pendingStartAddress))))
                               ]),
-                          SizedBox(height: defaultSpace),
                           widget.type == CalendarEventType.Drive ? _buildRow(
                               context) : SizedBox(height: 0,),
+                          widget.lift.stops.length == 0 ? SizedBox(height: defaultSpace,) : SizedBox(height: 0,),
                           Row(crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 labelText(text: (widget.type ==
@@ -556,7 +556,6 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                                 // trailing: Icon(Icons.arrow_drop_down,color: Colors.black,),
                                 //title: Text("Passenger info"),
                                 children: [
-                                  SizedBox(height: defaultSpace),
                                   ...(widget.type == CalendarEventType.Drive ? [
                                   ] :
                                   [
@@ -576,6 +575,15 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                                     ])
                                   ]),
                                   SizedBox(height: defaultSpace),
+                                  ...((widget.type == CalendarEventType.Lift || widget.type == CalendarEventType.PendingLift) ? [
+                                  Row(children: [
+                                    labelText(text: "Big Bag: "),
+                                    widget.lift.bigBag
+                                        ? Icon(Icons.check_circle_outline,
+                                        color: secondColor)
+                                        : Icon(Icons.cancel_outlined,
+                                        color: Colors.pink)
+                                  ]),SizedBox(height: defaultSpace,)] : [SizedBox()]),
                                   Row(children: [
                                     labelText(text: "Big Trunk: "),
                                     widget.lift.bigTrunk
@@ -593,7 +601,6 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                                         : Icon(Icons.cancel_outlined,
                                         color: Colors.pink)
                                   ]),
-                                  SizedBox(height: defaultSpace),
                                   // _buildRow(context),
                                   widget.lift.note.isEmpty ? SizedBox(
                                     height: 0,) : SizedBox(

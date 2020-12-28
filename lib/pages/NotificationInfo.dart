@@ -187,7 +187,7 @@ class _NotificationInfoState extends State<NotificationInfo> {
           ret.add(value);
           return firestore.collection("Profiles").doc(name).get().then((value) {
             ret.add(value.data()["firstName"] + " " + value.data()["lastName"]);
-            if(widget.type == NotificationInfoType.Accepted){
+            if(widget.type == NotificationInfoType.Requested){
               ret.add(widget.lift.passengersInfo[name]["startAddress"]);//2
               ret.add(widget.lift.passengersInfo[name]["dist"]/ 1000);//3
               ret.add(widget.lift.passengersInfo[name]["bigBag"]);//4
@@ -345,7 +345,20 @@ class _NotificationInfoState extends State<NotificationInfo> {
                       ),
                       SizedBox(
                         height: MediaQuery.of(context).size.height * 0.004,
-                      )],
+                      ),
+                      ...(widget.type == NotificationInfoType.Requested ? ([Row(children: [
+                      ]),Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
+                        labelText(text: "Pick Up: "),
+                        Expanded(child: infoText(snapshot.data[2]))
+                      ]), Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
+                        labelText(text: "Drop Off: "),
+                        Expanded(child: infoText(snapshot.data[6]))
+                      ]),widget.type == NotificationInfoType.Requested ? Row(crossAxisAlignment: CrossAxisAlignment.start,children: [
+                        labelText(text: "Note: "), Expanded(child: infoText(snapshot.data[5]))
+                      ]) : Container(),     Row(children: [labelText(text: "Big Bag: "),
+                        snapshot.data[4]
+                            ? Icon(Icons.check_circle_outline, color: secondColor)
+                            : Icon(Icons.cancel_outlined, color: Colors.pink)]),Divider(thickness: 1)]) : [])],
                   ),
                 );
               } else {
@@ -652,11 +665,7 @@ class _NotificationInfoState extends State<NotificationInfo> {
                                 // trailing: Icon(Icons.arrow_drop_down,color: Colors.black,),
                                 //title: Text("Passenger info"),
                                 children: [
-                                  widget.type == NotificationInfoType.Accepted
-                                      ? SizedBox(height: defaultSpace)
-                                      : Container(),
-                                  widget.type == NotificationInfoType.Accepted
-                                      ? Row(children: [
+                                  Row(children: [
                                     labelText(text: "Big Trunk: "),
                                     widget.lift.bigTrunk
                                         ? Icon(Icons.check_circle_outline,
@@ -664,8 +673,7 @@ class _NotificationInfoState extends State<NotificationInfo> {
                                         : Icon(
                                         Icons.cancel_outlined,
                                         color: Colors.pink),
-                                  ])
-                                      : Container(),
+                                  ]),
                                   SizedBox(height: defaultSpace),
                                   widget.type == NotificationInfoType.Requested
                                       ? Row(children: [

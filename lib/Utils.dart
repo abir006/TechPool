@@ -112,6 +112,7 @@ class MyLift{
   String pendingStartAddress;
   String pendingDestAddress;
   String pendingNote;
+  bool bigBag;
   var stops = new List<dynamic>();
 
   void setProperty(String key,var property){

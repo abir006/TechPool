@@ -22,8 +22,9 @@ class Lift{
   int numberOfSeats;
   int numberOfPassengers;
   DateTime dateTime;
+  bool bigBag;
   final String title = "Lift";
-  Lift(this.driveId,this.info,this.numberOfSeats,this.numberOfPassengers,this.dateTime);
+  Lift(this.driveId,this.info,this.numberOfSeats,this.numberOfPassengers,this.dateTime,this.bigBag);
 }
 
 /// A container class for PendingLift Calendar event.
@@ -35,8 +36,9 @@ class PendingLift{
   String from;
   String to;
   String passengerNote;
+  bool bigBag;
   final String title = "Pending lift";
-  PendingLift(this.from,this.to,this.driveId,this.info,this.dateTime,this.dist,this.passengerNote);
+  PendingLift(this.from,this.to,this.driveId,this.info,this.dateTime,this.dist,this.passengerNote,this.bigBag);
 }
 
 enum CalendarEventType { Drive, Lift , PendingLift }
@@ -84,9 +86,10 @@ Container calendarListTile(dynamic event,Widget leadingWidget,BuildContext conte
             docLift.pendingStartAddress = event.from;
             docLift.pendingDestAddress = event.to;
             docLift.pendingNote = event.passengerNote;
-
+            docLift.bigBag = event.bigBag;
           }
-          else{
+          else if (eventType == CalendarEventType.Lift){
+            docLift.bigBag = event.bigBag;
             docLift.dist = 0;
           }
           docLift.passengersInfo = Map<String, Map<String, dynamic>>.from(drive.data()["PassengersInfo"]?? {}) ;

@@ -187,19 +187,15 @@ class _LocationSearchState extends State<LocationSearch> {
                                 context, LocationsResult(
                                 fromAddress, toAddress, stopAddresses,stopNumber));
                           } else {
-                            _key.currentState.showSnackBar(SnackBar(content: Positioned(bottom: MediaQuery.of(context).viewInsets.bottom,
-                              child: Text(
-                                "Please select addresses before submitting",
-                                style: TextStyle(fontSize: 16),),
-                            ),));
+                            _key.currentState.showSnackBar(SnackBar(content: Text(
+                              "Please select addresses before submitting",
+                              style: TextStyle(fontSize: 16),),));
                           }
                         }
                         else {
-                          _key.currentState.showSnackBar(SnackBar(content: Positioned(bottom: MediaQuery.of(context).viewInsets.bottom,
-                            child: Text(
-                              "Please select addresses before submitting",
-                              style: TextStyle(fontSize: 16),),
-                          ),));
+                          _key.currentState.showSnackBar(SnackBar(content: Text(
+                            "Please select addresses before submitting",
+                            style: TextStyle(fontSize: 16),),));
                         }
                       },child:  Container(decoration: BoxDecoration(color: Colors.black,borderRadius: BorderRadius.circular(18)),width: size.width*0.6,
                           height: size.height*0.058,child: Row(mainAxisAlignment: MainAxisAlignment.center,children: [Icon(Icons.approval,color: Colors.white,),Text(" Submit locations",style: TextStyle(color: Colors.white),)]))),

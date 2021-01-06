@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:geocoder/geocoder.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import '../Utils.dart';
 
 class LocationTextBoxes2 extends StatefulWidget {
@@ -36,24 +37,35 @@ class _LocationTextBoxes2State extends State<LocationTextBoxes2> {
   }
 
   /// validates the city input is legal.
-  Future<bool> validateLegalCity(String city) async {
+  Future<bool> validateLegalAddress(String address) async {
     try {
-      var cc = await locationFromAddress(city,localeIdentifier: "en");
+      var cc = await locationFromAddress(address,localeIdentifier: "en");
       var cityAddress = await placemarkFromCoordinates(cc[0].latitude, cc[0].longitude,localeIdentifier: "en");
       if (cityAddress.first.country.toLowerCase() == "israel") {
+        this.address = [
+          Address(coordinates: Coordinates(cc[0].latitude, cc[0].longitude),
+              addressLine: (cityAddress[0].locality + ", " + cityAddress[0].street),
+              countryName: cityAddress[0].country,
+              countryCode: cityAddress[0].isoCountryCode,
+              featureName: cityAddress[0].name,
+              postalCode: cityAddress[0].postalCode,
+              adminArea: cityAddress[0].administrativeArea,
+              subAdminArea: cityAddress[0].subAdministrativeArea,
+              locality: cityAddress[0].locality,
+              subLocality: cityAddress[0].subLocality,
+              thoroughfare: cityAddress[0].thoroughfare,
+              subThoroughfare: cityAddress[0].subThoroughfare)
+        ];
         return false;
       } else {
         return true;
       }
     } catch (e) {
-      if(city.toLowerCase().contains("haifa") || city.contains("חיפה")){
-        return false;
-      }
       return true;
     }
   }
 
-  /// validates the "city, street" input is legal.
+/*  /// validates the "city, street" input is legal.
   Future<bool> validateLegalStreet(String city, String street) async {
     try {
         if (city.toLowerCase().contains("haifa") || city.contains("חיפה")) {
@@ -110,7 +122,10 @@ class _LocationTextBoxes2State extends State<LocationTextBoxes2> {
       } catch (e) {
       return true;
     }
-  }
+  }*/
+
+  String val="";
+  bool selected = true;
 
   @override
   Widget build(BuildContext context) {
@@ -119,7 +134,6 @@ class _LocationTextBoxes2State extends State<LocationTextBoxes2> {
         borderRadius: BorderRadius.circular(18),
             color: Colors.white),
         padding: const EdgeInsets.fromLTRB(4, 0, 0, 0),
-        height: 40,
         width: widget.size.width,
         child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -132,24 +146,142 @@ class _LocationTextBoxes2State extends State<LocationTextBoxes2> {
                       TextStyle(fontSize: 16, color: widget.leadingTextColor),
                     ),
               ),
+        ///first attempt.
+        /*      Flexible(child: DropdownButtonHideUnderline(
+    child: DropdownButton<String>(
+      items: [DropdownMenuItem(value: "asd",child: Container(height: 100,
+        width: 100,
+        child: TextField(
+            controller: city,
+            textAlign: TextAlign.left,
+            decoration: InputDecoration(
+                border: InputBorder.none, hintText: "City")),
+      )),DropdownMenuItem(value: "bbb",child: Text("bbb"))],
+    value: "asd",
+    isDense: true,
+    onChanged: (s) => print("s"))))*/
+              ///second attempt.
+     /*         Flexible(
+                child: DropdownButton(onTap: () {setState(() {
+                  selected = false;
+                  print("clicked");
+                });},isDense: true,isExpanded: true,value: val, items: [(selected? DropdownMenuItem(value: "",child: TextFormField(
+                    controller: city,
+                    textAlign: TextAlign.left,
+                    decoration: InputDecoration(
+                        border: InputBorder.none, hintText: "Enter address/place"))) : DropdownMenuItem(value: "",child: Text("Enter Address"))),DropdownMenuItem(value: "Netanya admonit 12",child: Text("Home")),DropdownMenuItem(value: "Haifa technion",child: Text("Work"))], onChanged: (newVal) {city.text = newVal; setState(() {
+                  print("selected");
+                  val = newVal;
+                  if(newVal == null || newVal == "") {
+                    selected = true;
+                  }
+                        });}),
+              ),*/
+              PopupMenuButton(offset: Offset(0,40),icon: Icon(Icons.arrow_drop_down_sharp),
+                itemBuilder: (BuildContext context) => [PopupMenuItem(value: "my location",child: Row(children: [Icon(Icons.my_location),Text("My location")],)),PopupMenuItem(value: "Netanya Admonit 12",child: Row(children: [Icon(Icons.home),Text("Home")]),),PopupMenuItem(value: "Haifa Technion",child: Row(children: [Icon(Icons.work),Text("Work")]))],
+                onSelected: (value) async{
+                  setState(() {
+                    FocusScope.of(context).unfocus();
+                    _pressed = true;
+                  });
+                if(value != "my location") {
+                  city.text = value;
+                  try {
+                    if (!await validateLegalAddress(city.text)) {
+                      widget.updateAddress(address.first);
+                      await widget.performOnPress(
+                          address: address.first,
+                          locationNumber: widget.locationNumber,
+                          stopText: "\"" + widget.leadingText + "\"");
+                    } else {
+                      widget._key.currentState.showSnackBar(SnackBar(
+                        content: Text("Address not found"),
+                      ));
+                    }
+                  } catch (e) {
+                    widget._key.currentState.showSnackBar(SnackBar(
+                      content: Text("Address not found"),
+                    ));
+                  }
+                  setState(() {
+                    _pressed = false;
+                  });
+                } else {
+                  bool serviceEnabled;
+                  LocationPermission permission;
+                  serviceEnabled = await Geolocator.isLocationServiceEnabled();
+                  if (!serviceEnabled) {
+                    widget._key.currentState.showSnackBar(SnackBar(
+                      content: Text("Please enable location service")));
+                    setState(() {
+                      _pressed = false;
+                    });
+                    return;
+                  }
+                  permission = await Geolocator.checkPermission();
+                  if (permission == LocationPermission.deniedForever) {
+                    widget._key.currentState.showSnackBar(SnackBar(
+                        content: Text('Location permissions are permantly denied, we cannot request permissions.')));
+                    setState(() {
+                      _pressed = false;
+                    });
+                    return;
+                  }
+                  if (permission == LocationPermission.denied) {
+                    permission = await Geolocator.requestPermission();
+                    if (permission != LocationPermission.whileInUse &&
+                        permission != LocationPermission.always) {
+                      widget._key.currentState.showSnackBar(SnackBar(
+                          content: Text(
+                          'Location permissions are denied (actual value: $permission).')));
+                      setState(() {
+                        _pressed = false;
+                      });
+                      return;
+                    }
+                  }
+                  var currentLocation = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
+                  var cityAddress = await placemarkFromCoordinates(
+                      currentLocation.latitude,currentLocation.longitude, localeIdentifier: "en");
+                  if (cityAddress.first.country.toLowerCase() == "israel") {
+                    this.address = [
+                      Address(coordinates: Coordinates(
+                          currentLocation.latitude, currentLocation.longitude),
+                          addressLine: (cityAddress[0].locality + ", " +
+                              cityAddress[0].street),
+                          countryName: cityAddress[0].country,
+                          countryCode: cityAddress[0].isoCountryCode,
+                          featureName: cityAddress[0].name,
+                          postalCode: cityAddress[0].postalCode,
+                          adminArea: cityAddress[0].administrativeArea,
+                          subAdminArea: cityAddress[0].subAdministrativeArea,
+                          locality: cityAddress[0].locality,
+                          subLocality: cityAddress[0].subLocality,
+                          thoroughfare: cityAddress[0].thoroughfare,
+                          subThoroughfare: cityAddress[0].subThoroughfare)
+                    ];
+                    city.text = address.first.addressLine;
+                    widget.updateAddress(address.first);
+                    await widget.performOnPress(
+                        address: address.first,
+                        locationNumber: widget.locationNumber,
+                        stopText: "\"" + widget.leadingText + "\"");
+                  }
+                }
+                  setState(() {
+                    _pressed = false;
+                    FocusScope.of(context).unfocus();
+                  });
+              }),
               Flexible(
-                fit: FlexFit.loose,
+                  fit: FlexFit.loose,
                   flex: 3,
                   child: TextFormField(
                       controller: city,
                       textAlign: TextAlign.left,
                       decoration: InputDecoration(
-                          border: InputBorder.none, hintText: "City"))),
+                          border: InputBorder.none, hintText: "Address/Place"))),
               VerticalDivider(width: 6),
-              Flexible(
-                  fit: FlexFit.loose,
-                  flex: 5,
-                  child: TextFormField(
-                      controller: street,
-                      textAlign: TextAlign.left,
-                      decoration: InputDecoration(
-                          border: InputBorder.none,
-                          hintText: "Street\\place"))),
                   Container(
                     width: 100,
                     child: TextButton(
@@ -159,10 +291,7 @@ class _LocationTextBoxes2State extends State<LocationTextBoxes2> {
                             _pressed = true;
                           });
                           try {
-                            var _streetError = await validateLegalCity(city.text);
-                            var _cityError =
-                            await validateLegalStreet(city.text, street.text);
-                            if (!_streetError && !_cityError) {
+                            if (!await validateLegalAddress(city.text)) {
                               widget.updateAddress(address.first);
                               await widget.performOnPress(
                                   address: address.first,

@@ -43,7 +43,7 @@ dependencies:
   geocoding: ^1.0.4
   geocoder: ^0.2.1
   google_maps_flutter: ^1.0.6
-  geolocator: ^6.1.10
+  geolocator: ^6.1.13
   configurable_expansion_tile: ^1.0.0
   flutter_datetime_picker: ^1.4.0
   jiffy: ^3.0.1

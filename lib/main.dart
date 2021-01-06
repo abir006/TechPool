@@ -111,12 +111,13 @@ class _MyAppState extends State<MyApp> {
                                   .then((val) {
                                     pass = val;
                                   })
-                                  .then((_) => Future.sync(() {
+                                  .then((_) => Future.sync(() async {
                                         if (email.isNotEmpty &&
                                             pass.isNotEmpty) {
-                                          return userRep.auth
+                                          var x = await userRep.auth
                                               .signInWithEmailAndPassword(
                                                   email: email, password: pass);
+                                          return x;
                                         } else {
                                           /// if failed to sign in, throw to go to homepage.
                                           throw Exception("bad info");

@@ -4,6 +4,7 @@ import 'package:tech_pool/pages/FavoritesPage.dart';
 import 'package:tech_pool/pages/HomePage.dart';
 import 'package:tech_pool/pages/NotificationsPage.dart';
 import 'package:tech_pool/pages/ProfilePage.dart';
+import 'package:tech_pool/pages/ChatPage.dart';
 import 'package:tech_pool/widgets/WelcomeSignInButton.dart';
 import 'package:tech_pool/widgets/WelcomeSignUpButton.dart';
 import 'Utils.dart';
@@ -76,6 +77,7 @@ SafeArea techDrawer(UserRepository userRep, BuildContext context,
               drawerListTile("Profile",Icons.person,DrawerSections.profile,currentSection, context, userRep,_key),
               drawerListTile("Notifications",Icons.notifications,DrawerSections.notifications,currentSection, context, userRep,_key),
               drawerListTile("Favorites",Icons.favorite,DrawerSections.favorites,currentSection, context, userRep,_key),
+              drawerListTile("Chats",Icons.chat,DrawerSections.chats,currentSection, context, userRep,_key),
               Spacer(),
               AboutListTile(
                 icon: Icon(
@@ -147,8 +149,10 @@ ListTile drawerListTile(String pageName,IconData icon,DrawerSections tileSection
             break;
           }
           case DrawerSections.chats: {
-            //Navigator.of(context).pop();
-            key.currentState.showSnackBar(SnackBar(content: Text("This feature is not yet implemented", style: TextStyle(fontSize: 20),)));
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => ChatPage(currentUserId: userRep.user.email)));
             break;
           }
           case DrawerSections.settings: {

@@ -14,6 +14,8 @@ import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:tech_pool/appValidator.dart';
 import 'package:tech_pool/pages/NotificationsPage.dart';
 
+import 'ChatTalkPage.dart';
+
 class ProfilePage extends StatefulWidget {
   String email;
   bool fromProfile;
@@ -221,6 +223,7 @@ class _ProfilePageState extends State<ProfilePage> {
             mainAxisAlignment:MainAxisAlignment.start,
             crossAxisAlignment:CrossAxisAlignment.start,
             children: [SizedBox(width: defaultSpacewidth*3),Expanded(child:DiscardUpdate),SizedBox(width: defaultSpacewidth*1),Expanded(child:acceptUpdate),SizedBox(width: defaultSpacewidth*3)])));
+
     Widget allInfo (UserRepository userRep) {return FutureBuilder<void>(
         future: initInfo(userRep.user.email), // a previously-obtained Future<String> or null
         builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
@@ -269,7 +272,31 @@ class _ProfilePageState extends State<ProfilePage> {
                                   },
                                 ),
                               )),
-                        ):SizedBox(height: defaultSpace*0),
+                        ):Container(padding: EdgeInsets.only(
+                            left: defaultSpacewidth * 4.8, top: defaultSpacewidth * 5.3),
+                            child:ClipOval(
+                            child: Material(
+                              color: Colors.white, // button color
+                              child: InkWell(
+                                splashColor: mainColor, // inkwell color
+                                child: SizedBox(
+                                    width: defaultSpacewidth * 4,
+                                    height: defaultSpace * 4,
+                                    child: Icon(
+                                      Icons.chat,
+                                      size: defaultSpace * 4,
+                                      color: secondColor,
+                                    )),
+                                onTap: () async {
+                                  Navigator.push(context, MaterialPageRoute(
+                                      builder: (context) => ChatTalkPage(
+                                        peerId: (widget.email) ,
+                                        peerAvatar: imageUrl,
+                                        userId: userRep.user.email,
+                                      )));
+                                },
+                              ),
+                            ))),
                       ])),
                       isUser? Center(child: generalInfoText(text: myInfo.getPropertyEnum(userInfoKeyEnum.email)),): SizedBox(height: defaultSpace*0),
                       SizedBox(height: defaultSpace),
@@ -308,11 +335,11 @@ class _ProfilePageState extends State<ProfilePage> {
       appBar: AppBar(
         elevation: 0,
         title: Text(
-          "Profile Page",
+          "Profile ",
           style: TextStyle(color: Colors.white),
         ),
         actions: [
-          IconButton(
+         isUser? IconButton(
               icon: StreamBuilder(
                   stream: firestore.collection("Notifications").doc(userRep.user?.email).collection("UserNotifications").snapshots(), // a previously-obtained Future<String> or null
                   builder: (BuildContext context, snapshot) {
@@ -334,7 +361,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   context,
                   MaterialPageRoute(
                       builder: (context) => NotificationsPage()))
-          )
+          ):Container()
         ],
       ),
       body:  Consumer<UserRepository>(

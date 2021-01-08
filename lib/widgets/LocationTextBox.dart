@@ -1,9 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:geocoder/geocoder.dart';
 import 'package:geocoding/geocoding.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:location/location.dart' as loc;
 import '../Utils.dart';
 
 class LocationTextBoxes2 extends StatefulWidget {
@@ -207,40 +206,39 @@ class _LocationTextBoxes2State extends State<LocationTextBoxes2> {
                     _pressed = false;
                   });
                 } else {
-                  bool serviceEnabled;
-                  LocationPermission permission;
-                  serviceEnabled = await Geolocator.isLocationServiceEnabled();
-                  if (!serviceEnabled) {
-                    widget._key.currentState.showSnackBar(SnackBar(
-                      content: Text("Please enable location service")));
-                    setState(() {
-                      _pressed = false;
-                    });
-                    return;
-                  }
-                  permission = await Geolocator.checkPermission();
-                  if (permission == LocationPermission.deniedForever) {
-                    widget._key.currentState.showSnackBar(SnackBar(
-                        content: Text('Location permissions are permantly denied, we cannot request permissions.')));
-                    setState(() {
-                      _pressed = false;
-                    });
-                    return;
-                  }
-                  if (permission == LocationPermission.denied) {
-                    permission = await Geolocator.requestPermission();
-                    if (permission != LocationPermission.whileInUse &&
-                        permission != LocationPermission.always) {
+                  loc.Location location = loc.Location();
+                  bool _serviceEnabled;
+                  loc.PermissionStatus _permissionGranted;
+                  _serviceEnabled = await location.serviceEnabled();
+                  if (!_serviceEnabled) {
+                    _serviceEnabled = await location.requestService();
+                    if (!_serviceEnabled) {
                       widget._key.currentState.showSnackBar(SnackBar(
-                          content: Text(
-                          'Location permissions are denied (actual value: $permission).')));
+                        content: Text("Please enable location services"),
+                      ));
                       setState(() {
                         _pressed = false;
+                        FocusScope.of(context).unfocus();
                       });
                       return;
                     }
                   }
-                  var currentLocation = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
+                  _permissionGranted = await location.hasPermission();
+                  if (_permissionGranted == loc.PermissionStatus.denied) {
+                    _permissionGranted = await location.requestPermission();
+                    if (_permissionGranted != loc.PermissionStatus.granted) {
+                      widget._key.currentState.showSnackBar(SnackBar(
+                        content: Text("Cannot use location service without permission"),
+                      ));
+                      setState(() {
+                        _pressed = false;
+                        FocusScope.of(context).unfocus();
+                      });
+                      return;
+                    }
+                  }
+                  location.changeSettings(accuracy: loc.LocationAccuracy.high);
+                  var currentLocation = await location.getLocation();
                   var cityAddress = await placemarkFromCoordinates(
                       currentLocation.latitude,currentLocation.longitude, localeIdentifier: "en");
                   if (cityAddress.first.country.toLowerCase() == "israel") {

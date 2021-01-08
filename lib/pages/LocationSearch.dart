@@ -9,8 +9,9 @@ import 'dart:async';
 
 class LocationSearch extends StatefulWidget {
   final bool showAddStops;
+  final bool fromFavorites;
 
-  LocationSearch({@required this.showAddStops});
+  LocationSearch({@required this.showAddStops,this.fromFavorites=false});
   @override
   _LocationSearchState createState() => _LocationSearchState();
 }
@@ -88,7 +89,7 @@ class _LocationSearchState extends State<LocationSearch> {
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
     var textBoxes = LocationTextBoxes2(updateFromAddress,
-        size, _goToAddress, _key, 120.0, "From", Colors.green);
+        size, _goToAddress, _key, 120.0, widget.fromFavorites? "Address" : "From", Colors.green);
     var textBoxes2 =
         LocationTextBoxes2(updateToAddress,size, _goToAddress, _key, 0.0, "To", Colors.red);
     return Scaffold(
@@ -159,7 +160,7 @@ class _LocationSearchState extends State<LocationSearch> {
                               ],
                             )))
                     : Container(),
-                textBoxes2,
+                widget.fromFavorites? Container() : textBoxes2,
                 Flexible(
                     child: GoogleMap(
                   mapType: MapType.normal,
@@ -176,7 +177,7 @@ class _LocationSearchState extends State<LocationSearch> {
                       width: size.width,
                       height: size.height*0.068,
                       child: RaisedButton(shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(bottomLeft: Radius.circular(18),bottomRight: Radius.circular(18))),color: Colors.white,onPressed: () {
-                        if(fromAddress != null && toAddress != null) {
+                        if(fromAddress != null && (toAddress != null || widget.fromFavorites)) {
                           if (stopNumber == 0 ||
                               (stopNumber == 1 && stopAddresses[0] != null) ||
                               (stopNumber == 2 && stopAddresses[0] != null &&

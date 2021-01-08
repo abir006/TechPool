@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:geocoder/geocoder.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:tech_pool/widgets/LocationTextBox.dart';
 import 'package:tech_pool/Utils.dart';
 import 'dart:async';
@@ -87,11 +88,12 @@ class _LocationSearchState extends State<LocationSearch> {
 
   @override
   Widget build(BuildContext context) {
+    var myEmail = Provider.of<UserRepository>(context,listen: false).user.email;
     var size = MediaQuery.of(context).size;
     var textBoxes = LocationTextBoxes2(updateFromAddress,
-        size, _goToAddress, _key, 120.0, widget.fromFavorites? "Address" : "From", Colors.green);
+        size, _goToAddress, _key, 120.0, widget.fromFavorites? "Address" : "From", Colors.green,myEmail);
     var textBoxes2 =
-        LocationTextBoxes2(updateToAddress,size, _goToAddress, _key, 0.0, "To", Colors.red);
+        LocationTextBoxes2(updateToAddress,size, _goToAddress, _key, 0.0, "To", Colors.red,myEmail);
     return Scaffold(
       resizeToAvoidBottomPadding: false,
       backgroundColor: mainColor,
@@ -148,7 +150,7 @@ class _LocationSearchState extends State<LocationSearch> {
                                               _key,
                                               stopColor[stopNumber],
                                               "Stop${stopNumber+1}",
-                                              stopTextColor[stopNumber]))
+                                              stopTextColor[stopNumber],myEmail))
                                     ]));
                                 stopNumber = stopNumber + 1;
                               });

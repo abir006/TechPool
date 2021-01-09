@@ -51,16 +51,16 @@ class _NotificationsPageState extends State<NotificationsPage> {
       return StreamBuilder<QuerySnapshot>(
           stream: firestore.collection("Notifications").doc(userRep.user?.email).collection("UserNotifications").snapshots(),
           //return StreamBuilder<List<QuerySnapshot>>(
-      //firestore.collection("Notifications").doc("testing@campus.technion.ac.il").collection("UserNotifications").snapshots()],
-                  //(values) => [values[0]]),
+          //firestore.collection("Notifications").doc("testing@campus.technion.ac.il").collection("UserNotifications").snapshots()],
+          //(values) => [values[0]]),
           // stream: CombineLatestStream([
           //   firestore.collection("Notifications").doc(userRep.user?.email).collection("UserNotifications").snapshots()],
           //     //firestore.collection("Notifications").doc("testing@campus.technion.ac.il").collection("UserNotifications").snapshots()],
           //         (values) => [values[0]]),
           builder: (context, snapshot) {
             _notifications = [];
-              if (snapshot.hasData) {
-                snapshot.data.docs.forEach((element) {
+            if (snapshot.hasData) {
+              snapshot.data.docs.forEach((element) {
                 //snapshot.data[0].docs.forEach((element) {
                 String notificationId = element.id;
                 var elementData = element.data();
@@ -143,7 +143,25 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       );
                       break;
                     }
-                    //in case a hitchhiker canceled a lift - notify driver
+                  case "DesiredLift" :
+                    {
+                      notification = LiftNotification(
+                          notificationId,
+                          driveId,
+                          driverId,
+                          startCity,
+                          destCity,
+                          price,
+                          distance,
+                          liftTime,
+                          notificationTime,
+                          type,
+                          startAddress,
+                          destAddress
+                      );
+                      break;
+                    }
+                //in case a hitchhiker canceled a lift - notify driver
                   case "CanceledLift" :
                     {
                       String passengerId = elementData["passengerId"];
@@ -185,7 +203,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 }
                 _notifications.add(notification);
               });
-                //sorting the notifications to show by time of arrival
+              //sorting the notifications to show by time of arrival
               _notifications.sort((a, b) {
                 if (a.notificationTime.isAfter(b.notificationTime)) {
                   return -1;
@@ -199,15 +217,15 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 return Scaffold(
                     key: _key,
                     backgroundColor: mainColor,
-                  appBar: AppBar(
-                    elevation: 0,
-                    title: Text(
-                      "Notifications",
-                      style: TextStyle(color: Colors.white),
+                    appBar: AppBar(
+                      elevation: 0,
+                      title: Text(
+                        "Notifications",
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
-                  ),
-                  drawer: techDrawer(userRep, context, DrawerSections.notifications),
-                  body: Container(
+                    drawer: techDrawer(userRep, context, DrawerSections.notifications),
+                    body: Container(
                       decoration: pageContainerDecoration,
                       margin: pageContainerMargin,
                       //padding: EdgeInsets.only(bottom: 6.0,top: 7.0, left: defaultSpacewidth, right: defaultSpacewidth*4),
@@ -218,18 +236,18 @@ class _NotificationsPageState extends State<NotificationsPage> {
                           //Spacer(),
                           //SizedBox(height: MediaQuery.of(context).size.height * 0.1),
                           Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Icon(Icons.update, size: 30),
-                            SizedBox(width: MediaQuery.of(context).size.width * 0.02),
-                            Text("No notifications",style: TextStyle(fontSize: 30, color: Colors.black))
-                          ]),
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Icon(Icons.update, size: 30),
+                                SizedBox(width: MediaQuery.of(context).size.width * 0.02),
+                                Text("No notifications",style: TextStyle(fontSize: 30, color: Colors.black))
+                              ]),
                           //Spacer()
                         ],
                       ),
 
-                  ));
+                    ));
               }
               return _buildPage(context, userRep);
             } else if (snapshot.hasError) {
@@ -241,7 +259,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     Text("Error on loading notifications from the database. Please try again.")
                   ]);
             } else {
-                return _buildPage(context, userRep);
+              return _buildPage(context, userRep);
             }
           });
     });
@@ -252,14 +270,14 @@ class _NotificationsPageState extends State<NotificationsPage> {
     return Scaffold(
       key: _key,
       backgroundColor: mainColor,
-        appBar: AppBar(
-          elevation: 0,
-          title: Text(
-            "Notifications",
-            style: TextStyle(color: Colors.white),
-          ),
+      appBar: AppBar(
+        elevation: 0,
+        title: Text(
+          "Notifications",
+          style: TextStyle(color: Colors.white),
         ),
-        drawer: techDrawer(userRep, context, DrawerSections.notifications),
+      ),
+      drawer: techDrawer(userRep, context, DrawerSections.notifications),
       body:Container(
           padding: const EdgeInsets.only(bottom: 6.0, top: 7.0),
           decoration: pageContainerDecoration,
@@ -285,6 +303,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   tileToDisplay = _buildRequestedTile(_notifications[index]);
                   return tileToDisplay;
                 }
+                else if(_notifications[index].type == "DesiredLift") {
+                  tileToDisplay = _buildDesiredTile(_notifications[index]);
+                  //return tileToDisplay;
+                }
                 else if(_notifications[index].type == "CanceledLift" || _notifications[index].type == "CanceledDrive") {
                   tileToDisplay = _buildCanceledTile(_notifications[index]);
                 }
@@ -300,7 +322,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   //Key(notification.notificationTime.toString()),
                   // Provide a function that tells the app
                   // what to do after an item has been swiped away.
-                    onDismissed: (direction) async {
+                  onDismissed: (direction) async {
                     //Here will come the query to delete notification from db.
                     await firestore.collection("Notifications").
                     doc(userRep.user?.email).collection("UserNotifications").
@@ -362,7 +384,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                 .of(context)
                                 .size
                                 .height * 0.016 * 4,
-                          child: Icon(Icons.delete, size: 30, color: Colors.white)
+                            child: Icon(Icons.delete, size: 30, color: Colors.white)
                           /*decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: Colors.teal,
@@ -373,14 +395,14 @@ class _NotificationsPageState extends State<NotificationsPage> {
                         Spacer(), // I just added one line
                         Container(
                             margin: EdgeInsets.only(
-                                /*left: MediaQuery
+                              /*left: MediaQuery
                                     .of(context)
                                     .size
                                     .height * 0.016, */
                                 top: MediaQuery
-                                .of(context)
-                                .size
-                                .height * 0.004),
+                                    .of(context)
+                                    .size
+                                    .height * 0.004),
                             width: MediaQuery
                                 .of(context)
                                 .size
@@ -455,46 +477,46 @@ class _NotificationsPageState extends State<NotificationsPage> {
         builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
           if (snapshot.hasData) {
             return InkWell(
-                onTap:  () async {
-                  //Preparing and opening the info page
-                  var drive = await firestore.collection("Drives").doc(
-                      liftNotification.driveId).get();
-                  MyLift liftToShow = new MyLift(
-                      "driver", "destAddress", "stopAddress", 5);
-                  drive.data().forEach((key, value) {
-                    if (value != null) {
-                      liftToShow.setProperty(key, value);
-                    }
-                  });
-                  liftToShow.liftId = liftNotification.driveId;
-                  //liftToShow.stops = [];
-                  liftToShow.dist = liftNotification.distance;
-                  liftToShow.passengersInfo =
-                  Map<String, Map<String, dynamic>>.from(
-                      drive.data()["PassengersInfo"] ?? {});
-                  liftToShow.payments = (await firestore.collection(
-                      "Profiles").doc(liftNotification.driverId).get())
-                      .data()["allowedPayments"].join(", ");
-                  Navigator.of(context).push(new MaterialPageRoute<Null>(
-                      builder: (BuildContext context) {
-                        return NotificationInfo(
-                            lift: liftToShow,
-                            notification: liftNotification,
-                            type: NotificationInfoType.Accepted);
-                      },
-                      fullscreenDialog: true
-                  ));
-                },
+              onTap:  () async {
+                //Preparing and opening the info page
+                var drive = await firestore.collection("Drives").doc(
+                    liftNotification.driveId).get();
+                MyLift liftToShow = new MyLift(
+                    "driver", "destAddress", "stopAddress", 5);
+                drive.data().forEach((key, value) {
+                  if (value != null) {
+                    liftToShow.setProperty(key, value);
+                  }
+                });
+                liftToShow.liftId = liftNotification.driveId;
+                //liftToShow.stops = [];
+                liftToShow.dist = liftNotification.distance;
+                liftToShow.passengersInfo =
+                Map<String, Map<String, dynamic>>.from(
+                    drive.data()["PassengersInfo"] ?? {});
+                liftToShow.payments = (await firestore.collection(
+                    "Profiles").doc(liftNotification.driverId).get())
+                    .data()["allowedPayments"].join(", ");
+                Navigator.of(context).push(new MaterialPageRoute<Null>(
+                    builder: (BuildContext context) {
+                      return NotificationInfo(
+                          lift: liftToShow,
+                          notification: liftNotification,
+                          type: NotificationInfoType.Accepted);
+                    },
+                    fullscreenDialog: true
+                ));
+              },
               child: Container(
                 margin: EdgeInsets.only(
-              top: MediaQuery
-                  .of(context)
-                  .size
-                  .height * 0.006,
-          bottom: MediaQuery
-                .of(context)
-                .size
-                .height * 0.006),
+                    top: MediaQuery
+                        .of(context)
+                        .size
+                        .height * 0.006,
+                    bottom: MediaQuery
+                        .of(context)
+                        .size
+                        .height * 0.006),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   boxShadow: [BoxShadow(color: Colors.black, blurRadius: 2.0,
@@ -554,9 +576,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                   .size
                                   .height * 0.016,
                               top: MediaQuery
-                              .of(context)
-                              .size
-                              .height * 0.008),
+                                  .of(context)
+                                  .size
+                                  .height * 0.008),
                           child: Column(
                             children: [
                               Row(
@@ -584,6 +606,172 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                           Transform.rotate(angle: 0.8,
                                               child: Icon(Icons.thumb_up_rounded, size: 30, color: Colors.green)),
                                           Text("Accepted", style: TextStyle(fontSize: 15, color: Colors.green),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+
+                                ],
+                              ),
+                              allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000),
+                            ],
+                          )),
+                    ),
+                    SizedBox(width: MediaQuery
+                        .of(context)
+                        .size
+                        .width * 0.002),
+                  ],
+                ),
+              ),
+            );
+          }else {
+            return Container();
+            // return Center(
+            //   child: CircularProgressIndicator(),
+            // );
+          }
+        });
+  }
+
+  Widget _buildDesiredTile(LiftNotification liftNotification) {
+    return FutureBuilder<List<String>>(
+        future: initNames(liftNotification.driverId),
+        builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
+          if (snapshot.hasData) {
+            return InkWell(
+              onTap:  () async {
+                //Preparing and opening the info page
+                var drive = await firestore.collection("Drives").doc(
+                    liftNotification.driveId).get();
+                MyLift liftToShow = new MyLift(
+                    "driver", "destAddress", "stopAddress", 5);
+                drive.data().forEach((key, value) {
+                  if (value != null) {
+                    liftToShow.setProperty(key, value);
+                  }
+                });
+                liftToShow.liftId = liftNotification.driveId;
+                //liftToShow.stops = [];
+                liftToShow.dist = liftNotification.distance;
+                liftToShow.passengersInfo =
+                Map<String, Map<String, dynamic>>.from(
+                    drive.data()["PassengersInfo"] ?? {});
+                liftToShow.payments = (await firestore.collection(
+                    "Profiles").doc(liftNotification.driverId).get())
+                    .data()["allowedPayments"].join(", ");
+
+                //Here push request lift page
+
+                // Navigator.of(context).push(new MaterialPageRoute<Null>(
+                //     builder: (BuildContext context) {
+                //       return NotificationInfo(
+                //           lift: liftToShow,
+                //           notification: liftNotification,
+                //           type: NotificationInfoType.Accepted);
+                //     },
+                //     fullscreenDialog: true
+                // ));
+              },
+              child: Container(
+                margin: EdgeInsets.only(
+                    top: MediaQuery
+                        .of(context)
+                        .size
+                        .height * 0.006,
+                    bottom: MediaQuery
+                        .of(context)
+                        .size
+                        .height * 0.006),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [BoxShadow(color: Colors.black, blurRadius: 2.0,
+                      spreadRadius: 0.0, offset: Offset(2.0, 2.0))
+                  ],
+                  border: Border.all(color: secondColor, width: 0.65),
+                  borderRadius: BorderRadius.circular(12.0),),
+                child:
+                Row(
+                  children: [
+                    Flexible(flex: 3,
+                      child: InkWell(
+                          onTap: () async {
+                            await Navigator.of(context).push(
+                                MaterialPageRoute<liftRes>(
+                                    builder: (BuildContext context) {
+                                      return ProfilePage(
+                                        email: liftNotification.driverId, fromProfile: false,);
+                                    },
+                                    fullscreenDialog: true
+                                ));
+                            setState(() {
+
+                            });
+                          },
+                          child: Container(
+                              margin: EdgeInsets.only(
+                                  left: MediaQuery
+                                      .of(context)
+                                      .size
+                                      .height * 0.016, top: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .height * 0.004),
+                              width: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .height * 0.016 * 4,
+                              height: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .height * 0.016 * 4,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: secondColor,
+                                image: DecorationImage(fit: BoxFit.fill,
+                                    image: NetworkImage(snapshot.data[0])),
+
+                              ))),
+                    ),
+                    Flexible(
+                      flex: 14,
+                      child: Container(
+                          margin: EdgeInsets.only(
+                              left: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .height * 0.016,
+                              top: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .height * 0.008),
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Flexible(flex:8,
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        infoText(snapshot.data[1]),
+                                        placesText(liftNotification.startCity, liftNotification.destCity),
+                                        //allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000),
+                                      ],
+                                    ),
+                                  ),
+                                  //here the icon:
+                                  Flexible(flex:4,
+                                    child: Container(
+                                      width: MediaQuery
+                                          .of(context)
+                                          .size
+                                          .width * 0.016*16,
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: [
+                                          Icon(Icons.fact_check_outlined, size: 30, color: Colors.blue),
+                                          Text("Found", style: TextStyle(fontSize: 15, color: Colors.blue),
                                           )
                                         ],
                                       ),

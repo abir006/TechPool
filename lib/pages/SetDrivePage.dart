@@ -513,13 +513,13 @@ class _SetDrivePageState extends State<SetDrivePage> {
             child: Theme(
                 data: Theme.of(context).copyWith(
                     canvasColor:
-                        mainColor, // background color for the dropdown items
+                    Colors.white, // background color for the dropdown items
                     buttonTheme: ButtonTheme.of(context).copyWith(
                       alignedDropdown:
                           true, //If false (the default), then the dropdown's menu will be wider than its button.
                     )),
                 child: DropdownButton<String>(
-                    dropdownColor: mainColor,
+                    dropdownColor: Colors.white,
                     elevation: 0,
                     value: _numberOfPassengers,
                     onChanged: (String newValue) {

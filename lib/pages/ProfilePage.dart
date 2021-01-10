@@ -341,7 +341,7 @@ class _ProfilePageState extends State<ProfilePage> {
         actions: [
          isUser? IconButton(
               icon: StreamBuilder(
-                  stream: firestore.collection("Notifications").doc(userRep.user?.email).collection("UserNotifications").snapshots(), // a previously-obtained Future<String> or null
+                  stream: firestore.collection("Notifications").doc(userRep.user?.email).collection("UserNotifications").where("read", isEqualTo: "false").snapshots(), // a previously-obtained Future<String> or null
                   builder: (BuildContext context, snapshot) {
                     if (snapshot.hasData) {
                       return BadgeIcon(

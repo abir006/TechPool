@@ -32,6 +32,21 @@ class _NotificationsPageState extends State<NotificationsPage> {
     appValid.checkVersion(context);
   }
 
+
+  Future<bool> _markAsRead(UserRepository userRep) async {
+    try {
+      //mark all loaded notifications as readed
+      QuerySnapshot q2 = await firestore.collection("Notifications").
+      doc(userRep.user?.email).collection("UserNotifications").get();
+      q2.docs.forEach((element) async {
+        element.reference.update({'read': 'true'});
+      });
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   // Future<void> deleteNotification(index, userRep, _key) async {
   //   //Here will come the query to delete notification from db.
   //   await firestore.collection("Notifications").
@@ -202,7 +217,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     }
                 }
                 _notifications.add(notification);
+
               });
+              _markAsRead(userRep);
               //sorting the notifications to show by time of arrival
               _notifications.sort((a, b) {
                 if (a.notificationTime.isAfter(b.notificationTime)) {

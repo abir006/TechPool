@@ -200,7 +200,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                           icon: StreamBuilder(
                               stream: firestore.collection("Notifications").doc(
                                   userRep.user?.email).collection(
-                                  "UserNotifications").snapshots(),
+                                  "UserNotifications").where("read", isEqualTo: "false").snapshots(),
                               // a previously-obtained Future<String> or null
                               builder: (BuildContext context, snapshot) {
                                 if (snapshot.hasData) {
@@ -492,7 +492,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                           icon: StreamBuilder(
                               stream: firestore.collection("Notifications").doc(
                                   userRep.user?.email).collection(
-                                  "UserNotifications").snapshots(),
+                                  "UserNotifications").where("read", isEqualTo: "false").snapshots(),
                               // a previously-obtained Future<String> or null
                               builder: (BuildContext context, snapshot) {
                                 if (snapshot.hasData) {

@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:tech_pool/TechDrawer.dart';
 import 'package:tech_pool/Utils.dart';
 import '../appValidator.dart';
+import 'ChatPage.dart';
 import 'ProfilePage.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:intl/intl.dart';
@@ -205,6 +206,43 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       "Notifications",
                       style: TextStyle(color: Colors.white),
                     ),
+                    actions: [
+                      IconButton(
+                          icon: StreamBuilder(
+                              stream: firestore.collection("ChatFriends").doc(userRep.user?.email).collection("UnRead").snapshots(), // a previously-obtained Future<String> or null
+                              builder: (BuildContext context, snapshot) {
+                                if (snapshot.hasData) {
+                                  //QuerySnapshot values = snapshot.data;
+                                  //builder: (_, snapshot) =>
+
+                                  return BadgeIcon(
+                                    icon: Icon(Icons.message_outlined, size: 25),
+                                    badgeCount: snapshot.data.size,
+                                  );
+                                }
+                                else{
+                                  return BadgeIcon(
+                                    icon: Icon(Icons.notifications, size: 25),
+                                    badgeCount: 0,
+                                  );
+                                }
+                              }
+                          ),
+                          onPressed: () async {
+                            QuerySnapshot q2 = await  FirebaseFirestore.instance.collection("ChatFriends").doc(userRep.user.email)
+                                .collection("UnRead").get();
+
+                            FirebaseFirestore.instance.runTransaction((transaction) async {
+                              q2.docs.forEach((element) {
+                                transaction.delete(element.reference);
+                              });
+                            });
+                            Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => ChatPage(currentUserId: userRep.user.email)));}
+                      )
+                    ],
                   ),
                   drawer: techDrawer(userRep, context, DrawerSections.notifications),
                   body: Container(

@@ -101,6 +101,7 @@ Widget generalInfoBoxTextField({@required TextEditingController controllerText,@
   return Container(
     child: TextField(
       decoration:  InputDecoration(
+           border:  OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
             labelText: nameLabel,
             labelStyle: TextStyle(fontSize: 17),
            ),
@@ -119,6 +120,7 @@ Widget generalInfoBoxTextFieldNumbers({@required TextEditingController controlle
   return Container(
     child: TextField(
       decoration:  InputDecoration(
+        border:  OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
         labelText: nameLabel,
         labelStyle: TextStyle(fontSize: 17),
       ),

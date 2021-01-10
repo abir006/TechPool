@@ -6,6 +6,8 @@ import 'package:tech_pool/Utils.dart';
 import 'package:tech_pool/pages/LocationSearch.dart';
 import 'package:tech_pool/pages/NotificationsPage.dart';
 
+import 'ChatPage.dart';
+
 class FavoritesPage extends StatefulWidget {
   @override
   _FavoritesPageState createState() => _FavoritesPageState();
@@ -222,14 +224,41 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                   MaterialPageRoute(
                                       builder: (context) =>
                                           NotificationsPage()))
-                      )
+                      ),  IconButton(
+                          icon: StreamBuilder(
+                              stream: firestore.collection("ChatFriends").doc(userRep.user?.email).collection("UnRead").snapshots(), // a previously-obtained Future<String> or null
+                              builder: (BuildContext context, snapshot) {
+                                if (snapshot.hasData) {
+                                  //QuerySnapshot values = snapshot.data;
+                                  //builder: (_, snapshot) =>
 
-                      //     IconButton(
-                      //         icon: Icon(Icons.notifications),
-                      //         onPressed:() => Navigator.pushReplacement(
-                      // context,
-                      // MaterialPageRoute(
-                      //     builder: (context) => NotificationsPage())))
+                                  return BadgeIcon(
+                                    icon: Icon(Icons.message_outlined, size: 25),
+                                    badgeCount: snapshot.data.size,
+                                  );
+                                }
+                                else{
+                                  return BadgeIcon(
+                                    icon: Icon(Icons.notifications, size: 25),
+                                    badgeCount: 0,
+                                  );
+                                }
+                              }
+                          ),
+                          onPressed: () async {
+                            QuerySnapshot q2 = await  FirebaseFirestore.instance.collection("ChatFriends").doc(userRep.user.email)
+                                .collection("UnRead").get();
+
+                            FirebaseFirestore.instance.runTransaction((transaction) async {
+                              q2.docs.forEach((element) {
+                                transaction.delete(element.reference);
+                              });
+                            });
+                            Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => ChatPage(currentUserId: userRep.user.email)));}
+                      )
                     ],
                   ),
                   drawer: techDrawer(

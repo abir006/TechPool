@@ -14,6 +14,7 @@ import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:tech_pool/appValidator.dart';
 import 'package:tech_pool/pages/NotificationsPage.dart';
 
+import 'ChatPage.dart';
 import 'ChatTalkPage.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -237,10 +238,46 @@ class _ProfilePageState extends State<ProfilePage> {
                         left: defaultSpacewidth, right: defaultSpacewidth),
                     children: [
                       SizedBox(height: defaultSpace),
-                      Center(child: Stack(children: [Container(width: MediaQuery.of(context).size.height * 0.016 * 8, height: MediaQuery.of(context).size.height * 0.016 * 8,child:CircleAvatar(radius: 18, backgroundColor: secondColor ,backgroundImage: isUser? userRep.profilePicture.image:NetworkImage(imageUrl))),
-                        isUser? Container(padding: EdgeInsets.only(
-                            left: defaultSpacewidth * 4.8, top: defaultSpacewidth * 5.3),
-                          child: ClipOval(
+                      Container(
+                        child: Center(child: Stack(children: [Container(width: MediaQuery.of(context).size.height * 0.016 * 8, height: MediaQuery.of(context).size.height * 0.016 * 8,child:CircleAvatar(radius: 18, backgroundColor: secondColor ,backgroundImage: isUser? userRep.profilePicture.image:NetworkImage(imageUrl))),
+                          isUser? Container(padding: EdgeInsets.only(
+                              left: defaultSpacewidth * 4.8, top: defaultSpacewidth * 5.3),
+                            child: ClipOval(
+                                child: Material(
+                                  color: Colors.white, // button color
+                                  child: InkWell(
+                                    splashColor: mainColor, // inkwell color
+                                    child: SizedBox(
+                                        width: defaultSpacewidth * 4,
+                                        height: defaultSpace * 4,
+                                        child: Icon(
+                                          Icons.camera_alt_outlined,
+                                          size: defaultSpace * 4,
+                                          color: secondColor,
+                                        )),
+                                    onTap: () async {
+                                      var pickedFile = await picker.getImage(
+                                        source: ImageSource.gallery,
+                                        maxHeight: 100,
+                                        maxWidth: 100,
+                                      );
+                                      if (pickedFile != null) {
+                                        String ret = await FirebaseStorage.instance
+                                            .ref('uploads')
+                                            .child(widget.email)
+                                            .putFile(File(pickedFile.path))
+                                            .then((snapshot) => snapshot.ref.getDownloadURL());
+                                        setState(() {
+                                          userRep.profilePicture =  Image.file((File(pickedFile.path)));
+                                        });
+                                      }
+                                    },
+                                  ),
+                                )),
+                          ):Container(padding: EdgeInsets.only(
+                              left: defaultSpacewidth * 4.8, top: defaultSpacewidth * 5.3),
+                              child:ClipOval(
+
                               child: Material(
                                 color: Colors.white, // button color
                                 child: InkWell(
@@ -249,55 +286,48 @@ class _ProfilePageState extends State<ProfilePage> {
                                       width: defaultSpacewidth * 4,
                                       height: defaultSpace * 4,
                                       child: Icon(
-                                        Icons.camera_alt_outlined,
-                                        size: defaultSpace * 4,
+                                        Icons.chat_outlined,
+                                        size: defaultSpace * 3,
                                         color: secondColor,
                                       )),
                                   onTap: () async {
-                                    var pickedFile = await picker.getImage(
-                                      source: ImageSource.gallery,
-                                      maxHeight: 100,
-                                      maxWidth: 100,
-                                    );
-                                    if (pickedFile != null) {
-                                      String ret = await FirebaseStorage.instance
-                                          .ref('uploads')
-                                          .child(widget.email)
-                                          .putFile(File(pickedFile.path))
-                                          .then((snapshot) => snapshot.ref.getDownloadURL());
-                                      setState(() {
-                                        userRep.profilePicture =  Image.file((File(pickedFile.path)));
+                                    try {
+                                      QuerySnapshot q2 = await FirebaseFirestore
+                                          .instance
+                                          .collection("ChatFriends").doc(
+                                          userRep.user?.email).collection(
+                                          "Network").doc(widget.email).collection(
+                                          widget.email)
+                                          .get();
+
+
+                                      FirebaseFirestore.instance.runTransaction((
+                                          transaction) async {
+                                        transaction.update(
+                                          FirebaseFirestore.instance
+                                              .collection("ChatFriends").doc(userRep.user?.email).collection("Network").doc(widget.email),
+                                          {
+                                            'read': true
+                                          },
+                                        );
+                                        q2.docs.forEach((element) {
+                                          transaction.delete(element.reference);
+                                        });
                                       });
-                                    }
+                                    }catch(e){}
+
+
+                                    Navigator.push(context, MaterialPageRoute(
+                                        builder: (context) => ChatTalkPage(
+                                          peerId: (widget.email) ,
+                                          peerAvatar: imageUrl,
+                                          userId: userRep.user.email,
+                                        )));
                                   },
                                 ),
-                              )),
-                        ):Container(padding: EdgeInsets.only(
-                            left: defaultSpacewidth * 4.8, top: defaultSpacewidth * 5.3),
-                            child:ClipOval(
-                            child: Material(
-                              color: Colors.white, // button color
-                              child: InkWell(
-                                splashColor: mainColor, // inkwell color
-                                child: SizedBox(
-                                    width: defaultSpacewidth * 4,
-                                    height: defaultSpace * 4,
-                                    child: Icon(
-                                      Icons.chat,
-                                      size: defaultSpace * 4,
-                                      color: secondColor,
-                                    )),
-                                onTap: () async {
-                                  Navigator.push(context, MaterialPageRoute(
-                                      builder: (context) => ChatTalkPage(
-                                        peerId: (widget.email) ,
-                                        peerAvatar: imageUrl,
-                                        userId: userRep.user.email,
-                                      )));
-                                },
-                              ),
-                            ))),
-                      ])),
+                              ))),
+                        ])),
+                      ),
                       isUser? Center(child: generalInfoText(text: myInfo.getPropertyEnum(userInfoKeyEnum.email)),): SizedBox(height: defaultSpace*0),
                       SizedBox(height: defaultSpace),
                       editMode ? SizedBox(height: 0):labelText(text: "Name: ") ,
@@ -339,7 +369,7 @@ class _ProfilePageState extends State<ProfilePage> {
           style: TextStyle(color: Colors.white),
         ),
         actions: [
-         isUser? IconButton(
+          widget.fromProfile? IconButton(
               icon: StreamBuilder(
                   stream: firestore.collection("Notifications").doc(userRep.user?.email).collection("UserNotifications").snapshots(), // a previously-obtained Future<String> or null
                   builder: (BuildContext context, snapshot) {
@@ -361,22 +391,60 @@ class _ProfilePageState extends State<ProfilePage> {
                   context,
                   MaterialPageRoute(
                       builder: (context) => NotificationsPage()))
-          ):Container()
+          ):Container(),
+          widget.fromProfile? IconButton(
+              icon: StreamBuilder(
+                  stream: firestore.collection("ChatFriends").doc(userRep.user?.email).collection("UnRead").snapshots(), // a previously-obtained Future<String> or null
+                  builder: (BuildContext context, snapshot) {
+                    if (snapshot.hasData) {
+                      //QuerySnapshot values = snapshot.data;
+                      //builder: (_, snapshot) =>
+
+                      return BadgeIcon(
+                        icon: Icon(Icons.message_outlined, size: 25),
+                        badgeCount: snapshot.data.size,
+                      );
+                    }
+                    else{
+                      return BadgeIcon(
+                        icon: Icon(Icons.notifications, size: 25),
+                        badgeCount: 0,
+                      );
+                    }
+                  }
+              ),
+              onPressed: () async {
+                QuerySnapshot q2 = await  FirebaseFirestore.instance.collection("ChatFriends").doc(userRep.user.email)
+                    .collection("UnRead").get();
+
+                FirebaseFirestore.instance.runTransaction((transaction) async {
+                  q2.docs.forEach((element) {
+                    transaction.delete(element.reference);
+                  });
+                });
+                Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ChatPage(currentUserId: userRep.user.email)));}
+          ):Container(),
         ],
       ),
       body:  Consumer<UserRepository>(
           builder: (context, userRep, _) =>
-            Container(
-                decoration: pageContainerDecoration,
-                margin: pageContainerMargin,
+            GestureDetector(
+              onTap:() {FocusScope.of(context).requestFocus(new FocusNode());},
+              child: Container(
+                  decoration: pageContainerDecoration,
+                  margin: pageContainerMargin,
           //padding: EdgeInsets.only(left: defaultSpacewidth, right: defaultSpacewidth),
           child: Column(
-            children: [
-              Expanded(child: allInfo(userRep)),
-              SizedBox(height: defaultSpace),
-              isUser? (editMode ? buttons : updateProfile):SizedBox(height: defaultSpace*0),
-            ],
-          ))),
+              children: [
+                Expanded(child: allInfo(userRep)),
+                SizedBox(height: defaultSpace),
+                isUser? (editMode ? buttons : updateProfile):SizedBox(height: defaultSpace*0),
+              ],
+          )),
+            )),
       drawer: widget.fromProfile? Consumer<UserRepository>(builder: (context, auth, _) => techDrawer(auth, context, DrawerSections.profile)):null,
       backgroundColor: mainColor,
     )

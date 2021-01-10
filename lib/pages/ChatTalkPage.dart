@@ -192,7 +192,68 @@ class ChatScreenState extends State<ChatScreen> {
           .collection(groupChatId)
           .doc(DateTime.now().millisecondsSinceEpoch.toString());
 
+      String idFromData;
       FirebaseFirestore.instance.runTransaction((transaction) async {
+        await transaction.get(FirebaseFirestore.instance.collection("Profiles")
+            .doc(peerId)).then((value) => idFromData = value.data()["chattingWith"]);
+        transaction.set(
+          FirebaseFirestore.instance.collection("ChatFriends").doc(peerId)
+              .collection("Network").doc(id),
+          {
+            'idFrom': id,
+            'idTo': peerId,
+            'timestamp': DateTime
+                .now()
+                .millisecondsSinceEpoch
+                .toString(),
+            'content': content,
+            'type': type,
+            'read': idFromData==id
+          },
+        );
+        transaction.set(
+          FirebaseFirestore.instance.collection("ChatFriends").doc(id)
+              .collection("Network").doc(peerId),
+          {
+            'idFrom': id,
+            'idTo': peerId,
+            'timestamp': DateTime
+                .now()
+                .millisecondsSinceEpoch
+                .toString(),
+            'content': content,
+            'type': type,
+            'read': true
+          },
+        );
+        if(idFromData!=id) {
+       transaction.set(
+            FirebaseFirestore.instance.collection("ChatFriends").doc(peerId)
+                .collection("Network").doc(id).collection(id)
+                .doc(),
+            {
+              'idFrom': id,
+              'idTo': peerId,
+              'timestamp': DateTime
+                  .now()
+                  .millisecondsSinceEpoch
+                  .toString(),
+              'content': content,
+              'type': type
+            },
+          );
+          transaction.set(
+            FirebaseFirestore.instance.collection("ChatFriends").doc(peerId)
+                .collection("UnRead")
+                .doc(),
+            {
+              'timestamp': DateTime
+                  .now()
+                  .millisecondsSinceEpoch
+                  .toString(),
+            },
+          );
+        }
         transaction.set(
           documentReference,
           {
@@ -204,6 +265,29 @@ class ChatScreenState extends State<ChatScreen> {
           },
         );
       });
+/*
+     FirebaseFirestore.instance.runTransaction((transaction) async {
+        transaction.get(FirebaseFirestore.instance.collection("Profiles")
+            .doc(peerId))
+            .then((value) async {
+          if (value.data()["chattingWith"] != id) {
+            transaction.set(
+              FirebaseFirestore.instance.collection("ChatFriends").doc("gjjhg"),
+              {
+                'idFrom': id,
+                'idTo': peerId,
+                'timestamp': DateTime
+                    .now()
+                    .millisecondsSinceEpoch
+                    .toString(),
+                'content': content,
+                'type': type
+              },
+            );
+          }
+        });
+      });
+*/
       listScrollController.animateTo(0.0,
           duration: Duration(milliseconds: 300), curve: Curves.easeOut);
     } else {
@@ -324,7 +408,7 @@ class ChatScreenState extends State<ChatScreen> {
               )
                   : Container()
             ],
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.end,
         ),
         margin: EdgeInsets.only(bottom: 10.0),
       );

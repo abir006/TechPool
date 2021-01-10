@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:tech_pool/Utils.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:tech_pool/appValidator.dart';
+import 'package:tech_pool/pages/ChatPage.dart';
 import 'package:tech_pool/pages/NotificationsPage.dart';
 import 'package:tech_pool/pages/SearchLiftPage.dart';
 import 'package:rxdart/rxdart.dart';
@@ -297,14 +298,42 @@ class _HomePageState extends State<HomePage> {
                     context,
                     MaterialPageRoute(
                         builder: (context) => NotificationsPage()))
-            )
+            ),
+            IconButton(
+                icon: StreamBuilder(
+                    stream: firestore.collection("ChatFriends").doc(userRep.user?.email).collection("UnRead").snapshots(), // a previously-obtained Future<String> or null
+                    builder: (BuildContext context, snapshot) {
+                      if (snapshot.hasData) {
+                        //QuerySnapshot values = snapshot.data;
+                        //builder: (_, snapshot) =>
 
-        //     IconButton(
-        //         icon: Icon(Icons.notifications),
-        //         onPressed:() => Navigator.pushReplacement(
-        // context,
-        // MaterialPageRoute(
-        //     builder: (context) => NotificationsPage())))
+                        return BadgeIcon(
+                          icon: Icon(Icons.message_outlined, size: 25),
+                          badgeCount: snapshot.data.size,
+                        );
+                      }
+                      else{
+                        return BadgeIcon(
+                          icon: Icon(Icons.notifications, size: 25),
+                          badgeCount: 0,
+                        );
+                      }
+                    }
+                ),
+                onPressed: () async {
+                  QuerySnapshot q2 = await  FirebaseFirestore.instance.collection("ChatFriends").doc(userRep.user.email)
+                      .collection("UnRead").get();
+
+                  FirebaseFirestore.instance.runTransaction((transaction) async {
+                    q2.docs.forEach((element) {
+                      transaction.delete(element.reference);
+                    });
+                  });
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ChatPage(currentUserId: userRep.user.email)));}
+            )
           ],
         ),
         drawer: techDrawer(userRep, context, DrawerSections.home),

@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:badges/badges.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:provider/provider.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:tech_pool/Utils.dart';
+import 'package:tech_pool/pages/HomePage.dart';
 import 'package:tech_pool/widgets/loading.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -13,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'ChatTalkPage.dart';
+import 'NotificationsPage.dart';
 import 'ProfilePage.dart';
 import 'package:flappy_search_bar/flappy_search_bar.dart';
 import 'package:tech_pool/TechDrawer.dart';
@@ -29,11 +33,12 @@ class ChatPageState extends State<ChatPage> {
   ChatPageState({Key key, @required this.currentUserId});
   FirebaseFirestore firestore = FirebaseFirestore.instance;
   List<DocumentSnapshot> filteredDocs = new List<DocumentSnapshot>();
-  String query='';
+  List<DocumentSnapshot> onlyDocs = new List<DocumentSnapshot>();
+  String query = '';
   final String currentUserId;
   final FirebaseMessaging firebaseMessaging = FirebaseMessaging();
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-  FlutterLocalNotificationsPlugin();
+      FlutterLocalNotificationsPlugin();
   TextEditingController _searchText;
 
   bool isLoading = false;
@@ -80,7 +85,7 @@ class ChatPageState extends State<ChatPage> {
 
   void configLocalNotification() {
     var initializationSettingsAndroid =
-    new AndroidInitializationSettings('app_icon');
+        new AndroidInitializationSettings('app_icon');
     var initializationSettingsIOS = new IOSInitializationSettings();
     var initializationSettings = new InitializationSettings(
         initializationSettingsAndroid, initializationSettingsIOS);
@@ -125,9 +130,20 @@ class ChatPageState extends State<ChatPage> {
 //        payload: 'item x');
   }
 
-  Future<bool> onBackPress() {
-    openDialog();
-    return Future.value(false);
+  Future<bool> onBackPress() async {
+    QuerySnapshot q2 = await FirebaseFirestore.instance
+        .collection("ChatFriends")
+        .doc(currentUserId)
+        .collection("UnRead")
+        .get();
+
+    FirebaseFirestore.instance.runTransaction((transaction) async {
+      q2.docs.forEach((element) {
+        transaction.delete(element.reference);
+      });
+    });
+    Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (context) => HomePage()));
   }
 
   Future<Null> openDialog() async {
@@ -135,11 +151,17 @@ class ChatPageState extends State<ChatPage> {
         context: context,
         builder: (BuildContext context) {
           return SimpleDialog(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(20.0))),
             contentPadding:
-            EdgeInsets.only(left: 0.0, right: 0.0, top: 0.0, bottom: 0.0),
+                EdgeInsets.only(left: 0.0, right: 0.0, top: 0.0, bottom: 0.0),
             children: <Widget>[
               Container(
-                color: themeColor,
+                decoration: BoxDecoration(
+                    color: secondColor,
+                    borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(20.0),
+                        topRight: Radius.circular(20.0))),
                 margin: EdgeInsets.all(0.0),
                 padding: EdgeInsets.only(bottom: 10.0, top: 10.0),
                 height: 100.0,
@@ -215,7 +237,8 @@ class ChatPageState extends State<ChatPage> {
       case 0:
         break;
       case 1:
-        exit(0);
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (context) => HomePage()));
         break;
     }
   }
@@ -235,24 +258,58 @@ class ChatPageState extends State<ChatPage> {
     //    (Route<dynamic> route) => false);
   }
 
-  List<DocumentSnapshot>
-
-
-  onItemChanged(String value) {
+  List<DocumentSnapshot> onItemChanged(String value) {
     setState(() {
       query = _searchText.text;
     });
   }
-  void filter(List<DocumentSnapshot> data){
-    filteredDocs =[];
+
+  void filter(List<DocumentSnapshot> data, List<DocumentSnapshot> network) {
+    filteredDocs = [];
+    onlyDocs=[];
+    onlyDocs.addAll(network);
+    List<String> net = [];
+    network.forEach((element) {
+      net.add(element.id);
+    });
     data.forEach((element) {
-      String name =element["firstName"]+element["lastName"];
-      if(query=='' || name.toLowerCase().contains(query.toLowerCase())){
-        filteredDocs.add(element);
+      String name = (element["firstName"] +
+          element["lastName"].replaceAll(new RegExp(r"\s+\b|\b\s"), ""));
+      String query2 = query.replaceAll(new RegExp(r"\s+\b|\b\s"), "");
+      if (query != '') {
+        if(name.toLowerCase().contains(query2.toLowerCase())) {
+          filteredDocs.add(element);
+        }
+      } else {
+        if (net.contains(element.id)) {
+          filteredDocs.add(element);
+        }
       }
     });
+    if (query == '') {
+      Comparator<DocumentSnapshot> timeComparator = (a, b) {
+        if(a.data()['read']==true && b.data()['read']!=true){
+          return 1;
+        }
+        if(a.data()['read']!=true && b.data()['read']==true){
+          return -1;
+        }
+        return (int.parse(b.data()['timestamp']).compareTo(
+            int.parse(a.data()['timestamp'])));
+      };
+      Comparator<DocumentSnapshot> networComp = (a, b) {
+        return (net.indexOf(a.id).compareTo(net.indexOf(b.id)));
+      };
+      network.sort(timeComparator);
+      net = [];
+      network.forEach((element) {
+        net.add(element.id);
+      });
+      filteredDocs.sort(networComp);
 
+    }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -262,72 +319,122 @@ class ChatPageState extends State<ChatPage> {
           'Chats',
           style: TextStyle(color: Colors.white),
         ),
-      ),
-      drawer: Consumer<UserRepository>(builder: (context, auth, _) => techDrawer(auth, context, DrawerSections.profile)),
-      body: WillPopScope(
-        child: Container(
-          decoration: pageContainerDecoration,
-          margin: pageContainerMargin,
-          child: Stack(
-            children: <Widget>[
-              // List
-              Container(
-                child: StreamBuilder(
-                  stream:
-                  FirebaseFirestore.instance.collection('Profiles').snapshots(),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) {
-                      return Center(
-                        child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(themeColor),
-                        ),
+        actions: [
+      Consumer<UserRepository>(
+      builder: (context, userRep, _) =>
+          IconButton(
+              icon: StreamBuilder(
+                  stream: firestore.collection("Notifications").doc(userRep.user?.email).collection("UserNotifications").snapshots(), // a previously-obtained Future<String> or null
+                  builder: (BuildContext context, snapshot) {
+                    if (snapshot.hasData) {
+                      //QuerySnapshot values = snapshot.data;
+                      //builder: (_, snapshot) =>
+                      return BadgeIcon(
+                        icon: Icon(Icons.notifications, size: 25),
+                        badgeCount: snapshot.data.size,
                       );
-                    } else {
-                      filter(snapshot.data.documents);
-                      return Column(children:[
-                        Container(
-                          padding: const EdgeInsets.all(12.0),
-                          child: TextField(
-                             controller: _searchText,
-                          decoration: InputDecoration(
-                            prefixIcon:Icon(Icons.search),
-                            hintText: 'Search Here...',
-                            suffixIcon: query !=''?IconButton(
-                              onPressed: () {  setState(() {
-                                query ='';
-                                _searchText.clear();});},
-                              icon: Icon(Icons.clear),
-                            ): Container(),
-                          ),
-
-                        onChanged: onItemChanged,
-                      ),
-                        ),
-                        Expanded(
-                          child: ListView.builder(
-                          padding: EdgeInsets.all(10.0),
-                          itemBuilder: (context, index) =>
-                              buildItem(context, filteredDocs[index]),
-                          itemCount: filteredDocs.length,
-                      ),
-                        )]);
                     }
-                  },
-                ),
+                    else{
+                      return BadgeIcon(
+                        icon: Icon(Icons.notifications, size: 25),
+                        badgeCount: 0,
+                      );
+                    }
+                  }
               ),
+              onPressed: () => Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => NotificationsPage()))
+          )),
+        ],
+      ),
+      drawer: Consumer<UserRepository>(builder: (context, auth, _) {
+        return techDrawer2(auth, context, DrawerSections.chats);
+      }),
+      body: WillPopScope(
+        child: GestureDetector(
+          onTap:() {FocusScope.of(context).requestFocus(new FocusNode());},
+          child: Container(
+            decoration: pageContainerDecoration,
+            margin: pageContainerMargin,
+            child: Stack(
+              children: <Widget>[
+                // List
+                Container(
+                  child: StreamBuilder<List<QuerySnapshot>>(
+                    stream: CombineLatestStream([
+                      FirebaseFirestore.instance
+                          .collection('ChatFriends')
+                          .doc(currentUserId)
+                          .collection('Network')
+                          .snapshots(),
+                      FirebaseFirestore.instance
+                          .collection('Profiles')
+                          .snapshots(),
+                    ], (vals) => [vals[0], vals[1]]),
+                    builder:
+                        (context, AsyncSnapshot<List<QuerySnapshot>> snapshot) {
+                      if (!snapshot.hasData) {
+                        return Center(
+                          child: CircularProgressIndicator(
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(secondColor),
+                          ),
+                        );
+                      } else {
+                        filter(snapshot.data[1].docs, snapshot.data[0].docs);
+                        return Column(children: [
+                          Container(
+                            padding: const EdgeInsets.all(12.0),
+                            child: TextField(
+                              controller: _searchText,
+                              decoration: InputDecoration(
+                                prefixIcon: Icon(Icons.search),
+                                hintText: 'Search Here...',
+                                suffixIcon: query != ''
+                                    ? IconButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            query = '';
+                                            _searchText.clear();
+                                          });
+                                        },
+                                        icon: Icon(Icons.clear),
+                                      )
+                                    : Container(),
+                              ),
+                              onChanged: onItemChanged,
+                            ),
+                          ),
+                          Expanded(
+                            child: ListView.builder(
+                              padding: EdgeInsets.all(10.0),
+                              itemBuilder: (context, index) =>
+                                  buildItem(context, filteredDocs[index]),
+                              itemCount: filteredDocs.length,
+                            ),
+                          )
+                        ]);
+                      }
+                    },
+                  ),
+                ),
 
-              // Loading
-              Positioned(
-                child: isLoading ? const Loading() : Container(),
-              )
-            ],
+                // Loading
+                Positioned(
+                  child: isLoading ? const Loading() : Container(),
+                )
+              ],
+            ),
           ),
         ),
-       // onWillPop: onBackPress,
+        onWillPop: onBackPress,
       ),
       backgroundColor: mainColor,
     );
   }
+
   Future<List<String>> initNames(String name) {
     List<String> ret = [];
     return FirebaseStorage.instance
@@ -348,14 +455,13 @@ class ChatPageState extends State<ChatPage> {
     //  return null;
   }
 
-
   Widget buildItem(BuildContext context, DocumentSnapshot document) {
     return Consumer<UserRepository>(builder: (context, userRep, _) {
       return FutureBuilder<List<String>>(
           future: initNames(document.id.toString()),
           // a previously-obtained Future<String> or null
-          builder: (BuildContext context,
-              AsyncSnapshot<List<String>> snapshot) {
+          builder:
+              (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
             if (snapshot.hasData) {
               if (document.id.toString() == userRep.user.email) {
                 return Container();
@@ -364,43 +470,45 @@ class ChatPageState extends State<ChatPage> {
                   child: FlatButton(
                     child: Row(
                       children: <Widget>[
-                       Material(
+                        Material(
                           child: snapshot.data[0] != null
-                              ? 
-                          InkWell(
-                    onTap: () async {
-                  await Navigator.of(context).push(
-                      MaterialPageRoute<liftRes>(
-                          builder: (BuildContext context) {
-                            return ProfilePage(
-                              email: document.id.toString(), fromProfile: false,);
-                          },
-                          fullscreenDialog: true
-                      ));},
-                            child: CachedNetworkImage(
-                              placeholder: (context, url) =>
-                                  Container(
-                                    color: mainColor,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 1.0,
-                                      valueColor:
-                                      AlwaysStoppedAnimation<Color>(themeColor),
+                              ? InkWell(
+                                  onTap: () async {
+                                    await Navigator.of(context)
+                                        .push(MaterialPageRoute<liftRes>(
+                                            builder: (BuildContext context) {
+                                              return ProfilePage(
+                                                email: document.id.toString(),
+                                                fromProfile: false,
+                                              );
+                                            },
+                                            fullscreenDialog: true));
+                                  },
+                                  child:
+                                  CachedNetworkImage(
+                                    placeholder: (context, url) => Container(
+                                      color: mainColor,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 1.0,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                                secondColor),
+                                      ),
+                                      width: 50.0,
+                                      height: 50.0,
+                                      padding: EdgeInsets.all(15.0),
                                     ),
+                                    imageUrl: snapshot.data[0],
                                     width: 50.0,
                                     height: 50.0,
-                                    padding: EdgeInsets.all(15.0),
+                                    fit: BoxFit.cover,
                                   ),
-                              imageUrl: snapshot.data[0],
-                              width: 50.0,
-                              height: 50.0,
-                              fit: BoxFit.cover,
-                            ),
-                          )
+                                )
                               : Icon(
-                            Icons.account_circle,
-                            size: 50.0,
-                            color: greyColor,
-                          ),
+                                  Icons.account_circle,
+                                  size: 50.0,
+                                  color: secondColor,
+                                ),
                           borderRadius: BorderRadius.all(Radius.circular(25.0)),
                           clipBehavior: Clip.hardEdge,
                         ),
@@ -410,14 +518,16 @@ class ChatPageState extends State<ChatPage> {
                               children: <Widget>[
                                 Container(
                                   child: Text(
-                                    document.data()['firstName']+" "+document.data()['lastName'],
+                                    document.data()['firstName'] +
+                                        " " +
+                                        document.data()['lastName'],
                                     style: TextStyle(color: primaryColor),
                                   ),
                                   alignment: Alignment.centerLeft,
-                                  margin: EdgeInsets.fromLTRB(
-                                      10.0, 0.0, 0.0, 5.0),
+                                  margin:
+                                      EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 5.0),
                                 ),
-                               /* Container(
+                                /* Container(
                                   child: Text(
                                     'About me: ${document.data()['aboutMe'] ??
                                         'Not available'}',
@@ -432,36 +542,83 @@ class ChatPageState extends State<ChatPage> {
                             margin: EdgeInsets.only(left: 20.0),
                           ),
                         ),
+                        StreamBuilder<QuerySnapshot>(
+                    stream: firestore.collection("ChatFriends").doc(userRep.user?.email).collection("Network").doc(document.id.toString()).collection(document.id.toString()).snapshots(), // a previously-obtained Future<String> or null
+                builder: (BuildContext context, snapshot) {
+                      if(snapshot.hasData) {
+                        return snapshot.data.docs.length!=0? Badge(
+                          elevation: 0,
+                          shape: BadgeShape.circle,
+                          padding: EdgeInsets.all(7),
+                          badgeContent: Text(
+                            snapshot.data.docs.length.toString(),
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ):Container();
+                      }
+                    else{
+                      return Container();
+                    }
+                }
+                      ),
+                      /* Stack(children:[Container(
+                            width: 30.0,
+                            height: 30.0,
+                            //padding: EdgeInsets.all(15.0),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: secondColor,
+                            ),
+
+                         // child: Badge(badgeContent: Text("2"),),
+                        ),
+                         Container(
+                             width: 20.0,
+                             height: 20.0,
+                           //  padding: EdgeInsets.all(5.0),
+                             child: Text("2")),])*/
                       ],
                     ),
-                    onPressed: () {
-                       Navigator.push(context, MaterialPageRoute(
-                    builder: (context) => ChatTalkPage(
-                      peerId: document.id,
-                      peerAvatar: snapshot.data[0],
-                      userId: currentUserId,
-                    )));
+                    onPressed: () async {
+                      QuerySnapshot q2 = await FirebaseFirestore.instance
+                          .collection("ChatFriends").doc(userRep.user?.email).collection("Network").doc(document.id.toString()).collection(document.id.toString())
+                          .get();
+
+                      FirebaseFirestore.instance.runTransaction((transaction) async {
+                        q2.docs.forEach((element) {
+                          transaction.delete(element.reference);
+                        });
+                      });
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ChatTalkPage(
+                                    peerId: document.id,
+                                    peerAvatar: snapshot.data[0],
+                                    userId: currentUserId,
+                                  )));
                     },
                     color: greyColor2,
                     padding: EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 10.0),
-                    shape:
-                    RoundedRectangleBorder(
+                    shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10.0)),
                   ),
                   margin: EdgeInsets.only(bottom: 10.0, left: 5.0, right: 5.0),
                 );
               }
-            }
-            else {
+            } else {
               if (snapshot.hasError) {
-                  return Container();
+                return Container();
               } else {
-                return Center(child: CircularProgressIndicator(),);
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
               }
             }
           });
     });
   }
+
   void dispose() {
     _searchText.dispose();
     super.dispose();
@@ -474,3 +631,171 @@ class Choice {
   final String title;
   final IconData icon;
 }
+
+
+
+
+
+
+/*Widget buildItem(BuildContext context, DocumentSnapshot document) {
+    return Consumer<UserRepository>(builder: (context, userRep, _) {
+      if (document.id.toString() == userRep.user.email) {
+        return Container();
+      }
+        else{
+                return Container(
+                  child: FlatButton(
+                    child: Row(
+                      children: <Widget>[
+                        Container(
+                          child: FutureBuilder<List<String>>(
+                    future: initNames(document.id.toString()),
+                    // a previously-obtained Future<String> or null
+                    builder:
+                          (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
+                            if (snapshot.hasData) {
+                              return Material(
+                                  child: InkWell(
+                                      onTap: () async {
+                                        await Navigator.of(context)
+                                            .push(MaterialPageRoute<liftRes>(
+                                            builder: (BuildContext context) {
+                                              return ProfilePage(
+                                                email: document.id.toString(),
+                                                fromProfile: false,
+                                              );
+                                            },
+                                            fullscreenDialog: true));
+                                      },
+                                      child:
+                                      CachedNetworkImage(
+                                        placeholder: (context, url) =>
+                                            Container(
+                                              color: mainColor,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 1.0,
+                                                valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                    secondColor),
+                                              ),
+                                              width: 50.0,
+                                              height: 50.0,
+                                              padding: EdgeInsets.all(15.0),
+                                            ),
+                                        imageUrl: snapshot.data[0],
+                                        width: 50.0,
+                                        height: 50.0,
+                                        fit: BoxFit.cover,
+                                      )));
+                            }
+                            else {
+                              return Material(child: Icon(
+                                Icons.account_circle,
+                                size: 50.0,
+                                color: secondColor,
+                              ),
+                                borderRadius: BorderRadius.all(
+                                    Radius.circular(25.0)),
+                                clipBehavior: Clip.hardEdge,)
+                            }
+                          }),
+                        ),
+                        Flexible(
+                          child: Container(
+                            child: Column(
+                              children: <Widget>[
+                                Container(
+                                  child: Text(
+                                    document.data()['firstName'] +
+                                        " " +
+                                        document.data()['lastName'],
+                                    style: TextStyle(color: primaryColor),
+                                  ),
+                                  alignment: Alignment.centerLeft,
+                                  margin:
+                                  EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 5.0),
+                                ),
+                                /* Container(
+                                  child: Text(
+                                    'About me: ${document.data()['aboutMe'] ??
+                                        'Not available'}',
+                                    style: TextStyle(color: primaryColor),
+                                  ),
+                                  alignment: Alignment.centerLeft,
+                                  margin: EdgeInsets.fromLTRB(
+                                      10.0, 0.0, 0.0, 0.0),
+                                )*/
+                              ],
+                            ),
+                            margin: EdgeInsets.only(left: 20.0),
+                          ),
+                        ),
+                        StreamBuilder<QuerySnapshot>(
+                            stream: firestore.collection("ChatFriends").doc(userRep.user?.email).collection("Network").doc(document.id.toString()).collection(document.id.toString()).snapshots(), // a previously-obtained Future<String> or null
+                            builder: (BuildContext context, snapshot) {
+                              if(snapshot.hasData) {
+                                return snapshot.data.docs.length!=0? Badge(
+                                  elevation: 0,
+                                  shape: BadgeShape.circle,
+                                  padding: EdgeInsets.all(7),
+                                  badgeContent: Text(
+                                    snapshot.data.docs.length.toString(),
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ):Container();
+                              }
+                              else{
+                                return Container();
+                              }
+                            }
+                        ),
+                        /* Stack(children:[Container(
+                            width: 30.0,
+                            height: 30.0,
+                            //padding: EdgeInsets.all(15.0),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: secondColor,
+                            ),
+
+                         // child: Badge(badgeContent: Text("2"),),
+                        ),
+                         Container(
+                             width: 20.0,
+                             height: 20.0,
+                           //  padding: EdgeInsets.all(5.0),
+                             child: Text("2")),])*/
+                      ],
+                    ),
+                    onPressed: () async {
+                      QuerySnapshot q2 = await FirebaseFirestore.instance
+                          .collection("ChatFriends").doc(userRep.user?.email).collection("Network").doc(document.id.toString()).collection(document.id.toString())
+                          .get();
+
+                      FirebaseFirestore.instance.runTransaction((transaction) async {
+                        q2.docs.forEach((element) {
+                          transaction.delete(element.reference);
+                        });
+                      });
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ChatTalkPage(
+                                peerId: document.id,
+                                peerAvatar: snapshot.data[0],
+                                userId: currentUserId,
+                              )));
+                    },
+                    color: greyColor2,
+                    padding: EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 10.0),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0)),
+                  ),
+                  margin: EdgeInsets.only(bottom: 10.0, left: 5.0, right: 5.0),
+                );
+              }
+            }
+          });
+    });
+  }
+  */

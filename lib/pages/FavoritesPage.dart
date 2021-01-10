@@ -18,6 +18,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
   final _key = GlobalKey<ScaffoldState>();
   final GlobalKey<PopupMenuButtonState> _homeMenuKey = GlobalKey();
   final GlobalKey<PopupMenuButtonState> _workMenuKey = GlobalKey();
+  final GlobalKey<PopupMenuButtonState> _universityMenuKey = GlobalKey();
   @override
   Widget build(BuildContext context) {
     return Consumer<UserRepository>(builder: (context, userRep, child) {
@@ -35,7 +36,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
               }
               snapshotMap.forEach((key, value) {
                 final GlobalKey<PopupMenuButtonState> _menuKey = GlobalKey();
-                if(key != "Home" && key != "Work"){
+                if(key != "Home" && key != "Work" && key != "University"){
                   favorites.add(ListTile(onTap: () => _menuKey.currentState.showButtonMenu(),title: Text(key),
                     subtitle: Text(value["Address"]),
                     leading: Icon(Icons.favorite, size: 30,
@@ -76,7 +77,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                               return AlertDialog(shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.all(Radius.circular(20.0))),
                                 title: Text("Edit name"),content: Form(key: _formKey,child: TextFormField(decoration: InputDecoration(border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),labelText: "Name"),controller: _controller,validator: (val) {
-                                  if (val.isEmpty) {return 'Please enter name';} else if(val.toLowerCase() == "home" || val.toLowerCase() == "work"){return 'Cant select this name';}else if(snapshotMap.containsKey(val)) {return 'Name already exists';}return null;
+                                  if (val.isEmpty) {return 'Please enter name';} else if(val.toLowerCase() == "home" || val.toLowerCase() == "work" || val.toLowerCase() == "university"){return 'Cant select this name';}else if(snapshotMap.containsKey(val)) {return 'Name already exists';}return null;
                                 },)),
                                 actions: [
                                   TextButton(onPressed: () =>
@@ -139,7 +140,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                   title: Text("New favorite"),content: Form(key: _formKey,child: Wrap(runSpacing: 10,alignment: WrapAlignment.center,
                                     children: [
                                       TextFormField(decoration: InputDecoration(border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),labelText: "Name"),controller: _controller,validator: (val) {
-                                        if (val.isEmpty) {return 'Please enter name';} else if(val.toLowerCase() == "home" || val.toLowerCase() == "work"){return 'Cant select this name';}else if(snapshotMap.containsKey(val)) {return 'Name already exists';}return null;
+                                        if (val.isEmpty) {return 'Please enter name';} else if(val.toLowerCase() == "home" || val.toLowerCase() == "work" || val.toLowerCase() == "university"){return 'Cant select this name';}else if(snapshotMap.containsKey(val)) {return 'Name already exists';}return null;
                                       },),
                                       RaisedButton.icon(
                                         color: Colors.white,
@@ -394,6 +395,71 @@ class _FavoritesPageState extends State<FavoritesPage> {
                               await firestore.collection("Favorites").doc(userRep.user.email).set({"Work" : {"Address" : returnResult.fromAddress.addressLine,"Point" : GeoPoint(returnResult.fromAddress.coordinates.latitude,returnResult.fromAddress.coordinates.longitude)}},SetOptions(merge: true));
                             }
                           },),),
+                      Divider(thickness: 1,indent: 10,endIndent: 10,color: mainColor,),
+                      ListTile(onTap: () async {
+                        if(_universityMenuKey.currentState != null){
+                          _universityMenuKey.currentState.showButtonMenu();
+                        }else{
+                          var returnResult = await Navigator.of(context)
+                              .push(MaterialPageRoute<LocationsResult>(
+                              builder: (BuildContext context) {
+                                return LocationSearch(
+                                  showAddStops: false, fromFavorites: true,);
+                              },
+                              fullscreenDialog: true));
+                          if (returnResult != null) {
+                            await firestore.collection("Favorites").doc(userRep.user.email).set({"University" : {"Address" : returnResult.fromAddress.addressLine,"Point" : GeoPoint(returnResult.fromAddress.coordinates.latitude,returnResult.fromAddress.coordinates.longitude)}},SetOptions(merge: true));
+                          }
+                        }
+                      },title: Text("University"),
+                        subtitle: Text((!snapshotMap.containsKey("University") ? "Click to set university address" : snapshotMap["University"]["Address"])),
+                        leading: Icon(Icons.school, size: 30,
+                          color: secondColor,),
+                        trailing: snapshotMap.containsKey("University") ? PopupMenuButton(key: _universityMenuKey,icon: Icon(Icons.more_vert),
+                            itemBuilder: (BuildContext context) => [PopupMenuItem(value: "Edit location",child: Row(children: [Icon(Icons.edit_location),Text("Edit address")]),),PopupMenuItem(value: "Delete",child: Row(children: [Icon(Icons.delete),Text("Delete")]))],
+                            onSelected: (value2) async {
+                              if(value2 == "Delete"){
+                                snapshotMap.remove("University");
+                                await firestore.collection("Favorites").doc(userRep.user.email).set(snapshotMap);
+                              } else if (value2 == "Edit location") {
+                                var returnResult = await Navigator.of(context)
+                                    .push(MaterialPageRoute<LocationsResult>(
+                                    builder: (BuildContext context) {
+                                      return LocationSearch(
+                                        showAddStops: false, fromFavorites: true,);
+                                    },
+                                    fullscreenDialog: true));
+                                if (returnResult != null) {
+                                  await firestore.collection("Favorites").doc(
+                                      userRep.user.email).update({
+                                    "University": {
+                                      "Address": returnResult.fromAddress
+                                          .addressLine,
+                                      "Point": GeoPoint(
+                                          returnResult.fromAddress.coordinates
+                                              .latitude,
+                                          returnResult.fromAddress.coordinates
+                                              .longitude)
+                                    }
+                                  });
+                                }
+                              }
+                            }
+                        ) : IconButton(icon: Icon(Icons.edit),
+                          onPressed: () async {
+                            var returnResult = await Navigator.of(context)
+                                .push(MaterialPageRoute<LocationsResult>(
+                                builder: (BuildContext context) {
+                                  return LocationSearch(
+                                    showAddStops: false, fromFavorites: true,);
+                                },
+                                fullscreenDialog: true));
+                            if (returnResult != null) {
+                              await firestore.collection("Favorites").doc(userRep.user.email).set({"University" : {"Address" : returnResult.fromAddress.addressLine,"Point" : GeoPoint(returnResult.fromAddress.coordinates.latitude,returnResult.fromAddress.coordinates.longitude)}},SetOptions(merge: true));
+                            }
+                          },
+
+                        ),),
                       Divider(thickness: 1,indent: 10,endIndent: 10,color: mainColor,),
                       ...favorites
                     ],),

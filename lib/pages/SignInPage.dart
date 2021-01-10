@@ -92,6 +92,7 @@ class _SignInPageState extends State<SignInPage>
                               runAlignment: WrapAlignment.center,
                               children: [
                                 textBoxField(
+                                  enabled: !_pressed,
                                     size: size,
                                     hintText: "Email",
                                     textFieldController: _email,
@@ -107,6 +108,7 @@ class _SignInPageState extends State<SignInPage>
                                       return null;
                                     }),
                                 textBoxField(
+                                    enabled: !_pressed,
                                     textCap: TextCapitalization.none,
                                     size: size,
                                     hintText: "Password",

@@ -167,16 +167,19 @@ class _SignUpPageState extends State<SignUpPage>
                               runAlignment: WrapAlignment.center,
                               children: [
                                 textBoxField(
+                                    enabled: !_pressed,
                                     size: size,
                                     hintText: "First name",
                                     textFieldController: _firstName,
                                     validator: (value) {if (value.isEmpty) {return 'Please enter first name';} else if(value.length>20) {return 'first name cant be more than 20 characters';}return null;}),
                                 textBoxField(
+                                    enabled: !_pressed,
                                     size: size,
                                     hintText: "Last name",
                                     textFieldController: _lastName,
                                     validator: (value) {if (value.isEmpty) {return 'Please enter last name';} else if(value.length>20) {return 'last name cant be more than 20 characters';}return null;}),
                                 textBoxField(
+                                    enabled: !_pressed,
                                     textCap: TextCapitalization.none,
                                     size: size,
                                     hintText: "Email",
@@ -193,6 +196,7 @@ class _SignUpPageState extends State<SignUpPage>
                                       return null;
                                     }),
                                 textBoxField(
+                                    enabled: !_pressed,
                                     textCap: TextCapitalization.none,
                                     size: size,
                                     hintText: "Password",
@@ -207,6 +211,7 @@ class _SignUpPageState extends State<SignUpPage>
                                       return null;
                                     }),
                                 textBoxField(
+                                    enabled: !_pressed,
                                     textCap: TextCapitalization.none,
                                     size: size,
                                     hintText: "Validate password",
@@ -277,6 +282,16 @@ class _SignUpPageState extends State<SignUpPage>
                                                       email: _email.text,
                                                       password: _password.text)
                                                   .then((user) async {
+                                                await user.user.updateProfile(
+                                                    displayName:
+                                                    _firstName.text +
+                                                        " " +
+                                                        _lastName.text);
+                                                userRep.user = user.user;
+                                                await user.user
+                                                    .sendEmailVerification();
+                                                while (
+                                                    !await checkEmailVerified()) {}
                                                 await db
                                                     .collection("Profiles")
                                                     .doc(_email.text)
@@ -289,22 +304,14 @@ class _SignUpPageState extends State<SignUpPage>
                                                   "phoneNumber": "",
                                                   "allowedPayments": []
                                                 });
-                                                await user.user.updateProfile(
-                                                    displayName:
-                                                        _firstName.text +
-                                                            " " +
-                                                            _lastName.text);
-                                                await user.user
-                                                    .sendEmailVerification();
-                                                userRep.user = user.user;
                                                 await cloudStorage
                                                     .ref('uploads')
                                                     .child(userRep.user.email)
                                                     .putFile(await ImageUtils
-                                                        .imageToFile(
-                                                            imageName:
-                                                                "images/profile",
-                                                            ext: "png"));
+                                                    .imageToFile(
+                                                    imageName:
+                                                    "images/profile",
+                                                    ext: "png"));
                                                 userRep.profilePicture =
                                                     Image.asset(
                                                         "assets/images/profile.png");
@@ -312,8 +319,10 @@ class _SignUpPageState extends State<SignUpPage>
                                                     .collection("Notifications")
                                                     .doc(_email.text)
                                                     .set({});
-                                                while (
-                                                    !await checkEmailVerified()) {}
+                                                await db
+                                                    .collection("ChatFriends")
+                                                    .doc(_email.text)
+                                                    .set({});
                                                 if (_checkedValue) {
                                                   encryptedSharedPreferences
                                                       .setString(

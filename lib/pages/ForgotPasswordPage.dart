@@ -53,6 +53,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         textAlign: TextAlign.center,
                       ),
                       textBoxField(
+                          enabled: !_pressed,
                           size: size,
                           hintText: "Email",
                           textFieldController: _email,
@@ -69,21 +70,28 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                             return null;
                           }),
                       !_pressed
-                          ? Container(
-                              decoration: BoxDecoration(
-                                  color: Colors.black,
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(8))),
-                              width: size.width * 0.7,
-                              child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    TextButton(
-                                      child: Text(
+                          ? TextButton(
+                        child: Container(
+                            decoration: BoxDecoration(
+                                color: Colors.black,
+                                borderRadius: BorderRadius.all(
+                                    Radius.circular(8))),
+                            width: size.width * 0.8,
+                            height: size.height * 0.06,
+                            child: Row(
+                                mainAxisAlignment:
+                                MainAxisAlignment.center,
+                                children: [
+                                    Text(
                                         "Send Email",
                                         style: TextStyle(color: Colors.white),
                                         textAlign: TextAlign.center,
                                       ),
+                          Icon(
+                            Icons.outgoing_mail,
+                            color: Colors.white,
+                          )])),
+
                                       onPressed: () async {
                                         if (_formKey.currentState.validate()) {
                                           try {
@@ -108,12 +116,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                           }
                                         }
                                       },
-                                    ),
-                                    Icon(
-                                      Icons.outgoing_mail,
-                                      color: Colors.white,
                                     )
-                                  ]))
                           : Container(
                               child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,

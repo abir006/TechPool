@@ -166,7 +166,7 @@ class _HomePageState extends State<HomePage> {
                 actions: [
                   IconButton(
                       icon: StreamBuilder(
-                          stream: firestore.collection("Notifications").doc(userRep.user?.email).collection("UserNotifications").snapshots(), // a previously-obtained Future<String> or null
+                          stream: firestore.collection("Notifications").doc(userRep.user?.email).collection("UserNotifications").where("read", isEqualTo: "false").snapshots(), // a previously-obtained Future<String> or null
                           builder: (BuildContext context, snapshot) {
                             if (snapshot.hasData) {
                               //QuerySnapshot values = snapshot.data;
@@ -276,7 +276,7 @@ class _HomePageState extends State<HomePage> {
           actions: [
             IconButton(
                 icon: StreamBuilder(
-                stream: firestore.collection("Notifications").doc(userRep.user?.email).collection("UserNotifications").snapshots(), // a previously-obtained Future<String> or null
+                stream: firestore.collection("Notifications").doc(userRep.user?.email).collection("UserNotifications").where("read", isEqualTo: "false").snapshots(), // a previously-obtained Future<String> or null
                 builder: (BuildContext context, snapshot) {
                   if (snapshot.hasData) {
                     //QuerySnapshot values = snapshot.data;

@@ -316,6 +316,8 @@ class _SetDrivePageState extends State<SetDrivePage> {
                 showDialog(
                     context: context,
                     builder: (_) => new SimpleDialog(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(20))),
                           title: Center(
                               child: Text("Choose departure time",
                                   style: TextStyle(fontSize: 21))),
@@ -462,6 +464,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
         //maxLengthEnforced: true,
         controller: _noteController,
         decoration: InputDecoration(
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
           //counterText: '',
           labelText: 'Note to passengers:',
           labelStyle: TextStyle(fontSize: _fontTextsSize),
@@ -479,6 +482,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
           //maxLengthEnforced: true,
           maxLength: 3,
           decoration: InputDecoration(
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
             counterText: '',
             labelText: 'Price: ₪',
             labelStyle: TextStyle(fontSize: _fontTextsSize),
@@ -513,13 +517,13 @@ class _SetDrivePageState extends State<SetDrivePage> {
             child: Theme(
                 data: Theme.of(context).copyWith(
                     canvasColor:
-                        mainColor, // background color for the dropdown items
+                    Colors.white, // background color for the dropdown items
                     buttonTheme: ButtonTheme.of(context).copyWith(
                       alignedDropdown:
                           true, //If false (the default), then the dropdown's menu will be wider than its button.
                     )),
                 child: DropdownButton<String>(
-                    dropdownColor: mainColor,
+                    dropdownColor: Colors.white,
                     elevation: 0,
                     value: _numberOfPassengers,
                     onChanged: (String newValue) {
@@ -629,6 +633,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
               bigTrunkText,
               SizedBox(height: defaultSpace),
               backSeatText,
+              SizedBox(height: defaultSpace),
               noteToPassengersText,
             ],
           ));

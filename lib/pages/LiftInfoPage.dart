@@ -74,6 +74,7 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
                 "passengerNote": myNoteController.text,
                 "bigBag":bigBag,
                 "type": "RequestedLift",
+                'read': 'false'
               }
           );
            transaction.set(firestore.collection("Notifications").doc(userRep.user.email).collection("Pending").doc(),

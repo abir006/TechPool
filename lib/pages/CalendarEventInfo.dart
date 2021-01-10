@@ -56,6 +56,7 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                 "price": widget.lift.price,
                 "passengerId": userRep.user.email,
                 "type": "CanceledLift",
+                'read': 'false'
               }
           );
           return true;
@@ -121,6 +122,7 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
               "notificationTime": DateTime.now(),
               "price": widget.lift.price,
               "type": "RejectedLift",
+              'read': 'false'
             }
         );
         element.reference.delete();
@@ -164,6 +166,7 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
                   "price": widget.lift.price,
                   "passengerId": currentPassengerId,
                   "type": "CanceledDrive",
+                  'read': 'false'
                 }
             );
           });

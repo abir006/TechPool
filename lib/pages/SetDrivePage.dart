@@ -316,6 +316,8 @@ class _SetDrivePageState extends State<SetDrivePage> {
                 showDialog(
                     context: context,
                     builder: (_) => new SimpleDialog(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(20))),
                           title: Center(
                               child: Text("Choose departure time",
                                   style: TextStyle(fontSize: 21))),

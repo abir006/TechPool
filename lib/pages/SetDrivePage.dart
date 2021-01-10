@@ -464,6 +464,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
         //maxLengthEnforced: true,
         controller: _noteController,
         decoration: InputDecoration(
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
           //counterText: '',
           labelText: 'Note to passengers:',
           labelStyle: TextStyle(fontSize: _fontTextsSize),
@@ -481,6 +482,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
           //maxLengthEnforced: true,
           maxLength: 3,
           decoration: InputDecoration(
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
             counterText: '',
             labelText: 'Price: ₪',
             labelStyle: TextStyle(fontSize: _fontTextsSize),
@@ -631,6 +633,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
               bigTrunkText,
               SizedBox(height: defaultSpace),
               backSeatText,
+              SizedBox(height: defaultSpace),
               noteToPassengersText,
             ],
           ));

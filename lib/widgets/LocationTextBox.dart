@@ -28,7 +28,7 @@ class _LocationTextBoxes2State extends State<LocationTextBoxes2> {
   TextEditingController street;
   var address;
   bool _pressed;
-  List<PopupMenuItem> myFavorites = [];
+  List<ListTile> myFavorites = [];
 
   @override
   void initState() {
@@ -38,7 +38,7 @@ class _LocationTextBoxes2State extends State<LocationTextBoxes2> {
     _pressed = false;
   }
 
-  /// validates the city input is legal.
+  /// validates the address input is a legal address.
   Future<bool> validateLegalAddress(String address) async {
     try {
       var cc = await locationFromAddress(address,localeIdentifier: "en");
@@ -66,69 +66,6 @@ class _LocationTextBoxes2State extends State<LocationTextBoxes2> {
       return true;
     }
   }
-
-/*  /// validates the "city, street" input is legal.
-  Future<bool> validateLegalStreet(String city, String street) async {
-    try {
-        if (city.toLowerCase().contains("haifa") || city.contains("חיפה")) {
-          var cc2 = await locationFromAddress(city + ", " + street);
-          var ccA = await placemarkFromCoordinates(
-              cc2[0].latitude, cc2[0].longitude, localeIdentifier: "en");
-          address = [
-            Address(coordinates: Coordinates(cc2[0].latitude, cc2[0].longitude),
-                addressLine: (ccA[0].locality + ", " + ccA[0].street),
-                countryName: ccA[0].country,
-                countryCode: ccA[0].isoCountryCode,
-                featureName: ccA[0].name,
-                postalCode: ccA[0].postalCode,
-                adminArea: ccA[0].administrativeArea,
-                subAdminArea: ccA[0].subAdministrativeArea,
-                locality: ccA[0].locality,
-                subLocality: ccA[0].subLocality,
-                thoroughfare: ccA[0].thoroughfare,
-                subThoroughfare: ccA[0].subThoroughfare)
-          ];
-          return false;
-      } else {
-        var cc = await locationFromAddress(city, localeIdentifier: "en");
-        var cityAddress = await placemarkFromCoordinates(cc[0].latitude, cc[0].longitude, localeIdentifier: "en");
-        var cc2 = await locationFromAddress(city + ", " + street);
-        var ccA = await placemarkFromCoordinates(cc2[0].latitude, cc2[0].longitude, localeIdentifier: "en");
-        address = [
-          Address(coordinates: Coordinates(cc2[0].latitude, cc2[0].longitude),
-              addressLine: (ccA[0].locality + ", " + ccA[0].street),
-              countryName: ccA[0].country,
-              countryCode: ccA[0].isoCountryCode,
-              featureName: ccA[0].name,
-              postalCode: ccA[0].postalCode,
-              adminArea: ccA[0].administrativeArea,
-              subAdminArea: ccA[0].subAdministrativeArea,
-              locality: ccA[0].locality,
-              subLocality: ccA[0].subLocality,
-              thoroughfare: ccA[0].thoroughfare,
-              subThoroughfare: ccA[0].subThoroughfare)
-        ];
-        if (address.first.countryName.toLowerCase() == "israel") {
-          if ((cc2.first.latitude !=
-              cc.first.latitude ||
-              cc2.first.longitude !=
-                  cc.first.longitude)) {
-            return false;
-          } else {
-            return true;
-          }
-        } else {
-          return true;
-        }
-      }
-      } catch (e) {
-      return true;
-    }
-  }*/
-
-  String val="";
-  bool selected = true;
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -148,37 +85,6 @@ class _LocationTextBoxes2State extends State<LocationTextBoxes2> {
                       TextStyle(fontSize: 16, color: widget.leadingTextColor),
                     ),
               ),
-        ///first attempt.
-        /*      Flexible(child: DropdownButtonHideUnderline(
-    child: DropdownButton<String>(
-      items: [DropdownMenuItem(value: "asd",child: Container(height: 100,
-        width: 100,
-        child: TextField(
-            controller: city,
-            textAlign: TextAlign.left,
-            decoration: InputDecoration(
-                border: InputBorder.none, hintText: "City")),
-      )),DropdownMenuItem(value: "bbb",child: Text("bbb"))],
-    value: "asd",
-    isDense: true,
-    onChanged: (s) => print("s"))))*/
-              ///second attempt.
-     /*         Flexible(
-                child: DropdownButton(onTap: () {setState(() {
-                  selected = false;
-                  print("clicked");
-                });},isDense: true,isExpanded: true,value: val, items: [(selected? DropdownMenuItem(value: "",child: TextFormField(
-                    controller: city,
-                    textAlign: TextAlign.left,
-                    decoration: InputDecoration(
-                        border: InputBorder.none, hintText: "Enter address/place"))) : DropdownMenuItem(value: "",child: Text("Enter Address"))),DropdownMenuItem(value: "Netanya admonit 12",child: Text("Home")),DropdownMenuItem(value: "Haifa technion",child: Text("Work"))], onChanged: (newVal) {city.text = newVal; setState(() {
-                  print("selected");
-                  val = newVal;
-                  if(newVal == null || newVal == "") {
-                    selected = true;
-                  }
-                        });}),
-              ),*/
     FutureBuilder<DocumentSnapshot>(
     future: FirebaseFirestore.instance.collection("Favorites").doc(widget.myEmail).get(),
     builder: (context, snapshot) {
@@ -186,42 +92,51 @@ class _LocationTextBoxes2State extends State<LocationTextBoxes2> {
         if(snapshot.data.data() != null) {
           myFavorites = [];
           if(snapshot.data.data().containsKey("Home")){
-            myFavorites.add(PopupMenuItem(value: snapshot.data.data()["Home"]["Address"],child: Row(children: [Icon(Icons.home),Text("Home")])));
+            //myFavorites.add(PopupMenuItem(value: snapshot.data.data()["Home"]["Address"],child: Row(children: [Icon(Icons.home),Text("Home")])));
+            myFavorites.add(ListTile(contentPadding: EdgeInsets.all(0),leading: Icon(Icons.home,color: secondColor,),title: Transform.translate(
+              offset: Offset(-16, 0),
+              child:Text("Home")),onTap:() async{
+              setState(() {
+                FocusScope.of(context).requestFocus(FocusNode());
+                _pressed = true;
+                Navigator.of(context).pop();
+              });
+                city.text = snapshot.data.data()["Home"]["Address"];
+                try {
+                  if (!await validateLegalAddress(snapshot.data.data()["Home"]["Address"])) {
+              widget.updateAddress(address.first);
+              await widget.performOnPress(
+              address: address.first,
+              locationNumber: widget.locationNumber,
+              stopText: "\"" + widget.leadingText + "\"");
+              } else {
+              widget._key.currentState.showSnackBar(SnackBar(
+              content: Text("Address not found"),
+              ));
+              }
+              } catch (e) {
+              widget._key.currentState.showSnackBar(SnackBar(
+              content: Text("Address not found"),
+              ));
+              }
+              setState(() {
+              _pressed = false;
+              });
+            },));
           }
           if(snapshot.data.data().containsKey("Work")){
-            myFavorites.add(PopupMenuItem(value: snapshot.data.data()["Work"]["Address"],child: Row(children: [Icon(Icons.work),Text("Work")])));
-          }
-          snapshot.data.data().forEach((key, value) {
-            if(key != "Home" && key != "Work") {
-              myFavorites.add(PopupMenuItem(value: value["Address"], child: Row(
-                  children: [Icon(Icons.favorite), Text(key)])));
-            }
-          });
-        }else{
-          myFavorites = [];
-        }
-      }else if (snapshot.hasError){
-        myFavorites = [];
-    }else{
-        myFavorites = [PopupMenuItem(child: CircularProgressIndicator())];
-      }
-      return PopupMenuButton(
-          offset: Offset(0, 40), icon: Icon(Icons.arrow_drop_down_sharp),
-          itemBuilder: (BuildContext context) =>
-          [
-            PopupMenuItem(value: "my location", child: Row(children: [Icon(
-                Icons.my_location), Text("My location")],)),
-            ...myFavorites
-          ],
-          onSelected: (value) async {
-            setState(() {
-              FocusScope.of(context).unfocus();
-              _pressed = true;
-            });
-            if (value != "my location") {
-              city.text = value;
+            //myFavorites.add(PopupMenuItem(value: snapshot.data.data()["Work"]["Address"],child: Row(children: [Icon(Icons.work),Text("Work")])));
+            myFavorites.add(ListTile(contentPadding: EdgeInsets.all(0),leading: Icon(Icons.work,color: secondColor,),title: Transform.translate(
+              offset: Offset(-16, 0),
+              child:Text("Work")),onTap:() async{
+              setState(() {
+                FocusScope.of(context).requestFocus(FocusNode());
+                _pressed = true;
+                Navigator.of(context).pop();
+              });
+              city.text = snapshot.data.data()["Work"]["Address"];
               try {
-                if (!await validateLegalAddress(city.text)) {
+                if (!await validateLegalAddress(snapshot.data.data()["Work"]["Address"])) {
                   widget.updateAddress(address.first);
                   await widget.performOnPress(
                       address: address.first,
@@ -240,74 +155,172 @@ class _LocationTextBoxes2State extends State<LocationTextBoxes2> {
               setState(() {
                 _pressed = false;
               });
-            } else {
-              loc.Location location = loc.Location();
-              bool _serviceEnabled;
-              loc.PermissionStatus _permissionGranted;
-              _serviceEnabled = await location.serviceEnabled();
-              if (!_serviceEnabled) {
-                _serviceEnabled = await location.requestService();
-                if (!_serviceEnabled) {
+            },));
+          }
+          if(snapshot.data.data().containsKey("University")){
+            //myFavorites.add(PopupMenuItem(value: snapshot.data.data()["Work"]["Address"],child: Row(children: [Icon(Icons.work),Text("Work")])));
+            myFavorites.add(ListTile(contentPadding: EdgeInsets.all(0),leading: Icon(Icons.school,color: secondColor,),title: Transform.translate(
+                offset: Offset(-16, 0),
+                child:Text("University")),onTap:() async{
+              setState(() {
+                FocusScope.of(context).requestFocus(FocusNode());
+                _pressed = true;
+                Navigator.of(context).pop();
+              });
+              city.text = snapshot.data.data()["University"]["Address"];
+              try {
+                if (!await validateLegalAddress(snapshot.data.data()["University"]["Address"])) {
+                  widget.updateAddress(address.first);
+                  await widget.performOnPress(
+                      address: address.first,
+                      locationNumber: widget.locationNumber,
+                      stopText: "\"" + widget.leadingText + "\"");
+                } else {
                   widget._key.currentState.showSnackBar(SnackBar(
-                    content: Text("Please enable location services"),
+                    content: Text("Address not found"),
+                  ));
+                }
+              } catch (e) {
+                widget._key.currentState.showSnackBar(SnackBar(
+                  content: Text("Address not found"),
+                ));
+              }
+              setState(() {
+                _pressed = false;
+              });
+            },));
+          }
+          snapshot.data.data().forEach((key, value) {
+            if(key != "Home" && key != "Work" && key != "University") {
+              //myFavorites.add(PopupMenuItem(value: value["Address"], child: Row(
+                 // children: [Icon(Icons.favorite), Text(key)])));
+              myFavorites.add(ListTile(contentPadding: EdgeInsets.all(0),leading: Icon(Icons.favorite,color: secondColor,),title: Transform.translate(
+                offset: Offset(-16, 0),
+                child:Text(key)),onTap:() async{
+                setState(() {
+                  FocusScope.of(context).requestFocus(FocusNode());
+                  _pressed = true;
+                  Navigator.of(context).pop();
+                });
+                city.text = value["Address"];
+                try {
+                  if (!await validateLegalAddress(value["Address"])) {
+                    widget.updateAddress(address.first);
+                    await widget.performOnPress(
+                        address: address.first,
+                        locationNumber: widget.locationNumber,
+                        stopText: "\"" + widget.leadingText + "\"");
+                  } else {
+                    widget._key.currentState.showSnackBar(SnackBar(
+                      content: Text("Address not found"),
+                    ));
+                  }
+                } catch (e) {
+                  widget._key.currentState.showSnackBar(SnackBar(
+                    content: Text("Address not found"),
+                  ));
+                }
+                setState(() {
+                  _pressed = false;
+                });
+              },));
+            }
+          });
+        }else{
+          myFavorites = [];
+        }
+      }else if (snapshot.hasError){
+        myFavorites = [];
+    }else{
+        //myFavorites = [PopupMenuItem(child: CircularProgressIndicator())];
+        myFavorites = [ListTile(title: CircularProgressIndicator())];
+      }
+      return PopupMenuButton(
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20)),
+          offset: Offset(0, 40), icon: Icon(Icons.arrow_drop_down_sharp),
+          itemBuilder: (BuildContext context) =>
+          <PopupMenuEntry<Widget>>[
+            PopupMenuItem<Widget>(
+              child: Container(
+                child: ListView(children: [ListTile(contentPadding: EdgeInsets.all(0),leading: Icon(Icons.my_location,color: secondColor,),title: Transform.translate(
+                    offset: Offset(-16, 0),
+                    child:Text("My location")),onTap: () async{
+                  setState(() {
+                    FocusScope.of(context).requestFocus(FocusNode());
+                    _pressed = true;
+                    Navigator.of(context).pop();
+                  });
+                  loc.Location location = loc.Location();
+                  bool _serviceEnabled;
+                  loc.PermissionStatus _permissionGranted;
+                  _serviceEnabled = await location.serviceEnabled();
+                  if (!_serviceEnabled) {
+                  _serviceEnabled = await location.requestService();
+                  if (!_serviceEnabled) {
+                  widget._key.currentState.showSnackBar(SnackBar(
+                  content: Text("Please enable location services"),
                   ));
                   setState(() {
-                    _pressed = false;
-                    FocusScope.of(context).unfocus();
+                  _pressed = false;
                   });
                   return;
-                }
-              }
-              _permissionGranted = await location.hasPermission();
-              if (_permissionGranted == loc.PermissionStatus.denied) {
-                _permissionGranted = await location.requestPermission();
-                if (_permissionGranted != loc.PermissionStatus.granted) {
+                  }
+                  }
+                  _permissionGranted = await location.hasPermission();
+                  if (_permissionGranted == loc.PermissionStatus.denied) {
+                  _permissionGranted = await location.requestPermission();
+                  if (_permissionGranted != loc.PermissionStatus.granted) {
                   widget._key.currentState.showSnackBar(SnackBar(
-                    content: Text(
-                        "Cannot use location service without permission"),
+                  content: Text(
+                  "Cannot use location service without permission"),
                   ));
                   setState(() {
-                    _pressed = false;
-                    FocusScope.of(context).unfocus();
+                  _pressed = false;
                   });
                   return;
-                }
-              }
-              location.changeSettings(accuracy: loc.LocationAccuracy.high);
-              var currentLocation = await location.getLocation();
-              var cityAddress = await placemarkFromCoordinates(
+                  }
+                  }
+                  location.changeSettings(accuracy: loc.LocationAccuracy.high);
+                  var currentLocation = await location.getLocation();
+                  var cityAddress = await placemarkFromCoordinates(
                   currentLocation.latitude, currentLocation.longitude,
                   localeIdentifier: "en");
-              if (cityAddress.first.country.toLowerCase() == "israel") {
-                this.address = [
+                  if (cityAddress.first.country.toLowerCase() == "israel") {
+                  this.address = [
                   Address(coordinates: Coordinates(
-                      currentLocation.latitude, currentLocation.longitude),
-                      addressLine: (cityAddress[0].locality + ", " +
-                          cityAddress[0].street),
-                      countryName: cityAddress[0].country,
-                      countryCode: cityAddress[0].isoCountryCode,
-                      featureName: cityAddress[0].name,
-                      postalCode: cityAddress[0].postalCode,
-                      adminArea: cityAddress[0].administrativeArea,
-                      subAdminArea: cityAddress[0].subAdministrativeArea,
-                      locality: cityAddress[0].locality,
-                      subLocality: cityAddress[0].subLocality,
-                      thoroughfare: cityAddress[0].thoroughfare,
-                      subThoroughfare: cityAddress[0].subThoroughfare)
-                ];
-                city.text = address.first.addressLine;
-                widget.updateAddress(address.first);
-                await widget.performOnPress(
-                    address: address.first,
-                    locationNumber: widget.locationNumber,
-                    stopText: "\"" + widget.leadingText + "\"");
-              }
-            }
-            setState(() {
-              _pressed = false;
-              FocusScope.of(context).unfocus();
-            });
-          });
+                  currentLocation.latitude, currentLocation.longitude),
+                  addressLine: (cityAddress[0].locality + ", " +
+                  cityAddress[0].street),
+                  countryName: cityAddress[0].country,
+                  countryCode: cityAddress[0].isoCountryCode,
+                  featureName: cityAddress[0].name,
+                  postalCode: cityAddress[0].postalCode,
+                  adminArea: cityAddress[0].administrativeArea,
+                  subAdminArea: cityAddress[0].subAdministrativeArea,
+                  locality: cityAddress[0].locality,
+                  subLocality: cityAddress[0].subLocality,
+                  thoroughfare: cityAddress[0].thoroughfare,
+                  subThoroughfare: cityAddress[0].subThoroughfare)
+                  ];
+                  city.text = address.first.addressLine;
+                  widget.updateAddress(address.first);
+                  await widget.performOnPress(
+                  address: address.first,
+                  locationNumber: widget.locationNumber,
+                  stopText: "\"" + widget.leadingText + "\"");
+                  }
+                  setState(() {
+                  _pressed = false;
+                  });
+                },)
+                  ,...myFavorites]),
+                height: myFavorites.length >= 3 ? 200 : myFavorites.length*50.0 + 50.0,
+                width: 140,
+              ),
+            )
+          ],
+         );
     }),
               Flexible(
                   fit: FlexFit.loose,

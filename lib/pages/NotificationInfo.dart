@@ -50,7 +50,7 @@ class _NotificationInfoState extends State<NotificationInfo> {
               "notificationTime": DateTime.now(),
               "price": widget.notification.price,
               "type": "RejectedLift",
-              'read': 'false'
+              "read": "false"
               //"destAddress": widget.lift.destAddress,
               //"startAddress": widget.lift.startAddress,
               //"passengerId": userRep.user.email,
@@ -117,7 +117,7 @@ class _NotificationInfoState extends State<NotificationInfo> {
                 "notificationTime": DateTime.now(),
                 "price": widget.notification.price,
                 "type": "AcceptedLift",
-                'read': 'false'
+                "read": "false"
                 //"passengerId": widget.notification.passengerId,
               }
           );

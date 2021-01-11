@@ -407,7 +407,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     }
                     else{
                       return BadgeIcon(
-                        icon: Icon(Icons.notifications, size: 25),
+                        icon: Icon(Icons.message_outlined, size: 25),
                         badgeCount: 0,
                       );
                     }

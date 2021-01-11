@@ -362,6 +362,7 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
                      Text("My requests:",
                          style: TextStyle(
                              fontWeight: FontWeight.bold, fontSize: 18)),
+                     SizedBox(height: defaultSpace),
                      Container(
                        child: Column(
                            children: [
@@ -369,7 +370,7 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
                                  controllerText: myNoteController,
                                  enabled: true,
                                  maxLines: null,
-                                 nameLabel: "Request note to driver:",
+                                 nameLabel: "To driver:",
                                  maxLenth: 150),
                              Row(
                                    mainAxisAlignment: MainAxisAlignment.start,
@@ -634,6 +635,8 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
       },
     );
     AlertDialog alert = AlertDialog(
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(20.0))),
       title: Text(title),
       content: Text(info,style:TextStyle(fontSize: 17)),
       actions: [

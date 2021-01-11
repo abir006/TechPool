@@ -433,6 +433,8 @@ class ChatScreenState extends State<ChatScreen> {
                       height: 35.0,
                       padding: EdgeInsets.all(10.0),
                     ),
+                    color: secondColor,
+                    colorBlendMode: BlendMode.dstOver ,
                     imageUrl: peerAvatar,
                     width: 35.0,
                     height: 35.0,
@@ -745,69 +747,76 @@ class ChatScreenState extends State<ChatScreen> {
 
   Widget buildInput() {
     return Container(
-      child: Row(
-        children: <Widget>[
-          // Button send image
-          Material(
-            child: Container(
-              margin: EdgeInsets.symmetric(horizontal: 1.0),
-              child: IconButton(
-                icon: Icon(Icons.image),
-                onPressed: getImage,
-                color: primaryColor,
-              ),
-            ),
-            color: Colors.white,
-          ),
-          Material(
-            child: Container(
-              margin: EdgeInsets.symmetric(horizontal: 1.0),
-              child: IconButton(
-                icon: Icon(Icons.face),
-                onPressed: getSticker,
-                color: primaryColor,
-              ),
-            ),
-            color: Colors.white,
-          ),
-
-          // Edit text
-          Flexible(
-            child: Container(
-              child: TextField(
-                onSubmitted: (value) {
-                  onSendMessage(textEditingController.text, 0);
-                },
-                style: TextStyle(color: primaryColor, fontSize: 15.0),
-                controller: textEditingController,
-                decoration: InputDecoration.collapsed(
-                  hintText: 'Type your message...',
-                  hintStyle: TextStyle(color: greyColor),
-                ),
-                focusNode: focusNode,
-              ),
-            ),
-          ),
-
-          // Button send message
-          Material(
-            child: Container(
-              margin: EdgeInsets.symmetric(horizontal: 8.0),
-              child: IconButton(
-                icon: Icon(Icons.send),
-                onPressed: () => onSendMessage(textEditingController.text, 0),
-                color: primaryColor,
-              ),
-            ),
-            color: Colors.white,
-          ),
-        ],
-      ),
-      width: double.infinity,
-      height: 50.0,
       decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: greyColor2, width: 0.5)),
-          color: Colors.white),
+          border: Border(top: BorderSide(color: greyColor2, width: 0.5)),),
+      child: Container(
+        child: Row(
+          children: <Widget>[
+            // Button send image
+            Material(
+              borderRadius:  BorderRadius.all(Radius.circular(20.0)),
+              child: Container(
+                margin: EdgeInsets.symmetric(horizontal: 1.0),
+                child: IconButton(
+                  icon: Icon(Icons.image),
+                  onPressed: getImage,
+                  color: primaryColor,
+                ),
+              ),
+              color: Colors.white,
+            ),
+            Material(
+              child: Container(
+                margin: EdgeInsets.symmetric(horizontal: 1.0),
+                child: IconButton(
+                  icon: Icon(Icons.face),
+                  onPressed: getSticker,
+                  color: primaryColor,
+                ),
+              ),
+              color: Colors.white,
+            ),
+
+            // Edit text
+            Flexible(
+              child: Container(
+                child: TextField(
+                  onSubmitted: (value) {
+                    onSendMessage(textEditingController.text, 0);
+                  },
+                  style: TextStyle(color: primaryColor, fontSize: 15.0),
+                  controller: textEditingController,
+                  decoration: InputDecoration.collapsed(
+                    hintText: 'Type your message...',
+                    hintStyle: TextStyle(color: greyColor),
+                  ),
+                  focusNode: focusNode,
+                ),
+              ),
+            ),
+
+            // Button send message
+            Material(
+              borderRadius: BorderRadius.all(Radius.circular(20.0)),
+              child: Container(
+                margin: EdgeInsets.symmetric(horizontal: 8.0),
+                child: IconButton(
+                  icon: Icon(Icons.send),
+                  onPressed: () => onSendMessage(textEditingController.text, 0),
+                  color: primaryColor,
+                ),
+              ),
+              color: Colors.white,
+            ),
+          ],
+        ),
+       // width: double.infinity,
+        height: 50.0,
+      decoration:  BoxDecoration(color: Colors.white,borderRadius: BorderRadius.only(bottomLeft: Radius.circular(20.0),bottomRight:Radius.circular(20.0))),
+      /*  decoration: BoxDecoration(
+            border: Border(top: BorderSide(color: greyColor2, width: 0.5)),
+            color: Colors.white),*/
+      ),
     );
   }
 

@@ -240,7 +240,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                 }
                                 else{
                                   return BadgeIcon(
-                                    icon: Icon(Icons.notifications, size: 25),
+                                    icon: Icon(Icons.message_outlined, size: 25),
                                     badgeCount: 0,
                                   );
                                 }

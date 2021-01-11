@@ -15,6 +15,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import '../appValidator.dart';
 import 'ChatTalkPage.dart';
 import 'NotificationsPage.dart';
 import 'ProfilePage.dart';
@@ -40,6 +41,7 @@ class ChatPageState extends State<ChatPage> {
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
   TextEditingController _searchText;
+  appValidator appValid;
 
   bool isLoading = false;
   List<Choice> choices = const <Choice>[
@@ -53,6 +55,9 @@ class ChatPageState extends State<ChatPage> {
     _searchText = TextEditingController();
     registerNotification();
     configLocalNotification();
+    appValid = appValidator();
+    appValid.checkConnection(context);
+    appValid.checkVersion(context);
   }
 
   void registerNotification() {
@@ -350,7 +355,7 @@ class ChatPageState extends State<ChatPage> {
         ],
       ),
       drawer: Consumer<UserRepository>(builder: (context, auth, _) {
-        return techDrawer2(auth, context, DrawerSections.chats);
+        return techDrawer(auth, context, DrawerSections.chats);
       }),
       body: WillPopScope(
         child: GestureDetector(
@@ -498,6 +503,8 @@ class ChatPageState extends State<ChatPage> {
                                       height: 50.0,
                                       padding: EdgeInsets.all(15.0),
                                     ),
+                                    color: secondColor,
+                                    colorBlendMode: BlendMode.dstOver ,
                                     imageUrl: snapshot.data[0],
                                     width: 50.0,
                                     height: 50.0,
@@ -621,6 +628,8 @@ class ChatPageState extends State<ChatPage> {
 
   void dispose() {
     _searchText.dispose();
+    appValid.listener.cancel();
+    appValid.versionListener.cancel();
     super.dispose();
   }
 }

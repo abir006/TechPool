@@ -768,6 +768,8 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
     );
 
     AlertDialog alert = AlertDialog(
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(20.0))),
       title: Text(title),
       content: Text(info,style:TextStyle(fontSize: 17)),
       actions: [

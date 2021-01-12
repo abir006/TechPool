@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -17,6 +19,8 @@ class SignInPage extends StatefulWidget {
 
 class _SignInPageState extends State<SignInPage>
     with SingleTickerProviderStateMixin {
+  final FirebaseMessaging firebaseMessaging = FirebaseMessaging();
+  final FirebaseFirestore db = FirebaseFirestore.instance;
   final cloudStorage = FirebaseStorage.instance;
   Animation<double> animation;
   AnimationController controller;
@@ -203,6 +207,10 @@ class _SignInPageState extends State<SignInPage>
                                                 if (user.user.emailVerified) {
                                                   userRep.user = user.user;
                                                   try {
+                                                    db
+                                                        .collection('Profiles')
+                                                        .doc(user.user.email)
+                                                        .update({'pushToken': (await firebaseMessaging.getToken())});
                                                     var _imgUrl =
                                                         await (cloudStorage
                                                             .ref('uploads')

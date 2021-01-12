@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:data_connection_checker/data_connection_checker.dart';
 import 'package:encrypted_shared_preferences/encrypted_shared_preferences.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -54,6 +55,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  final FirebaseMessaging firebaseMessaging = FirebaseMessaging();
   FirebaseFirestore firestore = FirebaseFirestore.instance;
   final cloudStorage = FirebaseStorage.instance;
   final EncryptedSharedPreferences encryptedSharedPreferences =
@@ -129,7 +131,14 @@ class _MyAppState extends State<MyApp> {
                                       .child(userRep.user?.email)
                                       .getDownloadURL())
                                   .then((imgUrl) => userRep.profilePicture =
-                                      Image.network(imgUrl))
+                                      Image.network(imgUrl)).then((_) async {
+                                 FirebaseFirestore.instance
+                                    .collection('Profiles')
+                                    .doc(userRep.user.email)
+                                    .update({
+                                  'pushToken': await firebaseMessaging.getToken()
+                                });
+                              })
                                   .then((_) => true)
                                   .catchError((e) {
                                     return false;

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:encrypted_shared_preferences/encrypted_shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -35,6 +36,7 @@ class _SignUpPageState extends State<SignUpPage>
     with SingleTickerProviderStateMixin {
   EncryptedSharedPreferences encryptedSharedPreferences =
       EncryptedSharedPreferences();
+  final FirebaseMessaging firebaseMessaging = FirebaseMessaging();
   final cloudStorage = FirebaseStorage.instance;
   FirebaseFirestore db = FirebaseFirestore.instance;
   Animation<double> animation;
@@ -302,7 +304,8 @@ class _SignUpPageState extends State<SignUpPage>
                                                   "hobbies": "",
                                                   "faculty": "",
                                                   "phoneNumber": "",
-                                                  "allowedPayments": []
+                                                  "allowedPayments": [],
+                                                  "pushToken" : (await firebaseMessaging.getToken())
                                                 });
                                                 await cloudStorage
                                                     .ref('uploads')

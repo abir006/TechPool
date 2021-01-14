@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:badges/badges.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:tech_pool/Utils.dart';
@@ -21,6 +22,7 @@ import 'NotificationsPage.dart';
 import 'ProfilePage.dart';
 import 'package:flappy_search_bar/flappy_search_bar.dart';
 import 'package:tech_pool/TechDrawer.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 class ChatPage extends StatefulWidget {
   final String currentUserId;
@@ -42,6 +44,8 @@ class ChatPageState extends State<ChatPage> {
       FlutterLocalNotificationsPlugin();
   TextEditingController _searchText;
   appValidator appValid;
+  SlidableController slidableController;
+  List<String> net = [];
 
   bool isLoading = false;
   List<Choice> choices = const <Choice>[
@@ -49,12 +53,20 @@ class ChatPageState extends State<ChatPage> {
     const Choice(title: 'Log out', icon: Icons.exit_to_app),
   ];
 
+  void handleSlideAnimationChanged(Animation<double> slideAnimation) {
+    setState(() {
+    });
+  }
+
   @override
   void initState() {
     super.initState();
+    slidableController = SlidableController(
+      onSlideAnimationChanged: handleSlideAnimationChanged,
+    );
     _searchText = TextEditingController();
     registerNotification();
-    configLocalNotification();
+    //configLocalNotification();
     appValid = appValidator();
     appValid.checkConnection(context);
     appValid.checkVersion(context);
@@ -273,7 +285,7 @@ class ChatPageState extends State<ChatPage> {
     filteredDocs = [];
     onlyDocs=[];
     onlyDocs.addAll(network);
-    List<String> net = [];
+    net = [];
     network.forEach((element) {
       net.add(element.id);
     });
@@ -347,10 +359,22 @@ class ChatPageState extends State<ChatPage> {
                     }
                   }
               ),
-              onPressed: () => Navigator.pushReplacement(
+              onPressed: () async {
+      QuerySnapshot q2 = await FirebaseFirestore.instance
+        .collection("ChatFriends")
+        .doc(currentUserId)
+        .collection("UnRead")
+        .get();
+
+    FirebaseFirestore.instance.runTransaction((transaction) async {
+      q2.docs.forEach((element) {
+        transaction.delete(element.reference);
+      });
+    });
+                  Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => NotificationsPage()))
+                      builder: (context) => NotificationsPage()));}
           ),),
         ],
       ),
@@ -359,7 +383,11 @@ class ChatPageState extends State<ChatPage> {
       }),
       body: WillPopScope(
         child: GestureDetector(
-          onTap:() {FocusScope.of(context).requestFocus(new FocusNode());},
+          onTap:() {
+            FocusScope.of(context).requestFocus(new FocusNode());
+            try{
+            slidableController.activeState.close();}
+          catch(e){}},
           child: Container(
             decoration: pageContainerDecoration,
             margin: pageContainerMargin,
@@ -471,146 +499,215 @@ class ChatPageState extends State<ChatPage> {
               if (document.id.toString() == userRep.user.email) {
                 return Container();
               } else {
-                return Container(
-                  child: FlatButton(
-                    child: Row(
-                      children: <Widget>[
-                        Material(
-                          child: snapshot.data[0] != null
-                              ? InkWell(
-                                  onTap: () async {
-                                    await Navigator.of(context)
-                                        .push(MaterialPageRoute<liftRes>(
-                                            builder: (BuildContext context) {
-                                              return ProfilePage(
-                                                email: document.id.toString(),
-                                                fromProfile: false,
-                                              );
-                                            },
-                                            fullscreenDialog: true));
-                                  },
-                                  child:
-                                  CachedNetworkImage(
-                                    placeholder: (context, url) => Container(
-                                      color: mainColor,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 1.0,
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                                secondColor),
+                return Slidable(
+                  enabled: net.contains(document.id),
+                  controller: slidableController,
+                  actionPane: SlidableScrollActionPane(),
+                  actionExtentRatio: 0.25,
+                  actions: <Widget>[
+                SlideAction(
+                  child: Container(
+                    padding: EdgeInsets.fromLTRB(0,1, 0, 12,),
+                    child: FlatButton(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0)),
+                      child: Center(child:
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.delete_outline,color: Colors.white,),
+                          Text("Delete",style: TextStyle(color: Colors.white,fontSize: 10),)
+                        ],
+                      ),),
+                      height: 100,
+                   // caption: 'Delete',
+                      color: Colors.red,
+                    //  icon: Icons.delete_outline,
+                      onPressed: () async {
+                        FirebaseFirestore.instance.runTransaction((transaction) async {
+
+                          QuerySnapshot q2 = await FirebaseFirestore.instance
+                              .collection("ChatFriends").doc(userRep.user?.email).collection("Network").doc(document.id.toString()).collection(document.id.toString())
+                              .get();
+
+                          Future.wait(q2.docs.map((element) {
+                            transaction.delete(element.reference);
+                            return Future( ()=>Null);
+                          }));
+                            transaction.delete(firestore.collection("ChatFriends").doc(userRep.user?.email).collection("Network").doc(document.id.toString()));
+                        });
+                      //  FirebaseFirestore.instance.runTransaction((transaction) async {
+                      //    transaction.delete(firestore.collection("ChatFriends").doc(userRep.user?.email).collection("Network").doc(document.id.toString()));
+                      //  });
+                      },
+                    ),
+                  ),
+                )],
+                  child: Container(
+                    child: FlatButton(
+                      child: Row(
+                        children: <Widget>[
+                          Material(
+                            child: snapshot.data[0] != null
+                                ? InkWell(
+                                    onTap: () async {
+                                      FocusScope.of(context).unfocus();
+                                      await Navigator.of(context)
+                                          .push(MaterialPageRoute<liftRes>(
+                                              builder: (BuildContext context) {
+                                                return ProfilePage(
+                                                  email: document.id.toString(),
+                                                  fromProfile: false,
+                                                );
+                                              },
+                                              fullscreenDialog: true));
+                                    },
+                                    child:
+                                    CachedNetworkImage(
+                                      placeholder: (context, url) => Container(
+                                        color: mainColor,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 1.0,
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                  secondColor),
+                                        ),
+                                        width: 50.0,
+                                        height: 50.0,
+                                        padding: EdgeInsets.all(15.0),
                                       ),
+                                      color: secondColor,
+                                      colorBlendMode: BlendMode.dstOver ,
+                                      imageUrl: snapshot.data[0],
                                       width: 50.0,
                                       height: 50.0,
-                                      padding: EdgeInsets.all(15.0),
+                                      fit: BoxFit.cover,
                                     ),
+                                  )
+                                : Icon(
+                                    Icons.account_circle,
+                                    size: 50.0,
                                     color: secondColor,
-                                    colorBlendMode: BlendMode.dstOver ,
-                                    imageUrl: snapshot.data[0],
-                                    width: 50.0,
-                                    height: 50.0,
-                                    fit: BoxFit.cover,
                                   ),
-                                )
-                              : Icon(
-                                  Icons.account_circle,
-                                  size: 50.0,
-                                  color: secondColor,
-                                ),
-                          borderRadius: BorderRadius.all(Radius.circular(25.0)),
-                          clipBehavior: Clip.hardEdge,
-                        ),
-                        Flexible(
-                          child: Container(
-                            child: Column(
-                              children: <Widget>[
-                                Container(
-                                  child: Text(
-                                    document.data()['firstName'] +
-                                        " " +
-                                        document.data()['lastName'],
-                                    style: TextStyle(color: primaryColor),
+                            borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                            clipBehavior: Clip.hardEdge,
+                          ),
+                          Flexible(
+                            child: Container(
+                              child: Column(
+                                children: <Widget>[
+                                  Container(
+                                    child: Text(
+                                      document.data()['firstName'] +
+                                          " " +
+                                          document.data()['lastName'],
+                                      style: TextStyle(color: primaryColor),
+                                    ),
+                                    alignment: Alignment.centerLeft,
+                                    margin:
+                                        EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 5.0),
                                   ),
-                                  alignment: Alignment.centerLeft,
-                                  margin:
-                                      EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 5.0),
-                                ),
-                                /* Container(
-                                  child: Text(
-                                    'About me: ${document.data()['aboutMe'] ??
-                                        'Not available'}',
-                                    style: TextStyle(color: primaryColor),
-                                  ),
-                                  alignment: Alignment.centerLeft,
-                                  margin: EdgeInsets.fromLTRB(
-                                      10.0, 0.0, 0.0, 0.0),
-                                )*/
-                              ],
+                                /*   Container(
+                                    child: Text(
+                                      'About me: ${document.data()['aboutMe'] ??
+                                          'Not available'}',
+                                      style: TextStyle(color: primaryColor),
+                                    ),
+                                    alignment: Alignment.centerLeft,
+                                    margin: EdgeInsets.fromLTRB(
+                                        10.0, 0.0, 0.0, 0.0),
+                                  )*/
+                                ],
+                              ),
+                              margin: EdgeInsets.only(left: 20.0),
                             ),
-                            margin: EdgeInsets.only(left: 20.0),
                           ),
-                        ),
-                        StreamBuilder<QuerySnapshot>(
-                    stream: firestore.collection("ChatFriends").doc(userRep.user?.email).collection("Network").doc(document.id.toString()).collection(document.id.toString()).snapshots(), // a previously-obtained Future<String> or null
-                builder: (BuildContext context, snapshot) {
-                      if(snapshot.hasData) {
-                        return snapshot.data.docs.length!=0? Badge(
-                          elevation: 0,
-                          shape: BadgeShape.circle,
-                          padding: EdgeInsets.all(7),
-                          badgeContent: Text(
-                            snapshot.data.docs.length.toString(),
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ):Container();
+                          StreamBuilder<QuerySnapshot>(
+                      stream: firestore.collection("ChatFriends").doc(userRep.user?.email).collection("Network").doc(document.id.toString()).collection(document.id.toString()).orderBy('timestamp', descending: true).snapshots(), // a previously-obtained Future<String> or null
+                  builder: (BuildContext context, snapshot) {
+                        if(snapshot.hasData) {
+                          return snapshot.data.docs.length!=0?
+                          Column(
+                            children: [
+                              Badge(
+                                elevation: 0,
+                                shape: BadgeShape.circle,
+                                padding: EdgeInsets.all(7),
+                                badgeContent: Text(
+                                  snapshot.data.docs.length.toString(),
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
+                              DateFormat('dd/MM').format(DateTime.fromMillisecondsSinceEpoch(int.parse(snapshot.data.docs[0]['timestamp']))).compareTo(DateFormat('dd/MM').format(DateTime.now())) == 0 ? Text( "Today "+DateFormat('kk:mm').format(DateTime.fromMillisecondsSinceEpoch(int.parse(snapshot.data.docs[0]['timestamp']))), style:TextStyle(fontSize: 12)):Text( DateFormat('dd/MM kk:mm').format(DateTime.fromMillisecondsSinceEpoch(int.parse(snapshot.data.docs[0]['timestamp']))), style:TextStyle(fontSize: 12))],
+                          ):Container();
+                        }
+                      else{
+                        return Container();
                       }
-                    else{
-                      return Container();
-                    }
-                }
-                      ),
-                      /* Stack(children:[Container(
-                            width: 30.0,
-                            height: 30.0,
-                            //padding: EdgeInsets.all(15.0),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: secondColor,
-                            ),
-
-                         // child: Badge(badgeContent: Text("2"),),
+                  }
                         ),
-                         Container(
-                             width: 20.0,
-                             height: 20.0,
-                           //  padding: EdgeInsets.all(5.0),
-                             child: Text("2")),])*/
-                      ],
-                    ),
-                    onPressed: () async {
-                      QuerySnapshot q2 = await FirebaseFirestore.instance
-                          .collection("ChatFriends").doc(userRep.user?.email).collection("Network").doc(document.id.toString()).collection(document.id.toString())
-                          .get();
+                        /* Stack(children:[Container(
+                              width: 30.0,
+                              height: 30.0,
+                              //padding: EdgeInsets.all(15.0),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: secondColor,
+                              ),
 
-                      FirebaseFirestore.instance.runTransaction((transaction) async {
-                        q2.docs.forEach((element) {
-                          transaction.delete(element.reference);
+                           // child: Badge(badgeContent: Text("2"),),
+                          ),
+                           Container(
+                               width: 20.0,
+                               height: 20.0,
+                             //  padding: EdgeInsets.all(5.0),
+                               child: Text("2")),])*/
+                        ],
+                      ),
+                      onPressed: () async {
+                        QuerySnapshot q2 = await FirebaseFirestore.instance
+                            .collection("ChatFriends").doc(userRep.user?.email).collection("Network").doc(document.id.toString()).collection(document.id.toString())
+                            .get();
+
+                        FirebaseFirestore.instance.runTransaction((transaction) async {
+                          q2.docs.forEach((element) {
+                            transaction.delete(element.reference);
+                          });
+                          try {
+                            transaction.update(
+                              FirebaseFirestore.instance.collection("ChatFriends")
+                                  .doc(userRep.user?.email)
+                                  .collection("Network")
+                                  .doc(document.id.toString()),
+                              {
+                                'read': true
+                              },
+                            );
+                          }catch(e){}
+
                         });
-                      });
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => ChatTalkPage(
-                                    peerId: document.id,
-                                    peerAvatar: snapshot.data[0],
-                                    userId: currentUserId,
-                                  )));
-                    },
-                    color: greyColor2,
-                    padding: EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 10.0),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0)),
+                        FocusScope.of(context).unfocus();
+                        try{
+                          slidableController.activeState.close();}
+                          catch(e){}
+
+
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ChatTalkPage(
+                                      peerId: document.id,
+                                      peerAvatar: snapshot.data[0],
+                                      userId: currentUserId,
+                                    )));
+                      },
+                      color: greyColor2,
+                      padding: EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 10.0),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0)),
+                    ),
+                    margin: EdgeInsets.only(bottom: 10.0, left: 5.0, right: 5.0),
                   ),
-                  margin: EdgeInsets.only(bottom: 10.0, left: 5.0, right: 5.0),
                 );
               }
             } else {

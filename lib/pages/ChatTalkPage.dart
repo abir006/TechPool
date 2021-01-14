@@ -586,7 +586,7 @@ class ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  Future<bool> onBackPress() {
+  Future<bool> onBackPress() async {
     if (isShowSticker) {
       setState(() {
         isShowSticker = false;
@@ -596,6 +596,28 @@ class ChatScreenState extends State<ChatScreen> {
           .collection('Profiles')
           .doc(id)
           .update({'chattingWith': null});
+
+      QuerySnapshot q2 = await FirebaseFirestore.instance
+          .collection("ChatFriends").doc(id).collection("Network").doc(peerId).collection(peerId)
+          .get();
+
+      FirebaseFirestore.instance.runTransaction((transaction) async {
+        q2.docs.forEach((element) {
+          transaction.delete(element.reference);
+        });
+        try {
+          transaction.update(
+            FirebaseFirestore.instance.collection("ChatFriends")
+                .doc(id)
+                .collection("Network")
+                .doc(peerId),
+            {
+              'read': true
+            },
+          );
+        }catch(e){}
+
+      });
       Navigator.pop(context);
     }
 

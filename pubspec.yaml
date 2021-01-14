@@ -66,6 +66,7 @@ dependencies:
   fluttertoast: ^7.0.2
   flappy_search_bar: ^1.7.2
 
+  flutter_slidable: ^0.5.7
   badges: ^1.1.6
   location: ^3.0.0
 

@@ -12,7 +12,6 @@ import 'package:rxdart/rxdart.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'NotificationInfo.dart';
-
 class NotificationsPage extends StatefulWidget {
   @override
   _NotificationsPageState createState() => _NotificationsPageState();

@@ -63,9 +63,9 @@ Container calendarListTile(dynamic event,Widget leadingWidget,BuildContext conte
   return Container(
     decoration: BoxDecoration(
       color: Colors.white,
-      boxShadow: [BoxShadow(color: Colors.black,blurRadius: 2.0,
-          spreadRadius: 0.0,offset: Offset(2.0, 2.0))],
-      border: Border.all(color: eventType == CalendarEventType.PendingLift ? Colors.orange : Colors.green, width: 0.8),
+      boxShadow: [BoxShadow(color: greyColor,blurRadius: 1.0,
+          spreadRadius: 0.0,offset: Offset(1.0, 1.0))],
+      border: Border.all(color: eventType == CalendarEventType.PendingLift ? Colors.orange : Colors.green, width: 0.65),
       borderRadius: BorderRadius.circular(12.0),
     ),
     margin:

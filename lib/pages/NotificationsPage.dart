@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:tech_pool/TechDrawer.dart';
 import 'package:tech_pool/Utils.dart';
+import 'package:tech_pool/pages/HomePage.dart';
 import '../appValidator.dart';
 import 'ChatPage.dart';
 import 'ProfilePage.dart';
@@ -279,7 +280,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     ],
                   ),
                   drawer: techDrawer(userRep, context, DrawerSections.notifications),
-                  body: Container(
+                  body: WillPopScope(
+                      onWillPop: () => Navigator.pushReplacement(
+                          context, MaterialPageRoute(builder: (context) => HomePage())),
+                      child:Container(
                       decoration: pageContainerDecoration,
                       margin: pageContainerMargin,
                       //padding: EdgeInsets.only(bottom: 6.0,top: 7.0, left: defaultSpacewidth, right: defaultSpacewidth*4),
@@ -301,7 +305,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                         ],
                       ),
 
-                  ));
+                  )));
               }
               return _buildPage(context, userRep);
             } else if (snapshot.hasError) {
@@ -368,7 +372,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
           ],
         ),
         drawer: techDrawer(userRep, context, DrawerSections.notifications),
-      body:Container(
+      body:WillPopScope(
+    onWillPop: () => Navigator.pushReplacement(
+    context, MaterialPageRoute(builder: (context) => HomePage())),
+    child:Container(
           padding: const EdgeInsets.only(bottom: 6.0, top: 7.0),
           decoration: pageContainerDecoration,
           margin: pageContainerMargin,
@@ -533,7 +540,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 }
               },
             ))],
-          )),
+          ))),
     );
   }
 

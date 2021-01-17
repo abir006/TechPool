@@ -78,7 +78,7 @@ class _LocationTextBoxes2State extends State<LocationTextBoxes2> {
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              Container(width: 50,
+              Container(width: widget.leadingText.length<6 ? 50 : 64,
                 child: Text(
                       widget.leadingText + ":",
                       style:

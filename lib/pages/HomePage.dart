@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:provider/provider.dart';
@@ -226,10 +227,12 @@ class _HomePageState extends State<HomePage> {
                 ],
                 ),
                 drawer: techDrawer(userRep, context, DrawerSections.home),
-                body: Container(
+                body: WillPopScope(
+                onWillPop: _onBackPressed,
+                child:Container(
                 decoration: pageContainerDecoration,
                 margin: pageContainerMargin,
-                child: Center(child: CircularProgressIndicator())));
+                child: Center(child: CircularProgressIndicator()))));
                 }
               });
     });
@@ -371,7 +374,9 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
         drawer: techDrawer(userRep, context, DrawerSections.home),
-        body: Container(
+        body: WillPopScope(
+    onWillPop: _onBackPressed,
+    child:Container(
             decoration: pageContainerDecoration,
             margin: pageContainerMargin,
             child: Column(children: [
@@ -399,7 +404,7 @@ class _HomePageState extends State<HomePage> {
                     _dailyEvents.map((event) => transformEvent(event,context)).toList())
               ]),
                   )),
-            ])));
+            ]))));
   }
 
   @override
@@ -408,5 +413,26 @@ class _HomePageState extends State<HomePage> {
     appValid.listener.cancel();
     appValid.versionListener.cancel();
     super.dispose();
+  }
+
+  Future<bool> _onBackPressed() {
+    return showDialog(
+      context: context,
+      builder: (context) =>  AlertDialog(
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(20.0))),
+        title:  Text('Are you sure?'),
+        content:  Text('Do you want to exit an App'),
+        actions: <Widget>[
+      TextButton(onPressed: () => Navigator.of(context).pop(false),
+            child: Text("NO"),
+          ),
+          SizedBox(height: 16),
+          TextButton(onPressed: () => SystemChannels.platform.invokeMethod<void>('SystemNavigator.pop'), child: Text("YES"),
+          ),
+        ],
+      ),
+    ) ??
+        false;
   }
 }

@@ -131,7 +131,8 @@ class _MyAppState extends State<MyApp> {
                                       .child(userRep.user?.email)
                                       .getDownloadURL())
                                   .then((imgUrl) => userRep.profilePicture =
-                                      Image.network(imgUrl)).then((_) async {
+                                      Image.network(imgUrl))
+                                  .then((_) async {
                                  FirebaseFirestore.instance
                                     .collection('Profiles')
                                     .doc(userRep.user.email)

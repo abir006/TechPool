@@ -44,7 +44,12 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
   String imageUrl ="";
   QuerySnapshot q;
   QuerySnapshot q1;
+  bool addDesired = true;
 
+  @override
+  void initState() {
+    addDesired = true;
+  }
   Future<List<String>> initNames(String name) {
     List<String> ret = [];
     return FirebaseStorage.instance
@@ -244,18 +249,43 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
     double defaultSpacewidth = MediaQuery.of(context).size.height * 0.016;
 
 ///legacy edit lift button
-    final searchLift = Container(
+    final searchLift =  Consumer<UserRepository>(
+        builder: (context, userRep, _) =>Container(
       decoration: BoxDecoration(color: Colors.black,borderRadius: BorderRadius.only(topLeft:Radius.circular(20.0),topRight:Radius.circular(20.0) ),),
         child: FlatButton.icon(
             color: Colors.black,
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(18),
                 side: BorderSide(color: Colors.white)),
-            icon: Icon(Icons.search, color: Colors.white),
-            label: Text("Edit Search",
+            icon: Icon(Icons.fact_check_outlined, color: Colors.white),
+            label: Text("Add Desire",
                 style: TextStyle(color: Colors.white, fontSize: 17)),
             onPressed: () async {
-            }));
+              try {
+                FirebaseFirestore.instance.collection('Desired').add({
+                  'backSeatNotFull': (widget.backSeat),
+                  'bigTrunk': widget.bigTrunk,
+                  'destAddress': widget.destAddress.addressLine,
+                  'destCity': widget.destAddress.locality,
+                  'destPoint': GeoPoint(widget.destAddress.coordinates.latitude,
+                      widget.destAddress.coordinates.longitude),
+                  'liftTimeEnd': widget.toTime,
+                  'liftTimeStart': widget.fromTime,
+                  'maxDistance': widget.distances[widget.indexDist],
+                  'passengerId': userRep.user.email,
+                  'destCity': widget.destAddress.locality,
+                  'startAddress': widget.startAddress.addressLine,
+                  'startPoint': GeoPoint(
+                      widget.startAddress.coordinates.latitude,
+                      widget.startAddress.coordinates.longitude),
+                });
+                setState(() {
+                  addDesired=false;
+                });
+              }catch(e){
+
+              }
+            })));
 
     final sortAndSearch = Container(
         decoration: BoxDecoration(color: Colors.black,borderRadius: BorderRadius.only(topLeft:Radius.circular(20.0),topRight:Radius.circular(20.0) )),
@@ -299,7 +329,7 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
                 )),
           ),
           Spacer(),
-          //searchLift,
+          addDesired ? searchLift:Container(),
           SizedBox(width: defaultSpacewidth*0.2,)
         ])));
 

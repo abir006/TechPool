@@ -268,6 +268,14 @@ class _ProfilePageState extends State<ProfilePage> {
                                             .child(widget.email)
                                             .putFile(File(pickedFile.path))
                                             .then((snapshot) => snapshot.ref.getDownloadURL());
+          await FirebaseFirestore.instance.runTransaction((transaction) async {
+            transaction.update(
+                FirebaseFirestore.instance.collection("Profiles")
+                    .doc(userRep.user.email), {
+              'pic': ret,
+            });
+          });
+
                                         setState(() {
                                           userRep.profilePicture =  Image.file((File(pickedFile.path)));
                                         });

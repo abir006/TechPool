@@ -490,12 +490,6 @@ class ChatPageState extends State<ChatPage> {
 
   Widget buildItem(BuildContext context, DocumentSnapshot document) {
     return Consumer<UserRepository>(builder: (context, userRep, _) {
-      return FutureBuilder<List<String>>(
-          future: initNames(document.id.toString()),
-          // a previously-obtained Future<String> or null
-          builder:
-              (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
-            if (snapshot.hasData) {
               if (document.id.toString() == userRep.user.email) {
                 return Container();
               } else {
@@ -548,7 +542,7 @@ class ChatPageState extends State<ChatPage> {
                       child: Row(
                         children: <Widget>[
                           Material(
-                            child: snapshot.data[0] != null
+                            child: document.data()['pic'] != null
                                 ? InkWell(
                                     onTap: () async {
                                       FocusScope.of(context).unfocus();
@@ -578,7 +572,7 @@ class ChatPageState extends State<ChatPage> {
                                       ),
                                       color: secondColor,
                                       colorBlendMode: BlendMode.dstOver ,
-                                      imageUrl: snapshot.data[0],
+                                      imageUrl:   document.data()['pic'],
                                       width: 50.0,
                                       height: 50.0,
                                       fit: BoxFit.cover,
@@ -697,7 +691,7 @@ class ChatPageState extends State<ChatPage> {
                             MaterialPageRoute(
                                 builder: (context) => ChatTalkPage(
                                       peerId: document.id,
-                                      peerAvatar: snapshot.data[0],
+                                      peerAvatar: document.data()['pic'],
                                       userId: currentUserId,
                                     )));
                       },
@@ -710,16 +704,6 @@ class ChatPageState extends State<ChatPage> {
                   ),
                 );
               }
-            } else {
-              if (snapshot.hasError) {
-                return Container();
-              } else {
-                return Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-            }
-          });
     });
   }
 

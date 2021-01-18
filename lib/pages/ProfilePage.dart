@@ -439,8 +439,14 @@ class _ProfilePageState extends State<ProfilePage> {
         ],
       ),
       body:  WillPopScope(
-        onWillPop: () => Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => HomePage())),
+          onWillPop: () async {
+            if(widget.fromProfile) {
+              return Navigator.pushReplacement(
+                  context, MaterialPageRoute(builder: (context) => HomePage()) ); } else {
+              Navigator.of(context).pop();
+              return await true;
+            }
+          },
         child:Consumer<UserRepository>(
           builder: (context, userRep, _) =>
             GestureDetector(

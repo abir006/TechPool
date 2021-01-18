@@ -58,14 +58,24 @@ class ChatPageState extends State<ChatPage> {
     });
   }
 
+  void handleSlideIsOpenChanged(bool isOpen) {
+    //if(isOpen==false) {
+      setState(() {
+        slidableController.activeState.open();
+      });
+
+  //  }
+  }
+
   @override
   void initState() {
     super.initState();
     slidableController = SlidableController(
       onSlideAnimationChanged: handleSlideAnimationChanged,
+      onSlideIsOpenChanged: handleSlideIsOpenChanged,
     );
     _searchText = TextEditingController();
-    registerNotification();
+   // registerNotification();
     //configLocalNotification();
     appValid = appValidator();
     appValid.checkConnection(context);
@@ -75,7 +85,7 @@ class ChatPageState extends State<ChatPage> {
   void registerNotification() {
     firebaseMessaging.requestNotificationPermissions();
 
-    firebaseMessaging.configure(onMessage: (Map<String, dynamic> message) {
+ /*   firebaseMessaging.configure(onMessage: (Map<String, dynamic> message) {
       print('onMessage: $message');
       Platform.isAndroid
           ? showNotification(message['notification'])
@@ -97,7 +107,7 @@ class ChatPageState extends State<ChatPage> {
           .update({'pushToken': token});
     }).catchError((err) {
       Fluttertoast.showToast(msg: err.message.toString());
-    });
+    });*/
   }
 
   void configLocalNotification() {
@@ -498,9 +508,9 @@ class ChatPageState extends State<ChatPage> {
                   controller: slidableController,
                   actionPane: SlidableScrollActionPane(),
                   actionExtentRatio: 0.25,
+                  closeOnScroll: false,
                   actions: <Widget>[
-                SlideAction(
-                  child: Container(
+             Container(
                     padding: EdgeInsets.fromLTRB(0,1, 0, 12,),
                     child: FlatButton(
                       shape: RoundedRectangleBorder(
@@ -530,13 +540,16 @@ class ChatPageState extends State<ChatPage> {
                           }));
                             transaction.delete(firestore.collection("ChatFriends").doc(userRep.user?.email).collection("Network").doc(document.id.toString()));
                         });
+                        FocusScope.of(context).requestFocus(new FocusNode());
+                        try{
+                          slidableController.activeState.close();}
+                        catch(e){}},
                       //  FirebaseFirestore.instance.runTransaction((transaction) async {
                       //    transaction.delete(firestore.collection("ChatFriends").doc(userRep.user?.email).collection("Network").doc(document.id.toString()));
                       //  });
-                      },
                     ),
                   ),
-                )],
+                ],
                   child: Container(
                     child: FlatButton(
                       child: Row(
@@ -595,30 +608,55 @@ class ChatPageState extends State<ChatPage> {
                                       document.data()['firstName'] +
                                           " " +
                                           document.data()['lastName'],
-                                      style: TextStyle(color: primaryColor),
+                                      style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),
                                     ),
                                     alignment: Alignment.centerLeft,
                                     margin:
                                         EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 5.0),
                                   ),
-                                /*   Container(
-                                    child: Text(
-                                      'About me: ${document.data()['aboutMe'] ??
-                                          'Not available'}',
-                                      style: TextStyle(color: primaryColor),
-                                    ),
-                                    alignment: Alignment.centerLeft,
-                                    margin: EdgeInsets.fromLTRB(
-                                        10.0, 0.0, 0.0, 0.0),
-                                  )*/
-                                ],
-                              ),
-                              margin: EdgeInsets.only(left: 20.0),
-                            ),
-                          ),
-                          StreamBuilder<QuerySnapshot>(
-                      stream: firestore.collection("ChatFriends").doc(userRep.user?.email).collection("Network").doc(document.id.toString()).collection(document.id.toString()).orderBy('timestamp', descending: true).snapshots(), // a previously-obtained Future<String> or null
-                  builder: (BuildContext context, snapshot) {
+                                  StreamBuilder<QuerySnapshot>(
+    stream: firestore.collection("ChatFriends").doc(userRep.user?.email).collection("Network").snapshots(), // a previously-obtained Future<String> or null
+    builder: (BuildContext context, snapshot) {
+    if(snapshot.hasData ) {
+      int index = -1;
+      for (int i = 0; i < snapshot.data.docs.length; i++) {
+        if (snapshot.data.docs[i].id == document.id) {
+          index = i;
+        }
+      }
+      if (index > -1) {
+        var addi = "";
+        if (snapshot.data.docs[index]['idFrom'] == userRep.user.email) {
+          addi = "me: ";
+        }
+        return
+          Container(
+            child: snapshot.data.docs[index]['type'] == 0 ? Text(addi +
+                '${ snapshot.data.docs[index]['content']}', style: TextStyle(
+                color: Colors.black54, fontSize: 12),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,) : Text(addi + 'image...',
+              style: TextStyle(color: Colors.black54, fontSize: 12),),
+            alignment: Alignment.centerLeft,
+            margin: EdgeInsets.fromLTRB(
+                10.0, 0.0, 0.0, 0.0),
+          );
+      }
+      else {
+        return Container();
+      }
+    }else {
+      return Container();
+    }
+    }),
+                                  ],
+                                  ),
+                                  margin: EdgeInsets.only(left: 20.0),
+                                  ),
+                                  ),
+                                  StreamBuilder<QuerySnapshot>(
+                                  stream: firestore.collection("ChatFriends").doc(userRep.user?.email).collection("Network").doc(document.id.toString()).collection(document.id.toString()).orderBy('timestamp', descending: true).snapshots(), // a previously-obtained Future<String> or null
+                                  builder: (BuildContext context, snapshot) {
                         if(snapshot.hasData) {
                           return snapshot.data.docs.length!=0?
                           Column(
@@ -632,7 +670,8 @@ class ChatPageState extends State<ChatPage> {
                                   style: TextStyle(color: Colors.white),
                                 ),
                               ),
-                              DateFormat('dd/MM').format(DateTime.fromMillisecondsSinceEpoch(int.parse(snapshot.data.docs[0]['timestamp']))).compareTo(DateFormat('dd/MM').format(DateTime.now())) == 0 ? Text( "Today "+DateFormat('kk:mm').format(DateTime.fromMillisecondsSinceEpoch(int.parse(snapshot.data.docs[0]['timestamp']))), style:TextStyle(fontSize: 12)):Text( DateFormat('dd/MM kk:mm').format(DateTime.fromMillisecondsSinceEpoch(int.parse(snapshot.data.docs[0]['timestamp']))), style:TextStyle(fontSize: 12))],
+                             Text( DateFormat(' dd/MM kk:mm').format(DateTime.fromMillisecondsSinceEpoch(int.parse(snapshot.data.docs[0]['timestamp']))), style:TextStyle(fontSize: 12))],
+                             // DateFormat('dd/MM').format(DateTime.fromMillisecondsSinceEpoch(int.parse(snapshot.data.docs[0]['timestamp']))).compareTo(DateFormat('dd/MM').format(DateTime.now())) == 0 ? Text( "Today "+DateFormat('kk:mm').format(DateTime.fromMillisecondsSinceEpoch(int.parse(snapshot.data.docs[0]['timestamp']))), style:TextStyle(fontSize: 12)):Text( DateFormat('dd/MM kk:mm').format(DateTime.fromMillisecondsSinceEpoch(int.parse(snapshot.data.docs[0]['timestamp']))), style:TextStyle(fontSize: 12))],
                           ):Container();
                         }
                       else{

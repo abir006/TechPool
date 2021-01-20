@@ -10,6 +10,7 @@ import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:configurable_expansion_tile/configurable_expansion_tile.dart';
+import 'dart:math';
 
 class SetDrivePage extends StatefulWidget {
   DateTime currentDate;
@@ -20,6 +21,7 @@ class SetDrivePage extends StatefulWidget {
 }
 
 class _SetDrivePageState extends State<SetDrivePage> {
+  //FirebaseFirestore firestore = FirebaseFirestore.instance;
   final _formKey2 = GlobalKey<FormState>();
   final _key2 = GlobalKey<ScaffoldState>();
   double _fontTextsSize = 17;
@@ -57,6 +59,84 @@ class _SetDrivePageState extends State<SetDrivePage> {
     _priceController = TextEditingController(text: "");
     _noteController = TextEditingController(text: "");
   }
+
+
+  //After inserting the drive to db, search for fit desired lifts and notify the relevant hitchhikers
+  Future<bool> _checkForFitDesiredAndSendNotifications(MyLift relDrive) async {
+    Coordinates startPointCoords = startAddress.coordinates;
+    Coordinates destPointCoords = destAddress.coordinates;
+    try{
+      QuerySnapshot relevantDesired = await widget.db.collection("Desired")
+          .where('liftTimeStart', isLessThanOrEqualTo: Timestamp.fromDate(relDrive.time))
+          .get();
+          //.where('passengerId', isNotEqualTo: relDrive.driver)
+          //.where('liftTimeEnd', isGreaterThanOrEqualTo: Timestamp.fromDate(relDrive.time))
+          //.where('backSeatNotFull', isEqualTo: relDrive.backSeat)
+          //.where('bigTrunk', isEqualTo: relDrive.bigTrunk)
+      relevantDesired.docs.forEach((curDesired) async {
+        //DateTime liftTimeEnd2 = DateTime.fromMicrosecondsSinceEpoch(curDesired["liftTimeEnd"] * 1000);
+        DateTime liftTimeEnd = DateTime.fromMicrosecondsSinceEpoch(curDesired["liftTimeEnd"].microsecondsSinceEpoch);
+        String curDesiredPassengerId = curDesired["passengerId"];
+        String driver = relDrive.driver;
+        DateTime driveTime = relDrive.time;
+        if (curDesiredPassengerId != driver && liftTimeEnd.isAfter(driveTime)) {
+          int maxDistance = curDesired["maxDistance"];
+          bool curDesiredBigTrunk = curDesired["backSeatNotFull"];
+          bool curDesiredBackSeatNotFull = curDesired["bigTrunk"];
+          bool relDriveBackSeatNotFull = relDrive.backSeat;
+          //back seat not full = true means: back seat is not full
+          //back seat not full = false means: back seat is full!
+          if ( (relDrive.bigTrunk || (!relDrive.bigTrunk && !curDesiredBigTrunk))
+              && relDriveBackSeatNotFull || (!relDrive.backSeat && !curDesiredBackSeatNotFull)) {
+            double distToStart = clacDis(
+                curDesired["startPoint"], startPointCoords);
+            double distToEnd = clacDis(
+                curDesired["destPoint"], destPointCoords);
+            relDrive.stops.forEach((key) {
+              (key as Map).forEach((key, value) {
+                if (key == "stopPoint") {
+                  GeoPoint pointStop = value as GeoPoint;
+                  distToStart =
+                      min(distToStart, clacDis(pointStop, startPointCoords));
+                  distToEnd =
+                      min(distToEnd, clacDis(pointStop, destPointCoords));
+                }
+              });
+            });
+            int curDist = (distToStart + distToEnd).toInt();
+            if (curDist <= maxDistance) {
+              String curPassengerID = curDesired["passengerId"];
+              await widget.db.collection("Notifications")
+                  .doc(curPassengerID)
+                  .collection("UserNotifications")
+                  .add(
+                  {
+                    //Insert a desired notification to this person
+                    "destCity": relDrive.destCity,
+                    "startCity": relDrive.startCity,
+                    "startAddress": curDesired["startAddress"],
+                    "destAddress": curDesired["startAddress"],
+                    "distance": curDist,
+                    "driveId": relDrive.liftId,
+                    "driverId": relDrive.driver,
+                    "liftTime": relDrive.time,
+                    "notificationTime": DateTime.now(),
+                    "price": relDrive.price,
+                    "type": "DesiredLift",
+                    "read": "false",
+                  }
+              );
+            }
+          }
+        }
+      });
+    return true;
+    } catch(e){
+      return false;
+    }
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -573,8 +653,10 @@ class _SetDrivePageState extends State<SetDrivePage> {
                     //     .doc(driveName)
                     //     .set({
 
-                    CollectionReference drives = widget.db.collection('Drives');
-                    drives.add({
+                    // CollectionReference drives = widget.db.collection('Drives');
+                    // drives.add({
+
+                    DocumentReference newDriveRef = await widget.db.collection('Drives').add({
                       'BackSeatNotFull': !(_fullBackSeat),
                       'BigTrunk': _bigTrunk,
                       'Note': _noteController.text,
@@ -600,6 +682,22 @@ class _SetDrivePageState extends State<SetDrivePage> {
                       'Driver': userRep.user.email,
                       //'Driver': "testing@technion.co.il",
                     });
+
+
+
+                    //((element) async {
+                    DocumentSnapshot currentDriveDoc = await widget.db.collection('Drives').doc(newDriveRef.id).get();
+                    MyLift docLift = new MyLift(
+                        "driver", "destAddress", "stopAddress", 5);
+                    currentDriveDoc.data().forEach((key, value) {
+                      if (value != null) {
+                        docLift.setProperty(key, value);
+                      }
+                    });
+                    docLift.liftId = currentDriveDoc.id;
+                    // });
+
+                    bool res = await _checkForFitDesiredAndSendNotifications(docLift);
 
                     FocusManager.instance.primaryFocus.unfocus();
                     Navigator.of(context).pop();

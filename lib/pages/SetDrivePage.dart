@@ -128,6 +128,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
                     "price": relDrive.price,
                     "type": "DesiredLift",
                     "read": "false",
+                    "desiredId": curDesired.id,
                   }
               );
             }

@@ -163,7 +163,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     }
                   case "DesiredLift" :
                     {
-                      notification = LiftNotification(
+                      String desiredId = elementData["desiredId"];
+                      notification = LiftNotification.desired(
                           notificationId,
                           driveId,
                           driverId,
@@ -175,7 +176,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
                           notificationTime,
                           type,
                           startAddress,
-                          destAddress
+                          destAddress,
+                          desiredId,
                       );
                       break;
                     }

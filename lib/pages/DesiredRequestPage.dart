@@ -17,6 +17,8 @@ class DesiredRequestPage extends StatefulWidget {
   MyLift lift = new MyLift("driver", "destAddress", "stopAddress", 5);
   //liftRes resLift =new liftRes();
   final LiftNotification notification;
+  //final String desiredId;
+
   DesiredRequestPage({Key key, @required this.lift,@required this.notification}) : super(key: key);
 
   @override
@@ -68,7 +70,8 @@ class _DesiredRequestPageState extends State<DesiredRequestPage> {
                 "passengerNote": myNoteController.text,
                 "bigBag":bigBag,
                 "type": "RequestedLift",
-                "read": "false"
+                "read": "false",
+                "desiredId": widget.notification.desiredId,
               }
           );
           transaction.set(firestore.collection("Notifications").doc(userRep.user.email).collection("Pending").doc(),

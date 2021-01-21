@@ -78,13 +78,16 @@ class LiftNotification {
   String passengerId;
   String passengerNote;
   bool bigBag;
-
+  String desiredId;
   LiftNotification(this.notificationId, this.driveId, this.driverId, this.startCity, this.destCity,
   this.price, this.distance, this.liftTime, this.notificationTime,
   this.type, this.startAddress, this.destAddress, [this.passengerId, this.passengerNote, this.bigBag]);//optional
   LiftNotification.requested(this.notificationId, this.driveId, this.driverId, this.startCity, this.destCity,
       this.price, this.distance, this.liftTime, this.notificationTime,
       this.type, this.startAddress, this.destAddress, this.passengerId, this.passengerNote, this.bigBag);
+  LiftNotification.desired(this.notificationId, this.driveId, this.driverId, this.startCity, this.destCity,
+      this.price, this.distance, this.liftTime, this.notificationTime,
+      this.type, this.startAddress, this.destAddress, this.desiredId);
 }
 
 class MyLift{

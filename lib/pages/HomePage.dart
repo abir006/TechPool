@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -7,6 +8,8 @@ import 'package:provider/provider.dart';
 import 'package:tech_pool/Utils.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:tech_pool/appValidator.dart';
+import 'package:tech_pool/main.dart';
+import 'package:tech_pool/pages/CalendarEventInfo.dart';
 import 'package:tech_pool/pages/ChatPage.dart';
 import 'package:tech_pool/pages/NotificationsPage.dart';
 import 'package:tech_pool/pages/SearchLiftPage.dart';
@@ -21,6 +24,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final FirebaseMessaging firebaseMessaging = FirebaseMessaging();
   FirebaseFirestore firestore = FirebaseFirestore.instance;
   DateTime selectedDay = DateTime.now();
   CalendarController _calendarController;
@@ -32,12 +36,75 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    firebaseMessaging.configure(
+      onLaunch: (Map<String, dynamic> message) async {
+        if(lastNotifUsed != message["data"]["google.message_id"]) {
+          lastNotifUsed = message["data"]["google.message_id"];
+          if (message["data"]["type"] == "Reminder") {
+            await hourBeforeNotificationPressed(message);
+          }
+        }
+        return;
+      },
+      onResume: (Map<String, dynamic> message) async {
+        if(lastNotifUsed != message["data"]["google.message_id"]) {
+          lastNotifUsed = message["data"]["google.message_id"];
+          if (message["data"]["type"] == "Reminder") {
+            await hourBeforeNotificationPressed(message);
+          }
+        }
+        return;
+      },
+    );
     _calendarController = CalendarController();
     _events = {};
     _dailyEvents = [];
     appValid = appValidator();
     appValid.checkConnection(context);
     appValid.checkVersion(context);
+  }
+
+  Future hourBeforeNotificationPressed(Map<String, dynamic> message) async {
+      try {
+      var type;
+      MyLift docLift = new MyLift(
+          "driver", "destAddress", "stopAddress", 5);
+      var tempLift = (await firestore.collection("Drives").doc(
+          message["data"]["driveId"]).get()).data();
+      tempLift.forEach((key, value) {
+        if (value != null) {
+          docLift.setProperty(key, value);
+        }
+      });
+      docLift.liftId = message["data"]["driveId"];
+      if (message["data"]["pagetype"] == "Driver") {
+        type = CalendarEventType.Drive;
+      } else {
+        print(Provider
+            .of<UserRepository>(context, listen: false)
+            .user
+            .email);
+        docLift.bigBag = tempLift["PassengersInfo"][Provider
+            .of<UserRepository>(context, listen: false)
+            .user
+            .email]["bigBag"];
+        docLift.dist = 0;
+        type = CalendarEventType.Lift;
+      }
+      docLift.passengersInfo = Map<String, Map<String, dynamic>>.from(
+          tempLift["PassengersInfo"] ?? {});
+      docLift.payments =
+          (await firestore.collection("Profiles")
+              .doc(docLift.driver)
+              .get())
+              .data()["allowedPayments"].join(", ");
+      await Navigator.of(context).push(new MaterialPageRoute<Null>(
+          builder: (BuildContext context) {
+            return CalendarEventInfo(lift: docLift, type: type);
+          },
+          fullscreenDialog: true
+      ));
+    }catch(_){}
   }
 
   void _onDaySelected(DateTime day, List events, List holidays) {

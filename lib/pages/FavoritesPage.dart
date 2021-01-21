@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tech_pool/TechDrawer.dart';
 import 'package:tech_pool/Utils.dart';
-import 'package:tech_pool/pages/HomePage.dart';
 import 'package:tech_pool/pages/LocationSearch.dart';
 import 'package:tech_pool/pages/NotificationsPage.dart';
 
@@ -265,17 +264,61 @@ class _FavoritesPageState extends State<FavoritesPage> {
                   ),
                   drawer: techDrawer(
                       userRep, context, DrawerSections.favorites),
-                  body: WillPopScope(
-                    onWillPop: () => Navigator.pushReplacement(
-                        context, MaterialPageRoute(builder: (context) => HomePage())),
-                    child: Container(
-                      decoration: pageContainerDecoration,
-                      margin: pageContainerMargin,
-                      child: ListView(children: [
-                        ListTile(onTap: () async {
-                          if(_homeMenuKey.currentState != null){
-                            _homeMenuKey.currentState.showButtonMenu();
-                          }else{
+                  body: Container(
+                    decoration: pageContainerDecoration,
+                    margin: pageContainerMargin,
+                    child: ListView(children: [
+                      ListTile(onTap: () async {
+                        if(_homeMenuKey.currentState != null){
+                          _homeMenuKey.currentState.showButtonMenu();
+                        }else{
+                          var returnResult = await Navigator.of(context)
+                              .push(MaterialPageRoute<LocationsResult>(
+                              builder: (BuildContext context) {
+                                return LocationSearch(
+                                  showAddStops: false, fromFavorites: true,);
+                              },
+                              fullscreenDialog: true));
+                          if (returnResult != null) {
+                            await firestore.collection("Favorites").doc(userRep.user.email).set({"Home" : {"Address" : returnResult.fromAddress.addressLine,"Point" : GeoPoint(returnResult.fromAddress.coordinates.latitude,returnResult.fromAddress.coordinates.longitude)}},SetOptions(merge: true));
+                          }
+                        }
+                      },title: Text("Home"),
+                        subtitle: Text((!snapshotMap.containsKey("Home") ? "Click to set home address" : snapshotMap["Home"]["Address"])),
+                        leading: Icon(Icons.home, size: 30,
+                          color: secondColor,),
+                        trailing: snapshotMap.containsKey("Home") ? PopupMenuButton(key: _homeMenuKey,icon: Icon(Icons.more_vert),
+                            itemBuilder: (BuildContext context) => [PopupMenuItem(value: "Edit location",child: Row(children: [Icon(Icons.edit_location),Text("Edit address")]),),PopupMenuItem(value: "Delete",child: Row(children: [Icon(Icons.delete),Text("Delete")]))],
+                            onSelected: (value2) async {
+                              if(value2 == "Delete"){
+                                snapshotMap.remove("Home");
+                                await firestore.collection("Favorites").doc(userRep.user.email).set(snapshotMap);
+                              } else if (value2 == "Edit location") {
+                                var returnResult = await Navigator.of(context)
+                                    .push(MaterialPageRoute<LocationsResult>(
+                                    builder: (BuildContext context) {
+                                      return LocationSearch(
+                                        showAddStops: false, fromFavorites: true,);
+                                    },
+                                    fullscreenDialog: true));
+                                if (returnResult != null) {
+                                  await firestore.collection("Favorites").doc(
+                                      userRep.user.email).update({
+                                    "Home": {
+                                      "Address": returnResult.fromAddress
+                                          .addressLine,
+                                      "Point": GeoPoint(
+                                          returnResult.fromAddress.coordinates
+                                              .latitude,
+                                          returnResult.fromAddress.coordinates
+                                              .longitude)
+                                    }
+                                  });
+                                }
+                              }
+                            }
+                        ) : IconButton(icon: Icon(Icons.edit),
+                          onPressed: () async {
                             var returnResult = await Navigator.of(context)
                                 .push(MaterialPageRoute<LocationsResult>(
                                 builder: (BuildContext context) {
@@ -286,61 +329,61 @@ class _FavoritesPageState extends State<FavoritesPage> {
                             if (returnResult != null) {
                               await firestore.collection("Favorites").doc(userRep.user.email).set({"Home" : {"Address" : returnResult.fromAddress.addressLine,"Point" : GeoPoint(returnResult.fromAddress.coordinates.latitude,returnResult.fromAddress.coordinates.longitude)}},SetOptions(merge: true));
                             }
+                          },
+
+                        ),),
+                      Divider(thickness: 1,indent: 10,endIndent: 10,color: mainColor,),
+                      ListTile(onTap: () async {
+                        if(_workMenuKey.currentState != null){
+                          _workMenuKey.currentState.showButtonMenu();
+                        }else{
+                          var returnResult = await Navigator.of(context)
+                              .push(MaterialPageRoute<LocationsResult>(
+                              builder: (BuildContext context) {
+                                return LocationSearch(
+                                  showAddStops: false, fromFavorites: true,);
+                              },
+                              fullscreenDialog: true));
+                          if (returnResult != null) {
+                            await firestore.collection("Favorites").doc(userRep.user.email).set({"Work" : {"Address" : returnResult.fromAddress.addressLine,"Point" : GeoPoint(returnResult.fromAddress.coordinates.latitude,returnResult.fromAddress.coordinates.longitude)}},SetOptions(merge: true));
                           }
-                        },title: Text("Home"),
-                          subtitle: Text((!snapshotMap.containsKey("Home") ? "Click to set home address" : snapshotMap["Home"]["Address"])),
-                          leading: Icon(Icons.home, size: 30,
-                            color: secondColor,),
-                          trailing: snapshotMap.containsKey("Home") ? PopupMenuButton(key: _homeMenuKey,icon: Icon(Icons.more_vert),
-                              itemBuilder: (BuildContext context) => [PopupMenuItem(value: "Edit location",child: Row(children: [Icon(Icons.edit_location),Text("Edit address")]),),PopupMenuItem(value: "Delete",child: Row(children: [Icon(Icons.delete),Text("Delete")]))],
-                              onSelected: (value2) async {
-                                if(value2 == "Delete"){
-                                  snapshotMap.remove("Home");
-                                  await firestore.collection("Favorites").doc(userRep.user.email).set(snapshotMap);
-                                } else if (value2 == "Edit location") {
-                                  var returnResult = await Navigator.of(context)
-                                      .push(MaterialPageRoute<LocationsResult>(
-                                      builder: (BuildContext context) {
-                                        return LocationSearch(
-                                          showAddStops: false, fromFavorites: true,);
-                                      },
-                                      fullscreenDialog: true));
-                                  if (returnResult != null) {
-                                    await firestore.collection("Favorites").doc(
-                                        userRep.user.email).update({
-                                      "Home": {
-                                        "Address": returnResult.fromAddress
-                                            .addressLine,
-                                        "Point": GeoPoint(
-                                            returnResult.fromAddress.coordinates
-                                                .latitude,
-                                            returnResult.fromAddress.coordinates
-                                                .longitude)
-                                      }
-                                    });
-                                  }
+                        }
+                      },title: Text("Work"),
+                        subtitle: Text((!snapshotMap.containsKey("Work") ? "Click to set work address" : snapshotMap["Work"]["Address"])),
+                        leading: Icon(Icons.work, size: 30,
+                          color: secondColor,),
+                        trailing: snapshotMap.containsKey("Work") ? PopupMenuButton(key: _workMenuKey,icon: Icon(Icons.more_vert),
+                            itemBuilder: (BuildContext context) => [PopupMenuItem(value: "Edit location",child: Row(children: [Icon(Icons.edit_location),Text("Edit address")]),),PopupMenuItem(value: "Delete",child: Row(children: [Icon(Icons.delete),Text("Delete")]))],
+                            onSelected: (value2) async {
+                              if(value2 == "Delete"){
+                                snapshotMap.remove("Work");
+                                await firestore.collection("Favorites").doc(userRep.user.email).set(snapshotMap);
+                              } else if (value2 == "Edit location") {
+                                var returnResult = await Navigator.of(context)
+                                    .push(MaterialPageRoute<LocationsResult>(
+                                    builder: (BuildContext context) {
+                                      return LocationSearch(
+                                        showAddStops: false, fromFavorites: true,);
+                                    },
+                                    fullscreenDialog: true));
+                                if (returnResult != null) {
+                                  await firestore.collection("Favorites").doc(
+                                      userRep.user.email).update({
+                                    "Work": {
+                                      "Address": returnResult.fromAddress
+                                          .addressLine,
+                                      "Point": GeoPoint(
+                                          returnResult.fromAddress.coordinates
+                                              .latitude,
+                                          returnResult.fromAddress.coordinates
+                                              .longitude)
+                                    }
+                                  });
                                 }
                               }
-                          ) : IconButton(icon: Icon(Icons.edit),
-                            onPressed: () async {
-                              var returnResult = await Navigator.of(context)
-                                  .push(MaterialPageRoute<LocationsResult>(
-                                  builder: (BuildContext context) {
-                                    return LocationSearch(
-                                      showAddStops: false, fromFavorites: true,);
-                                  },
-                                  fullscreenDialog: true));
-                              if (returnResult != null) {
-                                await firestore.collection("Favorites").doc(userRep.user.email).set({"Home" : {"Address" : returnResult.fromAddress.addressLine,"Point" : GeoPoint(returnResult.fromAddress.coordinates.latitude,returnResult.fromAddress.coordinates.longitude)}},SetOptions(merge: true));
-                              }
-                            },
-
-                          ),),
-                        Divider(thickness: 1,indent: 10,endIndent: 10,color: mainColor,),
-                        ListTile(onTap: () async {
-                          if(_workMenuKey.currentState != null){
-                            _workMenuKey.currentState.showButtonMenu();
-                          }else{
+                            }
+                        ) : IconButton(icon: Icon(Icons.edit),
+                          onPressed: () async {
                             var returnResult = await Navigator.of(context)
                                 .push(MaterialPageRoute<LocationsResult>(
                                 builder: (BuildContext context) {
@@ -351,59 +394,59 @@ class _FavoritesPageState extends State<FavoritesPage> {
                             if (returnResult != null) {
                               await firestore.collection("Favorites").doc(userRep.user.email).set({"Work" : {"Address" : returnResult.fromAddress.addressLine,"Point" : GeoPoint(returnResult.fromAddress.coordinates.latitude,returnResult.fromAddress.coordinates.longitude)}},SetOptions(merge: true));
                             }
+                          },),),
+                      Divider(thickness: 1,indent: 10,endIndent: 10,color: mainColor,),
+                      ListTile(onTap: () async {
+                        if(_universityMenuKey.currentState != null){
+                          _universityMenuKey.currentState.showButtonMenu();
+                        }else{
+                          var returnResult = await Navigator.of(context)
+                              .push(MaterialPageRoute<LocationsResult>(
+                              builder: (BuildContext context) {
+                                return LocationSearch(
+                                  showAddStops: false, fromFavorites: true,);
+                              },
+                              fullscreenDialog: true));
+                          if (returnResult != null) {
+                            await firestore.collection("Favorites").doc(userRep.user.email).set({"University" : {"Address" : returnResult.fromAddress.addressLine,"Point" : GeoPoint(returnResult.fromAddress.coordinates.latitude,returnResult.fromAddress.coordinates.longitude)}},SetOptions(merge: true));
                           }
-                        },title: Text("Work"),
-                          subtitle: Text((!snapshotMap.containsKey("Work") ? "Click to set work address" : snapshotMap["Work"]["Address"])),
-                          leading: Icon(Icons.work, size: 30,
-                            color: secondColor,),
-                          trailing: snapshotMap.containsKey("Work") ? PopupMenuButton(key: _workMenuKey,icon: Icon(Icons.more_vert),
-                              itemBuilder: (BuildContext context) => [PopupMenuItem(value: "Edit location",child: Row(children: [Icon(Icons.edit_location),Text("Edit address")]),),PopupMenuItem(value: "Delete",child: Row(children: [Icon(Icons.delete),Text("Delete")]))],
-                              onSelected: (value2) async {
-                                if(value2 == "Delete"){
-                                  snapshotMap.remove("Work");
-                                  await firestore.collection("Favorites").doc(userRep.user.email).set(snapshotMap);
-                                } else if (value2 == "Edit location") {
-                                  var returnResult = await Navigator.of(context)
-                                      .push(MaterialPageRoute<LocationsResult>(
-                                      builder: (BuildContext context) {
-                                        return LocationSearch(
-                                          showAddStops: false, fromFavorites: true,);
-                                      },
-                                      fullscreenDialog: true));
-                                  if (returnResult != null) {
-                                    await firestore.collection("Favorites").doc(
-                                        userRep.user.email).update({
-                                      "Work": {
-                                        "Address": returnResult.fromAddress
-                                            .addressLine,
-                                        "Point": GeoPoint(
-                                            returnResult.fromAddress.coordinates
-                                                .latitude,
-                                            returnResult.fromAddress.coordinates
-                                                .longitude)
-                                      }
-                                    });
-                                  }
+                        }
+                      },title: Text("University"),
+                        subtitle: Text((!snapshotMap.containsKey("University") ? "Click to set university address" : snapshotMap["University"]["Address"])),
+                        leading: Icon(Icons.school, size: 30,
+                          color: secondColor,),
+                        trailing: snapshotMap.containsKey("University") ? PopupMenuButton(key: _universityMenuKey,icon: Icon(Icons.more_vert),
+                            itemBuilder: (BuildContext context) => [PopupMenuItem(value: "Edit location",child: Row(children: [Icon(Icons.edit_location),Text("Edit address")]),),PopupMenuItem(value: "Delete",child: Row(children: [Icon(Icons.delete),Text("Delete")]))],
+                            onSelected: (value2) async {
+                              if(value2 == "Delete"){
+                                snapshotMap.remove("University");
+                                await firestore.collection("Favorites").doc(userRep.user.email).set(snapshotMap);
+                              } else if (value2 == "Edit location") {
+                                var returnResult = await Navigator.of(context)
+                                    .push(MaterialPageRoute<LocationsResult>(
+                                    builder: (BuildContext context) {
+                                      return LocationSearch(
+                                        showAddStops: false, fromFavorites: true,);
+                                    },
+                                    fullscreenDialog: true));
+                                if (returnResult != null) {
+                                  await firestore.collection("Favorites").doc(
+                                      userRep.user.email).update({
+                                    "University": {
+                                      "Address": returnResult.fromAddress
+                                          .addressLine,
+                                      "Point": GeoPoint(
+                                          returnResult.fromAddress.coordinates
+                                              .latitude,
+                                          returnResult.fromAddress.coordinates
+                                              .longitude)
+                                    }
+                                  });
                                 }
                               }
-                          ) : IconButton(icon: Icon(Icons.edit),
-                            onPressed: () async {
-                              var returnResult = await Navigator.of(context)
-                                  .push(MaterialPageRoute<LocationsResult>(
-                                  builder: (BuildContext context) {
-                                    return LocationSearch(
-                                      showAddStops: false, fromFavorites: true,);
-                                  },
-                                  fullscreenDialog: true));
-                              if (returnResult != null) {
-                                await firestore.collection("Favorites").doc(userRep.user.email).set({"Work" : {"Address" : returnResult.fromAddress.addressLine,"Point" : GeoPoint(returnResult.fromAddress.coordinates.latitude,returnResult.fromAddress.coordinates.longitude)}},SetOptions(merge: true));
-                              }
-                            },),),
-                        Divider(thickness: 1,indent: 10,endIndent: 10,color: mainColor,),
-                        ListTile(onTap: () async {
-                          if(_universityMenuKey.currentState != null){
-                            _universityMenuKey.currentState.showButtonMenu();
-                          }else{
+                            }
+                        ) : IconButton(icon: Icon(Icons.edit),
+                          onPressed: () async {
                             var returnResult = await Navigator.of(context)
                                 .push(MaterialPageRoute<LocationsResult>(
                                 builder: (BuildContext context) {
@@ -414,60 +457,12 @@ class _FavoritesPageState extends State<FavoritesPage> {
                             if (returnResult != null) {
                               await firestore.collection("Favorites").doc(userRep.user.email).set({"University" : {"Address" : returnResult.fromAddress.addressLine,"Point" : GeoPoint(returnResult.fromAddress.coordinates.latitude,returnResult.fromAddress.coordinates.longitude)}},SetOptions(merge: true));
                             }
-                          }
-                        },title: Text("University"),
-                          subtitle: Text((!snapshotMap.containsKey("University") ? "Click to set university address" : snapshotMap["University"]["Address"])),
-                          leading: Icon(Icons.school, size: 30,
-                            color: secondColor,),
-                          trailing: snapshotMap.containsKey("University") ? PopupMenuButton(key: _universityMenuKey,icon: Icon(Icons.more_vert),
-                              itemBuilder: (BuildContext context) => [PopupMenuItem(value: "Edit location",child: Row(children: [Icon(Icons.edit_location),Text("Edit address")]),),PopupMenuItem(value: "Delete",child: Row(children: [Icon(Icons.delete),Text("Delete")]))],
-                              onSelected: (value2) async {
-                                if(value2 == "Delete"){
-                                  snapshotMap.remove("University");
-                                  await firestore.collection("Favorites").doc(userRep.user.email).set(snapshotMap);
-                                } else if (value2 == "Edit location") {
-                                  var returnResult = await Navigator.of(context)
-                                      .push(MaterialPageRoute<LocationsResult>(
-                                      builder: (BuildContext context) {
-                                        return LocationSearch(
-                                          showAddStops: false, fromFavorites: true,);
-                                      },
-                                      fullscreenDialog: true));
-                                  if (returnResult != null) {
-                                    await firestore.collection("Favorites").doc(
-                                        userRep.user.email).update({
-                                      "University": {
-                                        "Address": returnResult.fromAddress
-                                            .addressLine,
-                                        "Point": GeoPoint(
-                                            returnResult.fromAddress.coordinates
-                                                .latitude,
-                                            returnResult.fromAddress.coordinates
-                                                .longitude)
-                                      }
-                                    });
-                                  }
-                                }
-                              }
-                          ) : IconButton(icon: Icon(Icons.edit),
-                            onPressed: () async {
-                              var returnResult = await Navigator.of(context)
-                                  .push(MaterialPageRoute<LocationsResult>(
-                                  builder: (BuildContext context) {
-                                    return LocationSearch(
-                                      showAddStops: false, fromFavorites: true,);
-                                  },
-                                  fullscreenDialog: true));
-                              if (returnResult != null) {
-                                await firestore.collection("Favorites").doc(userRep.user.email).set({"University" : {"Address" : returnResult.fromAddress.addressLine,"Point" : GeoPoint(returnResult.fromAddress.coordinates.latitude,returnResult.fromAddress.coordinates.longitude)}},SetOptions(merge: true));
-                              }
-                            },
+                          },
 
-                          ),),
-                        Divider(thickness: 1,indent: 10,endIndent: 10,color: mainColor,),
-                        ...favorites
-                      ],),
-                    ),
+                        ),),
+                      Divider(thickness: 1,indent: 10,endIndent: 10,color: mainColor,),
+                      ...favorites
+                    ],),
                   ));
             }else if(snapshot.hasError){
               return Column(
@@ -534,14 +529,11 @@ class _FavoritesPageState extends State<FavoritesPage> {
                   ),
                   drawer: techDrawer(
                       userRep, context, DrawerSections.favorites),
-                  body: WillPopScope(
-            onWillPop: () => Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => HomePage())),
-            child:Container(
-                    decoration: pageContainerDecoration,
-                    margin: pageContainerMargin,
-                    child: Center(child: CircularProgressIndicator(),),
-                  )));
+                  body: Container(
+                          decoration: pageContainerDecoration,
+                          margin: pageContainerMargin,
+                          child: Center(child: CircularProgressIndicator(),),
+                        ));
             }
           });
     }

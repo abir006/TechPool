@@ -7,7 +7,6 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:tech_pool/Utils.dart';
-import 'package:tech_pool/pages/HomePage.dart';
 import 'package:tech_pool/widgets/loading.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -206,8 +205,7 @@ class ChatPageState extends State<ChatPage>  with WidgetsBindingObserver {
         transaction.delete(element.reference);
       });
     });
-    Navigator.pushReplacement(
-        context, MaterialPageRoute(builder: (context) => HomePage()));
+    Navigator.pop(context);
   }
 
   Future<Null> openDialog() async {
@@ -301,8 +299,7 @@ class ChatPageState extends State<ChatPage>  with WidgetsBindingObserver {
       case 0:
         break;
       case 1:
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => HomePage()));
+        Navigator.pop(context);
         break;
     }
   }

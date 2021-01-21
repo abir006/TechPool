@@ -14,6 +14,9 @@ import 'Utils.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 final versionNumber = 1.0;
+var lastNotifUsed;
+
+final GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
 
 class App extends StatelessWidget {
   final Future<FirebaseApp> _initialization = Firebase.initializeApp();
@@ -80,6 +83,7 @@ class _MyAppState extends State<MyApp> {
       return ChangeNotifierProvider<UserRepository>(
           create: (context) => UserRepository(),
           child: MaterialApp(
+            navigatorKey: navigatorKey,
               title: 'TechPool',
               theme: ThemeData(
                 primaryColor: mainColor,

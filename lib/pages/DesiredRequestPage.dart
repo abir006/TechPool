@@ -91,6 +91,14 @@ class _DesiredRequestPageState extends State<DesiredRequestPage> {
                 "bigBag":bigBag,
               }
           );
+
+          //Deleting the found notification from the passenger notifications
+          String foundDocIdToDelete = widget.notification.notificationId;
+          transaction.delete(firestore.collection("Notifications").
+          doc(userRep.user?.email).collection("UserNotifications").
+          doc(foundDocIdToDelete));
+
+
           return  _errorsRequest.isOK;
         });
       });

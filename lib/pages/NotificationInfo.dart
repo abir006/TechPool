@@ -137,6 +137,19 @@ class _NotificationInfoState extends State<NotificationInfo> {
             transaction.delete(element.reference);
           });
 
+          //Deleting the relevant desired of the passenger, if exists
+          DocumentSnapshot currentRequest = await firestore.collection("Notifications").
+          doc(userRep.user?.email).collection("UserNotifications").
+          doc(widget.notification.notificationId).get();
+          bool containsDesiredId = currentRequest.data().containsKey("desiredId");
+          if(containsDesiredId) {
+            String desiredDocIdToDelete = currentRequest.data()["desiredId"];
+            // DocumentSnapshot desiredToDelete = await firestore.collection("Desired").
+            // doc(desiredDocIdToDelete).get();
+            transaction.delete(firestore.collection("Desired").
+            doc(desiredDocIdToDelete));
+          }
+
           //Deleting the request notification from the driver notifications
           transaction.delete(firestore.collection("Notifications").
           doc(userRep.user?.email).collection("UserNotifications").

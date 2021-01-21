@@ -193,9 +193,9 @@ export const sendLiftNotification = functions.firestore
                     const driverName = driver?.data()?.firstName + " " +
                     driver?.data()?.lastName;
                     titleMessage =
-                    "There is a new lift that fits your planned lift!";
+                    "We found a lift for you!";
                     console.log("titleMessage: " + titleMessage);
-                    contentMessage = "At " + liftTime + "with " + driverName;
+                    contentMessage = "At " + liftTime + " with " + driverName;
                     console.log("contentMessage: " + contentMessage);
                   }
                 });

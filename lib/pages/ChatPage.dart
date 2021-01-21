@@ -32,7 +32,7 @@ class ChatPage extends StatefulWidget {
   State createState() => ChatPageState(currentUserId: currentUserId);
 }
 
-class ChatPageState extends State<ChatPage> {
+class ChatPageState extends State<ChatPage>  with WidgetsBindingObserver {
   ChatPageState({Key key, @required this.currentUserId});
   FirebaseFirestore firestore = FirebaseFirestore.instance;
   List<DocumentSnapshot> filteredDocs = new List<DocumentSnapshot>();
@@ -68,8 +68,45 @@ class ChatPageState extends State<ChatPage> {
   }
 
   @override
+  Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
+    switch (state) {
+      case AppLifecycleState.resumed:
+        break;
+      case AppLifecycleState.inactive:
+        QuerySnapshot q2 = await FirebaseFirestore.instance
+            .collection("ChatFriends")
+            .doc(currentUserId)
+            .collection("UnRead")
+            .get();
+
+        FirebaseFirestore.instance.runTransaction((transaction) async {
+          q2.docs.forEach((element) {
+            transaction.delete(element.reference);
+          });
+        });
+      break;
+      case AppLifecycleState.paused:
+        QuerySnapshot q2 = await FirebaseFirestore.instance
+            .collection("ChatFriends")
+            .doc(currentUserId)
+            .collection("UnRead")
+            .get();
+
+        FirebaseFirestore.instance.runTransaction((transaction) async {
+          q2.docs.forEach((element) {
+            transaction.delete(element.reference);
+          });
+        });
+        break;
+      case AppLifecycleState.detached:
+        break;
+    }
+  }
+
+  @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     slidableController = SlidableController(
       onSlideAnimationChanged: handleSlideAnimationChanged,
       onSlideIsOpenChanged: handleSlideIsOpenChanged,
@@ -747,6 +784,7 @@ class ChatPageState extends State<ChatPage> {
   }
 
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _searchText.dispose();
     appValid.listener.cancel();
     appValid.versionListener.cancel();

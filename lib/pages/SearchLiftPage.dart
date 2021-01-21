@@ -161,26 +161,33 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
         _validateTime = false;
         _indexError = 0;
       } else {
-        if ((_fromTime.hour > _toTime.hour) ||
-            (_toTime.hour == _fromTime.hour &&
-                _toTime.minute < _fromTime.minute)) {
-          _validateTime = false;
-          _indexError = 2;
-        } else {
-          if (_fromTime.hour == _toTime.hour &&
-              _toTime.minute == _fromTime.minute) {
+          if ((_fromTime.hour > _toTime.hour) ||
+              (_toTime.hour == _fromTime.hour &&
+                  _toTime.minute < _fromTime.minute)) {
             _validateTime = false;
-            _indexError = 1;
-          } else if ((currentDate.compareTo(DateTime.now()) <= 0) &&
-              (_fromTime.hour < DateTime.now().hour ||
-                  (_fromTime.hour == DateTime.now().hour &&
-                      _fromTime.minute < DateTime.now().minute))) {
-            _validateTime = false;
-            _indexError = 3;
+            _indexError = 2;
+          } else {
+            if (_fromTime.hour == _toTime.hour &&
+                _toTime.minute == _fromTime.minute) {
+              _validateTime = false;
+              _indexError = 1;
+            } else if ((currentDate.compareTo(DateTime.now()) <= 0) &&
+                (_fromTime.hour < DateTime
+                    .now()
+                    .hour ||
+                    (_fromTime.hour == DateTime
+                        .now()
+                        .hour &&
+                        _fromTime.minute < DateTime
+                            .now()
+                            .minute))) {
+              _validateTime = false;
+              _indexError = 3;
+            }
           }
-        }
       }
     }
+
 
     final startPointText = Stack(children: [
       Container(
@@ -471,7 +478,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
                         type: DateTimePickerType.date,
                         dateMask: 'd MMM, yyyy',
                         initialValue: currentDate.toString(),
-                        firstDate: currentDate,
+                        firstDate: DateTime.now(),
                         lastDate: DateTime(2100),
                         icon: Icon(Icons.event),
                         dateLabelText: 'Date',
@@ -532,6 +539,17 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
                                   _toTime.millisecond,
                                   _toTime.microsecond);
                             }
+                          if (widget.currentdate != null) {
+                            widget.currentdate = DateTime(
+                                e.year,
+                                e.month,
+                                e.day,
+                                widget.currentdate.hour,
+                                widget.currentdate.minute,
+                                widget.currentdate.second,
+                                widget.currentdate.millisecond,
+                                widget.currentdate.microsecond);
+                          }
                             if (currentDate != null) {
                               currentDate = DateTime(
                                   e.year,
@@ -543,6 +561,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
                                   currentDate.millisecond,
                                   currentDate.microsecond);
                             }
+                            checktimes();
                           });
                         },
                         validator: (val) {

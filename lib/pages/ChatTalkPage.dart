@@ -58,7 +58,7 @@ class ChatScreen extends StatefulWidget {
       ChatScreenState(peerId: peerId, peerAvatar: peerAvatar,id:userId);
 }
 
-class ChatScreenState extends State<ChatScreen> {
+class ChatScreenState extends State<ChatScreen>  with WidgetsBindingObserver {
   ChatScreenState({Key key, @required this.peerId, @required this.peerAvatar,@required this.id});
 
   String peerId;
@@ -71,7 +71,7 @@ class ChatScreenState extends State<ChatScreen> {
   String groupChatId;
   SharedPreferences prefs;
   int _lastIndexPhoto;
-
+  AppLifecycleState _notification;
   File imageFile;
   bool isLoading;
   bool isShowSticker;
@@ -102,8 +102,36 @@ class ChatScreenState extends State<ChatScreen> {
   }
 
   @override
+  Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
+    switch (state) {
+      case AppLifecycleState.resumed:
+        await   FirebaseFirestore.instance
+            .collection('Profiles')
+            .doc(id)
+            .update({'chattingWith': peerId});
+        break;
+      case AppLifecycleState.inactive:
+        FirebaseFirestore.instance
+            .collection('Profiles')
+            .doc(id)
+            .update({'chattingWith': null});
+        break;
+      case AppLifecycleState.paused:
+        FirebaseFirestore.instance
+            .collection('Profiles')
+            .doc(id)
+            .update({'chattingWith': null});
+        break;
+      case AppLifecycleState.detached:
+       // print("my:resumed");
+        break;
+    }
+  }
+
+  @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     focusNode.addListener(onFocusChange);
     listScrollController.addListener(_scrollListener);
 
@@ -887,5 +915,10 @@ class ChatScreenState extends State<ChatScreen> {
         },
       ),
     );
+  }
+
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 }

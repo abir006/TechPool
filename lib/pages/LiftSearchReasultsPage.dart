@@ -273,6 +273,7 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
                   'liftTimeStart': widget.fromTime,
                   'maxDistance': widget.distances[widget.indexDist],
                   'passengerId': userRep.user.email,
+                  'startCity': widget.startAddress.locality,
                   'startAddress': widget.startAddress.addressLine,
                   'startPoint': GeoPoint(
                       widget.startAddress.coordinates.latitude,

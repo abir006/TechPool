@@ -712,7 +712,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
                                 ],
                               ),
-                              allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000),
+                              allInfoText(liftNotification.liftTime, liftNotification.distance / 1000),
                             ],
                           )),
                     ),
@@ -891,7 +891,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
                                 ],
                               ),
-                              allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000),
+                              allInfoText(liftNotification.liftTime, liftNotification.distance / 1000),
                             ],
                           )),
                     ),
@@ -1026,7 +1026,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
                               ],
                             ),
-                            allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000),
+                            allInfoText(liftNotification.liftTime, liftNotification.distance / 1000),
                           ],
                         )
                     ),
@@ -1166,7 +1166,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
                               ],
                             ),
-                            allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000),
+                            allInfoText(liftNotification.liftTime, liftNotification.distance / 1000),
                           ],
                         )),
                   ),
@@ -1327,7 +1327,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
                                 ],
                               ),
-                              allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000),
+                              allInfoText(liftNotification.liftTime, liftNotification.distance / 1000),
 
                             ],
                           )),
@@ -1350,7 +1350,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
         });
   }
 
-  Widget allInfoText(DateTime time,int dist){
+  Widget allInfoText(DateTime time,double dist){
     return Container(
         child:Row(
           children: [

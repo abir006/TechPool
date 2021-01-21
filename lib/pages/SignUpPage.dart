@@ -294,7 +294,14 @@ class _SignUpPageState extends State<SignUpPage>
                                                     .sendEmailVerification();
                                                 while (
                                                     !await checkEmailVerified()) {}
-                                                await db
+                                                await cloudStorage
+                                                    .ref('uploads')
+                                                    .child(userRep.user.email)
+                                                    .putFile(await ImageUtils
+                                                    .imageToFile(
+                                                    imageName:
+                                                    "images/profile",
+                                                    ext: "png")).then((snapshot) async => await db
                                                     .collection("Profiles")
                                                     .doc(_email.text)
                                                     .set({
@@ -305,16 +312,9 @@ class _SignUpPageState extends State<SignUpPage>
                                                   "faculty": "",
                                                   "phoneNumber": "",
                                                   "allowedPayments": [],
-                                                  "pushToken" : (await firebaseMessaging.getToken())
-                                                });
-                                                await cloudStorage
-                                                    .ref('uploads')
-                                                    .child(userRep.user.email)
-                                                    .putFile(await ImageUtils
-                                                    .imageToFile(
-                                                    imageName:
-                                                    "images/profile",
-                                                    ext: "png"));
+                                                  "pushToken" : (await firebaseMessaging.getToken()),
+                                                  "pic" : await snapshot.ref.getDownloadURL()
+                                                }));
                                                 userRep.profilePicture =
                                                     Image.asset(
                                                         "assets/images/profile.png");

@@ -7,7 +7,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:tech_pool/TechDrawer.dart';
 import 'package:tech_pool/Utils.dart';
-import 'package:tech_pool/pages/HomePage.dart';
 import 'package:tech_pool/widgets/TextBoxField.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -438,31 +437,22 @@ class _ProfilePageState extends State<ProfilePage> {
           ):Container(),
         ],
       ),
-      body:  WillPopScope(
-          onWillPop: () async {
-            if(widget.fromProfile) {
-              return Navigator.pushReplacement(
-                  context, MaterialPageRoute(builder: (context) => HomePage()) ); } else {
-              Navigator.of(context).pop();
-              return await true;
-            }
-          },
-        child:Consumer<UserRepository>(
-          builder: (context, userRep, _) =>
-            GestureDetector(
-              onTap:() {FocusScope.of(context).requestFocus(new FocusNode());},
-              child: Container(
-                  decoration: pageContainerDecoration,
-                  margin: pageContainerMargin,
-          //padding: EdgeInsets.only(left: defaultSpacewidth, right: defaultSpacewidth),
-          child: Column(
-              children: [
-                Expanded(child: allInfo(userRep)),
-                SizedBox(height: defaultSpace),
-                isUser? (editMode ? buttons : updateProfile):SizedBox(height: defaultSpace*0),
-              ],
+      body:  Consumer<UserRepository>(
+        builder: (context, userRep, _) =>
+          GestureDetector(
+            onTap:() {FocusScope.of(context).requestFocus(new FocusNode());},
+            child: Container(
+                decoration: pageContainerDecoration,
+                margin: pageContainerMargin,
+        //padding: EdgeInsets.only(left: defaultSpacewidth, right: defaultSpacewidth),
+        child: Column(
+            children: [
+              Expanded(child: allInfo(userRep)),
+              SizedBox(height: defaultSpace),
+              isUser? (editMode ? buttons : updateProfile):SizedBox(height: defaultSpace*0),
+            ],
+        )),
           )),
-            ))),
       drawer: widget.fromProfile? Consumer<UserRepository>(builder: (context, auth, _) => techDrawer(auth, context, DrawerSections.profile)):null,
       backgroundColor: mainColor,
     )

@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:encrypted_shared_preferences/encrypted_shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:tech_pool/pages/FavoritesPage.dart';
-import 'package:tech_pool/pages/HomePage.dart';
 import 'package:tech_pool/pages/NotificationsPage.dart';
 import 'package:tech_pool/pages/ProfilePage.dart';
 import 'package:tech_pool/pages/ChatPage.dart';
@@ -128,41 +127,69 @@ ListTile drawerListTile(String pageName,IconData icon,DrawerSections tileSection
           case DrawerSections.home:
             {
               Navigator.pop(context);
-              Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => HomePage()));
+              Navigator.pop(context);
               break;
             }
           case DrawerSections.profile: {
             Navigator.pop(context);
-            Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => ProfilePage(email: userRep.user?.email,fromProfile: true)));
+            if(currentSection == DrawerSections.home){
+  Navigator.push(
+  context,
+  MaterialPageRoute(
+  builder: (context) => ProfilePage(email: userRep.user?.email, fromProfile: true)));
+  }else {
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          ProfilePage(
+                              email: userRep.user?.email, fromProfile: true)));
+            }
             break;
           }
           case DrawerSections.notifications: {
             Navigator.pop(context);
-            Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => NotificationsPage()));
+            if(currentSection == DrawerSections.home){
+  Navigator.push(
+  context,
+  MaterialPageRoute(
+  builder: (context) => NotificationsPage()));
+  }else {
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => NotificationsPage()));
+            }
             break;
           }
           case DrawerSections.favorites:{
             Navigator.pop(context);
-            Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => FavoritesPage()));
+            if(currentSection == DrawerSections.home){
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => FavoritesPage()));
+            }else {
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => FavoritesPage()));
+            }
             break;
           }
           case DrawerSections.chats: {
-            Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => ChatPage(currentUserId: userRep.user.email)));
+  Navigator.pop(context);
+  if(currentSection == DrawerSections.home){
+  Navigator.push(
+  context,
+  MaterialPageRoute(
+  builder: (context) => ChatPage(currentUserId: userRep.user.email)));
+  }else {
+    Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+            builder: (context) => ChatPage(currentUserId: userRep.user.email)));
+  }
             break;
           }
           case DrawerSections.settings: {

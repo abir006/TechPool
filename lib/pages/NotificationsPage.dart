@@ -4,7 +4,6 @@ import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:tech_pool/TechDrawer.dart';
 import 'package:tech_pool/Utils.dart';
-import 'package:tech_pool/pages/HomePage.dart';
 import '../appValidator.dart';
 import 'ChatPage.dart';
 import 'ProfilePage.dart';
@@ -279,32 +278,29 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     ],
                   ),
                   drawer: techDrawer(userRep, context, DrawerSections.notifications),
-                  body: WillPopScope(
-                      onWillPop: () => Navigator.pushReplacement(
-                          context, MaterialPageRoute(builder: (context) => HomePage())),
-                      child:Container(
-                      decoration: pageContainerDecoration,
-                      margin: pageContainerMargin,
-                      //padding: EdgeInsets.only(bottom: 6.0,top: 7.0, left: defaultSpacewidth, right: defaultSpacewidth*4),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          //Spacer(),
-                          //SizedBox(height: MediaQuery.of(context).size.height * 0.1),
-                          Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Icon(Icons.update, size: 30),
-                            SizedBox(width: MediaQuery.of(context).size.width * 0.02),
-                            Text("No notifications",style: TextStyle(fontSize: 30, color: Colors.black))
-                          ]),
-                          //Spacer()
-                        ],
-                      ),
+                  body: Container(
+                  decoration: pageContainerDecoration,
+                  margin: pageContainerMargin,
+                  //padding: EdgeInsets.only(bottom: 6.0,top: 7.0, left: defaultSpacewidth, right: defaultSpacewidth*4),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      //Spacer(),
+                      //SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                      Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Icon(Icons.update, size: 30),
+                        SizedBox(width: MediaQuery.of(context).size.width * 0.02),
+                        Text("No notifications",style: TextStyle(fontSize: 30, color: Colors.black))
+                      ]),
+                      //Spacer()
+                    ],
+                  ),
 
-                  )));
+                  ));
               }
               return _buildPage(context, userRep);
             } else if (snapshot.hasError) {
@@ -371,175 +367,172 @@ class _NotificationsPageState extends State<NotificationsPage> {
           ],
         ),
         drawer: techDrawer(userRep, context, DrawerSections.notifications),
-      body:WillPopScope(
-    onWillPop: () => Navigator.pushReplacement(
-    context, MaterialPageRoute(builder: (context) => HomePage())),
-    child:Container(
-          padding: const EdgeInsets.only(bottom: 6.0, top: 7.0),
-          decoration: pageContainerDecoration,
-          margin: pageContainerMargin,
-          //padding: EdgeInsets.only(left: defaultSpacewidth, right: defaultSpacewidth),
-          child: Column(
-            children: [Expanded(child:ListView.builder(
-              shrinkWrap: true,
-              padding: EdgeInsets.only(left: defaultSpacewidth*0.4, right: defaultSpacewidth*0.4, bottom: defaultSpacewidth*0.4,top:defaultSpacewidth*0.4 ),
-              itemCount: _notifications.length,
-              //separatorBuilder: (BuildContext context, int index) => Divider(thickness: 1,),
-              itemBuilder: (BuildContext context, int index) {
-                final notification = _notifications[index];
+      body:Container(
+            padding: const EdgeInsets.only(bottom: 6.0, top: 7.0),
+            decoration: pageContainerDecoration,
+            margin: pageContainerMargin,
+            //padding: EdgeInsets.only(left: defaultSpacewidth, right: defaultSpacewidth),
+            child: Column(
+              children: [Expanded(child:ListView.builder(
+                shrinkWrap: true,
+                padding: EdgeInsets.only(left: defaultSpacewidth*0.4, right: defaultSpacewidth*0.4, bottom: defaultSpacewidth*0.4,top:defaultSpacewidth*0.4 ),
+                itemCount: _notifications.length,
+                //separatorBuilder: (BuildContext context, int index) => Divider(thickness: 1,),
+                itemBuilder: (BuildContext context, int index) {
+                  final notification = _notifications[index];
 
-                Widget tileToDisplay;
-                if(_notifications[index].type == "AcceptedLift") {
-                  tileToDisplay = _buildAcceptedTile(_notifications[index]);
-                }
-                else if(_notifications[index].type == "RejectedLift") {
-                  tileToDisplay = _buildRejectedTile(_notifications[index]);
-                }
-                else if(_notifications[index].type == "RequestedLift") {
-                  tileToDisplay = _buildRequestedTile(_notifications[index]);
-                  return tileToDisplay;
-                }
-                else if(_notifications[index].type == "DesiredLift") {
-                  tileToDisplay = _buildDesiredTile(_notifications[index]);
-                  //return tileToDisplay;
-                }
-                else if(_notifications[index].type == "CanceledLift" || _notifications[index].type == "CanceledDrive") {
-                  tileToDisplay = _buildCanceledTile(_notifications[index]);
-                }
-                /*else {
-                  tileToDisplay = null;
-                }*/
+                  Widget tileToDisplay;
+                  if(_notifications[index].type == "AcceptedLift") {
+                    tileToDisplay = _buildAcceptedTile(_notifications[index]);
+                  }
+                  else if(_notifications[index].type == "RejectedLift") {
+                    tileToDisplay = _buildRejectedTile(_notifications[index]);
+                  }
+                  else if(_notifications[index].type == "RequestedLift") {
+                    tileToDisplay = _buildRequestedTile(_notifications[index]);
+                    return tileToDisplay;
+                  }
+                  else if(_notifications[index].type == "DesiredLift") {
+                    tileToDisplay = _buildDesiredTile(_notifications[index]);
+                    //return tileToDisplay;
+                  }
+                  else if(_notifications[index].type == "CanceledLift" || _notifications[index].type == "CanceledDrive") {
+                    tileToDisplay = _buildCanceledTile(_notifications[index]);
+                  }
+                  /*else {
+                    tileToDisplay = null;
+                  }*/
 
-                return Dismissible(
-                  // Each Dismissible must contain a Key. Keys allow Flutter to
-                  // uniquely identify widgets.
-                  key: UniqueKey(),
-                  //Key(notification.toString()),
-                  //Key(notification.notificationTime.toString()),
-                  // Provide a function that tells the app
-                  // what to do after an item has been swiped away.
-                  onDismissed: (direction) async {
-                    //Here will come the query to delete notification from db.
-                    await firestore.collection("Notifications").
-                    doc(userRep.user?.email).collection("UserNotifications").
-                    doc(_notifications[index].notificationId).delete().then((value) =>
-                    {
-                      _key.currentState.showSnackBar(SnackBar(content: Text("Notification Deleted", style: TextStyle(fontSize: 20))))
-                      //return value;
-                    }
-                    );
+                  return Dismissible(
+                    // Each Dismissible must contain a Key. Keys allow Flutter to
+                    // uniquely identify widgets.
+                    key: UniqueKey(),
+                    //Key(notification.toString()),
+                    //Key(notification.notificationTime.toString()),
+                    // Provide a function that tells the app
+                    // what to do after an item has been swiped away.
+                    onDismissed: (direction) async {
+                      //Here will come the query to delete notification from db.
+                      await firestore.collection("Notifications").
+                      doc(userRep.user?.email).collection("UserNotifications").
+                      doc(_notifications[index].notificationId).delete().then((value) =>
+                      {
+                        _key.currentState.showSnackBar(SnackBar(content: Text("Notification Deleted", style: TextStyle(fontSize: 20))))
+                        //return value;
+                      }
+                      );
 
-                    //await deleteNotification;
+                      //await deleteNotification;
 
-                    /*setState(() {
-                    // Remove the item from the data source.
-                    _notifications.removeAt(index);
-                    });*/
+                      /*setState(() {
+                      // Remove the item from the data source.
+                      _notifications.removeAt(index);
+                      });*/
 
-                    // Then show a snackbar.
-                    //Scaffold.of(context)
-                    //_key.currentState.showSnackBar(SnackBar(content: Text(/*$notification*/"Notification Deleted", style: TextStyle(fontSize: 20))));
-                  },
-                  // Show a red background as the item is swiped away.
-                  background: //Container(color: mainColor),
+                      // Then show a snackbar.
+                      //Scaffold.of(context)
+                      //_key.currentState.showSnackBar(SnackBar(content: Text(/*$notification*/"Notification Deleted", style: TextStyle(fontSize: 20))));
+                    },
+                    // Show a red background as the item is swiped away.
+                    background: //Container(color: mainColor),
 
-                  Container(
-                    margin: EdgeInsets.only(
-                        top: MediaQuery
-                            .of(context)
-                            .size
-                            .height * 0.006,
-                        bottom: MediaQuery
-                            .of(context)
-                            .size
-                            .height * 0.006),
-                    decoration: BoxDecoration(
-                      color: mainColor,
-                      boxShadow: [BoxShadow(color: Colors.black, blurRadius: 2.0,
-                          spreadRadius: 0.0, offset: Offset(2.0, 2.0))
-                      ],
-                      border: Border.all(color: secondColor, width: 0.65),
-                      borderRadius: BorderRadius.circular(12.0),),
-                    child:
-                    Row(
-                      children: [
-                        Container(
-                            margin: EdgeInsets.only(
-                                left: MediaQuery
-                                    .of(context)
-                                    .size
-                                    .height * 0.016, top: MediaQuery
-                                .of(context)
-                                .size
-                                .height * 0.004),
-                            width: MediaQuery
-                                .of(context)
-                                .size
-                                .height * 0.016 * 4,
-                            height: MediaQuery
-                                .of(context)
-                                .size
-                                .height * 0.016 * 4,
-                            child: Icon(Icons.delete, size: 30, color: Colors.white)
-                          /*decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.teal,
-                              child:
+                    Container(
+                      margin: EdgeInsets.only(
+                          top: MediaQuery
+                              .of(context)
+                              .size
+                              .height * 0.006,
+                          bottom: MediaQuery
+                              .of(context)
+                              .size
+                              .height * 0.006),
+                      decoration: BoxDecoration(
+                        color: mainColor,
+                        boxShadow: [BoxShadow(color: Colors.black, blurRadius: 2.0,
+                            spreadRadius: 0.0, offset: Offset(2.0, 2.0))
+                        ],
+                        border: Border.all(color: secondColor, width: 0.65),
+                        borderRadius: BorderRadius.circular(12.0),),
+                      child:
+                      Row(
+                        children: [
+                          Container(
+                              margin: EdgeInsets.only(
+                                  left: MediaQuery
+                                      .of(context)
+                                      .size
+                                      .height * 0.016, top: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .height * 0.004),
+                              width: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .height * 0.016 * 4,
+                              height: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .height * 0.016 * 4,
+                              child: Icon(Icons.delete, size: 30, color: Colors.white)
+                            /*decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.teal,
+                                child:
 
-                            )*/
-                        ),
-                        Spacer(), // I just added one line
-                        Container(
-                            margin: EdgeInsets.only(
-                              /*left: MediaQuery
-                                    .of(context)
-                                    .size
-                                    .height * 0.016, */
-                                top: MediaQuery
-                                    .of(context)
-                                    .size
-                                    .height * 0.004),
-                            width: MediaQuery
-                                .of(context)
-                                .size
-                                .width * 0.016 * 12,
-                            height: MediaQuery
-                                .of(context)
-                                .size
-                                .height * 0.016 * 4,
-                            child: Icon(Icons.delete, size: 30, color: Colors.white)
-                          /*decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.teal,
-                              child:
+                              )*/
+                          ),
+                          Spacer(), // I just added one line
+                          Container(
+                              margin: EdgeInsets.only(
+                                /*left: MediaQuery
+                                      .of(context)
+                                      .size
+                                      .height * 0.016, */
+                                  top: MediaQuery
+                                      .of(context)
+                                      .size
+                                      .height * 0.004),
+                              width: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .width * 0.016 * 12,
+                              height: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .height * 0.016 * 4,
+                              child: Icon(Icons.delete, size: 30, color: Colors.white)
+                            /*decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.teal,
+                                child:
 
-                            )*/
-                        ),
-                      ],
+                              )*/
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
 
 
 
-                  child: tileToDisplay,
-                );
+                    child: tileToDisplay,
+                  );
 
-                //return _buildTile(_notifications[index]);
-                if(_notifications[index].type == "AcceptedLift") {
-                  return _buildAcceptedTile(_notifications[index]);
-                }
-                else if(_notifications[index].type == "RejectedLift") {
-                  return _buildRejectedTile(_notifications[index]);
-                }
-                else if(_notifications[index].type == "RequestedLift") {
-                  return _buildRequestedTile(_notifications[index]);
-                }
-                else {
-                  return null;
-                }
-              },
-            ))],
-          ))),
+                  //return _buildTile(_notifications[index]);
+                  if(_notifications[index].type == "AcceptedLift") {
+                    return _buildAcceptedTile(_notifications[index]);
+                  }
+                  else if(_notifications[index].type == "RejectedLift") {
+                    return _buildRejectedTile(_notifications[index]);
+                  }
+                  else if(_notifications[index].type == "RequestedLift") {
+                    return _buildRequestedTile(_notifications[index]);
+                  }
+                  else {
+                    return null;
+                  }
+                },
+              ))],
+            )),
     );
   }
 

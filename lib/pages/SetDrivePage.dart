@@ -10,6 +10,8 @@ import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:configurable_expansion_tile/configurable_expansion_tile.dart';
+import 'dart:math';
+import 'package:date_time_picker/date_time_picker.dart';
 
 class SetDrivePage extends StatefulWidget {
   DateTime currentDate;
@@ -20,8 +22,10 @@ class SetDrivePage extends StatefulWidget {
 }
 
 class _SetDrivePageState extends State<SetDrivePage> {
+  //FirebaseFirestore firestore = FirebaseFirestore.instance;
   final _formKey2 = GlobalKey<FormState>();
   final _key2 = GlobalKey<ScaffoldState>();
+  final myColor = Color(0xfff808080);
   double _fontTextsSize = 17;
   DateTime _chosenTime;
   DateTime _chosenTimeCandidate;
@@ -39,6 +43,8 @@ class _SetDrivePageState extends State<SetDrivePage> {
   TextEditingController _stopPoint2Controller;
   TextEditingController _stopPoint3Controller;
   bool _validateLocations = true;
+  bool _validateTime = true;
+  String _timeError = "";
 
   LocationsResult returnFromMapResult;
   Address startAddress;
@@ -48,7 +54,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
   @override
   void initState() {
     super.initState();
-    _hourController = TextEditingController(text: "");
+    _hourController = TextEditingController(text: "Choose time");
     _startPointController = TextEditingController(text: "");
     _destPointController = TextEditingController(text: "");
     _stopPoint1Controller = TextEditingController(text: "");
@@ -57,6 +63,85 @@ class _SetDrivePageState extends State<SetDrivePage> {
     _priceController = TextEditingController(text: "");
     _noteController = TextEditingController(text: "");
   }
+
+
+  //After inserting the drive to db, search for fit desired lifts and notify the relevant hitchhikers
+  Future<bool> _checkForFitDesiredAndSendNotifications(MyLift relDrive) async {
+    Coordinates startPointCoords = startAddress.coordinates;
+    Coordinates destPointCoords = destAddress.coordinates;
+    try{
+      QuerySnapshot relevantDesired = await widget.db.collection("Desired")
+          .where('liftTimeStart', isLessThanOrEqualTo: Timestamp.fromDate(relDrive.time))
+          .get();
+          //.where('passengerId', isNotEqualTo: relDrive.driver)
+          //.where('liftTimeEnd', isGreaterThanOrEqualTo: Timestamp.fromDate(relDrive.time))
+          //.where('backSeatNotFull', isEqualTo: relDrive.backSeat)
+          //.where('bigTrunk', isEqualTo: relDrive.bigTrunk)
+      relevantDesired.docs.forEach((curDesired) async {
+        //DateTime liftTimeEnd2 = DateTime.fromMicrosecondsSinceEpoch(curDesired["liftTimeEnd"] * 1000);
+        DateTime liftTimeEnd = DateTime.fromMicrosecondsSinceEpoch(curDesired["liftTimeEnd"].microsecondsSinceEpoch);
+        String curDesiredPassengerId = curDesired["passengerId"];
+        String driver = relDrive.driver;
+        DateTime driveTime = relDrive.time;
+        if (curDesiredPassengerId != driver && liftTimeEnd.isAfter(driveTime)) {
+          int maxDistance = curDesired["maxDistance"];
+          bool curDesiredBigTrunk = curDesired["backSeatNotFull"];
+          bool curDesiredBackSeatNotFull = curDesired["bigTrunk"];
+          bool relDriveBackSeatNotFull = relDrive.backSeat;
+          //back seat not full = true means: back seat is not full
+          //back seat not full = false means: back seat is full!
+          if ( (relDrive.bigTrunk || (!relDrive.bigTrunk && !curDesiredBigTrunk))
+              && relDriveBackSeatNotFull || (!relDrive.backSeat && !curDesiredBackSeatNotFull)) {
+            double distToStart = clacDis(
+                curDesired["startPoint"], startPointCoords);
+            double distToEnd = clacDis(
+                curDesired["destPoint"], destPointCoords);
+            relDrive.stops.forEach((key) {
+              (key as Map).forEach((key, value) {
+                if (key == "stopPoint") {
+                  GeoPoint pointStop = value as GeoPoint;
+                  distToStart =
+                      min(distToStart, clacDis(pointStop, startPointCoords));
+                  distToEnd =
+                      min(distToEnd, clacDis(pointStop, destPointCoords));
+                }
+              });
+            });
+            int curDist = (distToStart + distToEnd).toInt();
+            if (curDist <= maxDistance) {
+              String curPassengerID = curDesired["passengerId"];
+              await widget.db.collection("Notifications")
+                  .doc(curPassengerID)
+                  .collection("UserNotifications")
+                  .add(
+                  {
+                    //Insert a desired notification to this person
+                    "destCity": relDrive.destCity,
+                    "startCity": relDrive.startCity,
+                    "startAddress": curDesired["startAddress"],
+                    "destAddress": curDesired["startAddress"],
+                    "distance": curDist,
+                    "driveId": relDrive.liftId,
+                    "driverId": relDrive.driver,
+                    "liftTime": relDrive.time,
+                    "notificationTime": DateTime.now(),
+                    "price": relDrive.price,
+                    "type": "DesiredLift",
+                    "read": "false",
+                    "desiredId": curDesired.id,
+                  }
+              );
+            }
+          }
+        }
+      });
+    return true;
+    } catch(e){
+      return false;
+    }
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -68,6 +153,22 @@ class _SetDrivePageState extends State<SetDrivePage> {
         _validateLocations = false;
       }
     }
+
+    void checktimes() {
+      _validateTime = true;
+
+      if (_chosenTime == null) {
+        _validateTime = false;
+        _timeError = "Time not chosen";
+      }
+      else if (_chosenTime.isBefore(DateTime.now())){
+        _validateTime = false;
+        _timeError = "Time already passed";
+        //_hourController.text = "";
+      }
+    }
+
+
     var sizeFrameWidth = MediaQuery.of(context).size.width;
     double defaultSpace = MediaQuery.of(context).size.height * 0.013;
     double defaultSpaceWidth = MediaQuery.of(context).size.height * 0.016;
@@ -172,7 +273,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             searchLabelText(
-              text: "Start: ",
+              text: "Starting point: ",
             ),
             Expanded(child: generalInfoText(text: _startPointController.text)),
           ],
@@ -293,6 +394,143 @@ class _SetDrivePageState extends State<SetDrivePage> {
           ),
         ]);
 
+    Map<int, Color> color =
+    {
+      50:Color.fromRGBO(136,14,79, .1),
+      100:Color.fromRGBO(136,14,79, .2),
+      200:Color.fromRGBO(136,14,79, .3),
+      300:Color.fromRGBO(136,14,79, .4),
+      400:Color.fromRGBO(136,14,79, .5),
+      500:Color.fromRGBO(136,14,79, .6),
+      600:Color.fromRGBO(136,14,79, .7),
+      700:Color.fromRGBO(136,14,79, .8),
+      800:Color.fromRGBO(136,14,79, .9),
+      900:Color.fromRGBO(136,14,79, 1),
+    };
+
+    final dateChoose = Theme(
+        data: ThemeData(
+          // primaryColorLight: secondColor,
+          primarySwatch:MaterialColor(0xff308ea1, color,),
+          //    colorScheme: ColorScheme(primary:Colors.grey,primaryVariant:Colors.grey,onBackground: Colors.grey,background: Colors.grey,onPrimary: Colors.grey,secondary: Colors.grey,secondaryVariant: Colors.grey,surface: Colors.grey,onSurface: Colors.grey,error: Colors.grey,onError: Colors.grey,onSecondary: Colors.grey,brightness:Brightness.light ) ,
+          //  primaryColor: myColor,
+          // accentColor: secondColor,
+          //  canvasColor: primaryColor,
+          //  dialogBackgroundColor: primaryColor,
+          backgroundColor: primaryColor,
+          appBarTheme: AppBarTheme(color: Colors.pink),
+          secondaryHeaderColor: primaryColor,
+          dialogTheme: DialogTheme(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18),
+              ),
+              titleTextStyle: TextStyle(backgroundColor: myColor)),
+        ),
+        child:// Builder(
+        //builder: (context) =>
+        Stack(children: [
+          DateTimePicker(
+            decoration: InputDecoration(
+              labelText: "Date",
+              labelStyle: TextStyle(fontSize: 17,color:myColor),icon: Icon(Icons.event,color: myColor,),
+              disabledBorder: UnderlineInputBorder(
+                borderSide: BorderSide(width:1,color: myColor),),
+              focusedBorder: UnderlineInputBorder(
+                borderSide: BorderSide(width:1,color: myColor),
+              ),
+            ),
+            enableInteractiveSelection:false,
+            cursorColor: Colors.grey,
+            type: DateTimePickerType.date,
+            dateMask: 'd MMM, yyyy',
+            initialValue: widget.currentDate.toString(),
+            firstDate: DateTime.now(),
+            lastDate: DateTime(2100),
+            icon: Icon(Icons.event),
+            dateLabelText: 'Date',
+            timeLabelText: "Hour",
+            selectableDayPredicate: (date) {
+              // Disable weekend days to select from the calendar
+              return true;
+            },
+            onFieldSubmitted: (val) {
+              print(val);
+            },
+            onChanged: (val) {
+              setState(() {
+
+                DateTime chosen = DateFormat('yyyy-mm-dd').parse(val);
+                // if (_toTimeTemp != null) {
+                //   _toTimeTemp = DateTime(
+                //       e.year,
+                //       e.month,
+                //       e.day,
+                //       _toTimeTemp.hour,
+                //       _toTimeTemp.minute,
+                //       _toTimeTemp.second,
+                //       _toTimeTemp.millisecond,
+                //       _toTimeTemp.microsecond);
+                // }
+                // if (_fromTimeTemp != null) {
+                //   _fromTimeTemp = DateTime(
+                //       e.year,
+                //       e.month,
+                //       e.day,
+                //       _fromTimeTemp.hour,
+                //       _fromTimeTemp.minute,
+                //       _fromTimeTemp.second,
+                //       _fromTimeTemp.millisecond,
+                //       _fromTimeTemp.microsecond);
+                // }
+
+                if (_chosenTime != null) {
+                  _chosenTime = DateTime(
+                      chosen.year,
+                      chosen.month,
+                      chosen.day,
+                      _chosenTime.hour,
+                      _chosenTime.minute,
+                      _chosenTime.second,
+                      _chosenTime.millisecond,
+                      _chosenTime.microsecond);
+                }
+                // if (_toTime != null) {
+                //   _toTime = DateTime(
+                //       e.year,
+                //       e.month,
+                //       e.day,
+                //       _toTime.hour,
+                //       _toTime.minute,
+                //       _toTime.second,
+                //       _toTime.millisecond,
+                //       _toTime.microsecond);
+                // }
+                if (widget.currentDate != null) {
+                  widget.currentDate = DateTime(
+                      chosen.year,
+                      chosen.month,
+                      chosen.day,
+                      widget.currentDate.hour,
+                      widget.currentDate.minute,
+                      widget.currentDate.second,
+                      widget.currentDate.millisecond,
+                      widget.currentDate.microsecond);
+                }
+                checktimes();
+              });
+            },
+            validator: (val) {
+              print(val);
+              return null;
+            },
+            onSaved: (val) => print(val),
+          ),
+          //Container(color: Colors.transparent,child: SizedBox(width: 500,height: 100,),)
+        ]
+        )
+      //  )
+    );
+
 
     final departureTimeButton = Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -379,22 +617,131 @@ class _SetDrivePageState extends State<SetDrivePage> {
           //Text(resultString ?? "")
         ]);
 
-    final timeText1 = Container(
-      child: textBoxFieldDisableCentered(
-          size: MediaQuery.of(context).size,
-          hintText: "",
-          textFieldController: _hourController,
-          validator: (value) {
-            if (_chosenTime == null)
-              return '                             Time not chosen';
-             else if (_chosenTime.isBefore(DateTime.now())){
-              _hourController.text = "";
-              return '                             Time already passed';
-            }
-            else
-              return null;
-          }),
+    final chooseTime2 =
+    Container(
+      child: Padding(
+        padding: const EdgeInsets.only(right: 20),
+        child: InkWell(
+          child: TextField(
+            maxLength: 30,
+            decoration:  InputDecoration(
+              icon: Icon(Icons.timer,color: myColor,),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(width: 1000.0),
+              ),
+              disabledBorder: UnderlineInputBorder(
+                borderSide: BorderSide(width:1,color: myColor),
+              ),
+              labelText: "Time",
+              labelStyle: TextStyle(fontSize: 17,color:myColor),
+            ),
+            controller: _hourController,
+            textCapitalization: TextCapitalization.sentences,
+            //controller: controllerText,
+            //  maxLines: maxLines,
+            enabled: false,
+          ),
+          onTap: () {
+            DateTime fixedTime = widget.currentDate
+                .subtract(new Duration(hours: widget.currentDate.hour))
+                .subtract(new Duration(minutes: widget.currentDate.minute))
+                .add(new Duration(hours: DateTime.now().hour))
+                .add(new Duration(minutes: DateTime.now().minute));
+
+            showDialog(
+                context: context,
+                builder: (_) => new SimpleDialog(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(20))),
+                  title: Center(
+                      child: Text("Choose departure time",
+                          style: TextStyle(fontSize: 21))),
+                  //content: Text("Hey!"),
+                  children: [
+                    TimePickerSpinner(
+                      is24HourMode: true,
+                      normalTextStyle:
+                      TextStyle(fontSize: 28, color: Colors.grey),
+                      highlightedTextStyle:
+                      TextStyle(fontSize: 34, color: secondColor),
+                      //spacing: 50,
+                      //itemHeight: 80,
+                      alignment: Alignment.center,
+                      isForce2Digits: true,
+                      minutesInterval: 5,
+                      time:
+                      _chosenTime != null ? _chosenTime : fixedTime,
+                      isShowSeconds: false,
+                      onTimeChange: (time) {
+                        setState(() {
+                          _chosenTimeCandidate = time;
+                        });
+                      },
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment
+                          .center, //Center Row contents horizontally,
+                      children: [
+                        FlatButton(
+                          child: Text('CANCEL',
+                              style: TextStyle(
+                                  fontSize: 16, color: mainColor)),
+                          onPressed: () {
+                            setState(() {
+                              Navigator.of(context).pop();
+                            });
+                          },
+                        ),
+                        FlatButton(
+                          child: Text('CONFIRM',
+                              style: TextStyle(
+                                  fontSize: 16, color: mainColor)),
+                          // onPressed: () {
+                          //   _hourController.text =
+                          //   //DateFormat('dd/MM - kk:mm')
+                          //   DateFormat('kk:mm')
+                          //           .format(_chosenTimeCandidate);
+                          //   _chosenTime = _chosenTimeCandidate;
+                          //   checktimes();
+                          //   Navigator.of(context).pop();
+                          // },
+                          onPressed: () {
+                            setState(() {
+                              _hourController.text =
+                              //DateFormat('dd/MM - kk:mm')
+                              DateFormat('kk:mm')
+                                  .format(_chosenTimeCandidate);
+                              _chosenTime = _chosenTimeCandidate;
+                              checktimes();
+                              Navigator.of(context).pop();
+                            });
+                          },
+                        )
+                      ],
+                    ),
+                  ],
+                ));
+          },
+        ),
+      ),
     );
+
+    // final timeText1 = Container(
+    //   child: textBoxFieldDisableCentered(
+    //       size: MediaQuery.of(context).size,
+    //       hintText: "",
+    //       textFieldController: _hourController,
+    //       validator: (value) {
+    //         if (_chosenTime == null)
+    //           return '                             Time not chosen';
+    //          else if (_chosenTime.isBefore(DateTime.now())){
+    //           _hourController.text = "";
+    //           return '                             Time already passed';
+    //         }
+    //         else
+    //           return null;
+    //       }),
+    // );
 
     // child: textBoxFieldDisableCentered(
     //     size: MediaQuery.of(context).size,
@@ -559,8 +906,9 @@ class _SetDrivePageState extends State<SetDrivePage> {
               onPressed: () async {
                 setState(() {
                   checkLocations();
+                  checktimes();
                 });
-                if (_formKey2.currentState.validate() && _validateLocations) {
+                if (_formKey2.currentState.validate() && _validateLocations && _validateTime) {
                   try {
 
                     //for testing purposes:
@@ -573,8 +921,10 @@ class _SetDrivePageState extends State<SetDrivePage> {
                     //     .doc(driveName)
                     //     .set({
 
-                    CollectionReference drives = widget.db.collection('Drives');
-                    drives.add({
+                    // CollectionReference drives = widget.db.collection('Drives');
+                    // drives.add({
+
+                    DocumentReference newDriveRef = await widget.db.collection('Drives').add({
                       'BackSeatNotFull': !(_fullBackSeat),
                       'BigTrunk': _bigTrunk,
                       'Note': _noteController.text,
@@ -600,6 +950,22 @@ class _SetDrivePageState extends State<SetDrivePage> {
                       'Driver': userRep.user.email,
                       //'Driver': "testing@technion.co.il",
                     });
+
+
+
+                    //((element) async {
+                    DocumentSnapshot currentDriveDoc = await widget.db.collection('Drives').doc(newDriveRef.id).get();
+                    MyLift docLift = new MyLift(
+                        "driver", "destAddress", "stopAddress", 5);
+                    currentDriveDoc.data().forEach((key, value) {
+                      if (value != null) {
+                        docLift.setProperty(key, value);
+                      }
+                    });
+                    docLift.liftId = currentDriveDoc.id;
+                    // });
+
+                    bool res = await _checkForFitDesiredAndSendNotifications(docLift);
 
                     FocusManager.instance.primaryFocus.unfocus();
                     Navigator.of(context).pop();
@@ -700,9 +1066,9 @@ class _SetDrivePageState extends State<SetDrivePage> {
 
                                 SizedBox(height: 1.5 * defaultSpace),
                                 chooseStartAndDestination,
-                                SizedBox(height: 1 * defaultSpace),
+                                SizedBox(height: 1.5 * defaultSpace),
                                 startPointText,
-                                SizedBox(height: 1 * defaultSpace),
+                                SizedBox(height: 1.5 * defaultSpace),
 
                                 _numberOfStops > 0
                                     ? stopPoint1text
@@ -729,15 +1095,30 @@ class _SetDrivePageState extends State<SetDrivePage> {
                                 "Choose start and destination",
                                 style: TextStyle(color: Colors.red))),
 
-                                SizedBox(height: 1 * defaultSpace),
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    departureTimeButton,
-                                    timeText1,
-                                  ],
-                                ),
+                                // SizedBox(height: 1 * defaultSpace),
+                                // Column(
+                                //   mainAxisAlignment: MainAxisAlignment.center,
+                                //   crossAxisAlignment: CrossAxisAlignment.center,
+                                //   children: [
+                                //     departureTimeButton,
+                                //     timeText1,
+                                //   ],
+                                // ),
+                                SizedBox(height: 1.5*defaultSpace),
+
+                                dateChoose,
+                                SizedBox(height: defaultSpace),
+                                chooseTime2,
+                                //Center(child:Row(mainAxisAlignment: MainAxisAlignment.center,crossAxisAlignment: CrossAxisAlignment.start,children: [SizedBox(width: 10*defaultSpace,),Expanded(child:Times)],)),
+                                // fromText,
+                                //SizedBox(height: 0.5 * defaultSpace),
+                                _validateTime
+                                    ? SizedBox(height: 0 * defaultSpace)
+                                    : Center(
+                                    child: Text(_timeError,
+                                        style:
+                                        TextStyle(color: Colors.red))),
+                                SizedBox(height: 1.3*defaultSpace),
                                 priceText,
                                 backSeatRowText,
                                 //SizedBox(height: defaultSpace),

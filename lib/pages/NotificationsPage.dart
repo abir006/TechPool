@@ -11,6 +11,8 @@ import 'package:rxdart/rxdart.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'NotificationInfo.dart';
+import 'DesiredRequestPage.dart';
+
 class NotificationsPage extends StatefulWidget {
   @override
   _NotificationsPageState createState() => _NotificationsPageState();
@@ -160,7 +162,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     }
                   case "DesiredLift" :
                     {
-                      notification = LiftNotification(
+                      String desiredId = elementData["desiredId"];
+                      notification = LiftNotification.desired(
                           notificationId,
                           driveId,
                           driverId,
@@ -172,7 +175,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
                           notificationTime,
                           type,
                           startAddress,
-                          destAddress
+                          destAddress,
+                          desiredId,
                       );
                       break;
                     }
@@ -703,7 +707,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
                                 ],
                               ),
-                              allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000),
+                              allInfoText(liftNotification.liftTime, liftNotification.distance / 1000),
                             ],
                           )),
                     ),
@@ -730,7 +734,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
         builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
           if (snapshot.hasData) {
             return InkWell(
-              onTap:  () async {
+              onTap: () async {
                 //Preparing and opening the info page
                 var drive = await firestore.collection("Drives").doc(
                     liftNotification.driveId).get();
@@ -762,6 +766,19 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 //     },
                 //     fullscreenDialog: true
                 // ));
+
+                  await Navigator.of(context).push(new MaterialPageRoute<Null>(
+                      builder: (BuildContext context) {
+                        return DesiredRequestPage(lift: liftToShow,
+                          notification: liftNotification,
+                        );
+                      },
+                      fullscreenDialog: true
+                  ));
+                  // setState(() {
+                  //
+                  // });
+
               },
               child: Container(
                 margin: EdgeInsets.only(
@@ -869,7 +886,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
                                 ],
                               ),
-                              allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000),
+                              allInfoText(liftNotification.liftTime, liftNotification.distance / 1000),
                             ],
                           )),
                     ),
@@ -1004,7 +1021,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
                               ],
                             ),
-                            allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000),
+                            allInfoText(liftNotification.liftTime, liftNotification.distance / 1000),
                           ],
                         )
                     ),
@@ -1144,7 +1161,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
                               ],
                             ),
-                            allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000),
+                            allInfoText(liftNotification.liftTime, liftNotification.distance / 1000),
                           ],
                         )),
                   ),
@@ -1305,7 +1322,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
                                 ],
                               ),
-                              allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000),
+                              allInfoText(liftNotification.liftTime, liftNotification.distance / 1000),
 
                             ],
                           )),
@@ -1328,7 +1345,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
         });
   }
 
-  Widget allInfoText(DateTime time,int dist){
+  Widget allInfoText(DateTime time,double dist){
     return Container(
         child:Row(
           children: [

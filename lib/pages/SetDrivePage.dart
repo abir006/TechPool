@@ -54,7 +54,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
   @override
   void initState() {
     super.initState();
-    _hourController = TextEditingController(text: "Press to choose time");
+    _hourController = TextEditingController(text: "Choose time");
     _startPointController = TextEditingController(text: "");
     _destPointController = TextEditingController(text: "");
     _stopPoint1Controller = TextEditingController(text: "");
@@ -618,126 +618,129 @@ class _SetDrivePageState extends State<SetDrivePage> {
 
     final chooseTime2 =
     Container(
-      child: InkWell(
-        child: TextField(
-          maxLength: 30,
-          decoration:  InputDecoration(
-            icon: Icon(Icons.timer,color: myColor,),
-            focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(width: 1000.0),
+      child: Padding(
+        padding: const EdgeInsets.only(right: 20),
+        child: InkWell(
+          child: TextField(
+            maxLength: 30,
+            decoration:  InputDecoration(
+              icon: Icon(Icons.timer,color: myColor,),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(width: 1000.0),
+              ),
+              disabledBorder: UnderlineInputBorder(
+                borderSide: BorderSide(width:1,color: myColor),
+              ),
+              labelText: "Time",
+              labelStyle: TextStyle(fontSize: 17,color:myColor),
             ),
-            disabledBorder: UnderlineInputBorder(
-              borderSide: BorderSide(width:1,color: myColor),
-            ),
-            labelText: "Time",
-            labelStyle: TextStyle(fontSize: 17,color:myColor),
+            controller: _hourController,
+            textCapitalization: TextCapitalization.sentences,
+            //controller: controllerText,
+            //  maxLines: maxLines,
+            enabled: false,
           ),
-          controller: _hourController,
-          textCapitalization: TextCapitalization.sentences,
-          //controller: controllerText,
-          //  maxLines: maxLines,
-          enabled: false,
-        ),
-        onTap: () {
-          DateTime fixedTime = widget.currentDate
-              .subtract(new Duration(hours: widget.currentDate.hour))
-              .subtract(new Duration(minutes: widget.currentDate.minute))
-              .add(new Duration(hours: DateTime.now().hour))
-              .add(new Duration(minutes: DateTime.now().minute));
+          onTap: () {
+            DateTime fixedTime = widget.currentDate
+                .subtract(new Duration(hours: widget.currentDate.hour))
+                .subtract(new Duration(minutes: widget.currentDate.minute))
+                .add(new Duration(hours: DateTime.now().hour))
+                .add(new Duration(minutes: DateTime.now().minute));
 
-          showDialog(
-              context: context,
-              builder: (_) => new SimpleDialog(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(20))),
-                title: Center(
-                    child: Text("Choose departure time",
-                        style: TextStyle(fontSize: 21))),
-                //content: Text("Hey!"),
-                children: [
-                  TimePickerSpinner(
-                    is24HourMode: true,
-                    normalTextStyle:
-                    TextStyle(fontSize: 28, color: Colors.grey),
-                    highlightedTextStyle:
-                    TextStyle(fontSize: 34, color: secondColor),
-                    //spacing: 50,
-                    //itemHeight: 80,
-                    alignment: Alignment.center,
-                    isForce2Digits: true,
-                    minutesInterval: 5,
-                    time:
-                    _chosenTime != null ? _chosenTime : fixedTime,
-                    isShowSeconds: false,
-                    onTimeChange: (time) {
-                      setState(() {
-                        _chosenTimeCandidate = time;
-                      });
-                    },
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment
-                        .center, //Center Row contents horizontally,
-                    children: [
-                      FlatButton(
-                        child: Text('CANCEL',
-                            style: TextStyle(
-                                fontSize: 16, color: mainColor)),
-                        onPressed: () {
-                          setState(() {
-                            Navigator.of(context).pop();
-                          });
-                        },
-                      ),
-                      FlatButton(
-                        child: Text('CONFIRM',
-                            style: TextStyle(
-                                fontSize: 16, color: mainColor)),
-                        // onPressed: () {
-                        //   _hourController.text =
-                        //   //DateFormat('dd/MM - kk:mm')
-                        //   DateFormat('kk:mm')
-                        //           .format(_chosenTimeCandidate);
-                        //   _chosenTime = _chosenTimeCandidate;
-                        //   checktimes();
-                        //   Navigator.of(context).pop();
-                        // },
-                        onPressed: () {
-                          setState(() {
-                            _hourController.text =
-                            //DateFormat('dd/MM - kk:mm')
-                            DateFormat('kk:mm')
-                                .format(_chosenTimeCandidate);
-                            _chosenTime = _chosenTimeCandidate;
-                            checktimes();
-                            Navigator.of(context).pop();
-                          });
-                        },
-                      )
-                    ],
-                  ),
-                ],
-              ));
-        },
+            showDialog(
+                context: context,
+                builder: (_) => new SimpleDialog(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(20))),
+                  title: Center(
+                      child: Text("Choose departure time",
+                          style: TextStyle(fontSize: 21))),
+                  //content: Text("Hey!"),
+                  children: [
+                    TimePickerSpinner(
+                      is24HourMode: true,
+                      normalTextStyle:
+                      TextStyle(fontSize: 28, color: Colors.grey),
+                      highlightedTextStyle:
+                      TextStyle(fontSize: 34, color: secondColor),
+                      //spacing: 50,
+                      //itemHeight: 80,
+                      alignment: Alignment.center,
+                      isForce2Digits: true,
+                      minutesInterval: 5,
+                      time:
+                      _chosenTime != null ? _chosenTime : fixedTime,
+                      isShowSeconds: false,
+                      onTimeChange: (time) {
+                        setState(() {
+                          _chosenTimeCandidate = time;
+                        });
+                      },
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment
+                          .center, //Center Row contents horizontally,
+                      children: [
+                        FlatButton(
+                          child: Text('CANCEL',
+                              style: TextStyle(
+                                  fontSize: 16, color: mainColor)),
+                          onPressed: () {
+                            setState(() {
+                              Navigator.of(context).pop();
+                            });
+                          },
+                        ),
+                        FlatButton(
+                          child: Text('CONFIRM',
+                              style: TextStyle(
+                                  fontSize: 16, color: mainColor)),
+                          // onPressed: () {
+                          //   _hourController.text =
+                          //   //DateFormat('dd/MM - kk:mm')
+                          //   DateFormat('kk:mm')
+                          //           .format(_chosenTimeCandidate);
+                          //   _chosenTime = _chosenTimeCandidate;
+                          //   checktimes();
+                          //   Navigator.of(context).pop();
+                          // },
+                          onPressed: () {
+                            setState(() {
+                              _hourController.text =
+                              //DateFormat('dd/MM - kk:mm')
+                              DateFormat('kk:mm')
+                                  .format(_chosenTimeCandidate);
+                              _chosenTime = _chosenTimeCandidate;
+                              checktimes();
+                              Navigator.of(context).pop();
+                            });
+                          },
+                        )
+                      ],
+                    ),
+                  ],
+                ));
+          },
+        ),
       ),
     );
 
-    final timeText1 = Container(
-      child: textBoxFieldDisableCentered(
-          size: MediaQuery.of(context).size,
-          hintText: "",
-          textFieldController: _hourController,
-          validator: (value) {
-            if (_chosenTime == null)
-              return '                             Time not chosen';
-             else if (_chosenTime.isBefore(DateTime.now())){
-              _hourController.text = "";
-              return '                             Time already passed';
-            }
-            else
-              return null;
-          }),
-    );
+    // final timeText1 = Container(
+    //   child: textBoxFieldDisableCentered(
+    //       size: MediaQuery.of(context).size,
+    //       hintText: "",
+    //       textFieldController: _hourController,
+    //       validator: (value) {
+    //         if (_chosenTime == null)
+    //           return '                             Time not chosen';
+    //          else if (_chosenTime.isBefore(DateTime.now())){
+    //           _hourController.text = "";
+    //           return '                             Time already passed';
+    //         }
+    //         else
+    //           return null;
+    //       }),
+    // );
 
     // child: textBoxFieldDisableCentered(
     //     size: MediaQuery.of(context).size,

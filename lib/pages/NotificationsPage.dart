@@ -12,6 +12,8 @@ import 'package:rxdart/rxdart.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'NotificationInfo.dart';
+import 'DesiredRequestPage.dart';
+
 class NotificationsPage extends StatefulWidget {
   @override
   _NotificationsPageState createState() => _NotificationsPageState();
@@ -737,7 +739,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
         builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
           if (snapshot.hasData) {
             return InkWell(
-              onTap:  () async {
+              onTap: () async {
                 //Preparing and opening the info page
                 var drive = await firestore.collection("Drives").doc(
                     liftNotification.driveId).get();
@@ -769,6 +771,19 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 //     },
                 //     fullscreenDialog: true
                 // ));
+
+                  await Navigator.of(context).push(new MaterialPageRoute<Null>(
+                      builder: (BuildContext context) {
+                        return DesiredRequestPage(lift: liftToShow,
+                          notification: liftNotification,
+                        );
+                      },
+                      fullscreenDialog: true
+                  ));
+                  // setState(() {
+                  //
+                  // });
+
               },
               child: Container(
                 margin: EdgeInsets.only(

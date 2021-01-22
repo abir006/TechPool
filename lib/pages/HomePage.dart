@@ -45,7 +45,8 @@ class _HomePageState extends State<HomePage> {
       onMessage: (Map<String, dynamic> message){
           try{
             if (message["data"]["type"] == "Reminder") {
-              Flushbar(backgroundGradient: LinearGradient(
+              Flushbar flush;
+              flush = Flushbar(backgroundGradient: LinearGradient(
                   colors: [secondColor,Colors.blueGrey,]),
                 icon: Icon(
                   Icons.notifications_active,
@@ -69,7 +70,11 @@ class _HomePageState extends State<HomePage> {
                 flushbarStyle: FlushbarStyle.GROUNDED,
                 reverseAnimationCurve: Curves.decelerate,
                 forwardAnimationCurve: Curves.elasticOut,
-              ).show(context);
+                onTap: (Flushbar x) async {
+                  flush.dismiss();
+                  await hourBeforeNotificationPressed(message);
+                },
+              )..show(context);
             }
           }catch(e){
             print(e);
@@ -213,6 +218,10 @@ class _HomePageState extends State<HomePage> {
                       userId: message["data"]["idTo"],
                     )));*/
     }catch(_){}
+  }
+
+  void ff(Map<String, dynamic> message){
+    return;
   }
 
   Future hourBeforeNotificationPressed(Map<String, dynamic> message) async {

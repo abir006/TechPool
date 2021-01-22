@@ -18,6 +18,7 @@ import 'package:tech_pool/CalendarEvents.dart';
 import 'package:tech_pool/TechDrawer.dart';
 import 'ChatTalkPage.dart';
 import 'SetDrivePage.dart';
+import 'package:flushbar/flushbar.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -38,28 +39,65 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     firebaseMessaging.configure(
-      onMessage: (Map<String, dynamic> message){return;},
+      onMessage: (Map<String, dynamic> message){
+          try{
+            if (message["data"]["type"] == "Reminder") {
+              Flushbar(backgroundGradient: LinearGradient(
+                  colors: [secondColor,Colors.blueGrey,]),
+                icon: Icon(
+                  Icons.notifications_active,
+                  color: Colors.white,
+                ),
+                titleText: Text(
+                  "Reminder:",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20.0,
+                      color: Colors.white,
+                      fontFamily: "ShadowsIntoLightTwo"),
+                ),
+                messageText: Text(
+                  message["notification"]["body"],
+                  style: TextStyle(fontSize: 18.0,
+                      color: Colors.white,
+                      fontFamily: "ShadowsIntoLightTwo"),
+                ),
+                flushbarPosition: FlushbarPosition.TOP,
+                flushbarStyle: FlushbarStyle.GROUNDED,
+                reverseAnimationCurve: Curves.decelerate,
+                forwardAnimationCurve: Curves.elasticOut,
+              ).show(context);
+            }
+          }catch(e){
+            print(e);
+          }
+          return;
+        },
       onLaunch: (Map<String, dynamic> message) async {
         if(lastNotifUsed != message["data"]["google.message_id"]) {
           lastNotifUsed = message["data"]["google.message_id"];
-          if (message["data"]["type"] == "Reminder") {
-            await hourBeforeNotificationPressed(message);
-          }
-          if (message["data"]["type"] == "Chat") {
-            await chatNotification(message);
-          }
+          try {
+            if (message["data"]["type"] == "Reminder") {
+              await hourBeforeNotificationPressed(message);
+            }
+            if (message["data"]["type"] == "Chat") {
+              await chatNotification(message);
+            }
+          }catch(_){}
         }
         return;
       },
       onResume: (Map<String, dynamic> message) async {
         if(lastNotifUsed != message["data"]["google.message_id"]) {
           lastNotifUsed = message["data"]["google.message_id"];
-          if (message["data"]["type"] == "Reminder") {
-            await hourBeforeNotificationPressed(message);
-          }
-          if (message["data"]["type"] == "Chat") {
-            await chatNotification2(message);
-          }
+          try {
+            if (message["data"]["type"] == "Reminder") {
+              await hourBeforeNotificationPressed(message);
+            }
+            if (message["data"]["type"] == "Chat") {
+              await chatNotification2(message);
+            }
+          }catch(_){}
         }
         return;
       },
@@ -374,7 +412,7 @@ class _HomePageState extends State<HomePage> {
                             }
                           }
                       ),
-                      onPressed: () => Navigator.pushReplacement(
+                      onPressed: () => Navigator.push(
                           context,
                           MaterialPageRoute(
                               builder: (context) => NotificationsPage()))
@@ -408,7 +446,7 @@ class _HomePageState extends State<HomePage> {
                             transaction.delete(element.reference);
                           });
                         });
-                        Navigator.pushReplacement(
+                        Navigator.push(
                             context,
                             MaterialPageRoute(
                                 builder: (context) => ChatPage(currentUserId: userRep.user.email,fromNotification: false,)));}
@@ -520,7 +558,7 @@ class _HomePageState extends State<HomePage> {
                   }
                 }
                 ),
-                onPressed: () => Navigator.pushReplacement(
+                onPressed: () => Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (context) => NotificationsPage()))
@@ -555,7 +593,7 @@ class _HomePageState extends State<HomePage> {
                       transaction.delete(element.reference);
                     });
                   });
-                  Navigator.pushReplacement(
+                  Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (context) => ChatPage(currentUserId: userRep.user.email,fromNotification: false,)));}

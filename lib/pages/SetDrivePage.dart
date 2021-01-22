@@ -950,9 +950,6 @@ class _SetDrivePageState extends State<SetDrivePage> {
                       'Driver': userRep.user.email,
                       //'Driver': "testing@technion.co.il",
                     });
-
-
-
                     //((element) async {
                     DocumentSnapshot currentDriveDoc = await widget.db.collection('Drives').doc(newDriveRef.id).get();
                     MyLift docLift = new MyLift(
@@ -968,9 +965,9 @@ class _SetDrivePageState extends State<SetDrivePage> {
                     bool res = await _checkForFitDesiredAndSendNotifications(docLift);
 
                     FocusManager.instance.primaryFocus.unfocus();
-                 //   Navigator.of(context).pop();
-                    // .then((value) => Navigator.pop(context))
-                    // .catchError((error) => print("Something went wrong. Please try again"));
+                    Navigator.of(context).pop();
+                     //.then((value) => Navigator.pop(context))
+                     //.catchError((error) => print("Something went wrong. Please try again"));
                   }
                   catch(e){
                     _key2.currentState.showSnackBar(SnackBar(content: Text("Something went wrong. Please try again", style: TextStyle(fontSize: 19,color: Colors.red),)));

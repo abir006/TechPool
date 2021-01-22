@@ -4,8 +4,8 @@ import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:tech_pool/TechDrawer.dart';
 import 'package:tech_pool/Utils.dart';
+import 'package:tech_pool/appValidator.dart';
 import 'package:tech_pool/pages/HomePage.dart';
-import '../appValidator.dart';
 import 'ChatPage.dart';
 import 'ProfilePage.dart';
 import 'package:rxdart/rxdart.dart';
@@ -988,15 +988,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
                 //Here push request lift page
 
-                // Navigator.of(context).push(new MaterialPageRoute<Null>(
-                //     builder: (BuildContext context) {
-                //       return NotificationInfo(
-                //           lift: liftToShow,
-                //           notification: liftNotification,
-                //           type: NotificationInfoType.Accepted);
-                //     },
-                //     fullscreenDialog: true
-                // ));
                 FocusScope.of(context).unfocus();
                 try{
                   slidableController.activeState.close();}

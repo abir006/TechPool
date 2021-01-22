@@ -21,7 +21,9 @@ export const sendLiftNotification = functions.firestore
       // console.log(doc);
 
       const typeStr = doc.type;
-      const notificationID = doc.id;
+      const notificationID = context.params.notification;
+      console.log("notificationId at beginning: " +
+                      notificationID);
       const driveID = doc.driveId;
       const liftTime = doc.liftTime.toDate().toLocaleString(
           "en-GB", {timeZone: "Israel", month: "2-digit", day: "2-digit",
@@ -235,10 +237,10 @@ export const sendLiftNotification = functions.firestore
                     sound: "default",
                   },
                   data: {
-                    type: typeStr,
+                    type: "liftNotification",
                     click_action: "FLUTTER_NOTIFICATION_CLICK",
                     notificationId: notificationID,
-                    driveId: driveID,
+                    typeStr: typeStr,
                   },
                 };
                 // Push to the target device

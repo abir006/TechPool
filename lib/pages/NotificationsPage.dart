@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:tech_pool/TechDrawer.dart';
 import 'package:tech_pool/Utils.dart';
+import 'package:tech_pool/pages/HomePage.dart';
 import '../appValidator.dart';
 import 'ChatPage.dart';
 import 'ProfilePage.dart';
@@ -12,6 +13,7 @@ import 'package:intl/intl.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'NotificationInfo.dart';
 import 'DesiredRequestPage.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 class NotificationsPage extends StatefulWidget {
   @override
@@ -24,6 +26,22 @@ class _NotificationsPageState extends State<NotificationsPage> {
   //DateTime selectedDay = DateTime.now();
   List<LiftNotification> _notifications;
   appValidator appValid;
+  SlidableController slidableController;
+  List<String> net = [];
+
+  void handleSlideAnimationChanged(Animation<double> slideAnimation) {
+    setState(() {
+    });
+  }
+
+  void handleSlideIsOpenChanged(bool isOpen) {
+    if(isOpen==true) {
+    setState(() {
+      slidableController.activeState.open();
+    });
+
+      }
+  }
 
   @override
   void initState() {
@@ -32,6 +50,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
     appValid = appValidator();
     appValid.checkConnection(context);
     appValid.checkVersion(context);
+    slidableController = SlidableController(
+      onSlideAnimationChanged: handleSlideAnimationChanged,
+      onSlideIsOpenChanged: handleSlideIsOpenChanged,
+    );
   }
 
 
@@ -65,260 +87,282 @@ class _NotificationsPageState extends State<NotificationsPage> {
   Widget build(BuildContext context) {
     //double defaultSpacewidth = MediaQuery.of(context).size.height * 0.016;
     return Consumer<UserRepository>(builder: (context, userRep, child) {
-      return StreamBuilder<QuerySnapshot>(
-          stream: firestore.collection("Notifications").doc(userRep.user?.email).collection("UserNotifications").snapshots(),
-          //return StreamBuilder<List<QuerySnapshot>>(
-          //firestore.collection("Notifications").doc("testing@campus.technion.ac.il").collection("UserNotifications").snapshots()],
-          //(values) => [values[0]]),
-          // stream: CombineLatestStream([
-          //   firestore.collection("Notifications").doc(userRep.user?.email).collection("UserNotifications").snapshots()],
-          //     //firestore.collection("Notifications").doc("testing@campus.technion.ac.il").collection("UserNotifications").snapshots()],
-          //         (values) => [values[0]]),
-          builder: (context, snapshot) {
-            _notifications = [];
-            if (snapshot.hasData) {
-              snapshot.data.docs.forEach((element) {
-                //snapshot.data[0].docs.forEach((element) {
-                String notificationId = element.id;
-                var elementData = element.data();
-                String driveId = elementData["driveId"];
-                String driverId = elementData["driverId"];//email
-                String startCity = elementData["startCity"];
-                String destCity = elementData["destCity"];
-                int price = elementData["price"];
-                int distance = elementData["distance"];
-                DateTime liftTime = elementData["liftTime"].toDate();
-                DateTime notificationTime = elementData["notificationTime"].toDate();
-                String type = elementData["type"];
-                String startAddress = elementData["startAddress"];
-                String destAddress = elementData["destAddress"];
-
-                var notification;
-                switch(type) {
-                  case "RequestedLift" :
-                    {
-                      String passengerId = elementData["passengerId"];
-                      String passengerNote = elementData["passengerNote"];
-                      bool bigBag = elementData["bigBag"];
+      return GestureDetector(
+        onTap:() {
+        //   Slidable
+        //       .of(context)
+        //       ?.renderingMode == SlidableRenderingMode.none
+        //       ? Slidable.of(context)?.open()
+        //       : Slidable.of(context)?.close();
+        // },
+          FocusScope.of(context).requestFocus(new FocusNode());
+          try{
+            slidableController.activeState.close();}
+          catch(e){}},
+        child: Stack(
+            children: <Widget>[
+              Container(
+            child: StreamBuilder<QuerySnapshot>(
+                stream: firestore.collection("Notifications").doc(userRep.user?.email).collection("UserNotifications").snapshots(),
+                //return StreamBuilder<List<QuerySnapshot>>(
+                //firestore.collection("Notifications").doc("testing@campus.technion.ac.il").collection("UserNotifications").snapshots()],
+                //(values) => [values[0]]),
+                // stream: CombineLatestStream([
+                //   firestore.collection("Notifications").doc(userRep.user?.email).collection("UserNotifications").snapshots()],
+                //     //firestore.collection("Notifications").doc("testing@campus.technion.ac.il").collection("UserNotifications").snapshots()],
+                //         (values) => [values[0]]),
+                builder: (context, snapshot) {
+                  _notifications = [];
+                  if (snapshot.hasData) {
+                    snapshot.data.docs.forEach((element) {
+                      //snapshot.data[0].docs.forEach((element) {
+                      String notificationId = element.id;
+                      var elementData = element.data();
+                      String driveId = elementData["driveId"];
+                      String driverId = elementData["driverId"];//email
+                      String startCity = elementData["startCity"];
+                      String destCity = elementData["destCity"];
                       int price = elementData["price"];
-                      // int NumberSeats = elementData["NumberSeats"];
-                      // int numberOfPassengers = ;
-                      notification = LiftNotification.requested(
-                          notificationId,
-                          driveId,
-                          driverId,
-                          startCity,
-                          destCity,
-                          price,
-                          distance,
-                          liftTime,
-                          notificationTime,
-                          type,
-                          startAddress,
-                          destAddress,
-                          // NumberSeats,
-                          // numberOfPassengers,
-                          passengerId,
-                          passengerNote,
-                          bigBag
-                      );
-                      break;
-                    }
-                  case "RejectedLift" :
-                    {
-                      notification = LiftNotification(
-                          notificationId,
-                          driveId,
-                          driverId,
-                          startCity,
-                          destCity,
-                          price,
-                          distance,
-                          liftTime,
-                          notificationTime,
-                          type,
-                          startAddress,
-                          destAddress);
-                      break;
-                    }
+                      int distance = elementData["distance"];
+                      DateTime liftTime = elementData["liftTime"].toDate();
+                      DateTime notificationTime = elementData["notificationTime"].toDate();
+                      String type = elementData["type"];
+                      String startAddress = elementData["startAddress"];
+                      String destAddress = elementData["destAddress"];
 
-                  case "AcceptedLift" :
-                    {
-                      notification = LiftNotification(
-                          notificationId,
-                          driveId,
-                          driverId,
-                          startCity,
-                          destCity,
-                          price,
-                          distance,
-                          liftTime,
-                          notificationTime,
-                          type,
-                          startAddress,
-                          destAddress
-                      );
-                      break;
-                    }
-                  case "DesiredLift" :
-                    {
-                      String desiredId = elementData["desiredId"];
-                      notification = LiftNotification.desired(
-                          notificationId,
-                          driveId,
-                          driverId,
-                          startCity,
-                          destCity,
-                          price,
-                          distance,
-                          liftTime,
-                          notificationTime,
-                          type,
-                          startAddress,
-                          destAddress,
-                          desiredId,
-                      );
-                      break;
-                    }
-                //in case a hitchhiker canceled a lift - notify driver
-                  case "CanceledLift" :
-                    {
-                      String passengerId = elementData["passengerId"];
-                      notification = LiftNotification(
-                          notificationId,
-                          driveId,
-                          driverId,
-                          startCity,
-                          destCity,
-                          price,
-                          distance,
-                          liftTime,
-                          notificationTime,
-                          type,
-                          startAddress,
-                          destAddress,
-                          passengerId
-                      );
-                      break;
-                    }
-                //in case a driver canceled a drive- notify hitchhikers
-                  case "CanceledDrive" :
-                    {
-                      notification = LiftNotification(
-                          notificationId,
-                          driveId,
-                          driverId,
-                          startCity,
-                          destCity,
-                          price,
-                          distance,
-                          liftTime,
-                          notificationTime,
-                          type,
-                          startAddress,
-                          destAddress);
-                      break;
-                    }
-                }
-                _notifications.add(notification);
-              });
-              _markAsRead(userRep);
-              //sorting the notifications to show by time of arrival
-              _notifications.sort((a, b) {
-                if (a.notificationTime.isAfter(b.notificationTime)) {
-                  return -1;
-                } else {
-                  return 1;
-                }
-              });
-              if(_notifications.length == 0){
-                //double defaultSpacewidth = MediaQuery.of(context).size.width * 0.016;
+                      var notification;
+                      switch(type) {
+                        case "RequestedLift" :
+                          {
+                            String passengerId = elementData["passengerId"];
+                            String passengerNote = elementData["passengerNote"];
+                            bool bigBag = elementData["bigBag"];
+                            int price = elementData["price"];
+                            // int NumberSeats = elementData["NumberSeats"];
+                            // int numberOfPassengers = ;
+                            notification = LiftNotification.requested(
+                                notificationId,
+                                driveId,
+                                driverId,
+                                startCity,
+                                destCity,
+                                price,
+                                distance,
+                                liftTime,
+                                notificationTime,
+                                type,
+                                startAddress,
+                                destAddress,
+                                // NumberSeats,
+                                // numberOfPassengers,
+                                passengerId,
+                                passengerNote,
+                                bigBag
+                            );
+                            break;
+                          }
+                        case "RejectedLift" :
+                          {
+                            notification = LiftNotification(
+                                notificationId,
+                                driveId,
+                                driverId,
+                                startCity,
+                                destCity,
+                                price,
+                                distance,
+                                liftTime,
+                                notificationTime,
+                                type,
+                                startAddress,
+                                destAddress);
+                            break;
+                          }
 
-                return Scaffold(
-                    key: _key,
-                    backgroundColor: mainColor,
-                  appBar: AppBar(
-                    elevation: 0,
-                    title: Text(
-                      "Notifications",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    actions: [
-                      IconButton(
-                          icon: StreamBuilder(
-                              stream: firestore.collection("ChatFriends").doc(userRep.user?.email).collection("UnRead").snapshots(), // a previously-obtained Future<String> or null
-                              builder: (BuildContext context, snapshot) {
-                                if (snapshot.hasData) {
-                                  //QuerySnapshot values = snapshot.data;
-                                  //builder: (_, snapshot) =>
+                        case "AcceptedLift" :
+                          {
+                            notification = LiftNotification(
+                                notificationId,
+                                driveId,
+                                driverId,
+                                startCity,
+                                destCity,
+                                price,
+                                distance,
+                                liftTime,
+                                notificationTime,
+                                type,
+                                startAddress,
+                                destAddress
+                            );
+                            break;
+                          }
+                        case "DesiredLift" :
+                          {
+                            String desiredId = elementData["desiredId"];
+                            notification = LiftNotification.desired(
+                                notificationId,
+                                driveId,
+                                driverId,
+                                startCity,
+                                destCity,
+                                price,
+                                distance,
+                                liftTime,
+                                notificationTime,
+                                type,
+                                startAddress,
+                                destAddress,
+                                desiredId,
+                            );
+                            break;
+                          }
+                      //in case a hitchhiker canceled a lift - notify driver
+                        case "CanceledLift" :
+                          {
+                            String passengerId = elementData["passengerId"];
+                            notification = LiftNotification(
+                                notificationId,
+                                driveId,
+                                driverId,
+                                startCity,
+                                destCity,
+                                price,
+                                distance,
+                                liftTime,
+                                notificationTime,
+                                type,
+                                startAddress,
+                                destAddress,
+                                passengerId
+                            );
+                            break;
+                          }
+                      //in case a driver canceled a drive- notify hitchhikers
+                        case "CanceledDrive" :
+                          {
+                            notification = LiftNotification(
+                                notificationId,
+                                driveId,
+                                driverId,
+                                startCity,
+                                destCity,
+                                price,
+                                distance,
+                                liftTime,
+                                notificationTime,
+                                type,
+                                startAddress,
+                                destAddress);
+                            break;
+                          }
+                      }
+                      _notifications.add(notification);
+                    });
+                    _markAsRead(userRep);
+                    //sorting the notifications to show by time of arrival
+                    _notifications.sort((a, b) {
+                      if (a.notificationTime.isAfter(b.notificationTime)) {
+                        return -1;
+                      } else {
+                        return 1;
+                      }
+                    });
+                    if(_notifications.length == 0){
+                      //double defaultSpacewidth = MediaQuery.of(context).size.width * 0.016;
 
-                                  return BadgeIcon(
-                                    icon: Icon(Icons.message_outlined, size: 25),
-                                    badgeCount: snapshot.data.size,
-                                  );
-                                }
-                                else{
-                                  return BadgeIcon(
-                                    icon: Icon(Icons.notifications, size: 25),
-                                    badgeCount: 0,
-                                  );
-                                }
-                              }
+                      return Scaffold(
+                          key: _key,
+                          backgroundColor: mainColor,
+                        appBar: AppBar(
+                          elevation: 0,
+                          title: Text(
+                            "Notifications",
+                            style: TextStyle(color: Colors.white),
                           ),
-                          onPressed: () async {
-                            QuerySnapshot q2 = await  FirebaseFirestore.instance.collection("ChatFriends").doc(userRep.user.email)
-                                .collection("UnRead").get();
+                          actions: [
+                            IconButton(
+                                icon: StreamBuilder(
+                                    stream: firestore.collection("ChatFriends").doc(userRep.user?.email).collection("UnRead").snapshots(), // a previously-obtained Future<String> or null
+                                    builder: (BuildContext context, snapshot) {
+                                      if (snapshot.hasData) {
+                                        //QuerySnapshot values = snapshot.data;
+                                        //builder: (_, snapshot) =>
 
-                            FirebaseFirestore.instance.runTransaction((transaction) async {
-                              q2.docs.forEach((element) {
-                                transaction.delete(element.reference);
-                              });
-                            });
-                            Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => ChatPage(currentUserId: userRep.user.email)));}
-                      )
-                    ],
-                  ),
-                  drawer: techDrawer(userRep, context, DrawerSections.notifications),
-                  body: Container(
-                  decoration: pageContainerDecoration,
-                  margin: pageContainerMargin,
-                  //padding: EdgeInsets.only(bottom: 6.0,top: 7.0, left: defaultSpacewidth, right: defaultSpacewidth*4),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      //Spacer(),
-                      //SizedBox(height: MediaQuery.of(context).size.height * 0.1),
-                      Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Icon(Icons.update, size: 30),
-                        SizedBox(width: MediaQuery.of(context).size.width * 0.02),
-                        Text("No notifications",style: TextStyle(fontSize: 30, color: Colors.black))
-                      ]),
-                      //Spacer()
-                    ],
-                  ),
+                                        return BadgeIcon(
+                                          icon: Icon(Icons.message_outlined, size: 25),
+                                          badgeCount: snapshot.data.size,
+                                        );
+                                      }
+                                      else{
+                                        return BadgeIcon(
+                                          icon: Icon(Icons.notifications, size: 25),
+                                          badgeCount: 0,
+                                        );
+                                      }
+                                    }
+                                ),
+                                onPressed: () async {
+                                  QuerySnapshot q2 = await  FirebaseFirestore.instance.collection("ChatFriends").doc(userRep.user.email)
+                                      .collection("UnRead").get();
 
-                  ));
-              }
-              return _buildPage(context, userRep);
-            } else if (snapshot.hasError) {
-              return Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Icon(Icons.error),
-                    Text("Error on loading notifications from the database. Please try again.")
-                  ]);
-            } else {
-                return _buildPage(context, userRep);
-            }
-          });
+                                  FirebaseFirestore.instance.runTransaction((transaction) async {
+                                    q2.docs.forEach((element) {
+                                      transaction.delete(element.reference);
+                                    });
+                                  });
+                                  Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => ChatPage(currentUserId: userRep.user.email)));}
+                            )
+                          ],
+                        ),
+                        drawer: techDrawer(userRep, context, DrawerSections.notifications),
+                        body: WillPopScope(
+                            onWillPop: () => Navigator.pushReplacement(
+                                context, MaterialPageRoute(builder: (context) => HomePage())),
+                            child:Container(
+                            decoration: pageContainerDecoration,
+                            margin: pageContainerMargin,
+                            //padding: EdgeInsets.only(bottom: 6.0,top: 7.0, left: defaultSpacewidth, right: defaultSpacewidth*4),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                //Spacer(),
+                                //SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                                Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.update, size: 30),
+                                  SizedBox(width: MediaQuery.of(context).size.width * 0.02),
+                                  Text("No notifications",style: TextStyle(fontSize: 30, color: Colors.black))
+                                ]),
+                                //Spacer()
+                              ],
+                            ),
+
+                        )));
+                    }
+                    return _buildPage(context, userRep);
+                  } else if (snapshot.hasError) {
+                    return Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Icon(Icons.error),
+                          Text("Error on loading notifications from the database. Please try again.")
+                        ]);
+                  } else {
+                      return _buildPage(context, userRep);
+                  }
+                }),
+          )
+            ],
+        ),
+      );
     });
   }
 
@@ -371,172 +415,269 @@ class _NotificationsPageState extends State<NotificationsPage> {
           ],
         ),
         drawer: techDrawer(userRep, context, DrawerSections.notifications),
-      body:Container(
-            padding: const EdgeInsets.only(bottom: 6.0, top: 7.0),
-            decoration: pageContainerDecoration,
-            margin: pageContainerMargin,
-            //padding: EdgeInsets.only(left: defaultSpacewidth, right: defaultSpacewidth),
-            child: Column(
-              children: [Expanded(child:ListView.builder(
-                shrinkWrap: true,
-                padding: EdgeInsets.only(left: defaultSpacewidth*0.4, right: defaultSpacewidth*0.4, bottom: defaultSpacewidth*0.4,top:defaultSpacewidth*0.4 ),
-                itemCount: _notifications.length,
-                //separatorBuilder: (BuildContext context, int index) => Divider(thickness: 1,),
-                itemBuilder: (BuildContext context, int index) {
-                  final notification = _notifications[index];
+      body:WillPopScope(
+    onWillPop: () => Navigator.pushReplacement(
+    context, MaterialPageRoute(builder: (context) => HomePage())),
+    child:Container(
+          padding: const EdgeInsets.only(bottom: 6.0, top: 7.0),
+          decoration: pageContainerDecoration,
+          margin: pageContainerMargin,
+          //padding: EdgeInsets.only(left: defaultSpacewidth, right: defaultSpacewidth),
+          child: Column(
+            children: [Expanded(child:ListView.builder(
+              shrinkWrap: true,
+              padding: EdgeInsets.only(left: defaultSpacewidth*0.4, right: defaultSpacewidth*0.4, bottom: defaultSpacewidth*0.4,top:defaultSpacewidth*0.4 ),
+              itemCount: _notifications.length,
+              //separatorBuilder: (BuildContext context, int index) => Divider(thickness: 1,),
+              itemBuilder: (BuildContext context, int index) {
+                final notification = _notifications[index];
 
-                  Widget tileToDisplay;
-                  if(_notifications[index].type == "AcceptedLift") {
-                    tileToDisplay = _buildAcceptedTile(_notifications[index]);
-                  }
-                  else if(_notifications[index].type == "RejectedLift") {
-                    tileToDisplay = _buildRejectedTile(_notifications[index]);
-                  }
-                  else if(_notifications[index].type == "RequestedLift") {
-                    tileToDisplay = _buildRequestedTile(_notifications[index]);
-                    return tileToDisplay;
-                  }
-                  else if(_notifications[index].type == "DesiredLift") {
-                    tileToDisplay = _buildDesiredTile(_notifications[index]);
-                    //return tileToDisplay;
-                  }
-                  else if(_notifications[index].type == "CanceledLift" || _notifications[index].type == "CanceledDrive") {
-                    tileToDisplay = _buildCanceledTile(_notifications[index]);
-                  }
-                  /*else {
-                    tileToDisplay = null;
-                  }*/
+                Widget tileToDisplay;
+                if(_notifications[index].type == "AcceptedLift") {
+                  tileToDisplay = _buildAcceptedTile(_notifications[index]);
+                }
+                else if(_notifications[index].type == "RejectedLift") {
+                  tileToDisplay = _buildRejectedTile(_notifications[index]);
+                }
+                else if(_notifications[index].type == "RequestedLift") {
+                  tileToDisplay = _buildRequestedTile(_notifications[index]);
+                  return tileToDisplay;
+                }
+                else if(_notifications[index].type == "DesiredLift") {
+                  tileToDisplay = _buildDesiredTile(_notifications[index]);
+                  //return tileToDisplay;
+                }
+                else if(_notifications[index].type == "CanceledLift" || _notifications[index].type == "CanceledDrive") {
+                  tileToDisplay = _buildCanceledTile(_notifications[index]);
+                }
+                /*else {
+                  tileToDisplay = null;
+                }*/
+                bool condition = true;
+                if(condition) {
+                  //return Container();
+                  return Slidable(
+                    enabled: _notifications.contains(notification),
+                    controller: slidableController,
+                    actionPane: SlidableScrollActionPane(),
+                    actionExtentRatio: 0.25,
+                    closeOnScroll: false,
+                    actions: <Widget>[
+                      Container(
+                        //padding: EdgeInsets.fromLTRB(0, 1, 0, 12,),
+                  margin: EdgeInsets.only(
+                      top: MediaQuery
+                      .of(context)
+                      .size
+                      .height * 0.006,
+                bottom: MediaQuery
+                    .of(context)
+                    .size
+                    .height * 0.006),
+                        child: FlatButton(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.0)),
+                          child: Center(child:
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.delete_outline, size: 33, color: Colors.white,),
+                              Text("Delete", style: TextStyle(
+                                  color: Colors.white, fontSize: 12),)
+                            ],
+                          ),),
+                          height: 100,
+                          // caption: 'Delete',
+                          color: Colors.red,
+                          //  icon: Icons.delete_outline,
+                          onPressed: () async {
+                            FirebaseFirestore.instance.runTransaction((
+                                transaction) async {
+                              // QuerySnapshot q2 = await FirebaseFirestore
+                              //     .instance
+                              //     .collection("ChatFriends").doc(
+                              //     userRep.user?.email).collection("Network")
+                              //     .doc(document.id.toString()).collection(
+                              //     document.id.toString())
+                              //     .get();
 
-                  return Dismissible(
-                    // Each Dismissible must contain a Key. Keys allow Flutter to
-                    // uniquely identify widgets.
-                    key: UniqueKey(),
-                    //Key(notification.toString()),
-                    //Key(notification.notificationTime.toString()),
-                    // Provide a function that tells the app
-                    // what to do after an item has been swiped away.
-                    onDismissed: (direction) async {
-                      //Here will come the query to delete notification from db.
-                      await firestore.collection("Notifications").
-                      doc(userRep.user?.email).collection("UserNotifications").
-                      doc(_notifications[index].notificationId).delete().then((value) =>
-                      {
-                        _key.currentState.showSnackBar(SnackBar(content: Text("Notification Deleted", style: TextStyle(fontSize: 20))))
-                        //return value;
-                      }
-                      );
+                              await firestore.collection("Notifications").
+                              doc(userRep.user?.email).collection("UserNotifications").
+                              doc(_notifications[index].notificationId).delete()
+                              //     .then((value) =>
+                              // {
+                              //   _key.currentState.showSnackBar(SnackBar(content: Text("Notification Deleted", style: TextStyle(fontSize: 20))))
+                              //   //return value;
+                              // }
+                              //)
+                              ;
 
-                      //await deleteNotification;
-
-                      /*setState(() {
-                      // Remove the item from the data source.
-                      _notifications.removeAt(index);
-                      });*/
-
-                      // Then show a snackbar.
-                      //Scaffold.of(context)
-                      //_key.currentState.showSnackBar(SnackBar(content: Text(/*$notification*/"Notification Deleted", style: TextStyle(fontSize: 20))));
-                    },
-                    // Show a red background as the item is swiped away.
-                    background: //Container(color: mainColor),
-
-                    Container(
-                      margin: EdgeInsets.only(
-                          top: MediaQuery
-                              .of(context)
-                              .size
-                              .height * 0.006,
-                          bottom: MediaQuery
-                              .of(context)
-                              .size
-                              .height * 0.006),
-                      decoration: BoxDecoration(
-                        color: mainColor,
-                        boxShadow: [BoxShadow(color: Colors.black, blurRadius: 2.0,
-                            spreadRadius: 0.0, offset: Offset(2.0, 2.0))
-                        ],
-                        border: Border.all(color: secondColor, width: 0.65),
-                        borderRadius: BorderRadius.circular(12.0),),
-                      child:
-                      Row(
-                        children: [
-                          Container(
-                              margin: EdgeInsets.only(
-                                  left: MediaQuery
-                                      .of(context)
-                                      .size
-                                      .height * 0.016, top: MediaQuery
-                                  .of(context)
-                                  .size
-                                  .height * 0.004),
-                              width: MediaQuery
-                                  .of(context)
-                                  .size
-                                  .height * 0.016 * 4,
-                              height: MediaQuery
-                                  .of(context)
-                                  .size
-                                  .height * 0.016 * 4,
-                              child: Icon(Icons.delete, size: 30, color: Colors.white)
-                            /*decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.teal,
-                                child:
-
-                              )*/
-                          ),
-                          Spacer(), // I just added one line
-                          Container(
-                              margin: EdgeInsets.only(
-                                /*left: MediaQuery
-                                      .of(context)
-                                      .size
-                                      .height * 0.016, */
-                                  top: MediaQuery
-                                      .of(context)
-                                      .size
-                                      .height * 0.004),
-                              width: MediaQuery
-                                  .of(context)
-                                  .size
-                                  .width * 0.016 * 12,
-                              height: MediaQuery
-                                  .of(context)
-                                  .size
-                                  .height * 0.016 * 4,
-                              child: Icon(Icons.delete, size: 30, color: Colors.white)
-                            /*decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.teal,
-                                child:
-
-                              )*/
-                          ),
-                        ],
+                              // Future.wait(q2.docs.map((element) {
+                              //   transaction.delete(element.reference);
+                              //   return Future(() => Null);
+                              // }));
+                              // transaction.delete(
+                              //     firestore.collection("ChatFriends").doc(
+                              //         userRep.user?.email)
+                              //         .collection("Network")
+                              //         .doc(document.id.toString()));
+                            });
+                            FocusScope.of(context).requestFocus(
+                                new FocusNode());
+                            try {
+                              slidableController.activeState.close();
+                            }
+                            catch (e) {}
+                          },
+                          //  FirebaseFirestore.instance.runTransaction((transaction) async {
+                          //    transaction.delete(firestore.collection("ChatFriends").doc(userRep.user?.email).collection("Network").doc(document.id.toString()));
+                          //  });
+                        ),
                       ),
+                    ],
+                    child: Container(
+                        child: tileToDisplay
                     ),
 
 
 
-                    child: tileToDisplay,
-                  );
 
-                  //return _buildTile(_notifications[index]);
-                  if(_notifications[index].type == "AcceptedLift") {
-                    return _buildAcceptedTile(_notifications[index]);
+                  );
+                }
+
+
+                else{
+                    return Dismissible(
+                      // Each Dismissible must contain a Key. Keys allow Flutter to
+                      // uniquely identify widgets.
+                      key: UniqueKey(),
+                      //Key(notification.toString()),
+                      //Key(notification.notificationTime.toString()),
+                      // Provide a function that tells the app
+                      // what to do after an item has been swiped away.
+                      onDismissed: (direction) async {
+                        //Here will come the query to delete notification from db.
+                        await firestore.collection("Notifications").
+                        doc(userRep.user?.email).collection("UserNotifications").
+                        doc(_notifications[index].notificationId).delete().then((value) =>
+                        {
+                          _key.currentState.showSnackBar(SnackBar(content: Text("Notification Deleted", style: TextStyle(fontSize: 20))))
+                          //return value;
+                        }
+                        );
+
+                        //await deleteNotification;
+
+                        /*setState(() {
+                      // Remove the item from the data source.
+                      _notifications.removeAt(index);
+                      });*/
+
+                        // Then show a snackbar.
+                        //Scaffold.of(context)
+                        //_key.currentState.showSnackBar(SnackBar(content: Text(/*$notification*/"Notification Deleted", style: TextStyle(fontSize: 20))));
+                      },
+                      // Show a red background as the item is swiped away.
+                      background: //Container(color: mainColor),
+
+                      Container(
+                        margin: EdgeInsets.only(
+                            top: MediaQuery
+                                .of(context)
+                                .size
+                                .height * 0.006,
+                            bottom: MediaQuery
+                                .of(context)
+                                .size
+                                .height * 0.006),
+                        decoration: BoxDecoration(
+                          color: mainColor,
+                          boxShadow: [BoxShadow(color: Colors.black, blurRadius: 2.0,
+                              spreadRadius: 0.0, offset: Offset(2.0, 2.0))
+                          ],
+                          border: Border.all(color: secondColor, width: 0.65),
+                          borderRadius: BorderRadius.circular(12.0),),
+                        child:
+                        Row(
+                          children: [
+                            Container(
+                                margin: EdgeInsets.only(
+                                    left: MediaQuery
+                                        .of(context)
+                                        .size
+                                        .height * 0.016, top: MediaQuery
+                                    .of(context)
+                                    .size
+                                    .height * 0.004),
+                                width: MediaQuery
+                                    .of(context)
+                                    .size
+                                    .height * 0.016 * 4,
+                                height: MediaQuery
+                                    .of(context)
+                                    .size
+                                    .height * 0.016 * 4,
+                                child: Icon(Icons.delete, size: 30, color: Colors.white)
+                              /*decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.teal,
+                                child:
+
+                              )*/
+                            ),
+                            Spacer(), // I just added one line
+                            Container(
+                                margin: EdgeInsets.only(
+                                  /*left: MediaQuery
+                                      .of(context)
+                                      .size
+                                      .height * 0.016, */
+                                    top: MediaQuery
+                                        .of(context)
+                                        .size
+                                        .height * 0.004),
+                                width: MediaQuery
+                                    .of(context)
+                                    .size
+                                    .width * 0.016 * 12,
+                                height: MediaQuery
+                                    .of(context)
+                                    .size
+                                    .height * 0.016 * 4,
+                                child: Icon(Icons.delete, size: 30, color: Colors.white)
+                              /*decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.teal,
+                                child:
+
+                              )*/
+                            ),
+                          ],
+                        ),
+                      ),
+
+
+
+                      child: tileToDisplay,
+                    );
                   }
-                  else if(_notifications[index].type == "RejectedLift") {
-                    return _buildRejectedTile(_notifications[index]);
-                  }
-                  else if(_notifications[index].type == "RequestedLift") {
-                    return _buildRequestedTile(_notifications[index]);
-                  }
-                  else {
-                    return null;
-                  }
-                },
-              ))],
-            )),
+                  // //return _buildTile(_notifications[index]);
+                  // if(_notifications[index].type == "AcceptedLift") {
+                  //   return _buildAcceptedTile(_notifications[index]);
+                  // }
+                  // else if(_notifications[index].type == "RejectedLift") {
+                  //   return _buildRejectedTile(_notifications[index]);
+                  // }
+                  // else if(_notifications[index].type == "RequestedLift") {
+                  //   return _buildRequestedTile(_notifications[index]);
+                  // }
+                  // else {
+                  //   return null;
+                  // }
+                  //
+              },
+            ))],
+          ))),
     );
   }
 
@@ -590,6 +731,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 liftToShow.payments = (await firestore.collection(
                     "Profiles").doc(liftNotification.driverId).get())
                     .data()["allowedPayments"].join(", ");
+
+                FocusScope.of(context).unfocus();
+                try{
+                  slidableController.activeState.close();}
+                catch(e){}
+
                 Navigator.of(context).push(new MaterialPageRoute<Null>(
                     builder: (BuildContext context) {
                       return NotificationInfo(
@@ -599,6 +746,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     },
                     fullscreenDialog: true
                 ));
+
               },
               child: Container(
                 margin: EdgeInsets.only(
@@ -623,6 +771,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     Flexible(flex: 3,
                       child: InkWell(
                           onTap: () async {
+                            FocusScope.of(context).unfocus();
+                            try{
+                              slidableController.activeState.close();}
+                            catch(e){}
+
                             await Navigator.of(context).push(
                                 MaterialPageRoute<liftRes>(
                                     builder: (BuildContext context) {
@@ -735,6 +888,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
           if (snapshot.hasData) {
             return InkWell(
               onTap: () async {
+
                 //Preparing and opening the info page
                 var drive = await firestore.collection("Drives").doc(
                     liftNotification.driveId).get();
@@ -766,6 +920,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 //     },
                 //     fullscreenDialog: true
                 // ));
+                FocusScope.of(context).unfocus();
+                try{
+                  slidableController.activeState.close();}
+                catch(e){}
 
                   await Navigator.of(context).push(new MaterialPageRoute<Null>(
                       builder: (BuildContext context) {
@@ -803,6 +961,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     Flexible(flex: 3,
                       child: InkWell(
                           onTap: () async {
+                            FocusScope.of(context).unfocus();
+                            try{
+                              slidableController.activeState.close();}
+                            catch(e){}
+
                             await Navigator.of(context).push(
                                 MaterialPageRoute<liftRes>(
                                     builder: (BuildContext context) {
@@ -935,6 +1098,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   Flexible(flex: 3,
                     child: InkWell(
                         onTap: () async {
+                          FocusScope.of(context).unfocus();
+                          try{
+                            slidableController.activeState.close();}
+                          catch(e){}
+
                           await Navigator.of(context).push(
                               MaterialPageRoute<liftRes>(
                                   builder: (BuildContext context) {
@@ -1014,7 +1182,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                       ),
                                     ),
                                     onTap: () {
-
+                                      FocusScope.of(context).unfocus();
+                                      try{
+                                        slidableController.activeState.close();}
+                                      catch(e){}
                                     },
                                   ),
                                 ),
@@ -1073,6 +1244,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   Flexible( flex: 3,
                     child: InkWell(
                         onTap: () async {
+                          FocusScope.of(context).unfocus();
+                          try{
+                            slidableController.activeState.close();}
+                          catch(e){}
+
                           await Navigator.of(context).push(
                               MaterialPageRoute<liftRes>(
                                   builder: (BuildContext context) {
@@ -1154,7 +1330,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                       ),
                                     ),
                                     onTap: () {
-
+                                      FocusScope.of(context).unfocus();
+                                      try{
+                                        slidableController.activeState.close();}
+                                      catch(e){}
                                     },
                                   ),
                                 ),
@@ -1210,6 +1389,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     "Profiles").doc(liftNotification.passengerId).get())
                     .data()["allowedPayments"].join(", ");
 
+                FocusScope.of(context).unfocus();
+                try{
+                  slidableController.activeState.close();}
+                catch(e){}
+
                 Navigator.of(context).push(new MaterialPageRoute<Null>(
                     builder: (BuildContext context) {
                       return NotificationInfo(
@@ -1241,6 +1425,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     Flexible( flex: 3,
                       child: InkWell(
                           onTap: () async {
+                            FocusScope.of(context).unfocus();
+                            try{
+                              slidableController.activeState.close();}
+                            catch(e){}
                             await Navigator.of(context).push(
                                 MaterialPageRoute<liftRes>(
                                     builder: (BuildContext context) {

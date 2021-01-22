@@ -4,8 +4,8 @@ import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:tech_pool/TechDrawer.dart';
 import 'package:tech_pool/Utils.dart';
+import 'package:tech_pool/appValidator.dart';
 import 'package:tech_pool/pages/HomePage.dart';
-import '../appValidator.dart';
 import 'ChatPage.dart';
 import 'ProfilePage.dart';
 import 'package:rxdart/rxdart.dart';
@@ -37,11 +37,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   void handleSlideIsOpenChanged(bool isOpen) {
     //if(isOpen==true) {
-    //setState(() {
-    //   try{
-    //   slidableController.activeState.open();}
-    //   catch(e){}
-    //});
+    setState(() {
+      try{
+      slidableController.activeState.open();}
+      catch(e){}
+    });
 
     //  }
   }
@@ -72,6 +72,18 @@ class _NotificationsPageState extends State<NotificationsPage> {
     } catch (e) {
       return false;
     }
+  }
+
+  Future<void> deleteNotification(notificationId, userRep, _key) async {
+    //Here will come the query to delete notification from db.
+    await firestore.collection("Notifications").
+    doc(userRep.user?.email).collection("UserNotifications").
+    doc(notificationId).delete().then((value)
+    {
+      _key.currentState.showSnackBar(SnackBar(content: Text(/*$notification*/"Notification Deleted", style: TextStyle(fontSize: 20))));
+      // return value;
+    }
+    );
   }
 
   // Future<void> deleteNotification(index, userRep, _key) async {
@@ -270,7 +282,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                         return 1;
                       }
                     });
-                    _markAsRead(userRep);
+                    //_markAsRead(userRep);
 
                     if(_notifications.length == 0){
                       //double defaultSpacewidth = MediaQuery.of(context).size.width * 0.016;
@@ -490,21 +502,21 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
                   Widget tileToDisplay;
                   if(_notifications[index].type == "AcceptedLift") {
-                    tileToDisplay = _buildAcceptedTile(_notifications[index]);
+                    tileToDisplay = _buildAcceptedTile(_notifications[index], userRep);
                   }
                   else if(_notifications[index].type == "RejectedLift") {
-                    tileToDisplay = _buildRejectedTile(_notifications[index]);
+                    tileToDisplay = _buildRejectedTile(_notifications[index], userRep);
                   }
                   else if(_notifications[index].type == "RequestedLift") {
                     tileToDisplay = _buildRequestedTile(_notifications[index]);
                     return tileToDisplay;
                   }
                   else if(_notifications[index].type == "DesiredLift") {
-                    tileToDisplay = _buildDesiredTile(_notifications[index]);
+                    tileToDisplay = _buildDesiredTile(_notifications[index], userRep);
                     //return tileToDisplay;
                   }
                   else if(_notifications[index].type == "CanceledLift" || _notifications[index].type == "CanceledDrive") {
-                    tileToDisplay = _buildCanceledTile(_notifications[index]);
+                    tileToDisplay = _buildCanceledTile(_notifications[index], userRep);
                   }
                   /*else {
                     tileToDisplay = null;
@@ -512,7 +524,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   // bool condition = true;
                   // if(condition) {
                     //return Container();
-                  //return tileToDisplay;
+                  return tileToDisplay;
 
                   return Slidable(
                       //key: Key(notification.notificationId),
@@ -762,7 +774,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
     //  return null;
   }
 
-  Widget _buildAcceptedTile(LiftNotification liftNotification) {
+  Widget _buildAcceptedTile(LiftNotification liftNotification, userRep) {
     return FutureBuilder<List<String>>(
         future: initNames(liftNotification.driverId),
         builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
@@ -828,9 +840,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       child: InkWell(
                           onTap: () async {
                             FocusScope.of(context).unfocus();
-                            try{
-                              slidableController.activeState.close();}
-                            catch(e){}
+                            // try{
+                            //   slidableController.activeState.close();}
+                            // catch(e){}
 
                             await Navigator.of(context).push(
                                 MaterialPageRoute<liftRes>(
@@ -920,6 +932,15 @@ class _NotificationsPageState extends State<NotificationsPage> {
                             ],
                           )),
                     ),
+                    Flexible(
+                        flex: 2,
+                        child: IconButton(
+                            icon: Icon(Icons.delete_outline, size: 30, color: Colors.grey),
+                            onPressed: () async {
+                              await deleteNotification(liftNotification.notificationId, userRep, _key);
+                            })
+
+                    ),
                     SizedBox(width: MediaQuery
                         .of(context)
                         .size
@@ -937,7 +958,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
         });
   }
 
-  Widget _buildDesiredTile(LiftNotification liftNotification) {
+  Widget _buildDesiredTile(LiftNotification liftNotification, userRep) {
     return FutureBuilder<List<String>>(
         future: initNames(liftNotification.driverId),
         builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
@@ -967,15 +988,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
                 //Here push request lift page
 
-                // Navigator.of(context).push(new MaterialPageRoute<Null>(
-                //     builder: (BuildContext context) {
-                //       return NotificationInfo(
-                //           lift: liftToShow,
-                //           notification: liftNotification,
-                //           type: NotificationInfoType.Accepted);
-                //     },
-                //     fullscreenDialog: true
-                // ));
                 FocusScope.of(context).unfocus();
                 try{
                   slidableController.activeState.close();}
@@ -1017,9 +1029,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       child: InkWell(
                           onTap: () async {
                             FocusScope.of(context).unfocus();
-                            try{
-                              slidableController.activeState.close();}
-                            catch(e){}
+                            // try{
+                            //   slidableController.activeState.close();}
+                            // catch(e){}
 
                             await Navigator.of(context).push(
                                 MaterialPageRoute<liftRes>(
@@ -1108,6 +1120,15 @@ class _NotificationsPageState extends State<NotificationsPage> {
                             ],
                           )),
                     ),
+                    Flexible(
+                        flex: 2,
+                        child: IconButton(
+                            icon: Icon(Icons.delete_outline, size: 30, color: Colors.grey),
+                            onPressed: () async {
+                              await deleteNotification(liftNotification.notificationId, userRep, _key);
+                            })
+
+                    ),
                     SizedBox(width: MediaQuery
                         .of(context)
                         .size
@@ -1125,7 +1146,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
         });
   }
 
-  Widget _buildCanceledTile(LiftNotification liftNotification) {
+  Widget _buildCanceledTile(LiftNotification liftNotification, userRep) {
     return FutureBuilder<List<String>>(
         future: initNames(liftNotification.type == "CanceledLift" ? liftNotification.passengerId : liftNotification.driverId),
         builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
@@ -1153,9 +1174,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     child: InkWell(
                         onTap: () async {
                           FocusScope.of(context).unfocus();
-                          try{
-                            slidableController.activeState.close();}
-                          catch(e){}
+                          // try{
+                          //   slidableController.activeState.close();}
+                          // catch(e){}
 
                           await Navigator.of(context).push(
                               MaterialPageRoute<liftRes>(
@@ -1252,7 +1273,15 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     ),
                   ),
                   //Spacer(),
+                  Flexible(
+                      flex: 2,
+                      child: IconButton(
+                          icon: Icon(Icons.delete_outline, size: 30, color: Colors.grey),
+                          onPressed: () async {
+                            await deleteNotification(liftNotification.notificationId, userRep, _key);
+                          })
 
+                  ),
                   SizedBox(width: MediaQuery
                       .of(context)
                       .size
@@ -1270,7 +1299,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
   }
 
 
-  Widget _buildRejectedTile(LiftNotification liftNotification) {
+  Widget _buildRejectedTile(LiftNotification liftNotification, userRep) {
     return FutureBuilder<List<String>>(
         future: initNames(liftNotification.driverId),
         builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
@@ -1298,9 +1327,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     child: InkWell(
                         onTap: () async {
                           FocusScope.of(context).unfocus();
-                          try{
-                            slidableController.activeState.close();}
-                          catch(e){}
+                          // try{
+                          //   slidableController.activeState.close();}
+                          // catch(e){}
 
                           await Navigator.of(context).push(
                               MaterialPageRoute<liftRes>(
@@ -1397,7 +1426,15 @@ class _NotificationsPageState extends State<NotificationsPage> {
                           ],
                         )),
                   ),
+                  Flexible(
+                      flex: 2,
+                      child: IconButton(
+                          icon: Icon(Icons.delete_outline, size: 30, color: Colors.grey),
+                          onPressed: () async {
+                            await deleteNotification(liftNotification.notificationId, userRep, _key);
+                          })
 
+                  ),
                   SizedBox(width: MediaQuery
                       .of(context)
                       .size
@@ -1478,9 +1515,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       child: InkWell(
                           onTap: () async {
                             FocusScope.of(context).unfocus();
-                            try{
-                              slidableController.activeState.close();}
-                            catch(e){}
+                            // try{
+                            //   slidableController.activeState.close();}
+                            // catch(e){}
                             await Navigator.of(context).push(
                                 MaterialPageRoute<liftRes>(
                                     builder: (BuildContext context) {

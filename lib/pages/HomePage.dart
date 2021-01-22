@@ -17,6 +17,8 @@ import 'package:rxdart/rxdart.dart';
 import 'package:tech_pool/CalendarEvents.dart';
 import 'package:tech_pool/TechDrawer.dart';
 import 'ChatTalkPage.dart';
+import 'DesiredRequestPage.dart';
+import 'NotificationInfo.dart';
 import 'SetDrivePage.dart';
 import 'package:flushbar/flushbar.dart';
 
@@ -83,6 +85,9 @@ class _HomePageState extends State<HomePage> {
             if (message["data"]["type"] == "Chat") {
               await chatNotification(message);
             }
+            if (message["data"]["type"] == "liftNotification") {
+              await liftNotificationPressed(message);
+            }
           }catch(_){}
         }
         return;
@@ -96,6 +101,9 @@ class _HomePageState extends State<HomePage> {
             }
             if (message["data"]["type"] == "Chat") {
               await chatNotification2(message);
+            }
+            if (message["data"]["type"] == "liftNotification") {
+              await liftNotificationPressed(message);
             }
           }catch(_){}
         }
@@ -235,6 +243,263 @@ class _HomePageState extends State<HomePage> {
           fullscreenDialog: true
       ));
     }catch(_){}
+  }
+
+
+  Future liftNotificationPressed(Map<String, dynamic> message) async {
+    try {
+      String currentUserId = Provider
+          .of<UserRepository>(context, listen: false)
+          .user.email;
+      //String driveId = message["data"]["driveId"];
+      String notificationId = message["data"]["notificationId"];
+      var notificationDoc = await firestore.collection("Notifications")
+          .doc(currentUserId)
+          .collection("UserNotifications")
+          .doc(notificationId).get();
+      var elementData = notificationDoc.data();
+
+      String driveId = elementData["driveId"];
+      String driverId = elementData["driverId"]; //email
+      String startCity = elementData["startCity"];
+      String destCity = elementData["destCity"];
+      int price = elementData["price"];
+      int distance = elementData["distance"];
+      DateTime liftTime = elementData["liftTime"].toDate();
+      DateTime notificationTime = elementData["notificationTime"].toDate();
+      String type = elementData["type"];
+      String startAddress = elementData["startAddress"];
+      String destAddress = elementData["destAddress"];
+
+      var liftNotification;
+      switch (type) {
+        case "RequestedLift" :
+          {
+            String passengerId = elementData["passengerId"];
+            String passengerNote = elementData["passengerNote"];
+            bool bigBag = elementData["bigBag"];
+            int price = elementData["price"];
+            liftNotification = LiftNotification.requested(
+                notificationId,
+                driveId,
+                driverId,
+                startCity,
+                destCity,
+                price,
+                distance,
+                liftTime,
+                notificationTime,
+                type,
+                startAddress,
+                destAddress,
+                passengerId,
+                passengerNote,
+                bigBag
+            );
+
+            var drive = await firestore.collection("Drives").doc(
+                liftNotification.driveId).get();
+            MyLift liftToShow = new MyLift(
+                "driver", "destAddress", "stopAddress", 5);
+            drive.data().forEach((key, value) {
+              if (value != null) {
+                liftToShow.setProperty(key, value);
+              }
+            });
+
+            liftToShow.note = liftNotification.passengerNote;
+            liftToShow.liftId = liftNotification.driveId;
+            liftToShow.dist = liftNotification.distance;
+
+            liftToShow.passengersInfo =
+            Map<String, Map<String, dynamic>>.from(
+                drive.data()["PassengersInfo"] ?? {});
+            liftToShow.payments = (await firestore.collection(
+                "Profiles").doc(liftNotification.passengerId).get())
+                .data()["allowedPayments"].join(", ");
+
+            // FocusScope.of(context).unfocus();
+            // try {
+            //   slidableController.activeState.close();
+            // }
+            // catch (e) {}
+
+            await Navigator.of(context).push(new MaterialPageRoute<Null>(
+                builder: (BuildContext context) {
+                  return NotificationInfo(
+                      lift: liftToShow,
+                      notification: liftNotification,
+                      type: NotificationInfoType.Requested);
+                },
+                fullscreenDialog: true
+            ));
+
+            break;
+
+          }
+        case "AcceptedLift" :
+          {
+            liftNotification = LiftNotification(
+                notificationId,
+                driveId,
+                driverId,
+                startCity,
+                destCity,
+                price,
+                distance,
+                liftTime,
+                notificationTime,
+                type,
+                startAddress,
+                destAddress
+            );
+
+            var drive = await firestore.collection("Drives").doc(
+                liftNotification.driveId).get();
+            MyLift liftToShow = new MyLift(
+                "driver", "destAddress", "stopAddress", 5);
+            drive.data().forEach((key, value) {
+              if (value != null) {
+                liftToShow.setProperty(key, value);
+              }
+            });
+            liftToShow.liftId = driveId;
+            liftToShow.dist = liftNotification.distance;
+            liftToShow.passengersInfo =
+            Map<String, Map<String, dynamic>>.from(
+                drive.data()["PassengersInfo"] ?? {});
+            liftToShow.payments = (await firestore.collection(
+                "Profiles").doc(liftToShow.driver).get())
+                .data()["allowedPayments"].join(", ");
+
+            await Navigator.of(context).push(new MaterialPageRoute<Null>(
+                builder: (BuildContext context) {
+                  return NotificationInfo(
+                      lift: liftToShow,
+                      notification: liftNotification,
+                      type: NotificationInfoType.Accepted);
+                },
+                fullscreenDialog: true
+            ));
+
+            break;
+          }
+        case "DesiredLift" :
+          {
+            String desiredId = elementData["desiredId"];
+            liftNotification = LiftNotification.desired(
+              notificationId,
+              driveId,
+              driverId,
+              startCity,
+              destCity,
+              price,
+              distance,
+              liftTime,
+              notificationTime,
+              type,
+              startAddress,
+              destAddress,
+              desiredId,
+            );
+
+            var drive = await firestore.collection("Drives").doc(
+                liftNotification.driveId).get();
+            MyLift liftToShow = new MyLift(
+                "driver", "destAddress", "stopAddress", 5);
+            drive.data().forEach((key, value) {
+              if (value != null) {
+                liftToShow.setProperty(key, value);
+              }
+            });
+            liftToShow.liftId = liftNotification.driveId;
+            liftToShow.dist = liftNotification.distance;
+            liftToShow.passengersInfo =
+            Map<String, Map<String, dynamic>>.from(
+                drive.data()["PassengersInfo"] ?? {});
+            liftToShow.payments = (await firestore.collection(
+                "Profiles").doc(liftNotification.driverId).get())
+                .data()["allowedPayments"].join(", ");
+
+            //Here push request lift page
+
+            await Navigator.of(context).push(new MaterialPageRoute<Null>(
+                builder: (BuildContext context) {
+                  return DesiredRequestPage(lift: liftToShow,
+                    notification: liftNotification,
+                  );
+                },
+                fullscreenDialog: true
+            ));
+
+
+            break;
+          }
+
+      // case "RejectedLift" :
+      //   {
+      //     liftNotification = LiftNotification(
+      //         notificationId,
+      //         driveId,
+      //         driverId,
+      //         startCity,
+      //         destCity,
+      //         price,
+      //         distance,
+      //         liftTime,
+      //         notificationTime,
+      //         type,
+      //         startAddress,
+      //         destAddress);
+      //     break;
+      //   }
+
+      //in case a hitchhiker canceled a lift - notify driver
+      //   case "CanceledLift" :
+      //     {
+      //       String passengerId = elementData["passengerId"];
+      //       notification = LiftNotification(
+      //           notificationId,
+      //           driveId,
+      //           driverId,
+      //           startCity,
+      //           destCity,
+      //           price,
+      //           distance,
+      //           liftTime,
+      //           notificationTime,
+      //           type,
+      //           startAddress,
+      //           destAddress,
+      //           passengerId
+      //       );
+      //       break;
+      //     }
+      //in case a driver canceled a drive- notify hitchhikers
+      //   case "CanceledDrive" :
+      //     {
+      //       notification = LiftNotification(
+      //           notificationId,
+      //           driveId,
+      //           driverId,
+      //           startCity,
+      //           destCity,
+      //           price,
+      //           distance,
+      //           liftTime,
+      //           notificationTime,
+      //           type,
+      //           startAddress,
+      //           destAddress);
+      //       break;
+      //     }
+
+
+      }
+    }
+    catch(_){
+
+    }
   }
 
   void _onDaySelected(DateTime day, List events, List holidays) {

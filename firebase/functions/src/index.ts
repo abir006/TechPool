@@ -20,8 +20,11 @@ export const sendLiftNotification = functions.firestore
       const doc = change.data();
       // console.log(doc);
 
-      const type = doc.type;
-
+      const typeStr = doc.type;
+      const notificationID = context.params.notification;
+      console.log("notificationId at beginning: " +
+                      notificationID);
+      const driveID = doc.driveId;
       const liftTime = doc.liftTime.toDate().toLocaleString(
           "en-GB", {timeZone: "Israel", month: "2-digit", day: "2-digit",
             hour: "2-digit", minute: "2-digit"});
@@ -32,7 +35,7 @@ export const sendLiftNotification = functions.firestore
       let contentMessage = "";
       let titleMessage = "";
       let destinationUser = "";
-      switch (type) {
+      switch (typeStr) {
         case "RequestedLift": {
           console.log("-*-*-*-We are in RequestedLift-*-*-*-");
           destinationUser = doc.driverId;
@@ -222,6 +225,10 @@ export const sendLiftNotification = functions.firestore
             console.log("&&&-Inside then of sending a notification-&&&");
             if (destUser && destUser?.data()) {
               if (destUser?.data() && destUser?.data()?.pushToken) {
+                console.log("payload notificationId: " +
+                notificationID);
+                console.log("payload driveId: " +
+                driveID);
                 const payload = {
                   notification: {
                     title: titleMessage,
@@ -230,11 +237,11 @@ export const sendLiftNotification = functions.firestore
                     sound: "default",
                   },
                   data: {
-                    type: "Reminder",
-                    pagetype: 'Passenger',
-                    'click_action': 'FLUTTER_NOTIFICATION_CLICK',
-                    'driveId': tempDriveId
-                    }
+                    type: "liftNotification",
+                    click_action: "FLUTTER_NOTIFICATION_CLICK",
+                    notificationId: notificationID,
+                    typeStr: typeStr,
+                  },
                 };
                 // Push to the target device
                 console.log("dest Token is: " + destUser?.data()?.pushToken);

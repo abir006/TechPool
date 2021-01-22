@@ -11,6 +11,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tech_pool/Utils.dart';
+import 'package:tech_pool/main.dart';
 import 'package:tech_pool/widgets/loading.dart';
 
 
@@ -131,6 +132,7 @@ class ChatScreenState extends State<ChatScreen>  with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    chatTalkPage = true;
     WidgetsBinding.instance.addObserver(this);
     focusNode.addListener(onFocusChange);
     listScrollController.addListener(_scrollListener);
@@ -616,6 +618,7 @@ class ChatScreenState extends State<ChatScreen>  with WidgetsBindingObserver {
   }
 
   Future<bool> onBackPress() async {
+    chatTalkPage = false;
     if (isShowSticker) {
       setState(() {
         isShowSticker = false;
@@ -919,6 +922,7 @@ class ChatScreenState extends State<ChatScreen>  with WidgetsBindingObserver {
   }
 
   void dispose() {
+    chatTalkPage = false;
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }

@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:geocoder/geocoder.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:tech_pool/main.dart';
 import 'package:tech_pool/widgets/LocationTextBox.dart';
 import 'package:tech_pool/Utils.dart';
 import 'dart:async';
@@ -25,6 +26,7 @@ class _LocationSearchState extends State<LocationSearch> {
 
   @override
   void initState() {
+    chatTalkPage = true;
     stopFunctions = [updateStop1Address,updateStop2Address,updateStop3Address];
     stopAddresses = [Address(),Address(),Address()];
     super.initState();

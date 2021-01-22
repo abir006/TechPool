@@ -3,6 +3,7 @@ import 'package:configurable_expansion_tile/configurable_expansion_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:tech_pool/Utils.dart';
+import 'package:tech_pool/main.dart';
 
 class DesiredLiftInfo extends StatefulWidget {
   final String docId;
@@ -14,6 +15,13 @@ class DesiredLiftInfo extends StatefulWidget {
 
 class _DesiredLiftInfoState extends State<DesiredLiftInfo> {
   FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    chatTalkPage = false;
+  }
+
   @override
   Widget build(BuildContext context) {
     double defaultSpace = MediaQuery.of(context).size.height * 0.013;

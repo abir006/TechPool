@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:tech_pool/Utils.dart';
+import 'package:tech_pool/main.dart';
 import 'package:tech_pool/widgets/TextBoxField.dart';
 
 
@@ -19,6 +20,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   @override
   void initState() {
     super.initState();
+    chatTalkPage = false;
     _email = TextEditingController(text: "");
     _pressed = false;
   }

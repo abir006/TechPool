@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:tech_pool/Utils.dart';
 import 'package:intl/intl.dart';
+import 'package:tech_pool/main.dart';
 import 'package:tech_pool/widgets/TextBoxField.dart';
 import 'package:configurable_expansion_tile/configurable_expansion_tile.dart';
 import 'ProfilePage.dart';
@@ -32,6 +33,7 @@ class _DesiredRequestPageState extends State<DesiredRequestPage> {
   @override
   void initState() {
     super.initState();
+    chatTalkPage = false;
     myNoteController = TextEditingController();
     widget.lift.payments="";
   }

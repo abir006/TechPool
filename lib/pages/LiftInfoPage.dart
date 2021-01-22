@@ -11,6 +11,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 import 'package:tech_pool/Utils.dart';
 import 'package:intl/intl.dart';
+import 'package:tech_pool/main.dart';
 import 'package:tech_pool/pages/SearchLiftPage.dart';
 import 'package:tech_pool/widgets/TextBoxField.dart';
 import 'package:configurable_expansion_tile/configurable_expansion_tile.dart';
@@ -36,9 +37,11 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
   @override
   void initState() {
     super.initState();
+    chatTalkPage = false;
     myNoteController = TextEditingController();
     widget.lift.payments="";
   }
+
 
   Future<_errorsRequest> addRequest(UserRepository userRep) async {
     try{

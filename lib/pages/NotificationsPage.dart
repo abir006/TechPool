@@ -14,6 +14,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'NotificationInfo.dart';
 import 'DesiredRequestPage.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:tech_pool/main.dart';
 
 class NotificationsPage extends StatefulWidget {
   @override
@@ -49,6 +50,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
   @override
   void initState() {
     super.initState();
+    chatTalkPage = true;
     _notifications = [];
     appValid = appValidator();
     appValid.checkConnection(context);

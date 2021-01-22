@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 import 'package:tech_pool/widgets/TextBoxField.dart';
 import 'package:configurable_expansion_tile/configurable_expansion_tile.dart';
 import 'package:tech_pool/CalendarEvents.dart';
+import 'package:tech_pool/main.dart';
 import 'ProfilePage.dart';
 
 class CalendarEventInfo extends StatefulWidget {
@@ -29,6 +30,7 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
   @override
   void initState() {
     super.initState();
+    chatTalkPage = false;
   }
   Future<bool> _cancelRequest(UserRepository userRep) async {
     try{

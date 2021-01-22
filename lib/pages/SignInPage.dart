@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:tech_pool/Utils.dart';
+import 'package:tech_pool/main.dart';
 import 'package:tech_pool/widgets/TextBoxField.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'ForgotPasswordPage.dart';
@@ -36,6 +37,7 @@ class _SignInPageState extends State<SignInPage>
   @override
   void initState() {
     super.initState();
+    chatTalkPage = true;
     controller = AnimationController(
         duration: Duration(milliseconds: 150), vsync: this //
         );

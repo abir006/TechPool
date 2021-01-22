@@ -14,6 +14,7 @@ import 'package:dropdown_customizable/dropdown_customizable.dart';
 import 'package:f_datetimerangepicker/f_datetimerangepicker.dart';
 import 'package:intl/intl.dart';
 import 'package:tech_pool/appValidator.dart';
+import 'package:tech_pool/main.dart';
 import 'package:tech_pool/pages/LocationSearch.dart';
 import 'package:tech_pool/widgets/TextBoxField.dart';
 import 'package:tech_pool/pages/LiftSearchReasultsPage.dart';
@@ -86,6 +87,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
   @override
   void initState() {
     super.initState();
+    chatTalkPage = true;
     _fromControler = TextEditingController(text: "No Time Chosen");
     _toControler = TextEditingController(text: "");
     _startPointControler = TextEditingController(text: "");

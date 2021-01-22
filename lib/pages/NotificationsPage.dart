@@ -13,6 +13,7 @@ import 'package:intl/intl.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'NotificationInfo.dart';
 import 'DesiredRequestPage.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 class NotificationsPage extends StatefulWidget {
   @override
@@ -25,6 +26,22 @@ class _NotificationsPageState extends State<NotificationsPage> {
   //DateTime selectedDay = DateTime.now();
   List<LiftNotification> _notifications;
   appValidator appValid;
+  SlidableController slidableController;
+  List<String> net = [];
+
+  void handleSlideAnimationChanged(Animation<double> slideAnimation) {
+    setState(() {
+    });
+  }
+
+  void handleSlideIsOpenChanged(bool isOpen) {
+    //if(isOpen==false) {
+    setState(() {
+      slidableController.activeState.open();
+    });
+
+    //  }
+  }
 
   @override
   void initState() {
@@ -33,6 +50,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
     appValid = appValidator();
     appValid.checkConnection(context);
     appValid.checkVersion(context);
+    slidableController = SlidableController(
+      onSlideAnimationChanged: handleSlideAnimationChanged,
+      onSlideIsOpenChanged: handleSlideIsOpenChanged,
+    );
   }
 
 

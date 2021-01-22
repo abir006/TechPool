@@ -561,7 +561,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
                                   currentDate.millisecond,
                                   currentDate.microsecond);
                             }
-                            checktimes();
+                            if(_fromControler.text!="No Time Chosen"){checktimes();};
                           });
                         },
                         validator: (val) {
@@ -935,13 +935,13 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
                                             style:
                                                 TextStyle(color: Colors.red))),
                                 SizedBox(height: defaultSpace),
-                                SizedBox(height: defaultSpace),
+                            //    SizedBox(height: defaultSpace),
                                 Divider(
-                                  thickness: 1.5,
+                                  thickness: 1,
                                 ),
                                 prefer,
                                 Divider(
-                                  thickness: 1.5,
+                                  thickness: 1,
                                 ),
                               ])
                         ])),

@@ -273,7 +273,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                             Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => ChatPage(currentUserId: userRep.user.email)));}
+                                    builder: (context) => ChatPage(currentUserId: userRep.user.email,fromNotification: false)));}
                       )
                     ],
                   ),
@@ -362,7 +362,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => ChatPage(currentUserId: userRep.user.email)));}
+                        builder: (context) => ChatPage(currentUserId: userRep.user.email,fromNotification: false)));}
           )
           ],
         ),

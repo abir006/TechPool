@@ -433,7 +433,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => ChatPage(currentUserId: userRep.user.email)));}
+                        builder: (context) => ChatPage(currentUserId: userRep.user.email, fromNotification: false,)));}
           ):Container(),
         ],
       ),

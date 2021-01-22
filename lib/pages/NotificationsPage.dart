@@ -31,16 +31,19 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   void handleSlideAnimationChanged(Animation<double> slideAnimation) {
     setState(() {
+
     });
   }
 
   void handleSlideIsOpenChanged(bool isOpen) {
-    if(isOpen==true) {
+    //if(isOpen==true) {
     setState(() {
-      slidableController.activeState.open();
+      try{
+      slidableController.activeState.open();}
+      catch(e){}
     });
 
-      }
+    //  }
   }
 
   @override
@@ -259,7 +262,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       }
                       _notifications.add(notification);
                     });
-                    _markAsRead(userRep);
+                    //_markAsRead(userRep);
                     //sorting the notifications to show by time of arrival
                     _notifications.sort((a, b) {
                       if (a.notificationTime.isAfter(b.notificationTime)) {
@@ -346,7 +349,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
                         )));
                     }
-                    return _buildPage(context, userRep);
+                    else {
+                      return _buildPage(context, userRep);
+                    }
                   } else if (snapshot.hasError) {
                     return Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -355,8 +360,67 @@ class _NotificationsPageState extends State<NotificationsPage> {
                           Icon(Icons.error),
                           Text("Error on loading notifications from the database. Please try again.")
                         ]);
-                  } else {
-                      return _buildPage(context, userRep);
+                  }
+                  else {
+                      //return _buildPage(context, userRep);
+                    //return Container();
+                    return Scaffold(
+                        key: _key,
+                        backgroundColor: mainColor,
+                        appBar: AppBar(
+                          elevation: 0,
+                          title: Text(
+                            "Notifications",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          actions: [
+                            IconButton(
+                                icon: StreamBuilder(
+                                    stream: firestore.collection("ChatFriends").doc(userRep.user?.email).collection("UnRead").snapshots(), // a previously-obtained Future<String> or null
+                                    builder: (BuildContext context, snapshot) {
+                                      if (snapshot.hasData) {
+                                        //QuerySnapshot values = snapshot.data;
+                                        //builder: (_, snapshot) =>
+
+                                        return BadgeIcon(
+                                          icon: Icon(Icons.message_outlined, size: 25),
+                                          badgeCount: snapshot.data.size,
+                                        );
+                                      }
+                                      else{
+                                        return BadgeIcon(
+                                          icon: Icon(Icons.notifications, size: 25),
+                                          badgeCount: 0,
+                                        );
+                                      }
+                                    }
+                                ),
+                                onPressed: () async {
+                                  QuerySnapshot q2 = await  FirebaseFirestore.instance.collection("ChatFriends").doc(userRep.user.email)
+                                      .collection("UnRead").get();
+
+                                  FirebaseFirestore.instance.runTransaction((transaction) async {
+                                    q2.docs.forEach((element) {
+                                      transaction.delete(element.reference);
+                                    });
+                                  });
+                                  Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => ChatPage(currentUserId: userRep.user.email)));}
+                            )
+                          ],
+                        ),
+                        drawer: techDrawer(userRep, context, DrawerSections.notifications),
+                        body: WillPopScope(
+                            onWillPop: () => Navigator.pushReplacement(
+                                context, MaterialPageRoute(builder: (context) => HomePage())),
+                            child:Container(
+                              decoration: pageContainerDecoration,
+                              margin: pageContainerMargin,
+                              //padding: EdgeInsets.only(bottom: 6.0,top: 7.0, left: defaultSpacewidth, right: defaultSpacewidth*4),
+                              child: Center(child: Container())
+                    )));
                   }
                 }),
           )
@@ -457,10 +521,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 if(condition) {
                   //return Container();
                   return Slidable(
+                    //key: Key(notification.notificationId),
                     enabled: _notifications.contains(notification),
                     controller: slidableController,
                     actionPane: SlidableScrollActionPane(),
-                    actionExtentRatio: 0.25,
+                    actionExtentRatio: 0.23,
                     closeOnScroll: false,
                     actions: <Widget>[
                       Container(
@@ -592,9 +657,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                 .height * 0.006),
                         decoration: BoxDecoration(
                           color: mainColor,
-                          boxShadow: [BoxShadow(color: Colors.black, blurRadius: 2.0,
-                              spreadRadius: 0.0, offset: Offset(2.0, 2.0))
-                          ],
+                          boxShadow: [BoxShadow(color: greyColor,blurRadius: 1.0,
+                              spreadRadius: 0.0,offset: Offset(1.0, 1.0))],
                           border: Border.all(color: secondColor, width: 0.65),
                           borderRadius: BorderRadius.circular(12.0),),
                         child:
@@ -760,9 +824,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
                         .height * 0.006),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  boxShadow: [BoxShadow(color: Colors.black, blurRadius: 2.0,
-                      spreadRadius: 0.0, offset: Offset(2.0, 2.0))
-                  ],
+                  boxShadow: [BoxShadow(color: greyColor,blurRadius: 1.0,
+                      spreadRadius: 0.0,offset: Offset(1.0, 1.0))],
                   border: Border.all(color: secondColor, width: 0.65),
                   borderRadius: BorderRadius.circular(12.0),),
                 child:
@@ -950,9 +1013,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
                         .height * 0.006),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  boxShadow: [BoxShadow(color: Colors.black, blurRadius: 2.0,
-                      spreadRadius: 0.0, offset: Offset(2.0, 2.0))
-                  ],
+                  boxShadow: [BoxShadow(color: greyColor,blurRadius: 1.0,
+                      spreadRadius: 0.0,offset: Offset(1.0, 1.0))],
                   border: Border.all(color: secondColor, width: 0.65),
                   borderRadius: BorderRadius.circular(12.0),),
                 child:
@@ -1087,9 +1149,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       .height * 0.006),
               decoration: BoxDecoration(
                 color: Colors.white,
-                boxShadow: [BoxShadow(color: Colors.black, blurRadius: 2.0,
-                    spreadRadius: 0.0, offset: Offset(2.0, 2.0))
-                ],
+                boxShadow: [BoxShadow(color: greyColor,blurRadius: 1.0,
+                    spreadRadius: 0.0,offset: Offset(1.0, 1.0))],
                 border: Border.all(color: secondColor, width: 0.65),
                 borderRadius: BorderRadius.circular(12.0),),
               child:
@@ -1233,9 +1294,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       .height * 0.006),
               decoration: BoxDecoration(
                 color: Colors.white,
-                boxShadow: [BoxShadow(color: Colors.black, blurRadius: 2.0,
-                    spreadRadius: 0.0, offset: Offset(2.0, 2.0))
-                ],
+                boxShadow: [BoxShadow(color: greyColor,blurRadius: 1.0,
+                    spreadRadius: 0.0,offset: Offset(1.0, 1.0))],
                 border: Border.all(color: secondColor, width: 0.65),
                 borderRadius: BorderRadius.circular(12.0),),
               child:
@@ -1414,9 +1474,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
                         .height * 0.006),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  boxShadow: [BoxShadow(color: Colors.black, blurRadius: 2.0,
-                      spreadRadius: 0.0, offset: Offset(2.0, 2.0))
-                  ],
+                  boxShadow: [BoxShadow(color: greyColor,blurRadius: 1.0,
+                      spreadRadius: 0.0,offset: Offset(1.0, 1.0))],
                   border: Border.all(color: secondColor, width: 0.65),
                   borderRadius: BorderRadius.circular(12.0),),
                 child:

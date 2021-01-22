@@ -74,17 +74,29 @@ class _NotificationsPageState extends State<NotificationsPage> {
     }
   }
 
-  Future<void> deleteNotification(index, userRep, _key) async {
+  Future<void> deleteNotification(notificationId, userRep, _key) async {
     //Here will come the query to delete notification from db.
     await firestore.collection("Notifications").
     doc(userRep.user?.email).collection("UserNotifications").
-    doc(_notifications[index].notificationId).delete().then((value)
+    doc(notificationId).delete().then((value)
     {
       _key.currentState.showSnackBar(SnackBar(content: Text(/*$notification*/"Notification Deleted", style: TextStyle(fontSize: 20))));
-      return value;
+      // return value;
     }
     );
   }
+
+  // Future<void> deleteNotification(index, userRep, _key) async {
+  //   //Here will come the query to delete notification from db.
+  //   await firestore.collection("Notifications").
+  //   doc(userRep.user?.email).collection("UserNotifications").
+  //   doc(_notifications[index].notificationId).delete().then((value)
+  //   {
+  //     _key.currentState.showSnackBar(SnackBar(content: Text(/*$notification*/"Notification Deleted", style: TextStyle(fontSize: 20))));
+  //     return value;
+  //   }
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -263,13 +275,13 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       _notifications.add(notification);
                     });
                     //sorting the notifications to show by time of arrival
-                    // _notifications.sort((a, b) {
-                    //   if (a.notificationTime.isAfter(b.notificationTime)) {
-                    //     return 1;
-                    //   } else {
-                    //     return -1;
-                    //   }
-                    // });
+                    _notifications.sort((a, b) {
+                      if (a.notificationTime.isAfter(b.notificationTime)) {
+                        return -1;
+                      } else {
+                        return 1;
+                      }
+                    });
                     //_markAsRead(userRep);
 
                     if(_notifications.length == 0){
@@ -490,17 +502,17 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
                   Widget tileToDisplay;
                   if(_notifications[index].type == "AcceptedLift") {
-                    tileToDisplay = _buildAcceptedTile(_notifications[index]);
+                    tileToDisplay = _buildAcceptedTile(_notifications[index], userRep);
                   }
                   else if(_notifications[index].type == "RejectedLift") {
-                    tileToDisplay = _buildRejectedTile(_notifications[index]);
+                    tileToDisplay = _buildRejectedTile(_notifications[index], userRep);
                   }
                   else if(_notifications[index].type == "RequestedLift") {
                     tileToDisplay = _buildRequestedTile(_notifications[index]);
                     return tileToDisplay;
                   }
                   else if(_notifications[index].type == "DesiredLift") {
-                    tileToDisplay = _buildDesiredTile(_notifications[index]);
+                    tileToDisplay = _buildDesiredTile(_notifications[index], userRep);
                     //return tileToDisplay;
                   }
                   else if(_notifications[index].type == "CanceledLift" || _notifications[index].type == "CanceledDrive") {
@@ -512,7 +524,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   // bool condition = true;
                   // if(condition) {
                     //return Container();
-                  //return tileToDisplay;
+                  return tileToDisplay;
 
                   return Slidable(
                       //key: Key(notification.notificationId),
@@ -762,7 +774,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
     //  return null;
   }
 
-  Widget _buildAcceptedTile(LiftNotification liftNotification) {
+  Widget _buildAcceptedTile(LiftNotification liftNotification, userRep) {
     return FutureBuilder<List<String>>(
         future: initNames(liftNotification.driverId),
         builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
@@ -920,6 +932,15 @@ class _NotificationsPageState extends State<NotificationsPage> {
                             ],
                           )),
                     ),
+                    Flexible(
+                        flex: 2,
+                        child: IconButton(
+                            icon: Icon(Icons.delete_outline, size: 30, color: Colors.grey),
+                            onPressed: () async {
+                              await deleteNotification(liftNotification.notificationId, userRep, _key);
+                            })
+
+                    ),
                     SizedBox(width: MediaQuery
                         .of(context)
                         .size
@@ -937,7 +958,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
         });
   }
 
-  Widget _buildDesiredTile(LiftNotification liftNotification) {
+  Widget _buildDesiredTile(LiftNotification liftNotification, userRep) {
     return FutureBuilder<List<String>>(
         future: initNames(liftNotification.driverId),
         builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
@@ -1108,6 +1129,15 @@ class _NotificationsPageState extends State<NotificationsPage> {
                             ],
                           )),
                     ),
+                    Flexible(
+                        flex: 2,
+                        child: IconButton(
+                            icon: Icon(Icons.delete_outline, size: 30, color: Colors.grey),
+                            onPressed: () async {
+                              await deleteNotification(liftNotification.notificationId, userRep, _key);
+                            })
+
+                    ),
                     SizedBox(width: MediaQuery
                         .of(context)
                         .size
@@ -1257,7 +1287,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       child: IconButton(
                           icon: Icon(Icons.delete_outline, size: 30, color: Colors.grey),
                           onPressed: () async {
-                            await deleteNotification(index, userRep, _key);
+                            await deleteNotification(liftNotification.notificationId, userRep, _key);
                           })
 
                   ),
@@ -1278,7 +1308,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
   }
 
 
-  Widget _buildRejectedTile(LiftNotification liftNotification) {
+  Widget _buildRejectedTile(LiftNotification liftNotification, userRep) {
     return FutureBuilder<List<String>>(
         future: initNames(liftNotification.driverId),
         builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
@@ -1405,7 +1435,15 @@ class _NotificationsPageState extends State<NotificationsPage> {
                           ],
                         )),
                   ),
+                  Flexible(
+                      flex: 2,
+                      child: IconButton(
+                          icon: Icon(Icons.delete_outline, size: 30, color: Colors.grey),
+                          onPressed: () async {
+                            await deleteNotification(liftNotification.notificationId, userRep, _key);
+                          })
 
+                  ),
                   SizedBox(width: MediaQuery
                       .of(context)
                       .size

@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:tech_pool/TechDrawer.dart';
 import 'package:tech_pool/Utils.dart';
+import 'package:tech_pool/main.dart';
 import 'package:tech_pool/widgets/TextBoxField.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -91,6 +92,7 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
+    chatTalkPage = true;
     _nameController = TextEditingController();
     _firstNameController = TextEditingController();
     _lastNameController = TextEditingController();

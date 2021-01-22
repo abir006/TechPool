@@ -13,6 +13,7 @@ import 'package:provider/provider.dart';
 import 'package:rxdart/streams.dart';
 import 'package:tech_pool/Utils.dart';
 import 'package:intl/intl.dart';
+import 'package:tech_pool/main.dart';
 import 'package:tech_pool/pages/LiftInfoPage.dart';
 import 'package:tech_pool/pages/ProfilePage.dart';
 import 'package:tech_pool/pages/SearchLiftPage.dart';
@@ -52,6 +53,7 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
   @override
   void initState() {
     addDesired = true;
+    chatTalkPage = true;
   }
   Future<List<String>> initNames(String name) {
     List<String> ret = [];

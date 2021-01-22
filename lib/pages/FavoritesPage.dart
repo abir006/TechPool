@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tech_pool/TechDrawer.dart';
 import 'package:tech_pool/Utils.dart';
+import 'package:tech_pool/main.dart';
 import 'package:tech_pool/pages/LocationSearch.dart';
 import 'package:tech_pool/pages/NotificationsPage.dart';
 
@@ -19,6 +20,14 @@ class _FavoritesPageState extends State<FavoritesPage> {
   final GlobalKey<PopupMenuButtonState> _homeMenuKey = GlobalKey();
   final GlobalKey<PopupMenuButtonState> _workMenuKey = GlobalKey();
   final GlobalKey<PopupMenuButtonState> _universityMenuKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    chatTalkPage = false;
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Consumer<UserRepository>(builder: (context, userRep, child) {

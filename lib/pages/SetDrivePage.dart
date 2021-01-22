@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:tech_pool/Utils.dart';
+import 'package:tech_pool/main.dart';
 import 'package:tech_pool/pages/LocationSearch.dart';
 import 'package:intl/intl.dart';
 import 'package:tech_pool/widgets/TextBoxField.dart';
@@ -54,6 +55,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
   @override
   void initState() {
     super.initState();
+    chatTalkPage = true;
     _hourController = TextEditingController(text: "Choose time");
     _startPointController = TextEditingController(text: "");
     _destPointController = TextEditingController(text: "");

@@ -37,6 +37,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    chatTalkPage = false;
     firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message){return;},
       onLaunch: (Map<String, dynamic> message) async {
@@ -103,15 +104,27 @@ class _HomePageState extends State<HomePage> {
             );
           } catch (e) {}
         });
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) =>
-                    ChatTalkPage(
-                      peerId: message["data"]["idFrom"],
-                      peerAvatar:  message["data"]["imageFrom"],
-                      userId: message["data"]["idTo"],
-                    )));
+        if(chatTalkPage ==false) {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      ChatTalkPage(
+                        peerId: message["data"]["idFrom"],
+                        peerAvatar: message["data"]["imageFrom"],
+                        userId: message["data"]["idTo"],
+                      )));
+        }else{
+          Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      ChatTalkPage(
+                        peerId: message["data"]["idFrom"],
+                        peerAvatar: message["data"]["imageFrom"],
+                        userId: message["data"]["idTo"],
+                      )));
+        }
       });
     }catch(_){}
   }

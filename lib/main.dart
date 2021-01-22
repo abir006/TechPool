@@ -14,6 +14,7 @@ import 'Utils.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 final versionNumber = 1.0;
+var chatTalkPage = false;
 var lastNotifUsed;
 
 final GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();

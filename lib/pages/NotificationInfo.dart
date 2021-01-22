@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:tech_pool/Utils.dart';
 import 'package:intl/intl.dart';
+import 'package:tech_pool/main.dart';
 import 'package:tech_pool/widgets/TextBoxField.dart';
 import 'package:configurable_expansion_tile/configurable_expansion_tile.dart';
 
@@ -30,6 +31,7 @@ class _NotificationInfoState extends State<NotificationInfo> {
   @override
   void initState() {
     super.initState();
+    chatTalkPage = true;
   }
 
   //Rejecting a request for a lift

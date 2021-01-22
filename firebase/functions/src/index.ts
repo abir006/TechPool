@@ -229,6 +229,12 @@ export const sendLiftNotification = functions.firestore
                     badge: "1",
                     sound: "default",
                   },
+                  data: {
+                    type: "Reminder",
+                    pagetype: 'Passenger',
+                    'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+                    'driveId': tempDriveId
+                    }
                 };
                 // Push to the target device
                 console.log("dest Token is: " + destUser?.data()?.pushToken);

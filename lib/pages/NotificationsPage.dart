@@ -30,17 +30,20 @@ class _NotificationsPageState extends State<NotificationsPage> {
   List<String> net = [];
 
   void handleSlideAnimationChanged(Animation<double> slideAnimation) {
-    setState(() {
-    });
+    // setState(() {
+    //
+    // });
   }
 
   void handleSlideIsOpenChanged(bool isOpen) {
-    if(isOpen==true) {
-    setState(() {
-      slidableController.activeState.open();
-    });
+    //if(isOpen==true) {
+    //setState(() {
+    //   try{
+    //   slidableController.activeState.open();}
+    //   catch(e){}
+    //});
 
-      }
+    //  }
   }
 
   @override
@@ -259,7 +262,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       }
                       _notifications.add(notification);
                     });
-                    _markAsRead(userRep);
                     //sorting the notifications to show by time of arrival
                     _notifications.sort((a, b) {
                       if (a.notificationTime.isAfter(b.notificationTime)) {
@@ -268,6 +270,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
                         return 1;
                       }
                     });
+                    _markAsRead(userRep);
+
                     if(_notifications.length == 0){
                       //double defaultSpacewidth = MediaQuery.of(context).size.width * 0.016;
 
@@ -320,30 +324,32 @@ class _NotificationsPageState extends State<NotificationsPage> {
                         ),
                         drawer: techDrawer(userRep, context, DrawerSections.notifications),
                         body: Container(
-                            decoration: pageContainerDecoration,
-                            margin: pageContainerMargin,
-                            //padding: EdgeInsets.only(bottom: 6.0,top: 7.0, left: defaultSpacewidth, right: defaultSpacewidth*4),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                //Spacer(),
-                                //SizedBox(height: MediaQuery.of(context).size.height * 0.1),
-                                Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.update, size: 30),
-                                  SizedBox(width: MediaQuery.of(context).size.width * 0.02),
-                                  Text("No notifications",style: TextStyle(fontSize: 30, color: Colors.black))
-                                ]),
-                                //Spacer()
-                              ],
-                            ),
+                        decoration: pageContainerDecoration,
+                        margin: pageContainerMargin,
+                        //padding: EdgeInsets.only(bottom: 6.0,top: 7.0, left: defaultSpacewidth, right: defaultSpacewidth*4),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            //Spacer(),
+                            //SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                            Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Icon(Icons.update, size: 30),
+                              SizedBox(width: MediaQuery.of(context).size.width * 0.02),
+                              Text("No notifications",style: TextStyle(fontSize: 30, color: Colors.black))
+                            ]),
+                            //Spacer()
+                          ],
+                        ),
 
                         ));
                     }
-                    return _buildPage(context, userRep);
+                    else {
+                      return _buildPage(context, userRep);
+                    }
                   } else if (snapshot.hasError) {
                     return Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -352,8 +358,64 @@ class _NotificationsPageState extends State<NotificationsPage> {
                           Icon(Icons.error),
                           Text("Error on loading notifications from the database. Please try again.")
                         ]);
-                  } else {
-                      return _buildPage(context, userRep);
+                  }
+                  else {
+                      //return _buildPage(context, userRep);
+                    //return Container();
+                    return Scaffold(
+                        key: _key,
+                        backgroundColor: mainColor,
+                        appBar: AppBar(
+                          elevation: 0,
+                          title: Text(
+                            "Notifications",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          actions: [
+                            IconButton(
+                                icon: StreamBuilder(
+                                    stream: firestore.collection("ChatFriends").doc(userRep.user?.email).collection("UnRead").snapshots(), // a previously-obtained Future<String> or null
+                                    builder: (BuildContext context, snapshot) {
+                                      if (snapshot.hasData) {
+                                        //QuerySnapshot values = snapshot.data;
+                                        //builder: (_, snapshot) =>
+
+                                        return BadgeIcon(
+                                          icon: Icon(Icons.message_outlined, size: 25),
+                                          badgeCount: snapshot.data.size,
+                                        );
+                                      }
+                                      else{
+                                        return BadgeIcon(
+                                          icon: Icon(Icons.notifications, size: 25),
+                                          badgeCount: 0,
+                                        );
+                                      }
+                                    }
+                                ),
+                                onPressed: () async {
+                                  QuerySnapshot q2 = await  FirebaseFirestore.instance.collection("ChatFriends").doc(userRep.user.email)
+                                      .collection("UnRead").get();
+
+                                  FirebaseFirestore.instance.runTransaction((transaction) async {
+                                    q2.docs.forEach((element) {
+                                      transaction.delete(element.reference);
+                                    });
+                                  });
+                                  Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => ChatPage(currentUserId: userRep.user.email)));}
+                            )
+                          ],
+                        ),
+                        drawer: techDrawer(userRep, context, DrawerSections.notifications),
+                        body: Container(
+                          decoration: pageContainerDecoration,
+                          margin: pageContainerMargin,
+                          //padding: EdgeInsets.only(bottom: 6.0,top: 7.0, left: defaultSpacewidth, right: defaultSpacewidth*4),
+                          child: Center(child: Container())
+                    ));
                   }
                 }),
           )
@@ -412,269 +474,267 @@ class _NotificationsPageState extends State<NotificationsPage> {
           ],
         ),
         drawer: techDrawer(userRep, context, DrawerSections.notifications),
-      body:WillPopScope(
-    onWillPop: () => Navigator.pushReplacement(
-    context, MaterialPageRoute(builder: (context) => HomePage())),
-    child:Container(
-          padding: const EdgeInsets.only(bottom: 6.0, top: 7.0),
-          decoration: pageContainerDecoration,
-          margin: pageContainerMargin,
-          //padding: EdgeInsets.only(left: defaultSpacewidth, right: defaultSpacewidth),
-          child: Column(
-            children: [Expanded(child:ListView.builder(
-              shrinkWrap: true,
-              padding: EdgeInsets.only(left: defaultSpacewidth*0.4, right: defaultSpacewidth*0.4, bottom: defaultSpacewidth*0.4,top:defaultSpacewidth*0.4 ),
-              itemCount: _notifications.length,
-              //separatorBuilder: (BuildContext context, int index) => Divider(thickness: 1,),
-              itemBuilder: (BuildContext context, int index) {
-                final notification = _notifications[index];
+      body:Container(
+            padding: const EdgeInsets.only(bottom: 6.0, top: 7.0),
+            decoration: pageContainerDecoration,
+            margin: pageContainerMargin,
+            //padding: EdgeInsets.only(left: defaultSpacewidth, right: defaultSpacewidth),
+            child: Column(
+              children: [Expanded(child:ListView.builder(
+                shrinkWrap: true,
+                padding: EdgeInsets.only(left: defaultSpacewidth*0.4, right: defaultSpacewidth*0.4, bottom: defaultSpacewidth*0.4,top:defaultSpacewidth*0.4 ),
+                itemCount: _notifications.length,
+                //separatorBuilder: (BuildContext context, int index) => Divider(thickness: 1,),
+                itemBuilder: (BuildContext context, int index) {
+                  final notification = _notifications[index];
 
-                Widget tileToDisplay;
-                if(_notifications[index].type == "AcceptedLift") {
-                  tileToDisplay = _buildAcceptedTile(_notifications[index]);
-                }
-                else if(_notifications[index].type == "RejectedLift") {
-                  tileToDisplay = _buildRejectedTile(_notifications[index]);
-                }
-                else if(_notifications[index].type == "RequestedLift") {
-                  tileToDisplay = _buildRequestedTile(_notifications[index]);
-                  return tileToDisplay;
-                }
-                else if(_notifications[index].type == "DesiredLift") {
-                  tileToDisplay = _buildDesiredTile(_notifications[index]);
+                  Widget tileToDisplay;
+                  if(_notifications[index].type == "AcceptedLift") {
+                    tileToDisplay = _buildAcceptedTile(_notifications[index]);
+                  }
+                  else if(_notifications[index].type == "RejectedLift") {
+                    tileToDisplay = _buildRejectedTile(_notifications[index]);
+                  }
+                  else if(_notifications[index].type == "RequestedLift") {
+                    tileToDisplay = _buildRequestedTile(_notifications[index]);
+                    return tileToDisplay;
+                  }
+                  else if(_notifications[index].type == "DesiredLift") {
+                    tileToDisplay = _buildDesiredTile(_notifications[index]);
+                    //return tileToDisplay;
+                  }
+                  else if(_notifications[index].type == "CanceledLift" || _notifications[index].type == "CanceledDrive") {
+                    tileToDisplay = _buildCanceledTile(_notifications[index]);
+                  }
+                  /*else {
+                    tileToDisplay = null;
+                  }*/
+                  // bool condition = true;
+                  // if(condition) {
+                    //return Container();
                   //return tileToDisplay;
-                }
-                else if(_notifications[index].type == "CanceledLift" || _notifications[index].type == "CanceledDrive") {
-                  tileToDisplay = _buildCanceledTile(_notifications[index]);
-                }
-                /*else {
-                  tileToDisplay = null;
-                }*/
-                bool condition = true;
-                if(condition) {
-                  //return Container();
+
                   return Slidable(
-                    enabled: _notifications.contains(notification),
-                    controller: slidableController,
-                    actionPane: SlidableScrollActionPane(),
-                    actionExtentRatio: 0.25,
-                    closeOnScroll: false,
-                    actions: <Widget>[
-                      Container(
-                        //padding: EdgeInsets.fromLTRB(0, 1, 0, 12,),
-                  margin: EdgeInsets.only(
-                      top: MediaQuery
+                      //key: Key(notification.notificationId),
+                      enabled: _notifications.contains(notification),
+                      controller: slidableController,
+                      actionPane: SlidableScrollActionPane(),
+                      actionExtentRatio: 0.23,
+                      closeOnScroll: false,
+                      actions: <Widget>[
+                        Container(
+                          //padding: EdgeInsets.fromLTRB(0, 1, 0, 12,),
+                    margin: EdgeInsets.only(
+                        top: MediaQuery
+                        .of(context)
+                        .size
+                        .height * 0.006,
+                  bottom: MediaQuery
                       .of(context)
                       .size
-                      .height * 0.006,
-                bottom: MediaQuery
-                    .of(context)
-                    .size
-                    .height * 0.006),
-                        child: FlatButton(
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10.0)),
-                          child: Center(child:
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.delete_outline, size: 33, color: Colors.white,),
-                              Text("Delete", style: TextStyle(
-                                  color: Colors.white, fontSize: 12),)
-                            ],
-                          ),),
-                          height: 100,
-                          // caption: 'Delete',
-                          color: Colors.red,
-                          //  icon: Icons.delete_outline,
-                          onPressed: () async {
-                            FirebaseFirestore.instance.runTransaction((
-                                transaction) async {
-                              // QuerySnapshot q2 = await FirebaseFirestore
-                              //     .instance
-                              //     .collection("ChatFriends").doc(
-                              //     userRep.user?.email).collection("Network")
-                              //     .doc(document.id.toString()).collection(
-                              //     document.id.toString())
-                              //     .get();
+                      .height * 0.006),
+                          child: FlatButton(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0)),
+                            child: Center(child:
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.delete_outline, size: 33, color: Colors.white,),
+                                Text("Delete", style: TextStyle(
+                                    color: Colors.white, fontSize: 12),)
+                              ],
+                            ),),
+                            height: 100,
+                            // caption: 'Delete',
+                            color: Colors.red,
+                            //  icon: Icons.delete_outline,
+                            onPressed: () async {
+                              FirebaseFirestore.instance.runTransaction((
+                                  transaction) async {
+                                // QuerySnapshot q2 = await FirebaseFirestore
+                                //     .instance
+                                //     .collection("ChatFriends").doc(
+                                //     userRep.user?.email).collection("Network")
+                                //     .doc(document.id.toString()).collection(
+                                //     document.id.toString())
+                                //     .get();
 
-                              await firestore.collection("Notifications").
-                              doc(userRep.user?.email).collection("UserNotifications").
-                              doc(_notifications[index].notificationId).delete()
-                              //     .then((value) =>
-                              // {
-                              //   _key.currentState.showSnackBar(SnackBar(content: Text("Notification Deleted", style: TextStyle(fontSize: 20))))
-                              //   //return value;
-                              // }
-                              //)
-                              ;
+                                await firestore.collection("Notifications").
+                                doc(userRep.user?.email).collection("UserNotifications").
+                                doc(_notifications[index].notificationId).delete()
+                                //     .then((value) =>
+                                // {
+                                //   _key.currentState.showSnackBar(SnackBar(content: Text("Notification Deleted", style: TextStyle(fontSize: 20))))
+                                //   //return value;
+                                // }
+                                //)
+                                ;
 
-                              // Future.wait(q2.docs.map((element) {
-                              //   transaction.delete(element.reference);
-                              //   return Future(() => Null);
-                              // }));
-                              // transaction.delete(
-                              //     firestore.collection("ChatFriends").doc(
-                              //         userRep.user?.email)
-                              //         .collection("Network")
-                              //         .doc(document.id.toString()));
-                            });
-                            FocusScope.of(context).requestFocus(
-                                new FocusNode());
-                            try {
-                              slidableController.activeState.close();
-                            }
-                            catch (e) {}
-                          },
-                          //  FirebaseFirestore.instance.runTransaction((transaction) async {
-                          //    transaction.delete(firestore.collection("ChatFriends").doc(userRep.user?.email).collection("Network").doc(document.id.toString()));
-                          //  });
+                                // Future.wait(q2.docs.map((element) {
+                                //   transaction.delete(element.reference);
+                                //   return Future(() => Null);
+                                // }));
+                                // transaction.delete(
+                                //     firestore.collection("ChatFriends").doc(
+                                //         userRep.user?.email)
+                                //         .collection("Network")
+                                //         .doc(document.id.toString()));
+                              });
+                              FocusScope.of(context).requestFocus(
+                                  new FocusNode());
+                              try {
+                                slidableController.activeState.close();
+                              }
+                              catch (e) {}
+                            },
+                            //  FirebaseFirestore.instance.runTransaction((transaction) async {
+                            //    transaction.delete(firestore.collection("ChatFriends").doc(userRep.user?.email).collection("Network").doc(document.id.toString()));
+                            //  });
+                          ),
                         ),
+                      ],
+                      child: Container(
+                          child: tileToDisplay
                       ),
-                    ],
-                    child: Container(
-                        child: tileToDisplay
-                    ),
-
-
-
 
                   );
-                }
-
-
-                else{
-                    return Dismissible(
-                      // Each Dismissible must contain a Key. Keys allow Flutter to
-                      // uniquely identify widgets.
-                      key: UniqueKey(),
-                      //Key(notification.toString()),
-                      //Key(notification.notificationTime.toString()),
-                      // Provide a function that tells the app
-                      // what to do after an item has been swiped away.
-                      onDismissed: (direction) async {
-                        //Here will come the query to delete notification from db.
-                        await firestore.collection("Notifications").
-                        doc(userRep.user?.email).collection("UserNotifications").
-                        doc(_notifications[index].notificationId).delete().then((value) =>
-                        {
-                          _key.currentState.showSnackBar(SnackBar(content: Text("Notification Deleted", style: TextStyle(fontSize: 20))))
-                          //return value;
-                        }
-                        );
-
-                        //await deleteNotification;
-
-                        /*setState(() {
-                      // Remove the item from the data source.
-                      _notifications.removeAt(index);
-                      });*/
-
-                        // Then show a snackbar.
-                        //Scaffold.of(context)
-                        //_key.currentState.showSnackBar(SnackBar(content: Text(/*$notification*/"Notification Deleted", style: TextStyle(fontSize: 20))));
-                      },
-                      // Show a red background as the item is swiped away.
-                      background: //Container(color: mainColor),
-
-                      Container(
-                        margin: EdgeInsets.only(
-                            top: MediaQuery
-                                .of(context)
-                                .size
-                                .height * 0.006,
-                            bottom: MediaQuery
-                                .of(context)
-                                .size
-                                .height * 0.006),
-                        decoration: BoxDecoration(
-                          color: mainColor,
-                          boxShadow: [BoxShadow(color: Colors.black, blurRadius: 2.0,
-                              spreadRadius: 0.0, offset: Offset(2.0, 2.0))
-                          ],
-                          border: Border.all(color: secondColor, width: 0.65),
-                          borderRadius: BorderRadius.circular(12.0),),
-                        child:
-                        Row(
-                          children: [
-                            Container(
-                                margin: EdgeInsets.only(
-                                    left: MediaQuery
-                                        .of(context)
-                                        .size
-                                        .height * 0.016, top: MediaQuery
-                                    .of(context)
-                                    .size
-                                    .height * 0.004),
-                                width: MediaQuery
-                                    .of(context)
-                                    .size
-                                    .height * 0.016 * 4,
-                                height: MediaQuery
-                                    .of(context)
-                                    .size
-                                    .height * 0.016 * 4,
-                                child: Icon(Icons.delete, size: 30, color: Colors.white)
-                              /*decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.teal,
-                                child:
-
-                              )*/
-                            ),
-                            Spacer(), // I just added one line
-                            Container(
-                                margin: EdgeInsets.only(
-                                  /*left: MediaQuery
-                                      .of(context)
-                                      .size
-                                      .height * 0.016, */
-                                    top: MediaQuery
-                                        .of(context)
-                                        .size
-                                        .height * 0.004),
-                                width: MediaQuery
-                                    .of(context)
-                                    .size
-                                    .width * 0.016 * 12,
-                                height: MediaQuery
-                                    .of(context)
-                                    .size
-                                    .height * 0.016 * 4,
-                                child: Icon(Icons.delete, size: 30, color: Colors.white)
-                              /*decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.teal,
-                                child:
-
-                              )*/
-                            ),
-                          ],
-                        ),
-                      ),
 
 
 
-                      child: tileToDisplay,
-                    );
-                  }
-                  // //return _buildTile(_notifications[index]);
-                  // if(_notifications[index].type == "AcceptedLift") {
-                  //   return _buildAcceptedTile(_notifications[index]);
-                  // }
-                  // else if(_notifications[index].type == "RejectedLift") {
-                  //   return _buildRejectedTile(_notifications[index]);
-                  // }
-                  // else if(_notifications[index].type == "RequestedLift") {
-                  //   return _buildRequestedTile(_notifications[index]);
-                  // }
-                  // else {
-                  //   return null;
-                  // }
-                  //
-              },
-            ))],
-          ))),
+
+                      // return Dismissible(
+                      //   // Each Dismissible must contain a Key. Keys allow Flutter to
+                      //   // uniquely identify widgets.
+                      //   key: UniqueKey(),
+                      //   //Key(notification.toString()),
+                      //   //Key(notification.notificationTime.toString()),
+                      //   // Provide a function that tells the app
+                      //   // what to do after an item has been swiped away.
+                      //   onDismissed: (direction) async {
+                      //     //Here will come the query to delete notification from db.
+                      //     await firestore.collection("Notifications").
+                      //     doc(userRep.user?.email).collection("UserNotifications").
+                      //     doc(_notifications[index].notificationId).delete().then((value) =>
+                      //     {
+                      //       _key.currentState.showSnackBar(SnackBar(content: Text("Notification Deleted", style: TextStyle(fontSize: 20))))
+                      //       //return value;
+                      //     }
+                      //     );
+                      //
+                      //     //await deleteNotification;
+                      //
+                      //     /*setState(() {
+                      //   // Remove the item from the data source.
+                      //   _notifications.removeAt(index);
+                      //   });*/
+                      //
+                      //     // Then show a snackbar.
+                      //     //Scaffold.of(context)
+                      //     //_key.currentState.showSnackBar(SnackBar(content: Text(/*$notification*/"Notification Deleted", style: TextStyle(fontSize: 20))));
+                      //   },
+                      //   // Show a red background as the item is swiped away.
+                      //   background: //Container(color: mainColor),
+                      //
+                      //   Container(
+                      //     margin: EdgeInsets.only(
+                      //         top: MediaQuery
+                      //             .of(context)
+                      //             .size
+                      //             .height * 0.006,
+                      //         bottom: MediaQuery
+                      //             .of(context)
+                      //             .size
+                      //             .height * 0.006),
+                      //     decoration: BoxDecoration(
+                      //       color: mainColor,
+                      //       boxShadow: [BoxShadow(color: greyColor,blurRadius: 1.0,
+                      //           spreadRadius: 0.0,offset: Offset(1.0, 1.0))],
+                      //       border: Border.all(color: secondColor, width: 0.65),
+                      //       borderRadius: BorderRadius.circular(12.0),),
+                      //     child:
+                      //     Row(
+                      //       children: [
+                      //         Container(
+                      //             margin: EdgeInsets.only(
+                      //                 left: MediaQuery
+                      //                     .of(context)
+                      //                     .size
+                      //                     .height * 0.016, top: MediaQuery
+                      //                 .of(context)
+                      //                 .size
+                      //                 .height * 0.004),
+                      //             width: MediaQuery
+                      //                 .of(context)
+                      //                 .size
+                      //                 .height * 0.016 * 4,
+                      //             height: MediaQuery
+                      //                 .of(context)
+                      //                 .size
+                      //                 .height * 0.016 * 4,
+                      //             child: Icon(Icons.delete, size: 30, color: Colors.white)
+                      //           /*decoration: BoxDecoration(
+                      //             shape: BoxShape.circle,
+                      //             color: Colors.teal,
+                      //             child:
+                      //
+                      //           )*/
+                      //         ),
+                      //         Spacer(), // I just added one line
+                      //         Container(
+                      //             margin: EdgeInsets.only(
+                      //               /*left: MediaQuery
+                      //                   .of(context)
+                      //                   .size
+                      //                   .height * 0.016, */
+                      //                 top: MediaQuery
+                      //                     .of(context)
+                      //                     .size
+                      //                     .height * 0.004),
+                      //             width: MediaQuery
+                      //                 .of(context)
+                      //                 .size
+                      //                 .width * 0.016 * 12,
+                      //             height: MediaQuery
+                      //                 .of(context)
+                      //                 .size
+                      //                 .height * 0.016 * 4,
+                      //             child: Icon(Icons.delete, size: 30, color: Colors.white)
+                      //           /*decoration: BoxDecoration(
+                      //             shape: BoxShape.circle,
+                      //             color: Colors.teal,
+                      //             child:
+                      //
+                      //           )*/
+                      //         ),
+                      //       ],
+                      //     ),
+                      //   ),
+                      //
+                      //
+                      //
+                      //   child: tileToDisplay,
+                      // );
+
+
+
+                    // //return _buildTile(_notifications[index]);
+                    // if(_notifications[index].type == "AcceptedLift") {
+                    //   return _buildAcceptedTile(_notifications[index]);
+                    // }
+                    // else if(_notifications[index].type == "RejectedLift") {
+                    //   return _buildRejectedTile(_notifications[index]);
+                    // }
+                    // else if(_notifications[index].type == "RequestedLift") {
+                    //   return _buildRequestedTile(_notifications[index]);
+                    // }
+                    // else {
+                    //   return null;
+                    // }
+                    //
+                },
+              ))],
+            )),
     );
   }
 
@@ -757,9 +817,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
                         .height * 0.006),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  boxShadow: [BoxShadow(color: Colors.black, blurRadius: 2.0,
-                      spreadRadius: 0.0, offset: Offset(2.0, 2.0))
-                  ],
+                  boxShadow: [BoxShadow(color: greyColor,blurRadius: 1.0,
+                      spreadRadius: 0.0,offset: Offset(1.0, 1.0))],
                   border: Border.all(color: secondColor, width: 0.65),
                   borderRadius: BorderRadius.circular(12.0),),
                 child:
@@ -781,9 +840,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                     },
                                     fullscreenDialog: true
                                 ));
-                            setState(() {
-
-                            });
+                            // setState(() {
+                            //
+                            // });
                           },
                           child: Container(
                               margin: EdgeInsets.only(
@@ -947,9 +1006,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
                         .height * 0.006),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  boxShadow: [BoxShadow(color: Colors.black, blurRadius: 2.0,
-                      spreadRadius: 0.0, offset: Offset(2.0, 2.0))
-                  ],
+                  boxShadow: [BoxShadow(color: greyColor,blurRadius: 1.0,
+                      spreadRadius: 0.0,offset: Offset(1.0, 1.0))],
                   border: Border.all(color: secondColor, width: 0.65),
                   borderRadius: BorderRadius.circular(12.0),),
                 child:
@@ -971,9 +1029,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                     },
                                     fullscreenDialog: true
                                 ));
-                            setState(() {
-
-                            });
+                            // setState(() {
+                            //
+                            // });
                           },
                           child: Container(
                               margin: EdgeInsets.only(
@@ -1084,9 +1142,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       .height * 0.006),
               decoration: BoxDecoration(
                 color: Colors.white,
-                boxShadow: [BoxShadow(color: Colors.black, blurRadius: 2.0,
-                    spreadRadius: 0.0, offset: Offset(2.0, 2.0))
-                ],
+                boxShadow: [BoxShadow(color: greyColor,blurRadius: 1.0,
+                    spreadRadius: 0.0,offset: Offset(1.0, 1.0))],
                 border: Border.all(color: secondColor, width: 0.65),
                 borderRadius: BorderRadius.circular(12.0),),
               child:
@@ -1108,9 +1165,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                   },
                                   fullscreenDialog: true
                               ));
-                          setState(() {
-
-                          });
+                          // setState(() {
+                          //
+                          // });
                         },
                         child: Container(
                             margin: EdgeInsets.only(
@@ -1230,9 +1287,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       .height * 0.006),
               decoration: BoxDecoration(
                 color: Colors.white,
-                boxShadow: [BoxShadow(color: Colors.black, blurRadius: 2.0,
-                    spreadRadius: 0.0, offset: Offset(2.0, 2.0))
-                ],
+                boxShadow: [BoxShadow(color: greyColor,blurRadius: 1.0,
+                    spreadRadius: 0.0,offset: Offset(1.0, 1.0))],
                 border: Border.all(color: secondColor, width: 0.65),
                 borderRadius: BorderRadius.circular(12.0),),
               child:
@@ -1254,9 +1310,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                   },
                                   fullscreenDialog: true
                               ));
-                          setState(() {
-
-                          });
+                          // setState(() {
+                          //
+                          // });
                         },
                         child: Container(
                             margin: EdgeInsets.only(
@@ -1411,9 +1467,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
                         .height * 0.006),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  boxShadow: [BoxShadow(color: Colors.black, blurRadius: 2.0,
-                      spreadRadius: 0.0, offset: Offset(2.0, 2.0))
-                  ],
+                  boxShadow: [BoxShadow(color: greyColor,blurRadius: 1.0,
+                      spreadRadius: 0.0,offset: Offset(1.0, 1.0))],
                   border: Border.all(color: secondColor, width: 0.65),
                   borderRadius: BorderRadius.circular(12.0),),
                 child:
@@ -1434,9 +1489,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                     },
                                     fullscreenDialog: true
                                 ));
-                            setState(() {
-
-                            });
+                            // setState(() {
+                            //
+                            // });
                           },
                           child: Container(
                               margin: EdgeInsets.only(

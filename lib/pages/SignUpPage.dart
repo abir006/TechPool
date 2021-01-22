@@ -436,7 +436,7 @@ class _SignUpPageState extends State<SignUpPage>
                                                   )),
                                               Center(
                                                 child:
-                                                    CircularProgressIndicator(),
+                                                    CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.orange),),
                                               )
                                             ]))
                               ]))

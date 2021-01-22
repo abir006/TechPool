@@ -38,6 +38,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message){return;},
       onLaunch: (Map<String, dynamic> message) async {
         if(lastNotifUsed != message["data"]["google.message_id"]) {
           lastNotifUsed = message["data"]["google.message_id"];
@@ -410,7 +411,7 @@ class _HomePageState extends State<HomePage> {
                         Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => ChatPage(currentUserId: userRep.user.email)));}
+                                builder: (context) => ChatPage(currentUserId: userRep.user.email,fromNotification: false,)));}
                   )
                 ],
                 ),
@@ -557,7 +558,7 @@ class _HomePageState extends State<HomePage> {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => ChatPage(currentUserId: userRep.user.email)));}
+                        builder: (context) => ChatPage(currentUserId: userRep.user.email,fromNotification: false,)));}
             )
           ],
         ),

@@ -37,11 +37,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   void handleSlideIsOpenChanged(bool isOpen) {
     //if(isOpen==true) {
-    //setState(() {
-    //   try{
-    //   slidableController.activeState.open();}
-    //   catch(e){}
-    //});
+    setState(() {
+      try{
+      slidableController.activeState.open();}
+      catch(e){}
+    });
 
     //  }
   }
@@ -74,17 +74,17 @@ class _NotificationsPageState extends State<NotificationsPage> {
     }
   }
 
-  // Future<void> deleteNotification(index, userRep, _key) async {
-  //   //Here will come the query to delete notification from db.
-  //   await firestore.collection("Notifications").
-  //   doc(userRep.user?.email).collection("UserNotifications").
-  //   doc(_notifications[index].notificationId).delete().then((value)
-  //   {
-  //     _key.currentState.showSnackBar(SnackBar(content: Text(/*$notification*/"Notification Deleted", style: TextStyle(fontSize: 20))));
-  //     return value;
-  //   }
-  //   );
-  // }
+  Future<void> deleteNotification(index, userRep, _key) async {
+    //Here will come the query to delete notification from db.
+    await firestore.collection("Notifications").
+    doc(userRep.user?.email).collection("UserNotifications").
+    doc(_notifications[index].notificationId).delete().then((value)
+    {
+      _key.currentState.showSnackBar(SnackBar(content: Text(/*$notification*/"Notification Deleted", style: TextStyle(fontSize: 20))));
+      return value;
+    }
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -263,14 +263,14 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       _notifications.add(notification);
                     });
                     //sorting the notifications to show by time of arrival
-                    _notifications.sort((a, b) {
-                      if (a.notificationTime.isAfter(b.notificationTime)) {
-                        return -1;
-                      } else {
-                        return 1;
-                      }
-                    });
-                    _markAsRead(userRep);
+                    // _notifications.sort((a, b) {
+                    //   if (a.notificationTime.isAfter(b.notificationTime)) {
+                    //     return 1;
+                    //   } else {
+                    //     return -1;
+                    //   }
+                    // });
+                    //_markAsRead(userRep);
 
                     if(_notifications.length == 0){
                       //double defaultSpacewidth = MediaQuery.of(context).size.width * 0.016;
@@ -504,7 +504,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     //return tileToDisplay;
                   }
                   else if(_notifications[index].type == "CanceledLift" || _notifications[index].type == "CanceledDrive") {
-                    tileToDisplay = _buildCanceledTile(_notifications[index]);
+                    tileToDisplay = _buildCanceledTile(_notifications[index], userRep);
                   }
                   /*else {
                     tileToDisplay = null;
@@ -828,9 +828,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       child: InkWell(
                           onTap: () async {
                             FocusScope.of(context).unfocus();
-                            try{
-                              slidableController.activeState.close();}
-                            catch(e){}
+                            // try{
+                            //   slidableController.activeState.close();}
+                            // catch(e){}
 
                             await Navigator.of(context).push(
                                 MaterialPageRoute<liftRes>(
@@ -1017,9 +1017,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       child: InkWell(
                           onTap: () async {
                             FocusScope.of(context).unfocus();
-                            try{
-                              slidableController.activeState.close();}
-                            catch(e){}
+                            // try{
+                            //   slidableController.activeState.close();}
+                            // catch(e){}
 
                             await Navigator.of(context).push(
                                 MaterialPageRoute<liftRes>(
@@ -1125,7 +1125,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
         });
   }
 
-  Widget _buildCanceledTile(LiftNotification liftNotification) {
+  Widget _buildCanceledTile(LiftNotification liftNotification, userRep) {
     return FutureBuilder<List<String>>(
         future: initNames(liftNotification.type == "CanceledLift" ? liftNotification.passengerId : liftNotification.driverId),
         builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
@@ -1153,9 +1153,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     child: InkWell(
                         onTap: () async {
                           FocusScope.of(context).unfocus();
-                          try{
-                            slidableController.activeState.close();}
-                          catch(e){}
+                          // try{
+                          //   slidableController.activeState.close();}
+                          // catch(e){}
 
                           await Navigator.of(context).push(
                               MaterialPageRoute<liftRes>(
@@ -1252,7 +1252,15 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     ),
                   ),
                   //Spacer(),
+                  Flexible(
+                      flex: 2,
+                      child: IconButton(
+                          icon: Icon(Icons.delete_outline, size: 30, color: Colors.grey),
+                          onPressed: () async {
+                            await deleteNotification(index, userRep, _key);
+                          })
 
+                  ),
                   SizedBox(width: MediaQuery
                       .of(context)
                       .size
@@ -1298,9 +1306,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     child: InkWell(
                         onTap: () async {
                           FocusScope.of(context).unfocus();
-                          try{
-                            slidableController.activeState.close();}
-                          catch(e){}
+                          // try{
+                          //   slidableController.activeState.close();}
+                          // catch(e){}
 
                           await Navigator.of(context).push(
                               MaterialPageRoute<liftRes>(
@@ -1478,9 +1486,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       child: InkWell(
                           onTap: () async {
                             FocusScope.of(context).unfocus();
-                            try{
-                              slidableController.activeState.close();}
-                            catch(e){}
+                            // try{
+                            //   slidableController.activeState.close();}
+                            // catch(e){}
                             await Navigator.of(context).push(
                                 MaterialPageRoute<liftRes>(
                                     builder: (BuildContext context) {

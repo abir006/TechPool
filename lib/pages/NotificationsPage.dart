@@ -274,6 +274,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       }
                       _notifications.add(notification);
                     });
+                    _markAsRead(userRep);
                     //sorting the notifications to show by time of arrival
                     _notifications.sort((a, b) {
                       if (a.notificationTime.isAfter(b.notificationTime)) {
@@ -282,7 +283,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
                         return 1;
                       }
                     });
-                    //_markAsRead(userRep);
 
                     if(_notifications.length == 0){
                       //double defaultSpacewidth = MediaQuery.of(context).size.width * 0.016;
@@ -806,7 +806,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   slidableController.activeState.close();}
                 catch(e){}
 
-                Navigator.of(context).push(new MaterialPageRoute<Null>(
+                await Navigator.of(context).push(new MaterialPageRoute<Null>(
                     builder: (BuildContext context) {
                       return NotificationInfo(
                           lift: liftToShow,
@@ -1484,7 +1484,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   slidableController.activeState.close();}
                 catch(e){}
 
-                Navigator.of(context).push(new MaterialPageRoute<Null>(
+                await Navigator.of(context).push(new MaterialPageRoute<Null>(
                     builder: (BuildContext context) {
                       return NotificationInfo(
                           lift: liftToShow, notification: liftNotification, type: NotificationInfoType.Requested);

@@ -275,6 +275,7 @@ class ChatScreenState extends State<ChatScreen>  with WidgetsBindingObserver {
                 .collection("UnRead")
                 .doc(),
             {
+              'idFrom':id,
               'timestamp': DateTime
                   .now()
                   .millisecondsSinceEpoch

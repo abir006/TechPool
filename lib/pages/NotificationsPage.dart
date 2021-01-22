@@ -314,15 +314,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                   Navigator.pushReplacement(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => ChatPage(currentUserId: userRep.user.email)));}
+                                          builder: (context) => ChatPage(currentUserId: userRep.user.email,fromNotification: false,)));}
                             )
                           ],
                         ),
                         drawer: techDrawer(userRep, context, DrawerSections.notifications),
-                        body: WillPopScope(
-                            onWillPop: () => Navigator.pushReplacement(
-                                context, MaterialPageRoute(builder: (context) => HomePage())),
-                            child:Container(
+                        body: Container(
                             decoration: pageContainerDecoration,
                             margin: pageContainerMargin,
                             //padding: EdgeInsets.only(bottom: 6.0,top: 7.0, left: defaultSpacewidth, right: defaultSpacewidth*4),
@@ -344,7 +341,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                               ],
                             ),
 
-                        )));
+                        ));
                     }
                     return _buildPage(context, userRep);
                   } else if (snapshot.hasError) {

@@ -968,7 +968,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
                     bool res = await _checkForFitDesiredAndSendNotifications(docLift);
 
                     FocusManager.instance.primaryFocus.unfocus();
-                    Navigator.of(context).pop();
+                 //   Navigator.of(context).pop();
                     // .then((value) => Navigator.pop(context))
                     // .catchError((error) => print("Something went wrong. Please try again"));
                   }

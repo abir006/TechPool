@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -45,6 +46,8 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
   QuerySnapshot q;
   QuerySnapshot q1;
   bool addDesired = true;
+  QuerySnapshot q2;
+  Map<String,DocumentSnapshot> mapi = new   Map<String,DocumentSnapshot>();
 
   @override
   void initState() {
@@ -70,6 +73,12 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
   void filter(List<QuerySnapshot> value,UserRepository userRep){
     q = value[0];
     q1 = value[1];
+    q2 = value[2];
+    q2.docs.forEach((element) {
+      if(element!=null) {
+        mapi[element.id] = element;
+      }
+    });
     liftList.clear();
     q.docs.forEach(
             (element) async {
@@ -341,7 +350,11 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
           .snapshots(),
         firestore
           .collection("Notifications")
-          .doc(userRep.user.email).collection("Pending").snapshots()],(vals) => [vals[0],vals[1]]), // a previously-obtained Future<String> or null
+          .doc(userRep.user.email).collection("Pending").snapshots(),
+        FirebaseFirestore.instance
+            .collection('Profiles')
+            .snapshots(),
+      ],(vals) => [vals[0],vals[1],vals[2]]), // a previously-obtained Future<String> or null
       builder: (BuildContext context, AsyncSnapshot<List<QuerySnapshot>> snapshot){
         if(snapshot.hasData) {
           filter(snapshot.data, userRep);
@@ -350,7 +363,7 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
             shrinkWrap: true,
             padding: EdgeInsets.only(left: defaultSpacewidth*0.4, right: defaultSpacewidth*0.4, bottom: defaultSpacewidth*0.4,top:defaultSpacewidth*0.4 ),
             itemCount: liftList.length,
-            separatorBuilder: (BuildContext context, int index) => Divider(thickness: 4,),
+            separatorBuilder: (BuildContext context, int index) => Divider(thickness: 0,),
             itemBuilder: (BuildContext context, int index) {
               return _buildTile(liftList[index]);
             },
@@ -405,11 +418,7 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
 
 ///build the tile of the lift
   Widget _buildTile(MyLift lift) {
-    return FutureBuilder<List<String>>(
-        future: initNames(lift.driver),
-        builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
-          if (snapshot.hasData) {
-            return InkWell(
+    return InkWell(
               onTap: () async {
                 liftRes temp =  liftRes(
                   fromTime: widget.fromTime,
@@ -432,9 +441,8 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
                 child: Container(
               decoration: BoxDecoration(
                 color: Colors.white,
-                boxShadow: [BoxShadow(color: Colors.black, blurRadius: 2.0,
-                    spreadRadius: 0.0, offset: Offset(2.0, 2.0))
-                ],
+                  boxShadow: [BoxShadow(color: greyColor,blurRadius: 1.0,
+                      spreadRadius: 0.0,offset: Offset(1.0, 1.0))],
                 border: Border.all(color: secondColor, width: 0.8),
                 borderRadius: BorderRadius.circular(12.0),),
               child:
@@ -456,7 +464,52 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
                       },
                      // child: Hero(
                        // tag: 'dash',
-                          child: Container(
+                          child: /* Material(
+                            child: mapi[lift.driver].data()["pic"] != null
+                                ? InkWell(
+                              onTap: () async {
+                                FocusScope.of(context).unfocus();
+                                await Navigator.of(context)
+                                    .push(MaterialPageRoute<liftRes>(
+                                    builder: (BuildContext context) {
+                                      return ProfilePage(
+                                        email:lift.driver,
+                                        fromProfile: false,
+                                      );
+                                    },
+                                    fullscreenDialog: true));
+                              },
+                              child:
+                              CachedNetworkImage(
+                                placeholder: (context, url) => Container(
+                                  color: mainColor,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 1.0,
+                                    valueColor:
+                                    AlwaysStoppedAnimation<Color>(
+                                        secondColor),
+                                  ),
+                                  width: 50.0,
+                                  height: 50.0,
+                                  padding: EdgeInsets.all(15.0),
+                                ),
+                                color: secondColor,
+                                colorBlendMode: BlendMode.dstOver ,
+                                imageUrl:   mapi[lift.driver].data()["pic"],
+                                width: 50.0,
+                                height: 50.0,
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                                : Icon(
+                              Icons.account_circle,
+                              size: 50.0,
+                              color: secondColor,
+                            ),
+                            borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                            clipBehavior: Clip.hardEdge,
+                          )),*/
+                          Container(
                           margin: EdgeInsets.only(
                               left: MediaQuery
                                   .of(context)
@@ -477,8 +530,7 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
                             shape: BoxShape.circle,
                             color: secondColor,
                             image: DecorationImage(fit: BoxFit.fill,
-                                image: NetworkImage(snapshot.data[0])),
-
+                                image: NetworkImage(mapi[lift.driver].data()["pic"])),
                           ))),
                   Container(
                       margin: EdgeInsets.only(
@@ -492,7 +544,7 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          infoText(snapshot.data[1]),
+                          infoText(mapi[lift.driver].data()["firstName"]+ " " +mapi[lift.driver].data()["lastName"]),
                           placesText(lift.startCity, lift.destCity),
                           allInfoText(lift.time, lift.dist/1000, lift.price,
                               lift.numberOfSeats, lift.passengers.length),
@@ -507,15 +559,6 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
                 ],
               ),
             ));
-          }else {
-            if(snapshot.hasError){
-              return Center(child: Text("Error loading lift", style: TextStyle(fontSize: 20),),);
-            } else{
-              return Center(
-                child: CircularProgressIndicator(),);
-            }
-          }
-        });
   }
 
 ///all the info in the lift tile

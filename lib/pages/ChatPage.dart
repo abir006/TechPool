@@ -25,7 +25,10 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 
 class ChatPage extends StatefulWidget {
   final String currentUserId;
-  ChatPage({Key key, @required this.currentUserId}) : super(key: key);
+  final bool fromNotification;
+  final String idFrom;
+  final String photo;
+  ChatPage({Key key, @required this.currentUserId,@required this.fromNotification, this.idFrom, this.photo}) : super(key: key);
 
   @override
   State createState() => ChatPageState(currentUserId: currentUserId);
@@ -373,6 +376,39 @@ class ChatPageState extends State<ChatPage>  with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    if(widget.fromNotification ==true){
+      FirebaseFirestore.instance
+          .collection("ChatFriends").doc(widget.currentUserId).collection(
+          "Network").doc(widget.idFrom).collection(
+         widget.idFrom)
+          .get().then((value) {
+        FirebaseFirestore.instance.runTransaction((transaction) async {
+          value.docs.forEach((element) {
+            transaction.delete(element.reference);
+          });
+          try {
+            transaction.update(
+              FirebaseFirestore.instance.collection("ChatFriends")
+                  .doc(widget.currentUserId)
+                  .collection("Network")
+                  .doc(widget.idFrom),
+              {
+                'read': true
+              },
+            );
+          } catch (e) {}
+        });
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    ChatTalkPage(
+                      peerId: widget.idFrom,
+                      peerAvatar: widget.photo,
+                      userId: widget.currentUserId,
+                    )));
+        });
+    }
     return Scaffold(
       appBar: AppBar(
         elevation: 0,

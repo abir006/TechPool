@@ -183,12 +183,12 @@ ListTile drawerListTile(String pageName,IconData icon,DrawerSections tileSection
   Navigator.push(
   context,
   MaterialPageRoute(
-  builder: (context) => ChatPage(currentUserId: userRep.user.email)));
+  builder: (context) => ChatPage(currentUserId: userRep.user.email,fromNotification: false,)));
   }else {
     Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-            builder: (context) => ChatPage(currentUserId: userRep.user.email)));
+            builder: (context) => ChatPage(currentUserId: userRep.user.email,fromNotification: false)));
   }
             break;
           }

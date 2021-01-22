@@ -16,6 +16,7 @@ import 'package:tech_pool/pages/SearchLiftPage.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:tech_pool/CalendarEvents.dart';
 import 'package:tech_pool/TechDrawer.dart';
+import 'ChatTalkPage.dart';
 import 'SetDrivePage.dart';
 
 class HomePage extends StatefulWidget {
@@ -43,6 +44,9 @@ class _HomePageState extends State<HomePage> {
           if (message["data"]["type"] == "Reminder") {
             await hourBeforeNotificationPressed(message);
           }
+          if (message["data"]["type"] == "Chat") {
+            await chatNotification(message);
+          }
         }
         return;
       },
@@ -51,6 +55,9 @@ class _HomePageState extends State<HomePage> {
           lastNotifUsed = message["data"]["google.message_id"];
           if (message["data"]["type"] == "Reminder") {
             await hourBeforeNotificationPressed(message);
+          }
+          if (message["data"]["type"] == "Chat") {
+            await chatNotification2(message);
           }
         }
         return;
@@ -62,6 +69,90 @@ class _HomePageState extends State<HomePage> {
     appValid = appValidator();
     appValid.checkConnection(context);
     appValid.checkVersion(context);
+  }
+  Future chatNotification2(Map<String, dynamic> message) async {
+    try {
+      QuerySnapshot q2 = await  FirebaseFirestore.instance.collection("ChatFriends").doc(message["data"]["idTo"])
+          .collection("UnRead").where('idFrom',isEqualTo:message["data"]["idFrom"]).get();
+
+      FirebaseFirestore.instance.runTransaction((transaction) async {
+        q2.docs.forEach((element) {
+          transaction.delete(element.reference);
+        });
+      });
+
+      FirebaseFirestore.instance
+          .collection("ChatFriends").doc(message["data"]["idTo"]).collection(
+          "Network").doc(message["data"]["idFrom"]).collection(
+          message["data"]["idFrom"])
+          .get().then((value) {
+        FirebaseFirestore.instance.runTransaction((transaction) async {
+          value.docs.forEach((element) {
+            transaction.delete(element.reference);
+          });
+          try {
+            transaction.update(
+              FirebaseFirestore.instance.collection("ChatFriends")
+                  .doc(message["data"]["idTo"])
+                  .collection("Network")
+                  .doc(message["data"]["idFrom"]),
+              {
+                'read': true
+              },
+            );
+          } catch (e) {}
+        });
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    ChatTalkPage(
+                      peerId: message["data"]["idFrom"],
+                      peerAvatar:  message["data"]["imageFrom"],
+                      userId: message["data"]["idTo"],
+                    )));
+      });
+    }catch(_){}
+  }
+  Future chatNotification(Map<String, dynamic> message) async {
+    try {
+     await  Navigator.of(context).push(new MaterialPageRoute(
+          builder: (BuildContext context) {
+            return ChatPage(currentUserId: message["data"]["idTo"],photo:message["data"]["imageFrom"],idFrom:message["data"]["idFrom"],fromNotification: true  ,);
+          },
+      ));
+      /*  QuerySnapshot q2 = await FirebaseFirestore.instance
+            .collection("ChatFriends").doc(message["data"]["idTo"]).collection(
+            "Network").doc(message["data"]["idFrom"]).collection(
+            message["data"]["idFrom"])
+            .get();
+
+        FirebaseFirestore.instance.runTransaction((transaction) async {
+          q2.docs.forEach((element) {
+            transaction.delete(element.reference);
+          });
+          try {
+            transaction.update(
+              FirebaseFirestore.instance.collection("ChatFriends")
+                  .doc(message["data"]["idTo"])
+                  .collection("Network")
+                  .doc(message["data"]["idFrom"]),
+              {
+                'read': true
+              },
+            );
+          } catch (e) {}
+        });
+        return Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    ChatTalkPage(
+                      peerId: message["data"]["idFrom"],
+                      peerAvatar: message["data"]["imageFrom"],
+                      userId: message["data"]["idTo"],
+                    )));*/
+    }catch(_){}
   }
 
   Future hourBeforeNotificationPressed(Map<String, dynamic> message) async {

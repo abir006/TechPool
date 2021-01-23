@@ -420,9 +420,36 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
 
 
       final searchLift =
-
       Consumer<UserRepository>(builder: (context, userRep, child) {
-        return Container(
+        return  widget.lift.time.isBefore(DateTime.now()) ?
+        Container(
+            padding: EdgeInsets.only(
+                left: sizeFrameWidth * 0.2,
+                right: sizeFrameWidth * 0.2,
+                bottom: defaultSpace * 2),
+            height: defaultSpace * 6,
+            child: RaisedButton.icon(
+                color: Colors.grey,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18),
+                    side: BorderSide(color: Colors.black)),
+                icon: Icon(Icons.delete, color: Colors.white,),
+                label: Text("Cancel ${widget.type == CalendarEventType.Drive
+                    ? "Drive"
+                    : "Lift"}",
+                    style: TextStyle(color: Colors.white, fontSize: 17)),
+                onPressed:  () => showDialog(context: context,builder: (_) {
+                  return AlertDialog(shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(20.0))),
+                    title: Text("The ${widget.type == CalendarEventType.Drive
+                        ? "Drive"
+                        : "Lift"} has past"),content: Text("You can't cancle a ${widget.type == CalendarEventType.Drive
+                          ? "Drive"
+                          : "Lift"} that has already passed"),actions: [
+                      TextButton(onPressed: () =>
+                      Navigator.pop(context),
+                  child: Text("Dismiss"))]);})))
+            : Container(
             padding: EdgeInsets.only(
                 left: sizeFrameWidth * 0.2,
                 right: sizeFrameWidth * 0.2,

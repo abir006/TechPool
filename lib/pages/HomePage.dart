@@ -734,13 +734,88 @@ class _HomePageState extends State<HomePage> {
                   });
                   return _buildPage(context, userRep);
                 } else if (snapshot.hasError) {
-                  return Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Icon(Icons.error),
-                        Text("Error loading events from cloud")
-                      ]);
+                  return Scaffold(backgroundColor: mainColor,
+                      appBar: AppBar(
+                        elevation: 0,
+                        title: Text(
+                          "Home",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        actions: [
+                          IconButton(
+                              icon: StreamBuilder(
+                                  stream: firestore.collection("Notifications").doc(userRep.user?.email).collection("UserNotifications").where("read", isEqualTo: "false").snapshots(), // a previously-obtained Future<String> or null
+                                  builder: (BuildContext context, snapshot) {
+                                    if (snapshot.hasData) {
+                                      //QuerySnapshot values = snapshot.data;
+                                      //builder: (_, snapshot) =>
+                                      return BadgeIcon(
+                                        icon: Icon(Icons.notifications, size: 25),
+                                        badgeCount: snapshot.data.size,
+                                      );
+                                    }
+                                    else{
+                                      return BadgeIcon(
+                                        icon: Icon(Icons.notifications, size: 25),
+                                        badgeCount: 0,
+                                      );
+                                    }
+                                  }
+                              ),
+                              onPressed: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => NotificationsPage()))
+                          ),   IconButton(
+                              icon: StreamBuilder(
+                                  stream: firestore.collection("ChatFriends").doc(userRep.user?.email).collection("UnRead").snapshots(), // a previously-obtained Future<String> or null
+                                  builder: (BuildContext context, snapshot) {
+                                    if (snapshot.hasData) {
+                                      //QuerySnapshot values = snapshot.data;
+                                      //builder: (_, snapshot) =>
+
+                                      return BadgeIcon(
+                                        icon: Icon(Icons.message_outlined, size: 25),
+                                        badgeCount: snapshot.data.size,
+                                      );
+                                    }
+                                    else{
+                                      return BadgeIcon(
+                                        icon: Icon(Icons.message_outlined, size: 25),
+                                        badgeCount: 0,
+                                      );
+                                    }
+                                  }
+                              ),
+                              onPressed: () async {
+                                QuerySnapshot q2 = await  FirebaseFirestore.instance.collection("ChatFriends").doc(userRep.user.email)
+                                    .collection("UnRead").get();
+
+                                FirebaseFirestore.instance.runTransaction((transaction) async {
+                                  q2.docs.forEach((element) {
+                                    transaction.delete(element.reference);
+                                  });
+                                });
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => ChatPage(currentUserId: userRep.user.email,fromNotification: false,)));}
+                          )
+                        ],
+                      ),
+                      drawer: techDrawer(userRep, context, DrawerSections.home),
+                      body: WillPopScope(
+                          onWillPop: _onBackPressed,
+                          child:Container(
+                              decoration: pageContainerDecoration,
+                              margin: pageContainerMargin,
+                              child: Center(child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.error),
+                                    Text("Error loading events from cloud")
+                                  ])))));
                 } else {
                   return Scaffold(backgroundColor: mainColor,
                   appBar: AppBar(
@@ -1008,8 +1083,8 @@ class _HomePageState extends State<HomePage> {
       builder: (context) =>  AlertDialog(
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(20.0))),
-        title:  Text('Are you sure?'),
-        content:  Text('Do you want to exit an App'),
+        title:  Text('You are exiting the app'),
+        content:  Text('Are you sure?'),
         actions: <Widget>[
       TextButton(onPressed: () => Navigator.of(context).pop(false),
             child: Text("NO"),

@@ -54,7 +54,7 @@ SafeArea techDrawer(UserRepository userRep, BuildContext context,
                               ),
                               onPressed: () async => await (userRep.auth
                                   .signOut()
-                                  .then((_) {
+                                  .then((_) async {
                                 final EncryptedSharedPreferences encryptedSharedPreferences = EncryptedSharedPreferences();
                                 encryptedSharedPreferences.clear();
                                 Navigator.pushReplacement(

@@ -46,6 +46,7 @@ class _DesiredLiftInfoState extends State<DesiredLiftInfo> {
         onPressed: () async {
           await firestore.collection("Desired").doc(widget.docId).delete();
           Navigator.pop(context);
+          Navigator.pop(context);
         },
       );
 
@@ -187,7 +188,28 @@ class _DesiredLiftInfoState extends State<DesiredLiftInfo> {
                                 Divider(
                                   thickness: 3,
                                 ),
-                              ]))), Container(
+                              ]))), (lift["liftTimeEnd"].toDate()).isBefore(DateTime.now()) ? Container(
+                          padding: EdgeInsets.only(
+                              left: sizeFrameWidth * 0.2,
+                              right: sizeFrameWidth * 0.2,
+                              bottom: defaultSpace * 2),
+                          height: defaultSpace * 6,
+                          child: RaisedButton.icon(
+                              color: Colors.grey,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(18),
+                                  side: BorderSide(color: Colors.black)),
+                              icon: Icon(Icons.delete, color: Colors.white,),
+                              label: Text("Cancel Desired",
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 17)),
+                              onPressed: () => showDialog(context: context,builder: (_) {
+          return AlertDialog(shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(20.0))),
+          title: Text("The Desired-Lift has past"),content: Text("You can't cancle a Desired-Lift that has already passed"),actions: [
+          TextButton(onPressed: () =>
+          Navigator.pop(context),
+          child: Text("Dismiss"))]);}))) : Container(
                           padding: EdgeInsets.only(
                               left: sizeFrameWidth * 0.2,
                               right: sizeFrameWidth * 0.2,

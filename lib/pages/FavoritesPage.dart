@@ -165,6 +165,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                         label: Text("Choose location"),
                                         icon: Icon(Icons.map),
                                         onPressed: () async {
+                                          _key.currentState.removeCurrentSnackBar();
                                           returnResult = await Navigator.of(context)
                                               .push(MaterialPageRoute<LocationsResult>(
                                               builder: (BuildContext context) {

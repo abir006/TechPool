@@ -72,6 +72,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
   int hasSpace = 0;
   bool _validateTime = true;
   bool _validateLocations = true;
+  DateTime currentDate;
 
   CalendarController _calendarController;
   List<String> _errors = [
@@ -88,11 +89,21 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
   void initState() {
     super.initState();
     chatTalkPage = true;
-    _fromControler = TextEditingController(text: "No Time Chosen");
+    _fromControler = TextEditingController(text: "Choose Time");
     _toControler = TextEditingController(text: "");
     _startPointControler = TextEditingController(text: "");
     _destPointControler = TextEditingController(text: "");
     _calendarController = CalendarController();
+    if (widget.currentdate == null) widget.currentdate = DateTime.now();
+    currentDate = DateTime(
+        widget.currentdate.year,
+        widget.currentdate.month,
+        widget.currentdate.day,
+        DateTime.now().hour,
+        (DateTime.now().minute ~/ 5) * 5,
+        0,
+        0,
+        0);
   }
 
   @override
@@ -100,16 +111,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
     var sizeFrameWidth = MediaQuery.of(context).size.width;
     double defaultSpace = MediaQuery.of(context).size.height * 0.013;
     double defaultSpacewidth = MediaQuery.of(context).size.height * 0.016;
-    if (widget.currentdate == null) widget.currentdate = DateTime.now();
-    DateTime currentDate = DateTime(
-        widget.currentdate.year,
-        widget.currentdate.month,
-        widget.currentdate.day,
-        DateTime.now().hour,
-        (DateTime.now().minute ~/ 5) * 5,
-        DateTime.now().second,
-        DateTime.now().millisecond,
-        DateTime.now().microsecond);
+
 
     ///update all information from the caller page if there is any
     if (widget.totime != null) {
@@ -562,7 +564,7 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
                                   currentDate.millisecond,
                                   currentDate.microsecond);
                             }
-                            if(_fromControler.text!="No Time Chosen"){checktimes();};
+                            if(_fromControler.text!="Choose Time"){checktimes();};
                           });
                         },
                         validator: (val) {

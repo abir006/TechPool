@@ -119,16 +119,37 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
       });
       double distToStart = clacDis(element.startPoint, startPointing);
       double distToEnd = clacDis(element.destPoint, destPointing);
-      element.stops.forEach((key) {
-        (key as Map).forEach((key, value) {
+      element.dist = (distToStart + distToEnd).toInt();
+
+      for(int i=0;i<element.stops.length;i++) {
+        (element.stops[i] as Map).forEach((key, value) {
           if (key == "stopPoint") {
             GeoPoint pointStop = value as GeoPoint;
-            distToStart = min(distToStart, clacDis(pointStop, startPointing));
+          //  distToStart = min(distToStart, clacDis(pointStop, startPointing));
             distToEnd = min(distToEnd, clacDis(pointStop, destPointing));
           }
         });
-      });
-      element.dist = (distToStart + distToEnd).toInt();
+      }
+      element.dist = min(element.dist,(distToStart + distToEnd).toInt());
+      for(int i=0;i<element.stops.length;i++) {
+        (element.stops[i] as Map).forEach((key, value) {
+          if (key == "stopPoint") {
+            GeoPoint pointStop = value as GeoPoint;
+            distToStart = clacDis(pointStop, startPointing);
+          }});
+        distToEnd = clacDis(element.destPoint, destPointing);
+        for(int j=i+1;j<element.stops.length;j++) {
+          (element.stops[j] as Map).forEach((key, value) {
+            if (key == "stopPoint") {
+              GeoPoint pointStop = value as GeoPoint;
+              //  distToStart = min(distToStart, clacDis(pointStop, startPointing));
+              distToEnd = min(distToEnd, clacDis(pointStop, destPointing));
+            }
+          });
+        }
+        element.dist = min(element.dist,(distToStart + distToEnd).toInt());
+      }
+
       if(element.dist> widget.distances[widget.indexDist]) toRemove = true;
       if (toRemove) {
         liftListDelete.add(element);
@@ -259,6 +280,19 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
     double defaultSpaceHeight = MediaQuery.of(context).size.height * 0.013;
     double defaultSpacewidth = MediaQuery.of(context).size.height * 0.016;
 
+    final addedtoDesire = Container(
+        decoration: BoxDecoration(color: Colors.black,borderRadius: BorderRadius.only(topLeft:Radius.circular(20.0),topRight:Radius.circular(20.0) ),),
+        child:FlatButton.icon(
+        color: Colors.black,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+            side: BorderSide(color: Colors.white)),
+        icon: Icon(Icons.check, color: Colors.white),
+        label: Text("Added",
+            style: TextStyle(color: Colors.white, fontSize: 17)),
+        disabledColor: Colors.grey,
+        onPressed:null,
+        ));
 ///legacy edit lift button
     final searchLift =  Consumer<UserRepository>(
         builder: (context, userRep, _) =>Container(
@@ -340,7 +374,7 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
                 )),
           ),
           Spacer(),
-          addDesired ? searchLift:Container(),
+          addDesired ? searchLift:addedtoDesire,
           SizedBox(width: defaultSpacewidth*0.2,)
         ])));
 
@@ -399,6 +433,14 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
               onPressed: () {
                 Navigator.of(context).pop();
                 Navigator.of(context).pop();
+              } ),
+          IconButton(
+              icon: Icon(Icons.info_outline_rounded),
+              onPressed: () {
+                showAlertDialog(context, "Page information dialog", "In this page, you can see all lifts that meets your search parameters.\n"
+                    "When you press the add desired button those parameters will be used to search for lifts.\n"
+                    "You will get notified for those lifts, you can manage the desired in the home page\n"
+                    "Enjoy :)");
               } )
         ],
       ),
@@ -607,4 +649,41 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
         )
     );
   }
+}
+
+///alert dialog that pops when the user pesses on request lift
+showAlertDialog(BuildContext context,String title,String info) {
+  Widget okButton = FlatButton(
+    textColor: mainColor,
+    child: Text("OK"),
+    onPressed: () {
+      Navigator.pop(context);
+      Navigator.pop(context);
+    },
+  );
+
+  Widget cancelButton = FlatButton(
+    textColor: mainColor,
+    child: Text("Dismiss"),
+    onPressed: () {
+      Navigator.pop(context);
+    },
+  );
+  AlertDialog alert = AlertDialog(
+    shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(20.0))),
+    title: Text(title),
+    content: Text(info,style:TextStyle(fontSize: 17)),
+    actions: [
+      cancelButton,
+    ],
+  );
+
+  // show the dialog
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return alert;
+    },
+  );
 }

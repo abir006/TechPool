@@ -5,6 +5,7 @@ import 'package:tech_pool/pages/FavoritesPage.dart';
 import 'package:tech_pool/pages/NotificationsPage.dart';
 import 'package:tech_pool/pages/ProfilePage.dart';
 import 'package:tech_pool/pages/ChatPage.dart';
+import 'package:tech_pool/pages/SettingsPage.dart';
 import 'package:tech_pool/widgets/WelcomeSignInButton.dart';
 import 'package:tech_pool/widgets/WelcomeSignUpButton.dart';
 import 'Utils.dart';
@@ -75,8 +76,9 @@ SafeArea techDrawer(UserRepository userRep, BuildContext context,
                 drawerListTile("Home",Icons.home_rounded,DrawerSections.home,currentSection, context, userRep,_key),
                 drawerListTile("Profile",Icons.person,DrawerSections.profile,currentSection, context, userRep,_key),
                 drawerListTile("Notifications",Icons.notifications,DrawerSections.notifications,currentSection, context, userRep,_key),
-                drawerListTile("Favorites",Icons.favorite,DrawerSections.favorites,currentSection, context, userRep,_key),
                 drawerListTile("Chats",Icons.chat,DrawerSections.chats,currentSection, context, userRep,_key),
+                drawerListTile("Favorites",Icons.favorite,DrawerSections.favorites,currentSection, context, userRep,_key),
+                drawerListTile("Settings",Icons.settings,DrawerSections.settings,currentSection, context, userRep,_key),
                 Spacer(),
                 AboutListTile(
                   icon: Icon(
@@ -193,8 +195,18 @@ ListTile drawerListTile(String pageName,IconData icon,DrawerSections tileSection
             break;
           }
           case DrawerSections.settings: {
-            //Navigator.of(context).pop();
-            key.currentState.showSnackBar(SnackBar(content: Text("This feature is not yet implemented", style: TextStyle(fontSize: 20,),)));
+            Navigator.pop(context);
+            if(currentSection == DrawerSections.home){
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => SettingsPage()));
+            }else {
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => SettingsPage()));
+            }
             break;
           }
         }

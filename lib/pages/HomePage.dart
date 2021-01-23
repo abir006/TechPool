@@ -24,25 +24,10 @@ import 'RejectedLiftInfo.dart';
 import 'SetDrivePage.dart';
 import 'package:flushbar/flushbar.dart';
 
-class NoAnimationPageRoute<T> extends MaterialPageRoute<T> {
-  NoAnimationPageRoute({ WidgetBuilder builder }) : super(builder: builder);
-
-  @override
-  Widget buildTransitions(
-      BuildContext context,
-      Animation<double> animation,
-      Animation<double> secondaryAnimation,
-      Widget child) {
-    return child;
-  }
-}
-
-
 class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
 }
-
 
 class _HomePageState extends State<HomePage> {
   final FirebaseMessaging firebaseMessaging = FirebaseMessaging();
@@ -94,7 +79,6 @@ class _HomePageState extends State<HomePage> {
               )..show(context);
             }
           }catch(e){
-            print(e);
           }
           return;
         },
@@ -257,10 +241,6 @@ class _HomePageState extends State<HomePage> {
       if (message["data"]["pagetype"] == "Driver") {
         type = CalendarEventType.Drive;
       } else {
-        print(Provider
-            .of<UserRepository>(context, listen: false)
-            .user
-            .email);
         docLift.bigBag = tempLift["PassengersInfo"][Provider
             .of<UserRepository>(context, listen: false)
             .user
@@ -284,11 +264,6 @@ class _HomePageState extends State<HomePage> {
     }catch(_){}
   }
 
-
-  Future<T> pushWithoutAnimation<T extends Object>(Widget page) {
-    Route route = NoAnimationPageRoute(builder: (BuildContext context) => page);
-    return Navigator.push(context, route);
-  }
 
   Future liftNotificationPressed(Map<String, dynamic> message, bool isOnLaunch) async {
     try {
@@ -748,7 +723,6 @@ class _HomePageState extends State<HomePage> {
                         _dailyEvents.add(lift);
                       }
                     }catch(e){
-                      print(e);
                     }
                   });
                   _dailyEvents.sort((a, b) {
@@ -866,7 +840,8 @@ class _HomePageState extends State<HomePage> {
               ),
               onPressed: () async {
                 if (selectedDay.isBefore(Jiffy(DateTime.now()).startOf(Units.DAY))) {
-                  showDialog(context: context,child: AlertDialog(title: Text("Drive error"),content: Text("Cant set a drive for a date that has already passed."),actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text("Dismiss"))],));
+                  showDialog(context: context,child: AlertDialog(shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(20.0))),title: Text("Drive error"),content: Text("Cant set a drive for a date that has already passed."),actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text("Dismiss"))],));
                 } else {
                   Navigator.of(context).push(
                     MaterialPageRoute<void>(
@@ -891,7 +866,8 @@ class _HomePageState extends State<HomePage> {
                     if (selectedDay.isBefore(
                         Jiffy(DateTime.now()).startOf(Units.DAY))) {
                       showDialog(context: context,
-                          child: AlertDialog(title: Text("Lift error"),
+                          child: AlertDialog(shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(20.0))),title: Text("Lift error"),
                             content: Text(
                                 "Cant search a lift for a date that has already passed."),
                             actions: [TextButton(onPressed: () =>

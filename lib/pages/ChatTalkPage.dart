@@ -1,7 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -86,18 +84,14 @@ class ChatScreenState extends State<ChatScreen>  with WidgetsBindingObserver {
     if (listScrollController.offset >=
         listScrollController.position.maxScrollExtent &&
         !listScrollController.position.outOfRange) {
-      print("reach the bottom");
       setState(() {
-        print("reach the bottom");
         _limit += _limitIncrement;
       });
     }
     if (listScrollController.offset <=
         listScrollController.position.minScrollExtent &&
         !listScrollController.position.outOfRange) {
-      print("reach the top");
       setState(() {
-        print("reach the top");
       });
     }
   }

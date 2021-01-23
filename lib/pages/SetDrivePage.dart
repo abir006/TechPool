@@ -456,7 +456,6 @@ class _SetDrivePageState extends State<SetDrivePage> {
               return true;
             },
             onFieldSubmitted: (val) {
-              print(val);
             },
             onChanged: (val) {
               setState(() {
@@ -522,10 +521,8 @@ class _SetDrivePageState extends State<SetDrivePage> {
               });
             },
             validator: (val) {
-              print(val);
               return null;
             },
-            onSaved: (val) => print(val),
           ),
           //Container(color: Colors.transparent,child: SizedBox(width: 500,height: 100,),)
         ]

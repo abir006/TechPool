@@ -107,6 +107,8 @@ class _SignUpPageState extends State<SignUpPage>
                             showDialog(
                                 context: context,
                                 builder: (_) => AlertDialog(
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.all(Radius.circular(20.0))),
                                       title: Text("Notice"),
                                       content: Text(
                                           "Exiting sign up now will stop the process and delete the account"),

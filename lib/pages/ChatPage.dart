@@ -187,7 +187,6 @@ class ChatPageState extends State<ChatPage>  with WidgetsBindingObserver {
     var platformChannelSpecifics = new NotificationDetails(
         androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
 
-    print(message);
 //    print(message['body'].toString());
 //    print(json.encode(message));
 

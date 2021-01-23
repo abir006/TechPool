@@ -21,7 +21,8 @@ class appValidator {
         builder: (BuildContext context) {
           return WillPopScope(
             onWillPop: () async => false,
-            child: AlertDialog(
+            child: AlertDialog(shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(20.0))),
               title: new Text(title),
               content: new Text(content),
               actions: <Widget>[

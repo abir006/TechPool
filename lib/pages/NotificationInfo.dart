@@ -24,6 +24,27 @@ class NotificationInfo extends StatefulWidget {
   _NotificationInfoState createState() => _NotificationInfoState();
 }
 
+
+// class NoAnimationPageRoute<T> extends MaterialPageRoute<T> {
+//   NoAnimationPageRoute({ WidgetBuilder builder }) : super(builder: builder);
+//
+//   @override
+//   Widget buildTransitions(
+//       BuildContext context,
+//       Animation<double> animation,
+//       Animation<double> secondaryAnimation,
+//       Widget child) {
+//     return child;
+//   }
+// }
+
+//
+// Future<T> pushWithoutAnimation<T extends Object>(Widget page) {
+//   Route route = NoAnimationPageRoute(builder: (BuildContext context) => page);
+//   return Navigator.push(context, route);
+// }
+
+
 class _NotificationInfoState extends State<NotificationInfo> {
   FirebaseFirestore firestore = FirebaseFirestore.instance;
   final _errorSnack = GlobalKey<ScaffoldState>();

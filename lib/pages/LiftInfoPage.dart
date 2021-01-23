@@ -37,7 +37,6 @@ class _LiftInfoPageState extends State<LiftInfoPage> {
   @override
   void initState() {
     super.initState();
-    chatTalkPage = false;
     myNoteController = TextEditingController();
     widget.lift.payments="";
   }

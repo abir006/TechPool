@@ -26,7 +26,6 @@ class _LocationSearchState extends State<LocationSearch> {
 
   @override
   void initState() {
-    chatTalkPage = true;
     stopFunctions = [updateStop1Address,updateStop2Address,updateStop3Address];
     stopAddresses = [Address(),Address(),Address()];
     super.initState();

@@ -16,7 +16,6 @@ class _LandingPageState extends State<LandingPage> {
   @override
   void initState() {
     super.initState();
-    chatTalkPage = false;
   }
 
   @override

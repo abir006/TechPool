@@ -42,7 +42,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    chatTalkPage = false;
+    //chatTalkPage = false;
     firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message){
           try{
@@ -156,7 +156,7 @@ class _HomePageState extends State<HomePage> {
             );
           } catch (e) {}
         });
-        if(chatTalkPage ==false) {
+        if(chatTalkPage2 ==false) {
           Navigator.push(
               context,
               MaterialPageRoute(

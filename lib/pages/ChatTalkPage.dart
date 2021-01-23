@@ -106,12 +106,14 @@ class ChatScreenState extends State<ChatScreen>  with WidgetsBindingObserver {
             .update({'chattingWith': peerId});
         break;
       case AppLifecycleState.inactive:
+        chatTalkPage2 = true;
         FirebaseFirestore.instance
             .collection('Profiles')
             .doc(id)
             .update({'chattingWith': null});
         break;
       case AppLifecycleState.paused:
+        chatTalkPage2 = true;
         FirebaseFirestore.instance
             .collection('Profiles')
             .doc(id)
@@ -126,7 +128,7 @@ class ChatScreenState extends State<ChatScreen>  with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    chatTalkPage = true;
+    chatTalkPage2 = true;
     WidgetsBinding.instance.addObserver(this);
     focusNode.addListener(onFocusChange);
     listScrollController.addListener(_scrollListener);
@@ -612,7 +614,7 @@ class ChatScreenState extends State<ChatScreen>  with WidgetsBindingObserver {
   }
 
   Future<bool> onBackPress() async {
-    chatTalkPage = false;
+    chatTalkPage2 = false;
     if (isShowSticker) {
       setState(() {
         isShowSticker = false;
@@ -916,7 +918,6 @@ class ChatScreenState extends State<ChatScreen>  with WidgetsBindingObserver {
   }
 
   void dispose() {
-    chatTalkPage = false;
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }

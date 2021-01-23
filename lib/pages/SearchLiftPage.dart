@@ -88,7 +88,6 @@ class _SearchLiftPageState extends State<SearchLiftPage> {
   @override
   void initState() {
     super.initState();
-    chatTalkPage = true;
     _fromControler = TextEditingController(text: "Choose Time");
     _toControler = TextEditingController(text: "");
     _startPointControler = TextEditingController(text: "");

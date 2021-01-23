@@ -55,7 +55,6 @@ class _SetDrivePageState extends State<SetDrivePage> {
   @override
   void initState() {
     super.initState();
-    chatTalkPage = true;
     _hourController = TextEditingController(text: "Choose time");
     _startPointController = TextEditingController(text: "");
     _destPointController = TextEditingController(text: "");

@@ -53,7 +53,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
   @override
   void initState() {
     super.initState();
-    chatTalkPage = true;
     _notifications = [];
     appValid = appValidator();
     appValid.checkConnection(context);

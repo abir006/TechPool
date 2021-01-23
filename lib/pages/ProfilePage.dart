@@ -92,7 +92,6 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
-    chatTalkPage = true;
     _nameController = TextEditingController();
     _firstNameController = TextEditingController();
     _lastNameController = TextEditingController();

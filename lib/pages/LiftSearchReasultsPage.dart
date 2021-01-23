@@ -53,7 +53,6 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
   @override
   void initState() {
     addDesired = true;
-    chatTalkPage = true;
   }
   Future<List<String>> initNames(String name) {
     List<String> ret = [];

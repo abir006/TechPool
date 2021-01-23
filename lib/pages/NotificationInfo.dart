@@ -31,7 +31,6 @@ class _NotificationInfoState extends State<NotificationInfo> {
   @override
   void initState() {
     super.initState();
-    chatTalkPage = true;
   }
 
   //Rejecting a request for a lift

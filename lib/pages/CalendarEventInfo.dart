@@ -30,7 +30,6 @@ class _CalendarEventInfoState extends State<CalendarEventInfo> {
   @override
   void initState() {
     super.initState();
-    chatTalkPage = false;
   }
   Future<bool> _cancelRequest(UserRepository userRep) async {
     try{

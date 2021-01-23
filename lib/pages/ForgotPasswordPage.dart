@@ -20,7 +20,6 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   @override
   void initState() {
     super.initState();
-    chatTalkPage = false;
     _email = TextEditingController(text: "");
     _pressed = false;
   }

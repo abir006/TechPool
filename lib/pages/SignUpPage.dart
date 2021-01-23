@@ -55,7 +55,6 @@ class _SignUpPageState extends State<SignUpPage>
   @override
   void initState() {
     super.initState();
-    chatTalkPage = true;
     controller = AnimationController(
         duration: Duration(milliseconds: 150), vsync: this //
         );

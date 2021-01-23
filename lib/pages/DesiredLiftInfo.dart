@@ -19,7 +19,6 @@ class _DesiredLiftInfoState extends State<DesiredLiftInfo> {
   @override
   void initState() {
     super.initState();
-    chatTalkPage = false;
   }
 
   @override

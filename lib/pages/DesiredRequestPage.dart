@@ -33,7 +33,6 @@ class _DesiredRequestPageState extends State<DesiredRequestPage> {
   @override
   void initState() {
     super.initState();
-    chatTalkPage = false;
     myNoteController = TextEditingController();
     widget.lift.payments="";
   }

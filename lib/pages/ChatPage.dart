@@ -111,7 +111,6 @@ class ChatPageState extends State<ChatPage>  with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    chatTalkPage = false;
     WidgetsBinding.instance.addObserver(this);
     slidableController = SlidableController(
       onSlideAnimationChanged: handleSlideAnimationChanged,

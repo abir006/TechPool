@@ -512,7 +512,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     tileToDisplay = _buildRejectedTile(_notifications[index], userRep);
                   }
                   else if(_notifications[index].type == "RequestedLift") {
-                    tileToDisplay = _buildRequestedTile(_notifications[index]);
+                    tileToDisplay = _buildRequestedTile(_notifications[index], userRep);
                     //return tileToDisplay;
                   }
                   else if(_notifications[index].type == "DesiredLift") {
@@ -886,7 +886,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                               ))),
                     ),
                     Flexible(
-                      flex: 14,
+                      flex: 13,
                       child: Container(
                           margin: EdgeInsets.only(
                               left: MediaQuery
@@ -937,9 +937,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
                           )),
                     ),
                     Flexible(
-                        flex: 2,
+                        flex: 3,
                         child: IconButton(
-                            icon: Icon(Icons.delete_outline, size: 30, color: Colors.grey),
+                            icon: Icon(Icons.delete_outline, size: 30, color: Colors.black54),
                             onPressed: () async {
                               await deleteNotification(liftNotification.notificationId, userRep, _key);
                             })
@@ -948,7 +948,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     SizedBox(width: MediaQuery
                         .of(context)
                         .size
-                        .width * 0.002),
+                        .width * 0.004),
                   ],
                 ),
               ),
@@ -1075,7 +1075,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                               ))),
                     ),
                     Flexible(
-                      flex: 14,
+                      flex: 13,
                       child: Container(
                           margin: EdgeInsets.only(
                               left: MediaQuery
@@ -1125,9 +1125,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
                           )),
                     ),
                     Flexible(
-                        flex: 2,
+                        flex: 3,
                         child: IconButton(
-                            icon: Icon(Icons.delete_outline, size: 30, color: Colors.grey),
+                            icon: Icon(Icons.delete_outline, size: 30, color: Colors.black54),
                             onPressed: () async {
                               await deleteNotification(liftNotification.notificationId, userRep, _key);
                             })
@@ -1136,7 +1136,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     SizedBox(width: MediaQuery
                         .of(context)
                         .size
-                        .width * 0.002),
+                        .width * 0.004),
                   ],
                 ),
               ),
@@ -1231,7 +1231,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
                               ))),
                     ),
-                    Flexible(flex: 14,
+                    Flexible(flex: 13,
                       child: Container(
                           margin: EdgeInsets.only(
                               left: MediaQuery
@@ -1290,9 +1290,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     ),
                     //Spacer(),
                     Flexible(
-                        flex: 2,
+                        flex: 3,
                         child: IconButton(
-                            icon: Icon(Icons.delete_outline, size: 30, color: Colors.grey),
+                            icon: Icon(Icons.delete_outline, size: 30, color: Colors.black54),
                             onPressed: () async {
                               await deleteNotification(liftNotification.notificationId, userRep, _key);
                             })
@@ -1301,7 +1301,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     SizedBox(width: MediaQuery
                         .of(context)
                         .size
-                        .width * 0.002),
+                        .width * 0.004),
                   ],
                 ),
               ),
@@ -1397,7 +1397,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
                               ))),
                     ),
-                    Flexible( flex: 14,
+                    Flexible( flex: 13,
                       child: Container(
                           margin: EdgeInsets.only(
                               left: MediaQuery
@@ -1456,9 +1456,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
                           )),
                     ),
                     Flexible(
-                        flex: 2,
+                        flex: 3,
                         child: IconButton(
-                            icon: Icon(Icons.delete_outline, size: 30, color: Colors.grey),
+                            icon: Icon(Icons.delete_outline, size: 30, color: Colors.black54),
                             onPressed: () async {
                               await deleteNotification(liftNotification.notificationId, userRep, _key);
                             })
@@ -1467,7 +1467,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     SizedBox(width: MediaQuery
                         .of(context)
                         .size
-                        .width * 0.003),
+                        .width * 0.004),
                   ],
                 ),
               ),
@@ -1481,7 +1481,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
         });
   }
 
-  Widget _buildRequestedTile(LiftNotification liftNotification) {
+  Widget _buildRequestedTile(LiftNotification liftNotification, userRep) {
     return FutureBuilder<List<String>>(
         future: initNames(liftNotification.passengerId),
         builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
@@ -1585,7 +1585,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
                               ))),
                     ),
-                    Flexible( flex: 14,
+                    Flexible( flex: 13,
                       child: Container(
                           margin: EdgeInsets.only(
                               left: MediaQuery
@@ -1634,11 +1634,21 @@ class _NotificationsPageState extends State<NotificationsPage> {
                             ],
                           )),
                     ),
+                    liftNotification.liftTime.isBefore(DateTime.now()) ?
+                      Flexible(
+                        flex: 3,
+                        child: IconButton(
+                            icon: Icon(Icons.delete_outline, size: 30, color: Colors.black54),
+                            onPressed: () async {
+                              await deleteNotification(liftNotification.notificationId, userRep, _key);
+                            })
 
+                    )
+                    : Container(),
                     SizedBox(width: MediaQuery
                         .of(context)
                         .size
-                        .width * 0.02),
+                        .width * 0.004),
                   ],
                 ),
               ),

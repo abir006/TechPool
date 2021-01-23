@@ -88,7 +88,7 @@ class _HomePageState extends State<HomePage> {
               await chatNotification(message);
             }
             if (message["data"]["type"] == "liftNotification") {
-              await liftNotificationPressedOnResume(message);
+              await liftNotificationPressed(message, true);
             }
           }catch(_){}
         }
@@ -105,7 +105,7 @@ class _HomePageState extends State<HomePage> {
               await chatNotification2(message);
             }
             if (message["data"]["type"] == "liftNotification") {
-              await liftNotificationPressedOnResume(message);
+              await liftNotificationPressed(message, false);
             }
           }catch(_){}
         }
@@ -248,7 +248,7 @@ class _HomePageState extends State<HomePage> {
   }
 
 
-  Future liftNotificationPressedOnResume(Map<String, dynamic> message) async {
+  Future liftNotificationPressed(Map<String, dynamic> message, bool isOnLaunch) async {
     try {
       String currentUserId = Provider
           .of<UserRepository>(context, listen: false)
@@ -325,6 +325,11 @@ class _HomePageState extends State<HomePage> {
             //   slidableController.activeState.close();
             // }
             // catch (e) {}
+
+            if(isOnLaunch){
+              await Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => NotificationsPage()));
+            }
 
             await Navigator.of(context).push(new MaterialPageRoute<Null>(
                 builder: (BuildContext context) {

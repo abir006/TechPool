@@ -9,6 +9,8 @@ class CanceledLiftInfo extends StatefulWidget {
   final String notificationId;
   final String userId;
   final String type;
+  //final bool fromNotification;
+
   //final String driverOrPassengerName;
 
   CanceledLiftInfo({@required this.notificationId, @required this.userId,@required this.type});

@@ -24,10 +24,25 @@ import 'RejectedLiftInfo.dart';
 import 'SetDrivePage.dart';
 import 'package:flushbar/flushbar.dart';
 
+class NoAnimationPageRoute<T> extends MaterialPageRoute<T> {
+  NoAnimationPageRoute({ WidgetBuilder builder }) : super(builder: builder);
+
+  @override
+  Widget buildTransitions(
+      BuildContext context,
+      Animation<double> animation,
+      Animation<double> secondaryAnimation,
+      Widget child) {
+    return child;
+  }
+}
+
+
 class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
 }
+
 
 class _HomePageState extends State<HomePage> {
   final FirebaseMessaging firebaseMessaging = FirebaseMessaging();
@@ -94,7 +109,7 @@ class _HomePageState extends State<HomePage> {
               await chatNotification(message);
             }
             if (message["data"]["type"] == "liftNotification") {
-              await liftNotificationPressedOnResume(message);
+              await liftNotificationPressed(message, true);
             }
           }catch(_){}
         }
@@ -111,7 +126,7 @@ class _HomePageState extends State<HomePage> {
               await chatNotification2(message);
             }
             if (message["data"]["type"] == "liftNotification") {
-              await liftNotificationPressedOnResume(message);
+              await liftNotificationPressed(message, false);
             }
           }catch(_){}
         }
@@ -270,7 +285,12 @@ class _HomePageState extends State<HomePage> {
   }
 
 
-  Future liftNotificationPressedOnResume(Map<String, dynamic> message) async {
+  Future<T> pushWithoutAnimation<T extends Object>(Widget page) {
+    Route route = NoAnimationPageRoute(builder: (BuildContext context) => page);
+    return Navigator.push(context, route);
+  }
+
+  Future liftNotificationPressed(Map<String, dynamic> message, bool isOnLaunch) async {
     try {
       String currentUserId = Provider
           .of<UserRepository>(context, listen: false)
@@ -348,15 +368,29 @@ class _HomePageState extends State<HomePage> {
             // }
             // catch (e) {}
 
-            await Navigator.of(context).push(new MaterialPageRoute<Null>(
-                builder: (BuildContext context) {
-                  return NotificationInfo(
-                      lift: liftToShow,
-                      notification: liftNotification,
-                      type: NotificationInfoType.Requested);
-                },
-                fullscreenDialog: true
-            ));
+
+
+              //else {
+              await Navigator.of(context).push(new MaterialPageRoute<Null>(
+                  builder: (BuildContext context) {
+                    return NotificationInfo(
+                        lift: liftToShow,
+                        notification: liftNotification,
+                        type: NotificationInfoType.Requested);
+                  },
+                  fullscreenDialog: true
+              ));
+              //}
+
+              if(isOnLaunch) {
+                await Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => NotificationsPage()));
+                // await pushWithoutAnimation(NotificationsPage());
+                // await pushWithoutAnimation(NotificationInfo(
+                //     lift: liftToShow,
+                //     notification: liftNotification,
+                //     type: NotificationInfoType.Requested));
+              }
 
             break;
 
@@ -405,7 +439,10 @@ class _HomePageState extends State<HomePage> {
                 },
                 fullscreenDialog: true
             ));
-
+            if(isOnLaunch) {
+              await Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => NotificationsPage()));
+            }
             break;
           }
         case "DesiredLift" :
@@ -456,7 +493,10 @@ class _HomePageState extends State<HomePage> {
                 fullscreenDialog: true
             ));
 
-
+            if(isOnLaunch) {
+              await Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => NotificationsPage()));
+            }
             break;
           }
 
@@ -476,6 +516,11 @@ class _HomePageState extends State<HomePage> {
               startAddress,
               destAddress);
 
+          // if(isOnLaunch){
+          //   await Navigator.of(context).push(MaterialPageRoute(
+          //       builder: (context) => NotificationsPage()));
+          // }
+
           await Navigator.of(context).push(new MaterialPageRoute<Null>(
               builder: (BuildContext context) {
                 return RejectedLiftInfo(
@@ -485,6 +530,16 @@ class _HomePageState extends State<HomePage> {
               },
               fullscreenDialog: true
           ));
+
+          if(isOnLaunch) {
+            await Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => NotificationsPage()));
+            // await pushWithoutAnimation(NotificationsPage());
+            // await pushWithoutAnimation(NotificationInfo(
+            //     lift: liftToShow,
+            //     notification: liftNotification,
+            //     type: NotificationInfoType.Requested));
+          }
 
           break;
         }
@@ -519,6 +574,11 @@ class _HomePageState extends State<HomePage> {
                 fullscreenDialog: true
             ));
 
+            if(isOnLaunch) {
+              await Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => NotificationsPage()));
+            }
+
             break;
           }
       //in case a driver canceled a drive- notify hitchhikers
@@ -547,7 +607,10 @@ class _HomePageState extends State<HomePage> {
                 },
                 fullscreenDialog: true
             ));
-
+            if(isOnLaunch) {
+              await Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => NotificationsPage()));
+            }
             break;
           }
 

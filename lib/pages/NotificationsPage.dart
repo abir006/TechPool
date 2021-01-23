@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:tech_pool/TechDrawer.dart';
 import 'package:tech_pool/Utils.dart';
 import 'package:tech_pool/appValidator.dart';
+import 'package:tech_pool/pages/CanceledLiftInfo.dart';
 import 'package:tech_pool/pages/HomePage.dart';
 import 'ChatPage.dart';
 import 'ProfilePage.dart';
@@ -14,6 +15,8 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'NotificationInfo.dart';
 import 'DesiredRequestPage.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+
+import 'RejectedLiftInfo.dart';
 
 class NotificationsPage extends StatefulWidget {
   @override
@@ -103,17 +106,17 @@ class _NotificationsPageState extends State<NotificationsPage> {
     //double defaultSpacewidth = MediaQuery.of(context).size.height * 0.016;
     return Consumer<UserRepository>(builder: (context, userRep, child) {
       return GestureDetector(
-        onTap:() {
-        //   Slidable
-        //       .of(context)
-        //       ?.renderingMode == SlidableRenderingMode.none
-        //       ? Slidable.of(context)?.open()
-        //       : Slidable.of(context)?.close();
-        // },
-          FocusScope.of(context).requestFocus(new FocusNode());
-          try{
-            slidableController.activeState.close();}
-          catch(e){}},
+        // onTap:() {
+        // //   Slidable
+        // //       .of(context)
+        // //       ?.renderingMode == SlidableRenderingMode.none
+        // //       ? Slidable.of(context)?.open()
+        // //       : Slidable.of(context)?.close();
+        // // },
+        //   FocusScope.of(context).requestFocus(new FocusNode());
+        //   try{
+        //     slidableController.activeState.close();}
+        //   catch(e){}},
         child: Stack(
             children: <Widget>[
               Container(
@@ -509,7 +512,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   }
                   else if(_notifications[index].type == "RequestedLift") {
                     tileToDisplay = _buildRequestedTile(_notifications[index]);
-                    return tileToDisplay;
+                    //return tileToDisplay;
                   }
                   else if(_notifications[index].type == "DesiredLift") {
                     tileToDisplay = _buildDesiredTile(_notifications[index], userRep);
@@ -526,91 +529,91 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     //return Container();
                   return tileToDisplay;
 
-                  return Slidable(
-                      //key: Key(notification.notificationId),
-                      enabled: _notifications.contains(notification),
-                      controller: slidableController,
-                      actionPane: SlidableScrollActionPane(),
-                      actionExtentRatio: 0.23,
-                      closeOnScroll: false,
-                      actions: <Widget>[
-                        Container(
-                          //padding: EdgeInsets.fromLTRB(0, 1, 0, 12,),
-                    margin: EdgeInsets.only(
-                        top: MediaQuery
-                        .of(context)
-                        .size
-                        .height * 0.006,
-                  bottom: MediaQuery
-                      .of(context)
-                      .size
-                      .height * 0.006),
-                          child: FlatButton(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.0)),
-                            child: Center(child:
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.delete_outline, size: 33, color: Colors.white,),
-                                Text("Delete", style: TextStyle(
-                                    color: Colors.white, fontSize: 12),)
-                              ],
-                            ),),
-                            height: 100,
-                            // caption: 'Delete',
-                            color: Colors.red,
-                            //  icon: Icons.delete_outline,
-                            onPressed: () async {
-                              FirebaseFirestore.instance.runTransaction((
-                                  transaction) async {
-                                // QuerySnapshot q2 = await FirebaseFirestore
-                                //     .instance
-                                //     .collection("ChatFriends").doc(
-                                //     userRep.user?.email).collection("Network")
-                                //     .doc(document.id.toString()).collection(
-                                //     document.id.toString())
-                                //     .get();
-
-                                await firestore.collection("Notifications").
-                                doc(userRep.user?.email).collection("UserNotifications").
-                                doc(_notifications[index].notificationId).delete()
-                                //     .then((value) =>
-                                // {
-                                //   _key.currentState.showSnackBar(SnackBar(content: Text("Notification Deleted", style: TextStyle(fontSize: 20))))
-                                //   //return value;
-                                // }
-                                //)
-                                ;
-
-                                // Future.wait(q2.docs.map((element) {
-                                //   transaction.delete(element.reference);
-                                //   return Future(() => Null);
-                                // }));
-                                // transaction.delete(
-                                //     firestore.collection("ChatFriends").doc(
-                                //         userRep.user?.email)
-                                //         .collection("Network")
-                                //         .doc(document.id.toString()));
-                              });
-                              FocusScope.of(context).requestFocus(
-                                  new FocusNode());
-                              try {
-                                slidableController.activeState.close();
-                              }
-                              catch (e) {}
-                            },
-                            //  FirebaseFirestore.instance.runTransaction((transaction) async {
-                            //    transaction.delete(firestore.collection("ChatFriends").doc(userRep.user?.email).collection("Network").doc(document.id.toString()));
-                            //  });
-                          ),
-                        ),
-                      ],
-                      child: Container(
-                          child: tileToDisplay
-                      ),
-
-                  );
+                  // return Slidable(
+                  //     //key: Key(notification.notificationId),
+                  //     enabled: _notifications.contains(notification),
+                  //     controller: slidableController,
+                  //     actionPane: SlidableScrollActionPane(),
+                  //     actionExtentRatio: 0.23,
+                  //     closeOnScroll: false,
+                  //     actions: <Widget>[
+                  //       Container(
+                  //         //padding: EdgeInsets.fromLTRB(0, 1, 0, 12,),
+                  //   margin: EdgeInsets.only(
+                  //       top: MediaQuery
+                  //       .of(context)
+                  //       .size
+                  //       .height * 0.006,
+                  // bottom: MediaQuery
+                  //     .of(context)
+                  //     .size
+                  //     .height * 0.006),
+                  //         child: FlatButton(
+                  //           shape: RoundedRectangleBorder(
+                  //               borderRadius: BorderRadius.circular(10.0)),
+                  //           child: Center(child:
+                  //           Column(
+                  //             mainAxisAlignment: MainAxisAlignment.center,
+                  //             children: [
+                  //               Icon(Icons.delete_outline, size: 33, color: Colors.white,),
+                  //               Text("Delete", style: TextStyle(
+                  //                   color: Colors.white, fontSize: 12),)
+                  //             ],
+                  //           ),),
+                  //           height: 100,
+                  //           // caption: 'Delete',
+                  //           color: Colors.red,
+                  //           //  icon: Icons.delete_outline,
+                  //           onPressed: () async {
+                  //             FirebaseFirestore.instance.runTransaction((
+                  //                 transaction) async {
+                  //               // QuerySnapshot q2 = await FirebaseFirestore
+                  //               //     .instance
+                  //               //     .collection("ChatFriends").doc(
+                  //               //     userRep.user?.email).collection("Network")
+                  //               //     .doc(document.id.toString()).collection(
+                  //               //     document.id.toString())
+                  //               //     .get();
+                  //
+                  //               await firestore.collection("Notifications").
+                  //               doc(userRep.user?.email).collection("UserNotifications").
+                  //               doc(_notifications[index].notificationId).delete()
+                  //               //     .then((value) =>
+                  //               // {
+                  //               //   _key.currentState.showSnackBar(SnackBar(content: Text("Notification Deleted", style: TextStyle(fontSize: 20))))
+                  //               //   //return value;
+                  //               // }
+                  //               //)
+                  //               ;
+                  //
+                  //               // Future.wait(q2.docs.map((element) {
+                  //               //   transaction.delete(element.reference);
+                  //               //   return Future(() => Null);
+                  //               // }));
+                  //               // transaction.delete(
+                  //               //     firestore.collection("ChatFriends").doc(
+                  //               //         userRep.user?.email)
+                  //               //         .collection("Network")
+                  //               //         .doc(document.id.toString()));
+                  //             });
+                  //             FocusScope.of(context).requestFocus(
+                  //                 new FocusNode());
+                  //             try {
+                  //               slidableController.activeState.close();
+                  //             }
+                  //             catch (e) {}
+                  //           },
+                  //           //  FirebaseFirestore.instance.runTransaction((transaction) async {
+                  //           //    transaction.delete(firestore.collection("ChatFriends").doc(userRep.user?.email).collection("Network").doc(document.id.toString()));
+                  //           //  });
+                  //         ),
+                  //       ),
+                  //     ],
+                  //     child: Container(
+                  //         child: tileToDisplay
+                  //     ),
+                  //
+                  // );
 
 
 
@@ -801,10 +804,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     "Profiles").doc(liftNotification.driverId).get())
                     .data()["allowedPayments"].join(", ");
 
-                FocusScope.of(context).unfocus();
-                try{
-                  slidableController.activeState.close();}
-                catch(e){}
+                // FocusScope.of(context).unfocus();
+                // try{
+                //   slidableController.activeState.close();}
+                // catch(e){}
 
                 await Navigator.of(context).push(new MaterialPageRoute<Null>(
                     builder: (BuildContext context) {
@@ -839,7 +842,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     Flexible(flex: 3,
                       child: InkWell(
                           onTap: () async {
-                            FocusScope.of(context).unfocus();
+                            //FocusScope.of(context).unfocus();
                             // try{
                             //   slidableController.activeState.close();}
                             // catch(e){}
@@ -988,10 +991,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
                 //Here push request lift page
 
-                FocusScope.of(context).unfocus();
-                try{
-                  slidableController.activeState.close();}
-                catch(e){}
+                // FocusScope.of(context).unfocus();
+                // try{
+                //   slidableController.activeState.close();}
+                // catch(e){}
 
                   await Navigator.of(context).push(new MaterialPageRoute<Null>(
                       builder: (BuildContext context) {
@@ -1028,7 +1031,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     Flexible(flex: 3,
                       child: InkWell(
                           onTap: () async {
-                            FocusScope.of(context).unfocus();
+                            //FocusScope.of(context).unfocus();
                             // try{
                             //   slidableController.activeState.close();}
                             // catch(e){}
@@ -1151,142 +1154,155 @@ class _NotificationsPageState extends State<NotificationsPage> {
         future: initNames(liftNotification.type == "CanceledLift" ? liftNotification.passengerId : liftNotification.driverId),
         builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
           if (snapshot.hasData) {
-            return Container(
-              margin: EdgeInsets.only(
-                  top: MediaQuery
-                      .of(context)
-                      .size
-                      .height * 0.006,
-                  bottom: MediaQuery
-                      .of(context)
-                      .size
-                      .height * 0.006),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [BoxShadow(color: greyColor,blurRadius: 1.0,
-                    spreadRadius: 0.0,offset: Offset(1.0, 1.0))],
-                border: Border.all(color: secondColor, width: 0.65),
-                borderRadius: BorderRadius.circular(12.0),),
-              child:
-              Row(
-                children: [
-                  Flexible(flex: 3,
-                    child: InkWell(
-                        onTap: () async {
-                          FocusScope.of(context).unfocus();
-                          // try{
-                          //   slidableController.activeState.close();}
-                          // catch(e){}
+            return InkWell(
+              onTap:  () async {
+                await Navigator.of(context).push(new MaterialPageRoute<Null>(
+                    builder: (BuildContext context) {
+                      return CanceledLiftInfo(
+                          notificationId: liftNotification.notificationId,
+                          userId: userRep.user?.email,
+                          type: liftNotification.type);
+                    },
+                    fullscreenDialog: true
+                ));
+              },
+              child: Container(
+                margin: EdgeInsets.only(
+                    top: MediaQuery
+                        .of(context)
+                        .size
+                        .height * 0.006,
+                    bottom: MediaQuery
+                        .of(context)
+                        .size
+                        .height * 0.006),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [BoxShadow(color: greyColor,blurRadius: 1.0,
+                      spreadRadius: 0.0,offset: Offset(1.0, 1.0))],
+                  border: Border.all(color: secondColor, width: 0.65),
+                  borderRadius: BorderRadius.circular(12.0),),
+                child:
+                Row(
+                  children: [
+                    Flexible(flex: 3,
+                      child: InkWell(
+                          onTap: () async {
+                            //FocusScope.of(context).unfocus();
+                            // try{
+                            //   slidableController.activeState.close();}
+                            // catch(e){}
 
-                          await Navigator.of(context).push(
-                              MaterialPageRoute<liftRes>(
-                                  builder: (BuildContext context) {
-                                    return ProfilePage(
-                                      email: liftNotification.type == "CanceledLift" ? liftNotification.passengerId : liftNotification.driverId, fromProfile: false,);
-                                  },
-                                  fullscreenDialog: true
-                              ));
-                          // setState(() {
-                          //
-                          // });
-                        },
-                        child: Container(
-                            margin: EdgeInsets.only(
-                                left: MediaQuery
-                                    .of(context)
-                                    .size
-                                    .height * 0.016, top: MediaQuery
-                                .of(context)
-                                .size
-                                .height * 0.004),
-                            width: MediaQuery
-                                .of(context)
-                                .size
-                                .height * 0.016 * 4,
-                            height: MediaQuery
-                                .of(context)
-                                .size
-                                .height * 0.016 * 4,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: secondColor,
-                              image: DecorationImage(fit: BoxFit.fill,
-                                  image: NetworkImage(snapshot.data[0])),
-
-                            ))),
-                  ),
-                  Flexible(flex: 14,
-                    child: Container(
-                        margin: EdgeInsets.only(
-                            left: MediaQuery
-                                .of(context)
-                                .size
-                                .height * 0.016,
-                            top: MediaQuery
-                                .of(context)
-                                .size
-                                .height * 0.008),
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                Flexible(flex:8,
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      liftNotification.type == "CanceledLift" ? infoText(snapshot.data[1]) : infoTextHitchhiker(snapshot.data[1]),
-                                      placesText(liftNotification.startCity, liftNotification.destCity),
-                                      //allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000),
-                                    ],
-                                  ),
-                                ),
-                                Flexible(flex: 4,
-                                  child: InkWell(
-                                    child: Container(
-                                      width: MediaQuery
-                                          .of(context)
-                                          .size
-                                          .width * 0.016*16,
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                        children: [
-                                          Icon(Icons.cancel_outlined, size: 30, color: Colors.red),
-                                          Text("Canceled", style: TextStyle(fontSize: 15, color: Colors.red),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                    onTap: () {
-                                      FocusScope.of(context).unfocus();
-                                      try{
-                                        slidableController.activeState.close();}
-                                      catch(e){}
+                            await Navigator.of(context).push(
+                                MaterialPageRoute<liftRes>(
+                                    builder: (BuildContext context) {
+                                      return ProfilePage(
+                                        email: liftNotification.type == "CanceledLift" ? liftNotification.passengerId : liftNotification.driverId, fromProfile: false,);
                                     },
-                                  ),
-                                ),
+                                    fullscreenDialog: true
+                                ));
+                            // setState(() {
+                            //
+                            // });
+                          },
+                          child: Container(
+                              margin: EdgeInsets.only(
+                                  left: MediaQuery
+                                      .of(context)
+                                      .size
+                                      .height * 0.016, top: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .height * 0.004),
+                              width: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .height * 0.016 * 4,
+                              height: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .height * 0.016 * 4,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: secondColor,
+                                image: DecorationImage(fit: BoxFit.fill,
+                                    image: NetworkImage(snapshot.data[0])),
 
-                              ],
-                            ),
-                            allInfoText(liftNotification.liftTime, liftNotification.distance / 1000),
-                          ],
-                        )
+                              ))),
                     ),
-                  ),
-                  //Spacer(),
-                  Flexible(
-                      flex: 2,
-                      child: IconButton(
-                          icon: Icon(Icons.delete_outline, size: 30, color: Colors.grey),
-                          onPressed: () async {
-                            await deleteNotification(liftNotification.notificationId, userRep, _key);
-                          })
+                    Flexible(flex: 14,
+                      child: Container(
+                          margin: EdgeInsets.only(
+                              left: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .height * 0.016,
+                              top: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .height * 0.008),
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Flexible(flex:8,
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        liftNotification.type == "CanceledLift" ? infoText(snapshot.data[1]) : infoTextHitchhiker(snapshot.data[1]),
+                                        placesText(liftNotification.startCity, liftNotification.destCity),
+                                        //allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000),
+                                      ],
+                                    ),
+                                  ),
+                                  Flexible(flex: 4,
+                                    child: InkWell(
+                                      child: Container(
+                                        width: MediaQuery
+                                            .of(context)
+                                            .size
+                                            .width * 0.016*16,
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          children: [
+                                            Icon(Icons.cancel_outlined, size: 30, color: Colors.red),
+                                            Text("Canceled", style: TextStyle(fontSize: 15, color: Colors.red),
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                      // onTap: () {
+                                      //   FocusScope.of(context).unfocus();
+                                      //   try{
+                                      //     slidableController.activeState.close();}
+                                      //   catch(e){}
+                                      // },
+                                    ),
+                                  ),
 
-                  ),
-                  SizedBox(width: MediaQuery
-                      .of(context)
-                      .size
-                      .width * 0.002),
-                ],
+                                ],
+                              ),
+                              allInfoText(liftNotification.liftTime, liftNotification.distance / 1000),
+                            ],
+                          )
+                      ),
+                    ),
+                    //Spacer(),
+                    Flexible(
+                        flex: 2,
+                        child: IconButton(
+                            icon: Icon(Icons.delete_outline, size: 30, color: Colors.grey),
+                            onPressed: () async {
+                              await deleteNotification(liftNotification.notificationId, userRep, _key);
+                            })
+
+                    ),
+                    SizedBox(width: MediaQuery
+                        .of(context)
+                        .size
+                        .width * 0.002),
+                  ],
+                ),
               ),
             );
           }else {
@@ -1304,142 +1320,155 @@ class _NotificationsPageState extends State<NotificationsPage> {
         future: initNames(liftNotification.driverId),
         builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
           if (snapshot.hasData) {
-            return Container(
-              margin: EdgeInsets.only(
-                  top: MediaQuery
-                      .of(context)
-                      .size
-                      .height * 0.006,
-                  bottom: MediaQuery
-                      .of(context)
-                      .size
-                      .height * 0.006),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [BoxShadow(color: greyColor,blurRadius: 1.0,
-                    spreadRadius: 0.0,offset: Offset(1.0, 1.0))],
-                border: Border.all(color: secondColor, width: 0.65),
-                borderRadius: BorderRadius.circular(12.0),),
-              child:
-              Row(
-                children: [
-                  Flexible( flex: 3,
-                    child: InkWell(
-                        onTap: () async {
-                          FocusScope.of(context).unfocus();
-                          // try{
-                          //   slidableController.activeState.close();}
-                          // catch(e){}
+            return InkWell(
+            onTap:  () async {
+              await Navigator.of(context).push(new MaterialPageRoute<Null>(
+                  builder: (BuildContext context) {
+                    return RejectedLiftInfo(
+                        notificationId: liftNotification.notificationId,
+                        userId: userRep.user?.email,
+                        );
+                  },
+                  fullscreenDialog: true
+              ));
+            },
+              child: Container(
+                margin: EdgeInsets.only(
+                    top: MediaQuery
+                        .of(context)
+                        .size
+                        .height * 0.006,
+                    bottom: MediaQuery
+                        .of(context)
+                        .size
+                        .height * 0.006),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [BoxShadow(color: greyColor,blurRadius: 1.0,
+                      spreadRadius: 0.0,offset: Offset(1.0, 1.0))],
+                  border: Border.all(color: secondColor, width: 0.65),
+                  borderRadius: BorderRadius.circular(12.0),),
+                child:
+                Row(
+                  children: [
+                    Flexible( flex: 3,
+                      child: InkWell(
+                          onTap: () async {
+                            //FocusScope.of(context).unfocus();
+                            // try{
+                            //   slidableController.activeState.close();}
+                            // catch(e){}
 
-                          await Navigator.of(context).push(
-                              MaterialPageRoute<liftRes>(
-                                  builder: (BuildContext context) {
-                                    return ProfilePage(
-                                      email: liftNotification.driverId, fromProfile: false,);
-                                  },
-                                  fullscreenDialog: true
-                              ));
-                          // setState(() {
-                          //
-                          // });
-                        },
-                        child: Container(
-                            margin: EdgeInsets.only(
-                                left: MediaQuery
-                                    .of(context)
-                                    .size
-                                    .height * 0.016, top: MediaQuery
-                                .of(context)
-                                .size
-                                .height * 0.004),
-                            width: MediaQuery
-                                .of(context)
-                                .size
-                                .height * 0.016 * 4,
-                            height: MediaQuery
-                                .of(context)
-                                .size
-                                .height * 0.016 * 4,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: secondColor,
-                              image: DecorationImage(fit: BoxFit.fill,
-                                  image: NetworkImage(snapshot.data[0])),
-
-                            ))),
-                  ),
-                  Flexible( flex: 14,
-                    child: Container(
-                        margin: EdgeInsets.only(
-                            left: MediaQuery
-                                .of(context)
-                                .size
-                                .height * 0.016,
-                            top: MediaQuery
-                                .of(context)
-                                .size
-                                .height * 0.008),
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                Flexible(flex:8,
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      infoText(snapshot.data[1]),
-                                      placesText(liftNotification.startCity, liftNotification.destCity),
-                                      //allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000),
-                                    ],
-                                  ),
-                                ),
-
-                                Flexible( flex: 4,
-                                  child: InkWell(
-                                    child: Container(
-                                      width: MediaQuery
-                                          .of(context)
-                                          .size
-                                          .width * 0.016*16,
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                        children: [
-                                          Transform.rotate(angle: 0.8,
-                                              child: Icon(Icons.thumb_up_rounded, size: 30, color: Colors.red)),
-                                          Text("Rejected", style: TextStyle(fontSize: 15, color: Colors.red),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                    onTap: () {
-                                      FocusScope.of(context).unfocus();
-                                      try{
-                                        slidableController.activeState.close();}
-                                      catch(e){}
+                            await Navigator.of(context).push(
+                                MaterialPageRoute<liftRes>(
+                                    builder: (BuildContext context) {
+                                      return ProfilePage(
+                                        email: liftNotification.driverId, fromProfile: false,);
                                     },
+                                    fullscreenDialog: true
+                                ));
+                            // setState(() {
+                            //
+                            // });
+                          },
+                          child: Container(
+                              margin: EdgeInsets.only(
+                                  left: MediaQuery
+                                      .of(context)
+                                      .size
+                                      .height * 0.016, top: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .height * 0.004),
+                              width: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .height * 0.016 * 4,
+                              height: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .height * 0.016 * 4,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: secondColor,
+                                image: DecorationImage(fit: BoxFit.fill,
+                                    image: NetworkImage(snapshot.data[0])),
+
+                              ))),
+                    ),
+                    Flexible( flex: 14,
+                      child: Container(
+                          margin: EdgeInsets.only(
+                              left: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .height * 0.016,
+                              top: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .height * 0.008),
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Flexible(flex:8,
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        infoText(snapshot.data[1]),
+                                        placesText(liftNotification.startCity, liftNotification.destCity),
+                                        //allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000),
+                                      ],
+                                    ),
                                   ),
-                                ),
 
-                              ],
-                            ),
-                            allInfoText(liftNotification.liftTime, liftNotification.distance / 1000),
-                          ],
-                        )),
-                  ),
-                  Flexible(
-                      flex: 2,
-                      child: IconButton(
-                          icon: Icon(Icons.delete_outline, size: 30, color: Colors.grey),
-                          onPressed: () async {
-                            await deleteNotification(liftNotification.notificationId, userRep, _key);
-                          })
+                                  Flexible( flex: 4,
+                                    child: InkWell(
+                                      child: Container(
+                                        width: MediaQuery
+                                            .of(context)
+                                            .size
+                                            .width * 0.016*16,
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          children: [
+                                            Transform.rotate(angle: 0.8,
+                                                child: Icon(Icons.thumb_up_rounded, size: 30, color: Colors.red)),
+                                            Text("Rejected", style: TextStyle(fontSize: 15, color: Colors.red),
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                      // onTap: () {
+                                      //   FocusScope.of(context).unfocus();
+                                      //   try{
+                                      //     slidableController.activeState.close();}
+                                      //   catch(e){}
+                                      // },
+                                    ),
+                                  ),
 
-                  ),
-                  SizedBox(width: MediaQuery
-                      .of(context)
-                      .size
-                      .width * 0.003),
-                ],
+                                ],
+                              ),
+                              allInfoText(liftNotification.liftTime, liftNotification.distance / 1000),
+                            ],
+                          )),
+                    ),
+                    Flexible(
+                        flex: 2,
+                        child: IconButton(
+                            icon: Icon(Icons.delete_outline, size: 30, color: Colors.grey),
+                            onPressed: () async {
+                              await deleteNotification(liftNotification.notificationId, userRep, _key);
+                            })
+
+                    ),
+                    SizedBox(width: MediaQuery
+                        .of(context)
+                        .size
+                        .width * 0.003),
+                  ],
+                ),
               ),
             );
           }else {
@@ -1479,10 +1508,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     "Profiles").doc(liftNotification.passengerId).get())
                     .data()["allowedPayments"].join(", ");
 
-                FocusScope.of(context).unfocus();
-                try{
-                  slidableController.activeState.close();}
-                catch(e){}
+                // FocusScope.of(context).unfocus();
+                // try{
+                //   slidableController.activeState.close();}
+                // catch(e){}
 
                 await Navigator.of(context).push(new MaterialPageRoute<Null>(
                     builder: (BuildContext context) {
@@ -1514,7 +1543,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     Flexible( flex: 3,
                       child: InkWell(
                           onTap: () async {
-                            FocusScope.of(context).unfocus();
+                            //FocusScope.of(context).unfocus();
                             // try{
                             //   slidableController.activeState.close();}
                             // catch(e){}

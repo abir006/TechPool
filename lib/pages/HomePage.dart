@@ -16,9 +16,11 @@ import 'package:tech_pool/pages/SearchLiftPage.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:tech_pool/CalendarEvents.dart';
 import 'package:tech_pool/TechDrawer.dart';
+import 'CanceledLiftInfo.dart';
 import 'ChatTalkPage.dart';
 import 'DesiredRequestPage.dart';
 import 'NotificationInfo.dart';
+import 'RejectedLiftInfo.dart';
 import 'SetDrivePage.dart';
 import 'package:flushbar/flushbar.dart';
 
@@ -86,7 +88,7 @@ class _HomePageState extends State<HomePage> {
               await chatNotification(message);
             }
             if (message["data"]["type"] == "liftNotification") {
-              await liftNotificationPressed(message);
+              await liftNotificationPressedOnResume(message);
             }
           }catch(_){}
         }
@@ -103,7 +105,7 @@ class _HomePageState extends State<HomePage> {
               await chatNotification2(message);
             }
             if (message["data"]["type"] == "liftNotification") {
-              await liftNotificationPressed(message);
+              await liftNotificationPressedOnResume(message);
             }
           }catch(_){}
         }
@@ -246,7 +248,7 @@ class _HomePageState extends State<HomePage> {
   }
 
 
-  Future liftNotificationPressed(Map<String, dynamic> message) async {
+  Future liftNotificationPressedOnResume(Map<String, dynamic> message) async {
     try {
       String currentUserId = Provider
           .of<UserRepository>(context, listen: false)
@@ -436,64 +438,96 @@ class _HomePageState extends State<HomePage> {
             break;
           }
 
-      // case "RejectedLift" :
-      //   {
-      //     liftNotification = LiftNotification(
-      //         notificationId,
-      //         driveId,
-      //         driverId,
-      //         startCity,
-      //         destCity,
-      //         price,
-      //         distance,
-      //         liftTime,
-      //         notificationTime,
-      //         type,
-      //         startAddress,
-      //         destAddress);
-      //     break;
-      //   }
+      case "RejectedLift" :
+        {
+          liftNotification = LiftNotification(
+              notificationId,
+              driveId,
+              driverId,
+              startCity,
+              destCity,
+              price,
+              distance,
+              liftTime,
+              notificationTime,
+              type,
+              startAddress,
+              destAddress);
+
+          await Navigator.of(context).push(new MaterialPageRoute<Null>(
+              builder: (BuildContext context) {
+                return RejectedLiftInfo(
+                  notificationId: liftNotification.notificationId,
+                  userId: currentUserId,
+                );
+              },
+              fullscreenDialog: true
+          ));
+
+          break;
+        }
 
       //in case a hitchhiker canceled a lift - notify driver
-      //   case "CanceledLift" :
-      //     {
-      //       String passengerId = elementData["passengerId"];
-      //       notification = LiftNotification(
-      //           notificationId,
-      //           driveId,
-      //           driverId,
-      //           startCity,
-      //           destCity,
-      //           price,
-      //           distance,
-      //           liftTime,
-      //           notificationTime,
-      //           type,
-      //           startAddress,
-      //           destAddress,
-      //           passengerId
-      //       );
-      //       break;
-      //     }
-      //in case a driver canceled a drive- notify hitchhikers
-      //   case "CanceledDrive" :
-      //     {
-      //       notification = LiftNotification(
-      //           notificationId,
-      //           driveId,
-      //           driverId,
-      //           startCity,
-      //           destCity,
-      //           price,
-      //           distance,
-      //           liftTime,
-      //           notificationTime,
-      //           type,
-      //           startAddress,
-      //           destAddress);
-      //       break;
-      //     }
+        case "CanceledLift" :
+          {
+            String passengerId = elementData["passengerId"];
+            liftNotification = LiftNotification(
+                notificationId,
+                driveId,
+                driverId,
+                startCity,
+                destCity,
+                price,
+                distance,
+                liftTime,
+                notificationTime,
+                type,
+                startAddress,
+                destAddress,
+                passengerId
+            );
 
+            await Navigator.of(context).push(new MaterialPageRoute<Null>(
+                builder: (BuildContext context) {
+                  return CanceledLiftInfo(
+                      notificationId: liftNotification.notificationId,
+                      userId: currentUserId,
+                      type: liftNotification.type);
+                },
+                fullscreenDialog: true
+            ));
+
+            break;
+          }
+      //in case a driver canceled a drive- notify hitchhikers
+        case "CanceledDrive" :
+          {
+            liftNotification = LiftNotification(
+                notificationId,
+                driveId,
+                driverId,
+                startCity,
+                destCity,
+                price,
+                distance,
+                liftTime,
+                notificationTime,
+                type,
+                startAddress,
+                destAddress);
+
+            await Navigator.of(context).push(new MaterialPageRoute<Null>(
+                builder: (BuildContext context) {
+                  return CanceledLiftInfo(
+                      notificationId: liftNotification.notificationId,
+                      userId: currentUserId,
+                      type: liftNotification.type);
+                },
+                fullscreenDialog: true
+            ));
+
+            break;
+          }
 
       }
     }

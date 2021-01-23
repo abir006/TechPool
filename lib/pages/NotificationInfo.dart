@@ -501,7 +501,13 @@ class _NotificationInfoState extends State<NotificationInfo> {
                     label: Text("Accept",
                         style: TextStyle(color: Colors.white, fontSize: 17)),
                     onPressed: () async {
-                      if (widget.lift.passengersInfo.length ==
+                      if (widget.lift.time.isBefore(DateTime.now())){
+                        //_errorSnack.currentState.showSnackBar(SnackBar(content: Text("This drive is already full. Please press on Reject", style: TextStyle(fontSize: 19,color: Colors.red),)));
+                        showErrorDialog(context, "Expired Lift",
+                            "This drive has already occured.\nYou can delete the notification.",
+                            userRep);
+                      }
+                      else if (widget.lift.passengersInfo.length ==
                           widget.lift.numberOfSeats) {
                         //_errorSnack.currentState.showSnackBar(SnackBar(content: Text("This drive is already full. Please press on Reject", style: TextStyle(fontSize: 19,color: Colors.red),)));
                         showErrorDialog(context, "No space left",
@@ -531,9 +537,17 @@ class _NotificationInfoState extends State<NotificationInfo> {
                     label: Text("Reject",
                         style: TextStyle(color: Colors.white, fontSize: 17)),
                     onPressed: () async {
-                      bool returnValue = await _rejectRequest(userRep);
-                      if (returnValue == true) {
-                        Navigator.pop(context);
+                      if (widget.lift.time.isBefore(DateTime.now())){
+                        //_errorSnack.currentState.showSnackBar(SnackBar(content: Text("This drive is already full. Please press on Reject", style: TextStyle(fontSize: 19,color: Colors.red),)));
+                        showErrorDialog(context, "Expired Lift",
+                            "This drive has already occured.\nYou can delete the notification.",
+                            userRep);
+                      }
+                      else {
+                        bool returnValue = await _rejectRequest(userRep);
+                        if (returnValue == true) {
+                          Navigator.pop(context);
+                        }
                       }
                     }),
               )

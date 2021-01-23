@@ -223,8 +223,10 @@ export const sendLiftNotification = functions.firestore
           .get()
           .then(async (destUser) => {
             console.log("&&&-Inside then of sending a notification-&&&");
-            if (destUser && destUser?.data()) {
-              if (destUser?.data() && destUser?.data()?.pushToken) {
+            if (destUser && destUser?.data() ) {
+              if (destUser?.data() && destUser?.data()?.pushToken &&
+              (destUser?.data()?.liftNotif == null ||
+              destUser?.data()?.liftNotif == true)) {
                 console.log("payload notificationId: " +
                 notificationID);
                 console.log("payload driveId: " +

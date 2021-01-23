@@ -69,8 +69,11 @@ class _SetDrivePageState extends State<SetDrivePage> {
 
   //After inserting the drive to db, search for fit desired lifts and notify the relevant hitchhikers
   Future<bool> _checkForFitDesiredAndSendNotifications(MyLift relDrive) async {
-    Coordinates startPointCoords = startAddress.coordinates;
-    Coordinates destPointCoords = destAddress.coordinates;
+    //Coordinates driveStartPointCoords = startAddress.coordinates;
+    GeoPoint driveStartPointGeoPoint = GeoPoint(startAddress.coordinates.latitude, startAddress.coordinates.longitude);
+    //Coordinates driveDestPointCoords = destAddress.coordinates;
+    GeoPoint driveDestPointGeoPoint = GeoPoint(destAddress.coordinates.latitude, destAddress.coordinates.longitude);
+
     try{
       QuerySnapshot relevantDesired = await widget.db.collection("Desired")
           .where('liftTimeStart', isLessThanOrEqualTo: Timestamp.fromDate(relDrive.time))
@@ -92,24 +95,63 @@ class _SetDrivePageState extends State<SetDrivePage> {
           bool relDriveBackSeatNotFull = relDrive.backSeat;
           //back seat not full = true means: back seat is not full
           //back seat not full = false means: back seat is full!
+
           if ( (relDrive.bigTrunk || (!relDrive.bigTrunk && !curDesiredBigTrunk))
               && relDriveBackSeatNotFull || (!relDrive.backSeat && !curDesiredBackSeatNotFull)) {
-            double distToStart = clacDis(
-                curDesired["startPoint"], startPointCoords);
-            double distToEnd = clacDis(
-                curDesired["destPoint"], destPointCoords);
-            relDrive.stops.forEach((key) {
-              (key as Map).forEach((key, value) {
+
+            GeoPoint desiredStartPointGeoPoint = curDesired["startPoint"];
+            GeoPoint desiredDestPointGeoPoint = curDesired["destPoint"];
+            Coordinates desiredStartPointCoords = Coordinates(desiredStartPointGeoPoint.latitude, desiredStartPointGeoPoint.longitude);
+            Coordinates desiredDestPointCoords = Coordinates(desiredDestPointGeoPoint.latitude, desiredDestPointGeoPoint.longitude);
+
+            double distToStart = clacDis(driveStartPointGeoPoint, desiredStartPointCoords);
+            double distToEnd = clacDis(driveDestPointGeoPoint, desiredDestPointCoords);
+            int curDist = (distToStart + distToEnd).toInt();
+
+
+            for(int i=0;i<relDrive.stops.length;i++) {
+              (relDrive.stops[i] as Map).forEach((key, value) {
                 if (key == "stopPoint") {
                   GeoPoint pointStop = value as GeoPoint;
-                  distToStart =
-                      min(distToStart, clacDis(pointStop, startPointCoords));
-                  distToEnd =
-                      min(distToEnd, clacDis(pointStop, destPointCoords));
+                  //  distToStart = min(distToStart, clacDis(pointStop, startPointing));
+                  distToEnd = min(distToEnd, clacDis(pointStop, desiredDestPointCoords));
                 }
               });
-            });
-            int curDist = (distToStart + distToEnd).toInt();
+            }
+            curDist = min(curDist,(distToStart + distToEnd).toInt());
+
+            for(int i=0;i<relDrive.stops.length;i++) {
+              (relDrive.stops[i] as Map).forEach((key, value) {
+                if (key == "stopPoint") {
+                  GeoPoint pointStop = value as GeoPoint;
+                  distToStart = clacDis(pointStop, desiredStartPointCoords);
+                }});
+              distToEnd = clacDis(driveDestPointGeoPoint, desiredDestPointCoords);
+              for(int j=i+1;j<relDrive.stops.length;j++) {
+                (relDrive.stops[j] as Map).forEach((key, value) {
+                  if (key == "stopPoint") {
+                    GeoPoint pointStop = value as GeoPoint;
+                    //  distToStart = min(distToStart, clacDis(pointStop, startPointing));
+                    distToEnd = min(distToEnd, clacDis(pointStop, desiredDestPointCoords));
+                  }
+                });
+              }
+              curDist = min(curDist,(distToStart + distToEnd).toInt());
+            }
+
+            // relDrive.stops.forEach((key) {
+            //   (key as Map).forEach((key, value) {
+            //     if (key == "stopPoint") {
+            //       GeoPoint pointStop = value as GeoPoint;
+            //       distToStart =
+            //           min(distToStart, clacDis(pointStop, startPointCoords));
+            //       distToEnd =
+            //           min(distToEnd, clacDis(pointStop, destPointCoords));
+            //     }
+            //   });
+            // });
+            //curDist = (distToStart + distToEnd).toInt();
+            print(curDist);
             if (curDist <= maxDistance) {
               String curPassengerID = curDesired["passengerId"];
               await widget.db.collection("Notifications")
@@ -517,7 +559,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
                       widget.currentDate.millisecond,
                       widget.currentDate.microsecond);
                 }
-                checktimes();
+                //checktimes();
               });
             },
             validator: (val) {
@@ -531,197 +573,194 @@ class _SetDrivePageState extends State<SetDrivePage> {
     );
 
 
-    final departureTimeButton = Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            child: RaisedButton.icon(
-              color: Colors.white,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18),
-                  side: BorderSide(color: Colors.black)),
-              label: Text("Departure time"),
-              icon: Icon(Icons.timer),
-              onPressed: () {
-                DateTime fixedTime = widget.currentDate
-                    .subtract(new Duration(hours: widget.currentDate.hour))
-                    .subtract(new Duration(minutes: widget.currentDate.minute))
-                    .add(new Duration(hours: DateTime.now().hour))
-                    .add(new Duration(minutes: DateTime.now().minute));
-
-                showDialog(
-                    context: context,
-                    builder: (_) => new SimpleDialog(
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(20))),
-                          title: Center(
-                              child: Text("Choose departure time",
-                                  style: TextStyle(fontSize: 21))),
-                          //content: Text("Hey!"),
-                          children: [
-                            TimePickerSpinner(
-                              is24HourMode: true,
-                              normalTextStyle:
-                                  TextStyle(fontSize: 28, color: Colors.grey),
-                              highlightedTextStyle:
-                                  TextStyle(fontSize: 34, color: secondColor),
-                              //spacing: 50,
-                              //itemHeight: 80,
-                              alignment: Alignment.center,
-                              isForce2Digits: true,
-                              minutesInterval: 5,
-                              time:
-                                  _chosenTime != null ? _chosenTime : fixedTime,
-                              isShowSeconds: false,
-                              onTimeChange: (time) {
-                                setState(() {
-                                  _chosenTimeCandidate = time;
-                                });
-                              },
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment
-                                  .center, //Center Row contents horizontally,
-                              children: [
-                                FlatButton(
-                                  child: Text('CANCEL',
-                                      style: TextStyle(
-                                          fontSize: 16, color: mainColor)),
-                                  onPressed: () {
-                                    setState(() {
-                                      Navigator.of(context).pop();
-                                    });
-                                  },
-                                ),
-                                FlatButton(
-                                  child: Text('CONFIRM',
-                                      style: TextStyle(
-                                          fontSize: 16, color: mainColor)),
-                                  onPressed: () {
-                                    _hourController.text =
-                                        DateFormat('dd/MM - kk:mm')
-                                            .format(_chosenTimeCandidate);
-                                    _chosenTime = _chosenTimeCandidate;
-                                    Navigator.of(context).pop();
-                                  },
-                                )
-                              ],
-                            ),
-                          ],
-                        ));
-              },
-            ),
-          ),
-          //Text(resultString ?? "")
-        ]);
+    // final departureTimeButton = Column(
+    //     mainAxisAlignment: MainAxisAlignment.start,
+    //     crossAxisAlignment: CrossAxisAlignment.start,
+    //     children: [
+    //       Container(
+    //         child: RaisedButton.icon(
+    //           color: Colors.white,
+    //           shape: RoundedRectangleBorder(
+    //               borderRadius: BorderRadius.circular(18),
+    //               side: BorderSide(color: Colors.black)),
+    //           label: Text("Departure time"),
+    //           icon: Icon(Icons.timer),
+    //           onPressed: () {
+    //             DateTime fixedTime = widget.currentDate
+    //                 .subtract(new Duration(hours: widget.currentDate.hour))
+    //                 .subtract(new Duration(minutes: widget.currentDate.minute))
+    //                 .add(new Duration(hours: DateTime.now().hour))
+    //                 .add(new Duration(minutes: DateTime.now().minute));
+    //
+    //             showDialog(
+    //                 context: context,
+    //                 builder: (_) => new SimpleDialog(
+    //                   shape: RoundedRectangleBorder(
+    //                       borderRadius: BorderRadius.all(Radius.circular(20))),
+    //                       title: Center(
+    //                           child: Text("Choose departure time",
+    //                               style: TextStyle(fontSize: 21))),
+    //                       //content: Text("Hey!"),
+    //                       children: [
+    //                         TimePickerSpinner(
+    //                           is24HourMode: true,
+    //                           normalTextStyle:
+    //                               TextStyle(fontSize: 28, color: Colors.grey),
+    //                           highlightedTextStyle:
+    //                               TextStyle(fontSize: 34, color: secondColor),
+    //                           //spacing: 50,
+    //                           //itemHeight: 80,
+    //                           alignment: Alignment.center,
+    //                           isForce2Digits: true,
+    //                           minutesInterval: 5,
+    //                           time:
+    //                               _chosenTime != null ? _chosenTime : fixedTime,
+    //                           isShowSeconds: false,
+    //                           onTimeChange: (time) {
+    //                             setState(() {
+    //                               _chosenTimeCandidate = time;
+    //                             });
+    //                           },
+    //                         ),
+    //                         Row(
+    //                           mainAxisAlignment: MainAxisAlignment
+    //                               .center, //Center Row contents horizontally,
+    //                           children: [
+    //                             FlatButton(
+    //                               child: Text('CANCEL',
+    //                                   style: TextStyle(
+    //                                       fontSize: 16, color: mainColor)),
+    //                               onPressed: () {
+    //                                 setState(() {
+    //                                   Navigator.of(context).pop();
+    //                                 });
+    //                               },
+    //                             ),
+    //                             FlatButton(
+    //                               child: Text('CONFIRM',
+    //                                   style: TextStyle(
+    //                                       fontSize: 16, color: mainColor)),
+    //                               onPressed: () {
+    //                                 _hourController.text =
+    //                                     DateFormat('dd/MM - kk:mm')
+    //                                         .format(_chosenTimeCandidate);
+    //                                 _chosenTime = _chosenTimeCandidate;
+    //                                 Navigator.of(context).pop();
+    //                               },
+    //                             )
+    //                           ],
+    //                         ),
+    //                       ],
+    //                     ));
+    //           },
+    //         ),
+    //       ),
+    //       //Text(resultString ?? "")
+    //     ]);
 
     final chooseTime2 =
     Container(
-      child: Padding(
-        padding: const EdgeInsets.only(right: 20),
-        child: InkWell(
-          child: TextField(
-            maxLength: 30,
-            decoration:  InputDecoration(
-              icon: Icon(Icons.timer,color: myColor,),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(width: 1000.0),
-              ),
-              disabledBorder: UnderlineInputBorder(
-                borderSide: BorderSide(width:1,color: myColor),
-              ),
-              labelText: "Time",
-              labelStyle: TextStyle(fontSize: 17,color:myColor),
+      child: InkWell(
+        child: TextField(
+          maxLength: 30,
+          decoration:  InputDecoration(
+            icon: Icon(Icons.timer,color: myColor,),
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(width: 1000.0),
             ),
-            controller: _hourController,
-            textCapitalization: TextCapitalization.sentences,
-            //controller: controllerText,
-            //  maxLines: maxLines,
-            enabled: false,
+            disabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(width:1,color: myColor),
+            ),
+            labelText: "Time",
+            labelStyle: TextStyle(fontSize: 17,color:myColor),
           ),
-          onTap: () {
-            DateTime fixedTime = widget.currentDate
-                .subtract(new Duration(hours: widget.currentDate.hour))
-                .subtract(new Duration(minutes: widget.currentDate.minute))
-                .add(new Duration(hours: DateTime.now().hour))
-                .add(new Duration(minutes: DateTime.now().minute));
-
-            showDialog(
-                context: context,
-                builder: (_) => new SimpleDialog(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(20))),
-                  title: Center(
-                      child: Text("Choose departure time",
-                          style: TextStyle(fontSize: 21))),
-                  //content: Text("Hey!"),
-                  children: [
-                    TimePickerSpinner(
-                      is24HourMode: true,
-                      normalTextStyle:
-                      TextStyle(fontSize: 28, color: Colors.grey),
-                      highlightedTextStyle:
-                      TextStyle(fontSize: 34, color: secondColor),
-                      //spacing: 50,
-                      //itemHeight: 80,
-                      alignment: Alignment.center,
-                      isForce2Digits: true,
-                      minutesInterval: 5,
-                      time:
-                      _chosenTime != null ? _chosenTime : fixedTime,
-                      isShowSeconds: false,
-                      onTimeChange: (time) {
-                        setState(() {
-                          _chosenTimeCandidate = time;
-                        });
-                      },
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment
-                          .center, //Center Row contents horizontally,
-                      children: [
-                        FlatButton(
-                          child: Text('CANCEL',
-                              style: TextStyle(
-                                  fontSize: 16, color: mainColor)),
-                          onPressed: () {
-                            setState(() {
-                              Navigator.of(context).pop();
-                            });
-                          },
-                        ),
-                        FlatButton(
-                          child: Text('CONFIRM',
-                              style: TextStyle(
-                                  fontSize: 16, color: mainColor)),
-                          // onPressed: () {
-                          //   _hourController.text =
-                          //   //DateFormat('dd/MM - kk:mm')
-                          //   DateFormat('kk:mm')
-                          //           .format(_chosenTimeCandidate);
-                          //   _chosenTime = _chosenTimeCandidate;
-                          //   checktimes();
-                          //   Navigator.of(context).pop();
-                          // },
-                          onPressed: () {
-                            setState(() {
-                              _hourController.text =
-                              //DateFormat('dd/MM - kk:mm')
-                              DateFormat('kk:mm')
-                                  .format(_chosenTimeCandidate);
-                              _chosenTime = _chosenTimeCandidate;
-                              checktimes();
-                              Navigator.of(context).pop();
-                            });
-                          },
-                        )
-                      ],
-                    ),
-                  ],
-                ));
-          },
+          controller: _hourController,
+          textCapitalization: TextCapitalization.sentences,
+          //controller: controllerText,
+          //  maxLines: maxLines,
+          enabled: false,
         ),
+        onTap: () {
+          DateTime fixedTime = widget.currentDate
+              .subtract(new Duration(hours: widget.currentDate.hour))
+              .subtract(new Duration(minutes: widget.currentDate.minute))
+              .add(new Duration(hours: DateTime.now().hour))
+              .add(new Duration(minutes: DateTime.now().minute));
+
+          showDialog(
+              context: context,
+              builder: (_) => new SimpleDialog(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(20))),
+                title: Center(
+                    child: Text("Choose departure time",
+                        style: TextStyle(fontSize: 21))),
+                //content: Text("Hey!"),
+                children: [
+                  TimePickerSpinner(
+                    is24HourMode: true,
+                    normalTextStyle:
+                    TextStyle(fontSize: 28, color: Colors.grey),
+                    highlightedTextStyle:
+                    TextStyle(fontSize: 34, color: secondColor),
+                    //spacing: 50,
+                    //itemHeight: 80,
+                    alignment: Alignment.center,
+                    isForce2Digits: true,
+                    minutesInterval: 5,
+                    time:
+                    _chosenTime != null ? _chosenTime : fixedTime,
+                    isShowSeconds: false,
+                    onTimeChange: (time) {
+                      setState(() {
+                        _chosenTimeCandidate = time;
+                      });
+                    },
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment
+                        .center, //Center Row contents horizontally,
+                    children: [
+                      FlatButton(
+                        child: Text('CANCEL',
+                            style: TextStyle(
+                                fontSize: 16, color: mainColor)),
+                        onPressed: () {
+                          setState(() {
+                            Navigator.of(context).pop();
+                          });
+                        },
+                      ),
+                      FlatButton(
+                        child: Text('CONFIRM',
+                            style: TextStyle(
+                                fontSize: 16, color: mainColor)),
+                        // onPressed: () {
+                        //   _hourController.text =
+                        //   //DateFormat('dd/MM - kk:mm')
+                        //   DateFormat('kk:mm')
+                        //           .format(_chosenTimeCandidate);
+                        //   _chosenTime = _chosenTimeCandidate;
+                        //   checktimes();
+                        //   Navigator.of(context).pop();
+                        // },
+                        onPressed: () {
+                          setState(() {
+                            _hourController.text =
+                            //DateFormat('dd/MM - kk:mm')
+                            DateFormat('kk:mm')
+                                .format(_chosenTimeCandidate);
+                            _chosenTime = _chosenTimeCandidate;
+                            checktimes();
+                            Navigator.of(context).pop();
+                          });
+                        },
+                      )
+                    ],
+                  ),
+                ],
+              ));
+        },
       ),
     );
 
@@ -903,6 +942,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
               label: Text("  Set Drive  ",
                   style: TextStyle(color: Colors.white, fontSize: 17)),
               onPressed: () async {
+                FocusScope.of(context).unfocus();
                 setState(() {
                   checkLocations();
                   checktimes();
@@ -1000,139 +1040,144 @@ class _SetDrivePageState extends State<SetDrivePage> {
             ],
           ));
 
-      return Scaffold(
-        key: _key2,
-        appBar: AppBar(
-          elevation: 0,
-          title: Text("Set Drive", style: TextStyle(color: Colors.white)),
-        ),
-        body: Container(
-          decoration: pageContainerDecoration,
-          margin: pageContainerMargin,
-          child: Form(
-            key: _formKey2,
-            child: Builder(
-              builder: (context) => Container(
-                  color: Colors.white,
-                  margin: EdgeInsets.only(
-                      left: defaultSpaceWidth,
-                      top: defaultSpace / 6,
-                      right: defaultSpaceWidth,
-                      bottom: 10),
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: Stack(children: [
-                          Container(
-                              child: Center(
-                                  child: Icon(
-                            Icons.directions_car_sharp,
-                            size: 330,
-                            color: Colors.cyan.withOpacity(0.1),
-                          ))),
-                          ListView(
-                              padding: EdgeInsets.only(
-                                  left: defaultSpaceWidth,
-                                  right: defaultSpaceWidth,
-                                  bottom: 10),
-                              children: [
+      return WillPopScope(
+        onWillPop: () {
+          FocusScope.of(context).unfocus(); return Future.value(true);
+          },
+        child: Scaffold(
+          key: _key2,
+          appBar: AppBar(
+            elevation: 0,
+            title: Text("Set Drive", style: TextStyle(color: Colors.white)),
+          ),
+          body: Container(
+            decoration: pageContainerDecoration,
+            margin: pageContainerMargin,
+            child: Form(
+              key: _formKey2,
+              child: Builder(
+                builder: (context) => Container(
+                    color: Colors.white,
+                    margin: EdgeInsets.only(
+                        left: defaultSpaceWidth,
+                        top: defaultSpace / 6,
+                        right: defaultSpaceWidth,
+                        bottom: 10),
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: Stack(children: [
+                            Container(
+                                child: Center(
+                                    child: Icon(
+                              Icons.directions_car_sharp,
+                              size: 330,
+                              color: Colors.cyan.withOpacity(0.1),
+                            ))),
+                            ListView(
+                                padding: EdgeInsets.only(
+                                    left: defaultSpaceWidth,
+                                    right: defaultSpaceWidth,
+                                    bottom: 10),
+                                children: [
 
-                                //       ...returnFromMapResult.stopAddresses.asMap().map((i, stop){
-                                //       if(stop!=null){
-                                //         return MapEntry(i, Container(
-                                //           child: Row(
-                                //             children: [
-                                //               textBoxFieldDisable(
-                                //                 nameLabel: "Stop " + i.toString() + ":", //Consider to edit,
-                                //                 size: MediaQuery.of(context).size,
-                                //                 hintText: "",
-                                //                 textFieldController: _stopPoint1Controller,
-                                //                 // validator: (value) {
-                                //                 //   if(_startPointController==null || _startPointController.text==""){return "No start point chosen";}
-                                //                 //   else return null;}
-                                //               ),
-                                //             ],
-                                //           ),
-                                //         ));
-                                //       }
-                                //       else
-                                //         return MapEntry(i, Container());
-                                //     }
-                                // ).values.toList(),
+                                  //       ...returnFromMapResult.stopAddresses.asMap().map((i, stop){
+                                  //       if(stop!=null){
+                                  //         return MapEntry(i, Container(
+                                  //           child: Row(
+                                  //             children: [
+                                  //               textBoxFieldDisable(
+                                  //                 nameLabel: "Stop " + i.toString() + ":", //Consider to edit,
+                                  //                 size: MediaQuery.of(context).size,
+                                  //                 hintText: "",
+                                  //                 textFieldController: _stopPoint1Controller,
+                                  //                 // validator: (value) {
+                                  //                 //   if(_startPointController==null || _startPointController.text==""){return "No start point chosen";}
+                                  //                 //   else return null;}
+                                  //               ),
+                                  //             ],
+                                  //           ),
+                                  //         ));
+                                  //       }
+                                  //       else
+                                  //         return MapEntry(i, Container());
+                                  //     }
+                                  // ).values.toList(),
 
-                                SizedBox(height: 1.5 * defaultSpace),
-                                chooseStartAndDestination,
-                                SizedBox(height: 1.5 * defaultSpace),
-                                startPointText,
-                                SizedBox(height: 1.5 * defaultSpace),
+                                  SizedBox(height: 1.5 * defaultSpace),
+                                  chooseStartAndDestination,
+                                  SizedBox(height: 1.5 * defaultSpace),
+                                  startPointText,
+                                  SizedBox(height: 1.5 * defaultSpace),
 
-                                _numberOfStops > 0
-                                    ? stopPoint1text
-                                    : Container(),
-                                _numberOfStops > 1
-                                    ? stopPoint2text
-                                    : Container(),
-                                _numberOfStops > 2
-                                    ? stopPoint3text
-                                    : Container(),
-                                _numberOfStops > 0 ?
-                                SizedBox(height: 1 * defaultSpace)
-                                    : Container(),
+                                  _numberOfStops > 0
+                                      ? stopPoint1text
+                                      : Container(),
+                                  _numberOfStops > 1
+                                      ? stopPoint2text
+                                      : Container(),
+                                  _numberOfStops > 2
+                                      ? stopPoint3text
+                                      : Container(),
+                                  _numberOfStops > 0 ?
+                                  SizedBox(height: 1 * defaultSpace)
+                                      : Container(),
 
-                                destinationText,
+                                  destinationText,
 
-                                _validateLocations
-                                    ? Container() :
-                                SizedBox(height: 1 * defaultSpace),
-                                _validateLocations
-                                ? SizedBox(height: 0 * defaultSpace)
-                                    : Center(
-                                child: Text(
-                                "Choose start and destination",
-                                style: TextStyle(color: Colors.red))),
+                                  _validateLocations
+                                      ? Container() :
+                                  SizedBox(height: 1 * defaultSpace),
+                                  _validateLocations
+                                  ? SizedBox(height: 0 * defaultSpace)
+                                      : Center(
+                                  child: Text(
+                                  "Choose start and destination",
+                                  style: TextStyle(color: Colors.red))),
 
-                                // SizedBox(height: 1 * defaultSpace),
-                                // Column(
-                                //   mainAxisAlignment: MainAxisAlignment.center,
-                                //   crossAxisAlignment: CrossAxisAlignment.center,
-                                //   children: [
-                                //     departureTimeButton,
-                                //     timeText1,
-                                //   ],
-                                // ),
-                                SizedBox(height: 1.5*defaultSpace),
+                                  // SizedBox(height: 1 * defaultSpace),
+                                  // Column(
+                                  //   mainAxisAlignment: MainAxisAlignment.center,
+                                  //   crossAxisAlignment: CrossAxisAlignment.center,
+                                  //   children: [
+                                  //     departureTimeButton,
+                                  //     timeText1,
+                                  //   ],
+                                  // ),
+                                  SizedBox(height: 1.5*defaultSpace),
 
-                                dateChoose,
-                                SizedBox(height: defaultSpace),
-                                chooseTime2,
-                                //Center(child:Row(mainAxisAlignment: MainAxisAlignment.center,crossAxisAlignment: CrossAxisAlignment.start,children: [SizedBox(width: 10*defaultSpace,),Expanded(child:Times)],)),
-                                // fromText,
-                                //SizedBox(height: 0.5 * defaultSpace),
-                                _validateTime
-                                    ? SizedBox(height: 0 * defaultSpace)
-                                    : Center(
-                                    child: Text(_timeError,
-                                        style:
-                                        TextStyle(color: Colors.red))),
-                                SizedBox(height: 1.3*defaultSpace),
-                                priceText,
-                                backSeatRowText,
-                                //SizedBox(height: defaultSpace),
-                                Divider(thickness: 3),
-                                preferences,
-                                Divider(thickness: 3),
-                              ])
-                        ]),
-                      ),
-                      SizedBox(height: 1 * defaultSpace),
-                      setDrive,
-                      SizedBox(height: 2 * defaultSpace),
-                    ],
-                  )),
+                                  dateChoose,
+                                  SizedBox(height: defaultSpace),
+                                  chooseTime2,
+                                  //Center(child:Row(mainAxisAlignment: MainAxisAlignment.center,crossAxisAlignment: CrossAxisAlignment.start,children: [SizedBox(width: 10*defaultSpace,),Expanded(child:Times)],)),
+                                  // fromText,
+                                  //SizedBox(height: 0.5 * defaultSpace),
+                                  _validateTime
+                                      ? SizedBox(height: 0 * defaultSpace)
+                                      : Center(
+                                      child: Text(_timeError,
+                                          style:
+                                          TextStyle(color: Colors.red))),
+                                  SizedBox(height: 1.3*defaultSpace),
+                                  priceText,
+                                  backSeatRowText,
+                                  //SizedBox(height: defaultSpace),
+                                  Divider(thickness: 3),
+                                  preferences,
+                                  Divider(thickness: 3),
+                                ])
+                          ]),
+                        ),
+                        SizedBox(height: 1 * defaultSpace),
+                        setDrive,
+                        SizedBox(height: 2 * defaultSpace),
+                      ],
+                    )),
+              ),
             ),
           ),
+          backgroundColor: mainColor,
         ),
-        backgroundColor: mainColor,
       );
     });
   }

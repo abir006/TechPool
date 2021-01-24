@@ -25,4 +25,4 @@ Type-accepted,rejected,canceled,requested.
 Stores the app version.
 
 ### Visual Representation:
-![TechPool_DataBase](https://user-images.githubusercontent.com/39681215/103154478-31c0f200-47a0-11eb-8de9-b3188661921b.png)
+![TechPool_DataBase](https://user-images.githubusercontent.com/39681215/105644244-5393be80-5e9d-11eb-8d4c-ace9587e0e19.png)

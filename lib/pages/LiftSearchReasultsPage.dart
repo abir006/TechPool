@@ -428,19 +428,19 @@ class _LiftSearchReasultsPageState extends State<LiftSearchReasultsPage> {
         title: Text("Search Results",style: TextStyle(color: Colors.white),),
         actions: [
           IconButton(
+              icon: Icon(Icons.info_outline_rounded),
+              onPressed: () {
+                showAlertDialog(context, "Page information dialog", "In this page, you can see all lifts that meet your search parameters.\n"
+                    "When you press the add desired button, you will get notified for lifts that meet those parameters.\n"
+                    "You can manage the desired in the home page.\n"
+                    "Enjoy :)");
+              } ),
+          IconButton(
               icon: Icon(Icons.home),
               onPressed: () {
                 Navigator.of(context).pop();
                 Navigator.of(context).pop();
               } ),
-          IconButton(
-              icon: Icon(Icons.info_outline_rounded),
-              onPressed: () {
-                showAlertDialog(context, "Page information dialog", "In this page, you can see all lifts that meets your search parameters.\n"
-                    "When you press the add desired button those parameters will be used to search for lifts.\n"
-                    "You will get notified for those lifts, you can manage the desired in the home page\n"
-                    "Enjoy :)");
-              } )
         ],
       ),
 

@@ -341,9 +341,10 @@ class ChatPageState extends State<ChatPage>  with WidgetsBindingObserver {
     data.forEach((element) {
       String name = (element["firstName"] +
           element["lastName"].replaceAll(new RegExp(r"\s+\b|\b\s"), ""));
+      String name2 =  element["lastName"].replaceAll(new RegExp(r"\s+\b|\b\s"), "");
       String query2 = query.replaceAll(new RegExp(r"\s+\b|\b\s"), "");
       if (query != '') {
-        if(name.toLowerCase().contains(query2.toLowerCase())) {
+        if(name.toLowerCase().startsWith(query2.toLowerCase()) || name2.toLowerCase().startsWith(query2.toLowerCase())) {
           filteredDocs.add(element);
         }
       } else {
@@ -399,6 +400,8 @@ class ChatPageState extends State<ChatPage>  with WidgetsBindingObserver {
               },
             );
           } catch (e) {}
+        }).catchError((e) {
+          return null;
         });
         Navigator.push(
             context,
@@ -569,7 +572,9 @@ class ChatPageState extends State<ChatPage>  with WidgetsBindingObserver {
     });
     //  return null;
   }
+  void dontDo(){}
   Widget buildItem(BuildContext context, DocumentSnapshot document) {
+    final GlobalKey<PopupMenuButtonState> _menuKey = GlobalKey();
     return Consumer<UserRepository>(builder: (context, userRep, _) {
       if (document.id.toString() == userRep.user.email) {
         return Container();
@@ -596,14 +601,14 @@ class ChatPageState extends State<ChatPage>  with WidgetsBindingObserver {
                   }
                 }
                 return Slidable(
-                  enabled: net.contains(document.id),
+                  enabled: false,
                   key: Key(userRep.user.email),
                   controller: slidableController,
                   actionPane: SlidableScrollActionPane(),
                   actionExtentRatio: 0.25,
                   closeOnScroll: false,
                   actions: <Widget>[
-                    Container(
+                   Container(
                       padding: EdgeInsets.fromLTRB(0, 1, 0, 12,),
                       child: FlatButton(
                         shape: RoundedRectangleBorder(
@@ -640,6 +645,8 @@ class ChatPageState extends State<ChatPage>  with WidgetsBindingObserver {
                                     userRep.user?.email)
                                     .collection("Network")
                                     .doc(document.id.toString()));
+                          }).catchError((e) {
+                            return Future.error(e);
                           });
                           FocusScope.of(context).requestFocus(new FocusNode());
                           try {
@@ -647,6 +654,62 @@ class ChatPageState extends State<ChatPage>  with WidgetsBindingObserver {
                           }
                           catch (e) {}
                         },
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.fromLTRB(0, 1, 0, 12,),
+                      child: FlatButton(
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.0)),
+                        child: Center(child:
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.mark_chat_read, color: Colors.white,),
+                            Text("Read", style: TextStyle(
+                                color: Colors.white, fontSize: 10),)
+                          ],
+                        ),),
+                        height: 100,
+                        // caption: 'Delete',
+                        color: Colors.teal,
+                        disabledColor: Colors.grey,
+                        //  icon: Icons.delete_outline,
+                        onPressed: snapshot.data[1].docs.length>0 ? () async {
+                          try {
+                            QuerySnapshot q2 = await FirebaseFirestore.instance
+                                .collection("ChatFriends").doc(
+                                userRep.user?.email)
+                                .collection("Network").doc(document.id.toString())
+                                .collection(document.id.toString())
+                                .get();
+                            FirebaseFirestore.instance.runTransaction((
+                                transaction) async {
+                              q2.docs.forEach((element) {
+                                transaction.delete(element.reference);
+                              });
+                              try {
+                                transaction.update(
+                                  FirebaseFirestore.instance.collection(
+                                      "ChatFriends")
+                                      .doc(userRep.user?.email)
+                                      .collection("Network")
+                                      .doc(document.id.toString()),
+                                  {
+                                    'read': true
+                                  },
+                                );
+                              } catch (e) {}
+                            }).catchError((e) {
+                              return null;
+                            });
+                            FocusScope.of(context).unfocus();
+                            try {
+                              slidableController.activeState.close();
+                            }
+                            catch (e) {}
+                          }catch(e){}
+                        }:null,
                       ),
                     ),
                   ],
@@ -745,43 +808,114 @@ class ChatPageState extends State<ChatPage>  with WidgetsBindingObserver {
                 style: TextStyle(color: Colors.white),
                 ),
                 ),
-                Text( DateFormat(' dd/MM kk:mm').format(DateTime.fromMillisecondsSinceEpoch(int.parse(snapshot.data[1].docs[0]['timestamp']))), style:TextStyle(fontSize: 12))],
+                Text( DateFormat('  dd/MM-kk:mm').format(DateTime.fromMillisecondsSinceEpoch(int.parse(snapshot.data[1].docs[0]['timestamp']))), style:TextStyle(fontSize: 11))],
                 // DateFormat('dd/MM').format(DateTime.fromMillisecondsSinceEpoch(int.parse(snapshot.data.docs[0]['timestamp']))).compareTo(DateFormat('dd/MM').format(DateTime.now())) == 0 ? Text( "Today "+DateFormat('kk:mm').format(DateTime.fromMillisecondsSinceEpoch(int.parse(snapshot.data.docs[0]['timestamp']))), style:TextStyle(fontSize: 12)):Text( DateFormat('dd/MM kk:mm').format(DateTime.fromMillisecondsSinceEpoch(int.parse(snapshot.data.docs[0]['timestamp']))), style:TextStyle(fontSize: 12))],
                 ):Container(),
+                          net.contains(document.id)? PopupMenuButton(key: _menuKey,icon: Icon(Icons.more_vert,),
+              itemBuilder: (BuildContext context) => [snapshot.data[1].docs.length>0 ? PopupMenuItem(value: "Read",child: Row(children: [Icon(Icons.mark_chat_read_outlined,color: Colors.grey),Text(" Read")],)) : null, PopupMenuItem(value: "Delete",child: Row(children: [Icon(Icons.delete_outline,color: Colors.grey,),Text("Delete")],)),],
+             shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(20.0))),
+                  onSelected: (value2) async {
+                if(value2=="Delete"){
+                  FirebaseFirestore.instance.runTransaction((
+                      transaction) async {
+                    QuerySnapshot q2 = await FirebaseFirestore.instance
+                        .collection("ChatFriends").doc(
+                        userRep.user?.email).collection("Network").doc(
+                        document.id.toString()).collection(
+                        document.id.toString())
+                        .get();
+
+                    Future.wait(q2.docs.map((element) {
+                      transaction.delete(element.reference);
+                      return Future(() => Null);
+                    }));
+                    transaction.delete(
+                        firestore.collection("ChatFriends").doc(
+                            userRep.user?.email)
+                            .collection("Network")
+                            .doc(document.id.toString()));
+                  }).catchError((e) {
+                    return Future.error(e);
+                  });
+                  FocusScope.of(context).requestFocus(new FocusNode());
+                  try {
+                    slidableController.activeState.close();
+                  }
+                  catch (e) {}
+                }else{
+                  if(value2=="Read"){
+                    try {
+                      QuerySnapshot q2 = await FirebaseFirestore.instance
+                          .collection("ChatFriends").doc(
+                          userRep.user?.email)
+                          .collection("Network").doc(document.id.toString())
+                          .collection(document.id.toString())
+                          .get();
+                      FirebaseFirestore.instance.runTransaction((
+                          transaction) async {
+                        q2.docs.forEach((element) {
+                          transaction.delete(element.reference);
+                        });
+                        try {
+                          transaction.update(
+                            FirebaseFirestore.instance.collection(
+                                "ChatFriends")
+                                .doc(userRep.user?.email)
+                                .collection("Network")
+                                .doc(document.id.toString()),
+                            {
+                              'read': true
+                            },
+                          );
+                        } catch (e) {}
+                      }).catchError((e) {
+                        return null;
+                      });
+                    }catch(e){}
+                  }
+                }
+                setState(() {
+
+                });
+              }
+              ):Container(),
                         ],
                       ),
                       onPressed: () async {
-                        QuerySnapshot q2 = await FirebaseFirestore.instance
-                            .collection("ChatFriends").doc(userRep.user?.email)
-                            .collection("Network").doc(document.id.toString())
-                            .collection(document.id.toString())
-                            .get();
-
-                        FirebaseFirestore.instance.runTransaction((
-                            transaction) async {
-                          q2.docs.forEach((element) {
-                            transaction.delete(element.reference);
-                          });
-                          try {
-                            transaction.update(
-                              FirebaseFirestore.instance.collection(
-                                  "ChatFriends")
-                                  .doc(userRep.user?.email)
-                                  .collection("Network")
-                                  .doc(document.id.toString()),
-                              {
-                                'read': true
-                              },
-                            );
-                          } catch (e) {}
-                        });
-                        FocusScope.of(context).unfocus();
                         try {
-                          slidableController.activeState.close();
-                        }
-                        catch (e) {}
-
-
+                          QuerySnapshot q2 = await FirebaseFirestore.instance
+                              .collection("ChatFriends").doc(
+                              userRep.user?.email)
+                              .collection("Network").doc(document.id.toString())
+                              .collection(document.id.toString())
+                              .get();
+                          FirebaseFirestore.instance.runTransaction((
+                              transaction) async {
+                            q2.docs.forEach((element) {
+                              transaction.delete(element.reference);
+                            });
+                            try {
+                              transaction.update(
+                                FirebaseFirestore.instance.collection(
+                                    "ChatFriends")
+                                    .doc(userRep.user?.email)
+                                    .collection("Network")
+                                    .doc(document.id.toString()),
+                                {
+                                  'read': true
+                                },
+                              );
+                            } catch (e) {}
+                          }).catchError((e) {
+                            return null;
+                          });
+                          FocusScope.of(context).unfocus();
+                          try {
+                            slidableController.activeState.close();
+                          }
+                          catch (e) {}
+                        }catch(e){}
                         Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -793,7 +927,7 @@ class ChatPageState extends State<ChatPage>  with WidgetsBindingObserver {
                                     )));
                       },
                       color: greyColor2,
-                      padding: EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 10.0),
+                      padding: EdgeInsets.fromLTRB(15.0, 10.0, 5.0, 10.0),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10.0)),
                     ),

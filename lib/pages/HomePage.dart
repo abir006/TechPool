@@ -155,6 +155,8 @@ class _HomePageState extends State<HomePage> {
               },
             );
           } catch (e) {}
+        }).catchError((e) {
+          return null;
         });
         if(chatTalkPage2 ==false) {
           Navigator.push(

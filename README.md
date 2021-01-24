@@ -1,6 +1,10 @@
 # Tech Pool
 A platform that connects between drivers and hitchhikers who study at the Technion in an easy and convenient way for collaborative rides.
 
+
+<a href='https://play.google.com/store/apps/details?id=com.technion.android.tech_pool&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png' width='250'/></a>
+
+
 ## Motivation
 For many students who study at the Technion, getting and providing lifts is not an easy task. They need to synchronize with apps like facebook and whatsapp which were’t designed for this purpose and don’t answer their specific needs, such as the need to know that the driver is from the technion. We want to give the students an app for an easier and faster way to get and provide lifts which answer their needs and preferences. 
 
@@ -22,3 +26,5 @@ For many students who study at the Technion, getting and providing lifts is not 
 1. [Setup](docs/setup.md)
 2. [Data models](docs/data-models.md)
 3. [Database](docs/database.md)
+4. [Firebase functions](docs/firebasefunctions.md)
+5. [Screenshots](docs/screenshots.md)

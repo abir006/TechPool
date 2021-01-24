@@ -13,7 +13,7 @@ import 'package:tech_pool/pages/LandingPage.dart';
 import 'Utils.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
-final versionNumber = 1.0;
+final versionNumber = 2.0;
 var chatTalkPage2 = false;
 var lastNotifUsed;
 
@@ -213,7 +213,7 @@ class _MyAppState extends State<MyApp> {
                                                 padding:
                                                     const EdgeInsets.all(8.0),
                                                 child: Text(
-                                                    "Youre app is not updated. \nPlease update your app from the play store.",
+                                                    "Your app is not updated. \nPlease update your app from the play store.",
                                                     style: TextStyle(
                                                         fontWeight:
                                                             FontWeight.bold,
@@ -253,7 +253,7 @@ class _MyAppState extends State<MyApp> {
                                               padding:
                                                   const EdgeInsets.all(8.0),
                                               child: Text(
-                                                  "Youre app is not update. \nPlease update your app from the play store.",
+                                                  "Your app is not update. \nPlease update your app from the play store.",
                                                   style: TextStyle(
                                                       fontWeight:
                                                           FontWeight.bold,

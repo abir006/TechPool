@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 /// Used in main pages init state, with the desired method.
 class appValidator {
   bool fallback = false;
+  bool fallback2 = false;
   StreamSubscription<DataConnectionStatus> listener;
   FirebaseFirestore firestore = FirebaseFirestore.instance;
   StreamSubscription<DocumentSnapshot> versionListener;
@@ -59,7 +60,14 @@ class appValidator {
   checkVersion(BuildContext context) async {
     versionListener = firestore.collection("Version").doc("VersionControl").snapshots().listen((event) {
       if(event.data()["version"] != versionNumber){
-        _showDialog("Your'e app is out-dated", "Please update your app through the app store", context);
+        fallback2=true;
+        _showDialog("Your app is out-dated", "Please update your app through the play store", context);
+      }else{
+        if(fallback2==true) {
+          // _showDialog(internetStatus, contentMessage, context);
+          fallback2 = false;
+          Navigator.of(context).pop();
+        }
       }
     });
   }

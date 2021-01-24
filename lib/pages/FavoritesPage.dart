@@ -58,6 +58,8 @@ class _FavoritesPageState extends State<FavoritesPage> {
                       leading: Icon(Icons.favorite, size: 30,
                         color: secondColor,),
                       trailing:  PopupMenuButton(key: _menuKey,icon: Icon(Icons.more_vert),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(20.0))),
                           itemBuilder: (BuildContext context) => [PopupMenuItem(value: "Edit name",child: Row(children: [Icon(Icons.edit),Text("Edit name")],)),PopupMenuItem(value: "Edit location",child: Row(children: [Icon(Icons.edit_location),Text("Edit address")]),),PopupMenuItem(value: "Delete",child: Row(children: [Icon(Icons.delete),Text("Delete")]))],
                           onSelected: (value2) async {
                             if(value2 == "Delete"){
@@ -312,6 +314,8 @@ class _FavoritesPageState extends State<FavoritesPage> {
                           leading: Icon(Icons.home, size: 30,
                             color: secondColor,),
                           trailing: snapshotMap.containsKey("Home") ? PopupMenuButton(key: _homeMenuKey,icon: Icon(Icons.more_vert),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.all(Radius.circular(20.0))),
                               itemBuilder: (BuildContext context) => [PopupMenuItem(value: "Edit location",child: Row(children: [Icon(Icons.edit_location),Text("Edit address")]),),PopupMenuItem(value: "Delete",child: Row(children: [Icon(Icons.delete),Text("Delete")]))],
                               onSelected: (value2) async {
                                 if(value2 == "Delete"){
@@ -386,6 +390,8 @@ class _FavoritesPageState extends State<FavoritesPage> {
                           leading: Icon(Icons.work, size: 30,
                             color: secondColor,),
                           trailing: snapshotMap.containsKey("Work") ? PopupMenuButton(key: _workMenuKey,icon: Icon(Icons.more_vert),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.all(Radius.circular(20.0))),
                               itemBuilder: (BuildContext context) => [PopupMenuItem(value: "Edit location",child: Row(children: [Icon(Icons.edit_location),Text("Edit address")]),),PopupMenuItem(value: "Delete",child: Row(children: [Icon(Icons.delete),Text("Delete")]))],
                               onSelected: (value2) async {
                                 if(value2 == "Delete"){
@@ -458,6 +464,8 @@ class _FavoritesPageState extends State<FavoritesPage> {
                           leading: Icon(Icons.school, size: 30,
                             color: secondColor,),
                           trailing: snapshotMap.containsKey("University") ? PopupMenuButton(key: _universityMenuKey,icon: Icon(Icons.more_vert),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.all(Radius.circular(20.0))),
                               itemBuilder: (BuildContext context) => [PopupMenuItem(value: "Edit location",child: Row(children: [Icon(Icons.edit_location),Text("Edit address")]),),PopupMenuItem(value: "Delete",child: Row(children: [Icon(Icons.delete),Text("Delete")]))],
                               onSelected: (value2) async {
                                 if(value2 == "Delete"){

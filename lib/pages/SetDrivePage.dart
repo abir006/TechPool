@@ -938,7 +938,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
                   borderRadius: BorderRadius.circular(18),
                   side: BorderSide(color: Colors.black)),
               icon: Icon(Icons.directions_car_sharp, color: Colors.white),
-              label: Text("  Set Drive  ",
+              label: Text("Set Drive",
                   style: TextStyle(color: Colors.white, fontSize: 17)),
               onPressed: () async {
                 FocusScope.of(context).unfocus();

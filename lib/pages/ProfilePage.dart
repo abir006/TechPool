@@ -322,6 +322,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                         q2.docs.forEach((element) {
                                           transaction.delete(element.reference);
                                         });
+                                      }).catchError((e) {
+                                        return null;
                                       });
                                     }catch(e){}
 

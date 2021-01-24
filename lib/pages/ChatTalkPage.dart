@@ -291,6 +291,8 @@ class ChatScreenState extends State<ChatScreen>  with WidgetsBindingObserver {
             'type': type
           },
         );
+      }).catchError((e) {
+        return null;
       });
 /*
      FirebaseFirestore.instance.runTransaction((transaction) async {
@@ -645,6 +647,8 @@ class ChatScreenState extends State<ChatScreen>  with WidgetsBindingObserver {
           );
         }catch(e){}
 
+      }).catchError((e) {
+        return null;
       });
       Navigator.pop(context);
     }

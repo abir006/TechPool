@@ -332,7 +332,7 @@ class _LocationTextBoxes2State extends State<LocationTextBoxes2> {
                           border: InputBorder.none, hintText: "Address/Place"))),
               VerticalDivider(width: 6),
                   Container(
-                    width: 100,
+                    width: 106,
                     child: TextButton(
                         onPressed: () async {
                           FocusScope.of(context).unfocus();

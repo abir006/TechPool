@@ -120,8 +120,8 @@ class _LocationSearchState extends State<LocationSearch> {
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.black),
                         ),
-                        width: 120,
-                        height: 26,
+                        width: 126,
+                        height: 30,
                         child: RaisedButton(
                             color: Colors.white,
                             onPressed: () {

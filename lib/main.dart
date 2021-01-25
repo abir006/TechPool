@@ -13,7 +13,7 @@ import 'package:tech_pool/pages/LandingPage.dart';
 import 'Utils.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
-final versionNumber = 2.0;
+final versionNumber = 1.0;
 var chatTalkPage2 = false;
 var lastNotifUsed;
 

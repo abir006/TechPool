@@ -594,7 +594,7 @@ class _HomePageState extends State<HomePage> {
       }
     }
     catch(_){
-
+      showAlertDialog(context, "Lift is not available", "Lift is not available.");
     }
   }
 

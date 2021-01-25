@@ -421,7 +421,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                   Navigator.pushReplacement(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => ChatPage(currentUserId: userRep.user.email)));}
+                                          builder: (context) => ChatPage(currentUserId: userRep.user.email,fromNotification: false)));}
                             )
                           ],
                         ),
@@ -485,7 +485,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => ChatPage(currentUserId: userRep.user.email)));}
+                        builder: (context) => ChatPage(currentUserId: userRep.user.email,fromNotification: false)));}
           )
           ],
         ),
@@ -496,7 +496,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
             margin: pageContainerMargin,
             //padding: EdgeInsets.only(left: defaultSpacewidth, right: defaultSpacewidth),
             child: Column(
-              children: [Expanded(child:ListView.builder(
+              children: [Expanded(
+                  child:ListView.builder(
                 shrinkWrap: true,
                 padding: EdgeInsets.only(left: defaultSpacewidth*0.4, right: defaultSpacewidth*0.4, bottom: defaultSpacewidth*0.4,top:defaultSpacewidth*0.4 ),
                 itemCount: _notifications.length,
@@ -786,39 +787,43 @@ class _NotificationsPageState extends State<NotificationsPage> {
             return InkWell(
               onTap:  () async {
                 //Preparing and opening the info page
-                var drive = await firestore.collection("Drives").doc(
-                    liftNotification.driveId).get();
-                MyLift liftToShow = new MyLift(
-                    "driver", "destAddress", "stopAddress", 5);
-                drive.data().forEach((key, value) {
-                  if (value != null) {
-                    liftToShow.setProperty(key, value);
-                  }
-                });
-                liftToShow.liftId = liftNotification.driveId;
-                //liftToShow.stops = [];
-                liftToShow.dist = liftNotification.distance;
-                liftToShow.passengersInfo =
-                Map<String, Map<String, dynamic>>.from(
-                    drive.data()["PassengersInfo"] ?? {});
-                liftToShow.payments = (await firestore.collection(
-                    "Profiles").doc(liftNotification.driverId).get())
-                    .data()["allowedPayments"].join(", ");
+                try {
+                  var drive = await firestore.collection("Drives").doc(
+                      liftNotification.driveId).get();
+                  MyLift liftToShow = new MyLift(
+                      "driver", "destAddress", "stopAddress", 5);
+                  drive.data().forEach((key, value) {
+                    if (value != null) {
+                      liftToShow.setProperty(key, value);
+                    }
+                  });
+                  liftToShow.liftId = liftNotification.driveId;
+                  //liftToShow.stops = [];
+                  liftToShow.dist = liftNotification.distance;
+                  liftToShow.passengersInfo =
+                  Map<String, Map<String, dynamic>>.from(
+                      drive.data()["PassengersInfo"] ?? {});
+                  liftToShow.payments = (await firestore.collection(
+                      "Profiles").doc(liftNotification.driverId).get())
+                      .data()["allowedPayments"].join(", ");
 
-                // FocusScope.of(context).unfocus();
-                // try{
-                //   slidableController.activeState.close();}
-                // catch(e){}
+                  // FocusScope.of(context).unfocus();
+                  // try{
+                  //   slidableController.activeState.close();}
+                  // catch(e){}
 
-                await Navigator.of(context).push(new MaterialPageRoute<Null>(
-                    builder: (BuildContext context) {
-                      return NotificationInfo(
-                          lift: liftToShow,
-                          notification: liftNotification,
-                          type: NotificationInfoType.Accepted);
-                    },
-                    fullscreenDialog: true
-                ));
+                  await Navigator.of(context).push(new MaterialPageRoute<Null>(
+                      builder: (BuildContext context) {
+                        return NotificationInfo(
+                            lift: liftToShow,
+                            notification: liftNotification,
+                            type: NotificationInfoType.Accepted);
+                      },
+                      fullscreenDialog: true
+                  ));
+                }catch(e){
+                  showAlertDialog(context, "Lift is not available", "The lift is no longer available.");
+                }
 
               },
               child: Container(
@@ -903,7 +908,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                 children: [
                                   Flexible(flex:8,
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
                                       children: [
                                         infoText(snapshot.data[1]),
                                         placesText(liftNotification.startCity, liftNotification.destCity),
@@ -911,44 +916,40 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                       ],
                                     ),
                                   ),
-                                  //here the icon:
-                                  Flexible(flex:4,
-                                    child: Container(
-                                      width: MediaQuery
-                                          .of(context)
-                                          .size
-                                          .width * 0.016*16,
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                        children: [
-                                          Transform.rotate(angle: 0.8,
-                                              child: Icon(Icons.thumb_up_rounded, size: 30, color: Colors.green)),
-                                          Text("Accepted", style: TextStyle(fontSize: 15, color: Colors.green),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                  ),
+                                  Row(
+                                      children: [
+                                        Container(
+                                          margin: EdgeInsets.only(left: 5),
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.center,
+                                            children: [
+                                              Icon(Icons.thumb_up_rounded, size: 30, color: Colors.green),
+                                              Text("Accepted", style: TextStyle(fontSize: 10, color: Colors.green),)
+                                            ],
+                                          ),
+                                        ),
+                                        //   SizedBox(width:20),
+                                        Container(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              InkWell(
+                                                  child: Icon(Icons.delete_outline, size: 30, color: Colors.black54),
+                                                  onTap: () async {
+                                                    await deleteNotification(liftNotification.notificationId, userRep, _key);
+                                                  }
 
+                                              ),
+                                              Text("", style: TextStyle(fontSize: 10, color: Colors.blue),)
+                                            ],
+                                          ),
+                                        )]), //here the icon:
                                 ],
                               ),
                               allInfoText(liftNotification.liftTime, liftNotification.distance / 1000),
                             ],
                           )),
                     ),
-                    Flexible(
-                        flex: 3,
-                        child: IconButton(
-                            icon: Icon(Icons.delete_outline, size: 30, color: Colors.black54),
-                            onPressed: () async {
-                              await deleteNotification(liftNotification.notificationId, userRep, _key);
-                            })
-
-                    ),
-                    SizedBox(width: MediaQuery
-                        .of(context)
-                        .size
-                        .width * 0.004),
                   ],
                 ),
               ),
@@ -969,45 +970,48 @@ class _NotificationsPageState extends State<NotificationsPage> {
           if (snapshot.hasData) {
             return InkWell(
               onTap: () async {
+try {
+  //Preparing and opening the info page
+  var drive = await firestore.collection("Drives").doc(
+      liftNotification.driveId).get();
+  MyLift liftToShow = new MyLift(
+      "driver", "destAddress", "stopAddress", 5);
+  drive.data().forEach((key, value) {
+    if (value != null) {
+      liftToShow.setProperty(key, value);
+    }
+  });
+  liftToShow.liftId = liftNotification.driveId;
+  //liftToShow.stops = [];
+  liftToShow.dist = liftNotification.distance;
+  liftToShow.passengersInfo =
+  Map<String, Map<String, dynamic>>.from(
+      drive.data()["PassengersInfo"] ?? {});
+  liftToShow.payments = (await firestore.collection(
+      "Profiles").doc(liftNotification.driverId).get())
+      .data()["allowedPayments"].join(", ");
 
-                //Preparing and opening the info page
-                var drive = await firestore.collection("Drives").doc(
-                    liftNotification.driveId).get();
-                MyLift liftToShow = new MyLift(
-                    "driver", "destAddress", "stopAddress", 5);
-                drive.data().forEach((key, value) {
-                  if (value != null) {
-                    liftToShow.setProperty(key, value);
-                  }
-                });
-                liftToShow.liftId = liftNotification.driveId;
-                //liftToShow.stops = [];
-                liftToShow.dist = liftNotification.distance;
-                liftToShow.passengersInfo =
-                Map<String, Map<String, dynamic>>.from(
-                    drive.data()["PassengersInfo"] ?? {});
-                liftToShow.payments = (await firestore.collection(
-                    "Profiles").doc(liftNotification.driverId).get())
-                    .data()["allowedPayments"].join(", ");
+  //Here push request lift page
 
-                //Here push request lift page
+  // FocusScope.of(context).unfocus();
+  // try{
+  //   slidableController.activeState.close();}
+  // catch(e){}
 
-                // FocusScope.of(context).unfocus();
-                // try{
-                //   slidableController.activeState.close();}
-                // catch(e){}
-
-                  await Navigator.of(context).push(new MaterialPageRoute<Null>(
-                      builder: (BuildContext context) {
-                        return DesiredRequestPage(lift: liftToShow,
-                          notification: liftNotification,
-                        );
-                      },
-                      fullscreenDialog: true
-                  ));
-                  // setState(() {
-                  //
-                  // });
+  await Navigator.of(context).push(new MaterialPageRoute<Null>(
+      builder: (BuildContext context) {
+        return DesiredRequestPage(lift: liftToShow,
+          notification: liftNotification,
+        );
+      },
+      fullscreenDialog: true
+  ));
+  // setState(() {
+  //
+  // });
+}catch(e){
+  showAlertDialog(context, "Lift is not available", "The lift is no longer available.");
+}
 
               },
               child: Container(
@@ -1092,7 +1096,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                 children: [
                                   Flexible(flex:8,
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
                                       children: [
                                         infoText(snapshot.data[1]),
                                         placesText(liftNotification.startCity, liftNotification.destCity),
@@ -1100,23 +1104,35 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                       ],
                                     ),
                                   ),
-                                  //here the icon:
-                                  Flexible(flex:4,
-                                    child: Container(
-                                      width: MediaQuery
-                                          .of(context)
-                                          .size
-                                          .width * 0.016*16,
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                        children: [
-                                          Icon(Icons.fact_check_outlined, size: 30, color: Colors.blue),
-                                          Text("Found", style: TextStyle(fontSize: 15, color: Colors.blue),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                  ),
+                                  Row(
+                                      children: [
+                                        Container(
+                                          margin: EdgeInsets.only(left: 5),
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.center,
+                                            children: [
+                                              Icon(Icons.fact_check_outlined, size: 30, color: Colors.blue),
+                                              Text(" Found  ", style: TextStyle(fontSize: 10, color: Colors.blue),)
+                                            ],
+                                          ),
+                                        ),
+                                        //   SizedBox(width:20),
+                                        Container(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              InkWell(
+                                                  child: Icon(Icons.delete_outline, size: 30, color: Colors.black54),
+                                                  onTap: () async {
+                                                    await deleteNotification(liftNotification.notificationId, userRep, _key);
+                                                  }
+
+                                              ),
+                                              Text("", style: TextStyle(fontSize: 10, color: Colors.blue),)
+                                            ],
+                                          ),
+                                        ),
+                                      ]),
 
                                 ],
                               ),
@@ -1124,19 +1140,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
                             ],
                           )),
                     ),
-                    Flexible(
-                        flex: 3,
-                        child: IconButton(
-                            icon: Icon(Icons.delete_outline, size: 30, color: Colors.black54),
-                            onPressed: () async {
-                              await deleteNotification(liftNotification.notificationId, userRep, _key);
-                            })
-
-                    ),
-                    SizedBox(width: MediaQuery
-                        .of(context)
-                        .size
-                        .width * 0.004),
                   ],
                 ),
               ),
@@ -1167,7 +1170,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     fullscreenDialog: true
                 ));
               },
-              child: Container(
+              child:
+              Container(
                 margin: EdgeInsets.only(
                     top: MediaQuery
                         .of(context)
@@ -1248,7 +1252,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                 children: [
                                   Flexible(flex:8,
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
                                       children: [
                                         liftNotification.type == "CanceledLift" ? infoText(snapshot.data[1]) : infoTextHitchhiker(snapshot.data[1]),
                                         placesText(liftNotification.startCity, liftNotification.destCity),
@@ -1256,32 +1260,37 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                       ],
                                     ),
                                   ),
-                                  Flexible(flex: 4,
-                                    child: InkWell(
-                                      child: Container(
-                                        width: MediaQuery
-                                            .of(context)
-                                            .size
-                                            .width * 0.016*16,
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.center,
-                                          children: [
-                                            Icon(Icons.cancel_outlined, size: 30, color: Colors.red),
-                                            Text("Canceled", style: TextStyle(fontSize: 15, color: Colors.red),
-                                            )
-                                          ],
+                                  Row(
+                                      children: [
+                                        Container(
+                                          margin: EdgeInsets.only(left: 5),
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.center,
+                                            children: [
+                                              Icon(Icons.cancel_outlined, size: 30, color: Colors.red),
+                                              Text("Canceled", style: TextStyle(fontSize: 10, color: Colors.red),)
+                                            ],
+                                          ),
                                         ),
-                                      ),
-                                      // onTap: () {
-                                      //   FocusScope.of(context).unfocus();
-                                      //   try{
-                                      //     slidableController.activeState.close();}
-                                      //   catch(e){}
-                                      // },
-                                    ),
-                                  ),
+                                        //   SizedBox(width:20),
+                                        Container(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              InkWell(
+                                                  child: Icon(Icons.delete_outline, size: 30, color: Colors.black54),
+                                                  onTap: () async {
+                                                    await deleteNotification(liftNotification.notificationId, userRep, _key);
+                                                  }
 
+                                              ),
+                                              Text("", style: TextStyle(fontSize: 10, color: Colors.blue),)
+                                            ],
+                                          ),
+                                        ),
+                                      ]),
                                 ],
+
                               ),
                               allInfoText(liftNotification.liftTime, liftNotification.distance / 1000),
                             ],
@@ -1289,19 +1298,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       ),
                     ),
                     //Spacer(),
-                    Flexible(
-                        flex: 3,
-                        child: IconButton(
-                            icon: Icon(Icons.delete_outline, size: 30, color: Colors.black54),
-                            onPressed: () async {
-                              await deleteNotification(liftNotification.notificationId, userRep, _key);
-                            })
-
-                    ),
-                    SizedBox(width: MediaQuery
-                        .of(context)
-                        .size
-                        .width * 0.004),
                   ],
                 ),
               ),
@@ -1408,66 +1404,60 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                   .of(context)
                                   .size
                                   .height * 0.008),
-                          child: Column(
+                          child: Row(
                             children: [
-                              Row(
-                                children: [
-                                  Flexible(flex:8,
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                              Expanded(
+                                child: Column(
+                                  children: [
+                                    Row(
                                       children: [
-                                        infoText(snapshot.data[1]),
-                                        placesText(liftNotification.startCity, liftNotification.destCity),
-                                        //allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000),
+                                        Flexible(flex:8,
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.center,
+                                            children: [
+                                              infoText(snapshot.data[1]),
+                                              placesText(liftNotification.startCity, liftNotification.destCity),
+                                              //allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000),
+                                            ],
+                                          ),
+                                        ),
+                                        Row(
+                                            children: [
+                                              Container(
+                                                margin: EdgeInsets.only(left:5),
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                                  children: [
+                                                    Icon(Icons.thumb_up_rounded, size: 30, color: Colors.red),
+                                                    Text("Rejected", style: TextStyle(fontSize: 10, color: Colors.red),)
+                                                  ],
+                                                ),
+                                              ),
+                                              //   SizedBox(width:20),
+                                              Container(
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    InkWell(
+                                                        child: Icon(Icons.delete_outline, size: 30, color: Colors.black54),
+                                                        onTap: () async {
+                                                          await deleteNotification(liftNotification.notificationId, userRep, _key);
+                                                        }
+
+                                                    ),
+                                                    Text("", style: TextStyle(fontSize: 10, color: Colors.blue),)
+                                                  ],
+                                                ),
+                                              )]),
                                       ],
                                     ),
-                                  ),
-
-                                  Flexible( flex: 4,
-                                    child: InkWell(
-                                      child: Container(
-                                        width: MediaQuery
-                                            .of(context)
-                                            .size
-                                            .width * 0.016*16,
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.center,
-                                          children: [
-                                            Transform.rotate(angle: 0.8,
-                                                child: Icon(Icons.thumb_up_rounded, size: 30, color: Colors.red)),
-                                            Text("Rejected", style: TextStyle(fontSize: 15, color: Colors.red),
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                      // onTap: () {
-                                      //   FocusScope.of(context).unfocus();
-                                      //   try{
-                                      //     slidableController.activeState.close();}
-                                      //   catch(e){}
-                                      // },
-                                    ),
-                                  ),
-
-                                ],
+                                    allInfoText(liftNotification.liftTime, liftNotification.distance / 1000),
+                                  ],
+                                ),
                               ),
-                              allInfoText(liftNotification.liftTime, liftNotification.distance / 1000),
                             ],
                           )),
                     ),
-                    Flexible(
-                        flex: 3,
-                        child: IconButton(
-                            icon: Icon(Icons.delete_outline, size: 30, color: Colors.black54),
-                            onPressed: () async {
-                              await deleteNotification(liftNotification.notificationId, userRep, _key);
-                            })
-
-                    ),
-                    SizedBox(width: MediaQuery
-                        .of(context)
-                        .size
-                        .width * 0.004),
                   ],
                 ),
               ),
@@ -1602,7 +1592,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                 children: [
                                   Flexible(flex:8,
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
                                       children: [
                                         infoTextHitchhiker(snapshot.data[1]),
                                         placesText(liftNotification.startCity, liftNotification.destCity),
@@ -1610,23 +1600,43 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                       ],
                                     ),
                                   ),
-                                  Flexible( flex: 3,
-                                    child: Container(
-                                      width: MediaQuery
-                                          .of(context)
-                                          .size
-                                          .width * 0.016*16,
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                        children: [
-                                          Icon(Icons.more_horiz, size: 30, color: Colors.orange),
-                                          Text("Respond", style: TextStyle(fontSize: 15, color: Colors.orange),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                  ),
+                                  Row(
+                                      children: [
+                                        Container(
+                                          margin: EdgeInsets.only(left: 5),
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.center,
+                                            children: [
+                                              Icon(Icons.more_horiz, size: 30, color: Colors.orange),
+                                              Text(" Respond ", style: TextStyle(fontSize: 10, color: Colors.orange),)
+                                            ],
+                                          ),
+                                        ),
+                                        //   SizedBox(width:20),
+                                        liftNotification.liftTime.isBefore(DateTime.now()) ? Container(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              InkWell(
+                                                  child: Icon(Icons.delete_outline, size: 30, color: Colors.black54),
+                                                  onTap: () async {
+                                                    await deleteNotification(liftNotification.notificationId, userRep, _key);
+                                                  }
 
+                                              ),
+                                              Text("", style: TextStyle(fontSize: 10, color: Colors.blue),)
+                                            ],
+                                          ),
+                                        ) :Container(
+                                          margin: EdgeInsets.only(right: 5),
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Icon(Icons.delete_outline, size: 5, color: Colors.transparent),
+                                              Text("", style: TextStyle(fontSize: 10, color: Colors.blue),)
+                                            ],
+                                          ),
+                                        ) ,]),
                                 ],
                               ),
                               allInfoText(liftNotification.liftTime, liftNotification.distance / 1000),
@@ -1634,21 +1644,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
                             ],
                           )),
                     ),
-                    liftNotification.liftTime.isBefore(DateTime.now()) ?
-                      Flexible(
-                        flex: 3,
-                        child: IconButton(
-                            icon: Icon(Icons.delete_outline, size: 30, color: Colors.black54),
-                            onPressed: () async {
-                              await deleteNotification(liftNotification.notificationId, userRep, _key);
-                            })
-
-                    )
-                    : Container(),
-                    SizedBox(width: MediaQuery
-                        .of(context)
-                        .size
-                        .width * 0.004),
                   ],
                 ),
               ),
@@ -1663,8 +1658,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
   }
 
   Widget allInfoText(DateTime time,double dist){
-    return Container(
-        child:Row(
+    return Row(
           children: [
             Icon(Icons.date_range),
             //Text(DateFormat('dd/MM kk:mm').format(time), style: TextStyle(fontSize: 13.5)),
@@ -1678,7 +1672,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
             Container(child:Image.asset("assets/images/tl-.png",scale: 0.9)),
             SizedBox(width: MediaQuery.of(context).size.width * 0.005),
             Text(dist.toStringAsFixed(1)+"km", style: TextStyle(fontSize: 13.5)),
-            SizedBox(width: MediaQuery.of(context).size.width * 0.01),
+           // SizedBox(width: MediaQuery.of(context).size.width * 0.01),
             //Icon(Icons.person),
             //Text(taken.toString()+"/"+avaliable.toString()),
             //SizedBox(width: MediaQuery.of(context).size.height * 0.01),
@@ -1686,7 +1680,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
             // SizedBox(width: MediaQuery.of(context).size.height * 0.003),
             // Text(price.toString()),
           ],
-        ));
+        );
   }
 
   Widget placesText(String from, String to) {
@@ -1721,4 +1715,41 @@ class _NotificationsPageState extends State<NotificationsPage> {
         )
     );
   }
+}
+
+///alert dialog that pops when the user pesses on request lift
+showAlertDialog(BuildContext context,String title,String info) {
+  Widget okButton = FlatButton(
+    textColor: mainColor,
+    child: Text("OK"),
+    onPressed: () {
+      Navigator.pop(context);
+      Navigator.pop(context);
+    },
+  );
+
+  Widget cancelButton = FlatButton(
+    textColor: mainColor,
+    child: Text("Dismiss"),
+    onPressed: () {
+      Navigator.pop(context);
+    },
+  );
+  AlertDialog alert = AlertDialog(
+    shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(20.0))),
+    title: Text(title),
+    content: Text(info,style:TextStyle(fontSize: 17)),
+    actions: [
+      cancelButton,
+    ],
+  );
+
+  // show the dialog
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return alert;
+    },
+  );
 }

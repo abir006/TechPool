@@ -79,15 +79,34 @@ class LiftNotification {
   String passengerNote;
   bool bigBag;
   String desiredId;
+  String passengerPic;
+  String driverPic;
+  String passengerName;
+  String driverName;
   LiftNotification(this.notificationId, this.driveId, this.driverId, this.startCity, this.destCity,
   this.price, this.distance, this.liftTime, this.notificationTime,
-  this.type, this.startAddress, this.destAddress, [this.passengerId, this.passengerNote, this.bigBag]);//optional
+  this.type, this.startAddress, this.destAddress, [this.passengerId, this.passengerNote, this.bigBag]);
+
+
   LiftNotification.requested(this.notificationId, this.driveId, this.driverId, this.startCity, this.destCity,
       this.price, this.distance, this.liftTime, this.notificationTime,
       this.type, this.startAddress, this.destAddress, this.passengerId, this.passengerNote, this.bigBag);
+
   LiftNotification.desired(this.notificationId, this.driveId, this.driverId, this.startCity, this.destCity,
       this.price, this.distance, this.liftTime, this.notificationTime,
       this.type, this.startAddress, this.destAddress, this.desiredId);
+
+  LiftNotification.a(this.notificationId, this.driveId, this.driverId, this.startCity, this.destCity,
+      this.price, this.distance, this.liftTime, this.notificationTime,
+      this.type, this.startAddress, this.destAddress, this.passengerPic,this.driverPic,this.passengerName,this.driverName,[this.passengerId, this.passengerNote, this.bigBag]);
+
+  LiftNotification.requested2(this.notificationId, this.driveId, this.driverId, this.startCity, this.destCity,
+      this.price, this.distance, this.liftTime, this.notificationTime,
+      this.type, this.startAddress, this.destAddress, this.passengerId, this.passengerNote, this.bigBag,this.passengerPic,this.driverPic,this.passengerName,this.driverName);
+
+  LiftNotification.desired2(this.notificationId, this.driveId, this.driverId, this.startCity, this.destCity,
+      this.price, this.distance, this.liftTime, this.notificationTime,
+      this.type, this.startAddress, this.destAddress, this.desiredId,this.passengerPic,this.driverPic,this.passengerName,this.driverName);
 }
 
 class MyLift{

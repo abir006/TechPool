@@ -280,6 +280,12 @@ class _HomePageState extends State<HomePage> {
           .doc(notificationId).get();
       var elementData = notificationDoc.data();
 
+      await firestore.collection("Notifications")
+          .doc(currentUserId)
+          .collection("UserNotifications")
+          .doc(notificationId).update({'read': 'true'}
+      );
+
       String driveId = elementData["driveId"];
       String driverId = elementData["driverId"]; //email
       String startCity = elementData["startCity"];
@@ -594,7 +600,7 @@ class _HomePageState extends State<HomePage> {
       }
     }
     catch(_){
-      showAlertDialog(context, "Lift is not available", "Lift is not available.");
+      showAlertDialog(context, "Notification not available", "The notification is not available.");
     }
   }
 
@@ -639,7 +645,7 @@ class _HomePageState extends State<HomePage> {
                               []) +
                               [drive];
                       if (elementTime
-                          .isAfter(Jiffy(selectedDay).startOf(Units.DAY)) &&
+                          .isAfter(Jiffy(selectedDay.subtract(Duration(days: 1))).endOf(Units.DAY))  &&
                           elementTime
                               .isBefore(Jiffy(selectedDay).endOf(Units.DAY))) {
                         _dailyEvents.add(drive);

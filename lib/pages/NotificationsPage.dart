@@ -32,6 +32,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
   appValidator appValid;
   SlidableController slidableController;
   List<String> net = [];
+  Map<String,DocumentSnapshot> mapi = new   Map<String,DocumentSnapshot>();
 
   void handleSlideAnimationChanged(Animation<double> slideAnimation) {
     // setState(() {
@@ -121,8 +122,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
         child: Stack(
             children: <Widget>[
               Container(
-            child: StreamBuilder<QuerySnapshot>(
-                stream: firestore.collection("Notifications").doc(userRep.user?.email).collection("UserNotifications").snapshots(),
+            child: StreamBuilder<List<QuerySnapshot>>(
+                stream: CombineLatestStream([ firestore.collection("Notifications").doc(userRep.user?.email).collection("UserNotifications").snapshots(),
+                  FirebaseFirestore.instance
+                      .collection('Profiles')
+                      .snapshots(),
+                ],(vals) => [vals[0],vals[1]]),
                 //return StreamBuilder<List<QuerySnapshot>>(
                 //firestore.collection("Notifications").doc("testing@campus.technion.ac.il").collection("UserNotifications").snapshots()],
                 //(values) => [values[0]]),
@@ -133,7 +138,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 builder: (context, snapshot) {
                   _notifications = [];
                   if (snapshot.hasData) {
-                    snapshot.data.docs.forEach((element) {
+                    snapshot.data[1].docs.forEach((element) {
+                      if(element!=null) {
+                        mapi[element.id] = element;
+                      }
+                    });
+                    snapshot.data[0].docs.forEach((element) {
                       //snapshot.data[0].docs.forEach((element) {
                       String notificationId = element.id;
                       var elementData = element.data();
@@ -148,6 +158,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       String type = elementData["type"];
                       String startAddress = elementData["startAddress"];
                       String destAddress = elementData["destAddress"];
+                      String pasPic = "mapi";
+                      String driPic = mapi[driverId].data()["pic"];
+                      String pasName = "";
+                      String driName = mapi[driverId]["firstName"]+" "+mapi[driverId]["lastName"] ;
+
 
                       var notification;
                       switch(type) {
@@ -157,9 +172,13 @@ class _NotificationsPageState extends State<NotificationsPage> {
                             String passengerNote = elementData["passengerNote"];
                             bool bigBag = elementData["bigBag"];
                             int price = elementData["price"];
+                            String pasPic = mapi[elementData["passengerId"]]?.data()["pic"];
+                            String driPic = mapi[driverId].data()["pic"];
+                            String pasName = mapi[elementData["passengerId"]]["firstName"]+" "+mapi[elementData["passengerId"]]["lastName"] ;
+                            String driName = mapi[driverId]["firstName"]+" "+mapi[driverId]["lastName"] ;
                             // int NumberSeats = elementData["NumberSeats"];
                             // int numberOfPassengers = ;
-                            notification = LiftNotification.requested(
+                            notification = LiftNotification.requested2(
                                 notificationId,
                                 driveId,
                                 driverId,
@@ -176,13 +195,18 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                 // numberOfPassengers,
                                 passengerId,
                                 passengerNote,
-                                bigBag
+                                bigBag,
+                              pasPic,
+                              driPic,
+                                pasName,
+                                driName,
+
                             );
                             break;
                           }
                         case "RejectedLift" :
                           {
-                            notification = LiftNotification(
+                            notification = LiftNotification.a(
                                 notificationId,
                                 driveId,
                                 driverId,
@@ -194,13 +218,19 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                 notificationTime,
                                 type,
                                 startAddress,
-                                destAddress);
+                                destAddress,
+                                pasPic,
+                                driPic,
+                              pasName,
+                              driName,
+
+                            );
                             break;
                           }
 
                         case "AcceptedLift" :
                           {
-                            notification = LiftNotification(
+                            notification = LiftNotification.a(
                                 notificationId,
                                 driveId,
                                 driverId,
@@ -212,14 +242,18 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                 notificationTime,
                                 type,
                                 startAddress,
-                                destAddress
+                                destAddress,
+                              pasPic,
+                              driPic,
+                              pasName,
+                              driName,
                             );
                             break;
                           }
                         case "DesiredLift" :
                           {
                             String desiredId = elementData["desiredId"];
-                            notification = LiftNotification.desired(
+                            notification = LiftNotification.desired2(
                                 notificationId,
                                 driveId,
                                 driverId,
@@ -233,6 +267,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                 startAddress,
                                 destAddress,
                                 desiredId,
+                              pasPic,
+                              driPic,
+                              pasName,
+                              driName,
                             );
                             break;
                           }
@@ -240,7 +278,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
                         case "CanceledLift" :
                           {
                             String passengerId = elementData["passengerId"];
-                            notification = LiftNotification(
+                            String pasPic = mapi[elementData["passengerId"]]?.data()["pic"];
+                            String driPic = mapi[driverId].data()["pic"];
+                            String pasName = mapi[elementData["passengerId"]]["firstName"]+" "+mapi[elementData["passengerId"]]["lastName"] ;
+                            String driName = mapi[driverId]["firstName"]+" "+mapi[driverId]["lastName"] ;
+                            notification = LiftNotification.a(
                                 notificationId,
                                 driveId,
                                 driverId,
@@ -253,14 +295,17 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                 type,
                                 startAddress,
                                 destAddress,
-                                passengerId
+                              pasPic,
+                              driPic,
+                              pasName,
+                              driName,
                             );
                             break;
                           }
                       //in case a driver canceled a drive- notify hitchhikers
                         case "CanceledDrive" :
                           {
-                            notification = LiftNotification(
+                            notification = LiftNotification.a(
                                 notificationId,
                                 driveId,
                                 driverId,
@@ -272,7 +317,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                 notificationTime,
                                 type,
                                 startAddress,
-                                destAddress);
+                                destAddress,
+                              pasPic,
+                              driPic,
+                              pasName,
+                              driName,);
                             break;
                           }
                       }
@@ -780,10 +829,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
   }
 
   Widget _buildAcceptedTile(LiftNotification liftNotification, userRep) {
-    return FutureBuilder<List<String>>(
-        future: initNames(liftNotification.driverId),
-        builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
-          if (snapshot.hasData) {
             return InkWell(
               onTap:  () async {
                 //Preparing and opening the info page
@@ -886,7 +931,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                 shape: BoxShape.circle,
                                 color: secondColor,
                                 image: DecorationImage(fit: BoxFit.fill,
-                                    image: NetworkImage(snapshot.data[0])),
+                                    image: NetworkImage(liftNotification.driverPic)),
 
                               ))),
                     ),
@@ -910,7 +955,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.center,
                                       children: [
-                                        infoText(snapshot.data[1]),
+                                        infoText(liftNotification.driverName),
                                         placesText(liftNotification.startCity, liftNotification.destCity),
                                         //allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000),
                                       ],
@@ -954,20 +999,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 ),
               ),
             );
-          }else {
-            return Container();
-            // return Center(
-            //   child: CircularProgressIndicator(),
-            // );
-          }
-        });
   }
 
   Widget _buildDesiredTile(LiftNotification liftNotification, userRep) {
-    return FutureBuilder<List<String>>(
-        future: initNames(liftNotification.driverId),
-        builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
-          if (snapshot.hasData) {
             return InkWell(
               onTap: () async {
 try {
@@ -1074,7 +1108,7 @@ try {
                                 shape: BoxShape.circle,
                                 color: secondColor,
                                 image: DecorationImage(fit: BoxFit.fill,
-                                    image: NetworkImage(snapshot.data[0])),
+                                    image: NetworkImage(liftNotification.driverPic)),
 
                               ))),
                     ),
@@ -1098,7 +1132,7 @@ try {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.center,
                                       children: [
-                                        infoText(snapshot.data[1]),
+                                        infoText(liftNotification.driverName),
                                         placesText(liftNotification.startCity, liftNotification.destCity),
                                         //allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000),
                                       ],
@@ -1144,20 +1178,9 @@ try {
                 ),
               ),
             );
-          }else {
-            return Container();
-            // return Center(
-            //   child: CircularProgressIndicator(),
-            // );
-          }
-        });
   }
 
   Widget _buildCanceledTile(LiftNotification liftNotification, userRep) {
-    return FutureBuilder<List<String>>(
-        future: initNames(liftNotification.type == "CanceledLift" ? liftNotification.passengerId : liftNotification.driverId),
-        builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
-          if (snapshot.hasData) {
             return InkWell(
               onTap:  () async {
                 await Navigator.of(context).push(new MaterialPageRoute<Null>(
@@ -1231,7 +1254,7 @@ try {
                                 shape: BoxShape.circle,
                                 color: secondColor,
                                 image: DecorationImage(fit: BoxFit.fill,
-                                    image: NetworkImage(snapshot.data[0])),
+                                    image: NetworkImage(liftNotification.type == "CanceledLift" ? liftNotification.passengerPic : liftNotification.driverPic)),
 
                               ))),
                     ),
@@ -1254,7 +1277,7 @@ try {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.center,
                                       children: [
-                                        liftNotification.type == "CanceledLift" ? infoText(snapshot.data[1]) : infoTextHitchhiker(snapshot.data[1]),
+                                        liftNotification.type == "CanceledLift" ? infoTextHitchhiker(liftNotification.passengerName) : infoText(liftNotification.driverName) ,
                                         placesText(liftNotification.startCity, liftNotification.destCity),
                                         //allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000),
                                       ],
@@ -1302,21 +1325,10 @@ try {
                 ),
               ),
             );
-          }else {
-            return Container();
-            // return Center(
-            //   child: CircularProgressIndicator(),
-            // );
-          }
-        });
   }
 
 
   Widget _buildRejectedTile(LiftNotification liftNotification, userRep) {
-    return FutureBuilder<List<String>>(
-        future: initNames(liftNotification.driverId),
-        builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
-          if (snapshot.hasData) {
             return InkWell(
             onTap:  () async {
               await Navigator.of(context).push(new MaterialPageRoute<Null>(
@@ -1389,7 +1401,7 @@ try {
                                 shape: BoxShape.circle,
                                 color: secondColor,
                                 image: DecorationImage(fit: BoxFit.fill,
-                                    image: NetworkImage(snapshot.data[0])),
+                                    image: NetworkImage(liftNotification.driverPic)),
 
                               ))),
                     ),
@@ -1415,7 +1427,7 @@ try {
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment.center,
                                             children: [
-                                              infoText(snapshot.data[1]),
+                                              infoText(liftNotification.driverName),
                                               placesText(liftNotification.startCity, liftNotification.destCity),
                                               //allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000),
                                             ],
@@ -1462,20 +1474,9 @@ try {
                 ),
               ),
             );
-          }else {
-            return Container();
-            // return Center(
-            //   child: CircularProgressIndicator(),
-            // );
-          }
-        });
   }
 
   Widget _buildRequestedTile(LiftNotification liftNotification, userRep) {
-    return FutureBuilder<List<String>>(
-        future: initNames(liftNotification.passengerId),
-        builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
-          if (snapshot.hasData) {
             return InkWell(
               onTap: () async {
                 var drive = await firestore.collection("Drives").doc(
@@ -1571,7 +1572,7 @@ try {
                                 shape: BoxShape.circle,
                                 color: secondColor,
                                 image: DecorationImage(fit: BoxFit.fill,
-                                    image: NetworkImage(snapshot.data[0])),
+                                    image: NetworkImage(liftNotification.passengerPic)),
 
                               ))),
                     ),
@@ -1594,7 +1595,7 @@ try {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.center,
                                       children: [
-                                        infoTextHitchhiker(snapshot.data[1]),
+                                        infoTextHitchhiker(liftNotification.passengerName),
                                         placesText(liftNotification.startCity, liftNotification.destCity),
                                         //allInfoText(liftNotification.liftTime, liftNotification.distance ~/ 1000),
                                       ],
@@ -1648,13 +1649,6 @@ try {
                 ),
               ),
             );
-          }else {
-            return Container();
-            // return Center(
-            //   child: CircularProgressIndicator(),
-            // );
-          }
-        });
   }
 
   Widget allInfoText(DateTime time,double dist){

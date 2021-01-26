@@ -16,6 +16,7 @@ enum DrawerSections { home, profile, notifications, favorites, chats, settings }
 /// returns a Drawer suited for the app, with the user information from userRep, and highlighting the current page being used.
 SafeArea techDrawer(UserRepository userRep, BuildContext context,
     DrawerSections currentSection) {
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
   final GlobalKey<ScaffoldState> _key = GlobalKey<ScaffoldState>();
   return SafeArea(child: ClipRRect(
       borderRadius: BorderRadius.only(topRight: Radius.circular(20.0),bottomRight:Radius.circular(20.0)),child: Container(width: MediaQuery.of(context).size.width*0.7,
@@ -44,8 +45,9 @@ SafeArea techDrawer(UserRepository userRep, BuildContext context,
                               color: Colors.white,
                               size: 25,
                             ),
-                            onPressed: () async => await (userRep.auth
-                                .signOut()
+                            onPressed: () async => await (firestore.collection("Profiles").doc(userRep
+                            .user.email).update({"pushToken" : FieldValue.delete()}).then((_) => userRep.auth
+                                .signOut())
                                 .then((_) async {
                               final EncryptedSharedPreferences encryptedSharedPreferences = EncryptedSharedPreferences();
                               encryptedSharedPreferences.clear();

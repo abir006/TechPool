@@ -558,7 +558,7 @@ class _SetDrivePageState extends State<SetDrivePage> {
                       widget.currentDate.millisecond,
                       widget.currentDate.microsecond);
                 }
-                //checktimes();
+                checktimes();
               });
             },
             validator: (val) {
